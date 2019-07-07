@@ -1,105 +1,70 @@
-#include "helpers/title.hpp"
+#include "title.hpp"
 
-extern "C" {
-  #include "nanojpeg.h"
-}
+#include <turbojpeg.h>
+#include <cstring>
+#include <string>
 
-Title::Title(FsSaveDataInfo& saveInfo) {
-  Result rc=0;
+namespace edz {
+    Title::Title(u64 titleID) : m_titleID(titleID) {
+        NsApplicationControlData appControlData;
+        size_t appControlDataSize = 0;
+        NsApplicationContentMetaStatus appContentMetaStatus;
+        NacpLanguageEntry *languageEntry = nullptr;
 
-  std::unique_ptr<NsApplicationControlData> buf = std::make_unique<NsApplicationControlData>();
-  size_t outsize=0;
+        std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
 
-  NacpLanguageEntry *langentry = nullptr;
+        nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize);
+        nsListApplicationContentMetaStatus(titleID, 0, &appContentMetaStatus, sizeof(NsApplicationContentMetaStatus), nullptr);
+        nacpGetLanguageEntry(&appControlData.nacp, &languageEntry);
 
-  if (buf == nullptr) {
-    m_errorCode = 1;
-    return;
-  }
-  memset(buf.get(), 0, sizeof(NsApplicationControlData));
+        m_titleName = std::string(languageEntry->name);
+        m_titleAuthor = std::string(languageEntry->author);
+        m_versionString = std::string(appControlData.nacp.version);
+        m_version = appContentMetaStatus.title_version;
 
-  rc = nsGetApplicationControlData(1, saveInfo.titleID, buf.get(), sizeof(NsApplicationControlData), &outsize);
-  if (R_FAILED(rc)) {
-    m_errorCode = 2;
-    return;
-  }
+        m_titleIcon = new u8[256 * 256 * 3];
 
-  if (outsize < sizeof(buf->nacp)) {
-    m_errorCode = 3;
-    return;
-  }
+        tjhandle jpegDecompressor = tjInitDecompress();
+        s32 jpegSubsamp;
 
-  rc = nacpGetLanguageEntry(&buf->nacp, &langentry);
-  if (R_FAILED(rc) || langentry==nullptr) {
-    m_errorCode = 4;
-    return;
-  }
+        tjDecompressHeader2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), &m_iconWidth, &m_iconHeight, &jpegSubsamp);
+        tjDecompress2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), m_titleIcon, m_iconWidth, 0, m_iconHeight, TJPF_RGB, TJFLAG_ACCURATEDCT);
+        tjDestroy(jpegDecompressor);
+    }
 
-  m_titleName = std::string(langentry->name);
-  m_titleAuthor = std::string(langentry->author);
-  m_titleVersion = std::string(buf->nacp.version);
+    Title::~Title() {
+        delete[] m_titleIcon;
+    }
 
-  m_titleID = saveInfo.titleID;
+    void Title::addUserID(u128 userID) {
+        m_userIDs.push_back(userID);
+    }
 
-  njInit();
+    std::string Title::getTitleName() {
+        return m_titleName;
+    }
 
-  size_t iconbytesize = outsize-sizeof(buf->nacp);
-  size_t imagesize = 256 * 256 * 3;
+    std::string Title::getVersionString() {
+        return m_versionString;
+    }
 
-  if (njDecode(buf->icon, iconbytesize) != NJ_OK) {
-    m_errorCode = 5;
-    njDone();
-    return;
-  }
+    u32 Title::getVersion() {
+        return m_version;
+    }
 
-  if (njGetWidth() != 256 || njGetHeight() != 256 || (size_t)njGetImageSize() != imagesize || njIsColor() != 1) {
-    m_errorCode = 6;
-    njDone();
-    return;
-  }
+    void Title::getTitleIcon(u8 *buffer, size_t bufferSize) {
+        std::memcpy(buffer, m_titleIcon, bufferSize);
+    }
 
-  u8* ptr = nullptr;
+    s32 Title::getTitleIconSize() {
+        return m_iconWidth * m_iconHeight * 3;
+    }
 
-  ptr = njGetImage();
-  if (ptr == nullptr) {
-    m_errorCode = 7;
-    njDone();
-    return;
-  }
+    u64 Title::getTitleID() {
+        return m_titleID;
+    }
 
-  memcpy(m_titleIcon, ptr, imagesize);
-  ptr = nullptr;
-
-  njDone();
-}
-
-Title::~Title() {
-}
-
-std::string Title::getTitleName() {
-  return m_titleName;
-}
-
-std::string Title::getTitleAuthor() {
-  return m_titleAuthor;
-}
-
-std::string Title::getTitleVersion() {
-  return m_titleVersion;
-}
-
-u8* Title::getTitleIcon() {
-  return m_titleIcon;
-}
-
-u64 Title::getTitleID() {
-  return m_titleID;
-}
-
-std::vector<u128> Title::getUserIDs() {
-  return m_userIDs;
-}
-
-void Title::addUserID(u128 userID) {
-  m_userIDs.push_back(userID);
+    std::vector<u128> Title::getUserIDs() {
+        return m_userIDs;
+    }
 }

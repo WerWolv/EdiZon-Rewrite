@@ -1,0 +1,31 @@
+#pragma once
+
+#include "file.hpp"
+
+#include <string>
+#include <vector>
+#include <dirent.h>
+
+namespace edz::helper {
+    class Folder {
+    public:
+        Folder(std::string path);
+        Folder(std::string path, std::string folderName);
+        ~Folder();
+
+        std::string path();
+        std::string folderName();
+
+        void copyTo(std::string newPath);
+        void removeFolder();        
+
+    private:
+        DIR *m_dir;
+        std::string m_path;
+        std::string m_folderName;
+
+        void openDirectory();
+        void closeDirectory();
+        void rewindDirectory();
+    };
+}

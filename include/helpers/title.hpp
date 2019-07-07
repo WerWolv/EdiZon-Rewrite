@@ -1,38 +1,35 @@
 #pragma once
 
-#include <edizon.h>
+#include "edizon.hpp"
+
+#include <vector>
 #include <string>
-#include <map>
-#include <memory>
 
-#include "types.h"
-#include "helpers/save.hpp"
-#include "helpers/account.hpp"
+namespace edz {
+    class Title {
+    public:
+        Title(u64 titleID);
+        ~Title();
 
-class Title {
-public:
-  static inline Title *g_currTitle;
-  static inline std::map<u64, Title*> g_titles;
+        void addUserID(u128 userID);
 
-  static inline u64 g_activeTitle = 0;
+        u64 getTitleID();
+        std::string getTitleName();
+        std::string getVersionString();
+        u32 getVersion();
 
-  Title(FsSaveDataInfo& saveInfo);
-  ~Title();
+        void getTitleIcon(u8 *buffer, size_t bufferSize);
+        s32 getTitleIconSize();
 
-  std::string getTitleName();
-  std::string getTitleAuthor();
-  std::string getTitleVersion();
-  u8* getTitleIcon();
-  std::vector<u128> getUserIDs();
-  void addUserID(u128 userID);
-  u64 getTitleID();
+        std::vector<u128> getUserIDs();
 
-private:
-  u8 m_titleIcon[256*256*3];
-  u64 m_titleID;
-  std::string m_titleName;
-  std::string m_titleAuthor;
-  std::string m_titleVersion;
-  std::vector<u128> m_userIDs;
-  u8 m_errorCode;
-};
+    private:
+        u64 m_titleID;
+        std::vector<u128> m_userIDs;
+
+        std::string m_titleName, m_titleAuthor, m_versionString;
+        u32 m_version;
+        u8 *m_titleIcon;
+        s32 m_iconWidth, m_iconHeight;
+    };
+}

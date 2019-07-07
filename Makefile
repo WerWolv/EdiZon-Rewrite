@@ -15,7 +15,6 @@ include $(DEVKITPRO)/libnx/switch_rules
 # SOURCES is a list of directories containing source code
 # DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
-# EXEFS_SRC is the optional input directory containing data copied into exefs, if anything this normally should only contain "main.npdm".
 # ROMFS is the directory containing data to be added to RomFS, relative to the Makefile (Optional)
 #
 # NO_ICON: if set to anything, do not use icon.
@@ -29,9 +28,17 @@ include $(DEVKITPRO)/libnx/switch_rules
 #     - <Project name>.jpg
 #     - icon.jpg
 #     - <libnx folder>/default_icon.jpg
+#
+# CONFIG_JSON is the filename of the NPDM config file (.json), relative to the project folder.
+#   If not set, it attempts to use one of the following (in this order):
+#     - <Project name>.json
+#     - config.json
+#   If a JSON file is provided or autodetected, an ExeFS PFS0 (.nsp) is built instead
+#   of a homebrew executable (.nro). This is intended to be used for sysmodules.
+#   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-VERSION_MAJOR := 3
-VERSION_MINOR := 1
+VERSION_MAJOR := 4
+VERSION_MINOR := 0
 VERSION_MICRO := 0
 NIGHTLY		  := 1
 
@@ -47,41 +54,41 @@ endif
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/widgets source/guis source/scripting source/ui_elements source/helpers libs/lua/source libs/nanojpeg/source libs/minizip/source
+SOURCES		:=	source source/helpers
+INCLUDES	:=	include include/bridge include/helpers
 DATA		:=	data
-INCLUDES	:=	include libs/nxpy/include libs/lua/include libs/nlohmann libs/nanojpeg/include libs/minizip/include
-EXEFS_SRC	:=	exefs_src
-ROMFS		:=	romfs
+#ROMFS		:=	romfs
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
+ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 null      :=
 SPACE     := $(null) $(null)
 
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
+
+CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES) \
 			-DVERSION_MAJOR=${VERSION_MAJOR} \
 			-DVERSION_MINOR=${VERSION_MINOR} \
 			-DVERSION_MICRO=${VERSION_MICRO} \
 			-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
-			
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3)
 
-CXXFLAGS	:= $(CFLAGS) -fexceptions -std=gnu++17
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+
+CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-no-as-needed,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lpython3.5 -lnx -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lz -lstdc++fs `freetype-config --libs`
+LIBS	:= -lnx -lstdc++fs -lturbojpeg
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CURDIR)/libs/nxpy $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX)
 
 
 #---------------------------------------------------------------------------------
@@ -120,7 +127,7 @@ endif
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
 export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
+export OFILES 		:=	$(OFILES_BIN) $(OFILES_SRC)
 export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
@@ -129,7 +136,18 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-export BUILD_EXEFS_SRC := $(TOPDIR)/$(EXEFS_SRC)
+ifeq ($(strip $(CONFIG_JSON)),)
+	jsons := $(wildcard *.json)
+	ifneq (,$(findstring $(TARGET).json,$(jsons)))
+		export APP_JSON := $(TOPDIR)/$(TARGET).json
+	else
+		ifneq (,$(findstring config.json,$(jsons)))
+			export APP_JSON := $(TOPDIR)/config.json
+		endif
+	endif
+else
+	export APP_JSON := $(TOPDIR)/$(CONFIG_JSON)
+endif
 
 ifeq ($(strip $(ICON)),)
 	icons := $(wildcard *.jpg)
@@ -160,11 +178,7 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
-PC   = $(shell printf "%d" ${pc})
-BASE = $(shell printf "%d" ${b})
-ADDR = $(shell printf "%x" $(shell echo $(PC)-$(BASE) | bc))
-
-.PHONY: $(BUILD) clean all run errline $(ROMFS)
+.PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(ROMFS)
@@ -173,19 +187,10 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@ $(BUILD) $(OUTDIR)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-#--------------------------------------------------------------------------------
-run: $(BUILD)
-	@echo Starting nxlink
-	@nxlink $(OUTPUT).nro -s -p "EdiZon/EdiZon.nro"
-	
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(OUTDIR)
-
-#---------------------------------------------------------------------------------
-errline:
-	@aarch64-none-elf-addr2line -e $(OUTPUT).elf -f -p -C -a 0x$(ADDR)
 
 #---------------------------------------------------------------------------------
 else
@@ -196,16 +201,24 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all	:	$(OUTPUT).pfs0 $(OUTPUT).nro
+ifeq ($(strip $(APP_JSON)),)
 
-$(OUTPUT).pfs0	:	$(OUTPUT).nso
-
-$(OUTPUT).nso	:	$(OUTPUT).elf
+all	:	$(OUTPUT).nro
 
 ifeq ($(strip $(NO_NACP)),)
 $(OUTPUT).nro	:	$(OUTPUT).elf $(OUTPUT).nacp
 else
 $(OUTPUT).nro	:	$(OUTPUT).elf
+endif
+
+else
+
+all	:	$(OUTPUT).nsp
+
+$(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
+
+$(OUTPUT).nso	:	$(OUTPUT).elf
+
 endif
 
 $(OUTPUT).elf	:	$(OFILES)
@@ -216,12 +229,6 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 # you need a rule like this for each extension you use as binary data
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
-
-#---------------------------------------------------------------------------------
-%.nxfnt.o	:	%.nxfnt
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
