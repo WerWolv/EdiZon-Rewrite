@@ -1,3 +1,6 @@
 [submodule "libs/borealis"]
 	path = libs/borealis
 	url = https://github.com/natinusala/borealis
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json
