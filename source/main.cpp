@@ -1,7 +1,5 @@
 #include "edizon.hpp"
 
-#include <Borealis.hpp>
-
 #include "helpers/file.hpp"
 #include "helpers/folder.hpp"
 #include "save/title.hpp"
@@ -11,14 +9,30 @@
 #include <iomanip>
 #include <cstring>
 #include "cheat/cheat.hpp"
+#include "helpers/utils.hpp"
 
 Service *fsService;
 
 void initServices() {
+    // Network sockets
     socketInitializeDefault();
+
+    // Title querying
     ncmInitialize();
     nsInitialize();
+
+    // Account querying
     accountInitialize();
+
+    // Parential control lockdown
+    pctlInitialize();
+
+    // Overclock
+    pcvInitialize();
+    clkrstInitialize();
+
+    // Controller LED
+    edz::helper::controllerLEDInitialize();
 }
 
 void exitServices() {
@@ -26,6 +40,9 @@ void exitServices() {
     ncmExit();
     nsExit();
     accountExit();
+    pctlExit();
+    pcvExit();
+    clkrstExit();
 }
 
 u8 *buffer = nullptr; 
@@ -33,7 +50,7 @@ size_t titleIconSize;
 void initInterface() {
     Application::init(StyleEnum::ACCURATE);
 
-    TabFrame *rootFrame = new TabFrame();
+    AppletFrame *rootFrame = new AppletFrame(true, false);
     rootFrame->setTitle("EdiZon");
 
     List *titleList = new List();
@@ -45,16 +62,9 @@ void initInterface() {
         ListItem *titleItem = new ListItem(title->getName());
         titleItem->setValue(ss.str(), true, true);
         titleList->addView(titleItem);
-
-        if (buffer == nullptr) {
-            titleIconSize = title->getIconSize();
-            buffer = new u8[titleIconSize];
-            title->getIcon(buffer, titleIconSize);
-        }
     }
 
-
-    rootFrame->addTab("Titles", titleList);
+    rootFrame->setContentView(titleList);
 
     Application::pushView(rootFrame);
 }
@@ -64,57 +74,24 @@ void initInterface() {
 // Access Denied 0x0100A9900CB5C000
 
 int main(int argc, char* argv[]) {
+    void *haddr;
+    extern char *fake_heap_end;
+    
+    // Setup Heap for swkbd on applets
+    Result rc = svcSetHeapSize(&haddr, 0x10000000);
+    if (R_FAILED(rc))
+        fatalSimple(0xDEAD);
+    fake_heap_end = (char*) haddr + 0x10000000;
+
     initServices();
 
-    fsService = fsGetServiceSession();
+    initInterface();
 
-    //nxlinkStdio();
-
-    //initInterface();
-
-    //edz::cheat::CheatManager &cheatManager = edz::cheat::CheatManager::getInstance();
-
-    //consoleInit(nullptr);
-
-    while (appletMainLoop()) {
-        hidScanInput();
-        u64 btn = hidKeysDown(CONTROLLER_P1_AUTO);
-
-        if (btn & KEY_PLUS) break;
-
-        /*if (btn & KEY_A) {
-            printf("Hello\n");
-            cheatManager.forceAttach();
-
-            cheatManager.getCheats()[0]->toggle();
-
-            for (auto &cheat : cheatManager.getCheats())
-                printf("%d : %s %c\n", cheat->getID(), cheat->getName().c_str(), cheat->isEnabled() ? 'X' : 'O');
-        }*/
-
-        if (btn & KEY_B) {
-            std::map<u64, edz::save::Title*> titles = edz::save::SaveFileSystem::getAllTitles();
-            std::map<u128, edz::save::Account*> accounts =  edz::save::SaveFileSystem::getAllAccounts();
-
-            for (auto &[titleID, title] : titles) {
-            }
-
-            for (auto &[userID, account] : accounts) {
-                
-                break;
-            }
-
-        }
-
-        if (btn & KEY_Y) {
-        }
-
-        //consoleUpdate(nullptr);
-    }  
-
-    //consoleExit(nullptr);
-
-    //while(Application::mainLoop());
+    while(Application::mainLoop());
+    
+    auto &titles = edz::save::SaveFileSystem::getAllTitles();
 
     exitServices();
+
+    svcSetHeapSize(&haddr, ((u8*) envGetHeapOverrideAddr() + envGetHeapOverrideSize()) - (u8*) haddr); // clean up the heap
 }
