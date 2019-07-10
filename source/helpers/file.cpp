@@ -2,7 +2,7 @@
 
 namespace edz::helper {
         File::File(std::string filePath) : m_filePath(filePath) {
-            m_file = nullptr;
+            this->m_file = nullptr;
         }
 
         File::File(const File &file) {
@@ -16,11 +16,11 @@ namespace edz::helper {
         
 
         std::string File::fileName() {
-            return std::filesystem::path(m_filePath).filename();
+            return std::filesystem::path(this->m_filePath).filename();
         }
 
         std::string File::path() {
-            return m_filePath;
+            return this->m_filePath;
         }
 
         size_t File::fileSize() {
@@ -29,9 +29,9 @@ namespace edz::helper {
             if (!valid()) return -1;
 
             size_t fileSize;
-            fseek(m_file, 0, SEEK_END);
-            fileSize = ftell(m_file);
-            rewind(m_file);
+            fseek(this->m_file, 0, SEEK_END);
+            fileSize = ftell(this->m_file);
+            rewind(this->m_file);
 
             return fileSize;
         }
@@ -41,7 +41,7 @@ namespace edz::helper {
             if (!valid()) return;
             closeFile();
 
-            remove(m_filePath.c_str());
+            remove(this->m_filePath.c_str());
         }
 
         void File::copyTo(std::string path) {
@@ -54,7 +54,7 @@ namespace edz::helper {
 
             openFile();
 
-            while ((size = fread(buffer, 1, 0x50000, m_file)) > 0) {
+            while ((size = fread(buffer, 1, 0x50000, this->m_file)) > 0) {
                 fwrite(buffer, 1, size, dst);
                 offset += size;
             }
@@ -68,7 +68,7 @@ namespace edz::helper {
         bool File::valid() {
             openFile();
 
-            if (m_file != nullptr) {
+            if (this->m_file != nullptr) {
                 closeFile();
                 return true;
             }
@@ -80,7 +80,7 @@ namespace edz::helper {
             size_t readSize = 0;
             
             openFile();
-            readSize = fread(buffer, 1, bufferSize, m_file);
+            readSize = fread(buffer, 1, bufferSize, this->m_file);
             closeFile();
 
             return readSize;
@@ -90,7 +90,7 @@ namespace edz::helper {
             size_t writeSize = 0;
 
             openFile();
-            writeSize = fwrite(buffer, 1, bufferSize, m_file);
+            writeSize = fwrite(buffer, 1, bufferSize, this->m_file);
             closeFile();
 
             return writeSize;            
@@ -98,19 +98,19 @@ namespace edz::helper {
 
 
         void File::openFile() {
-            if (m_file != nullptr) return;
+            if (this->m_file != nullptr) return;
 
-            m_file = fopen(m_filePath.c_str(), "rb");
+            this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
-            if (m_file == nullptr)
-                m_file = fopen(m_filePath.c_str(), "w+");
+            if (this->m_file == nullptr)
+                this->m_file = fopen(this->m_filePath.c_str(), "w+");
         }
 
         void File::closeFile() {
-            if (m_file == nullptr) return;
+            if (this->m_file == nullptr) return;
 
             fclose(m_file);
-            m_file = nullptr;
+            this->m_file = nullptr;
 
         }
 }

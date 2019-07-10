@@ -4,22 +4,22 @@ namespace edz::save {
 
     SaveFileSystem::SaveFileSystem(Title *title, Account *account) {
 
-        if (R_FAILED(fsMount_SaveData(&m_saveFileSystem, title->getTitleID(), account->getUserID())))
+        if (R_FAILED(fsMount_SaveData(&this->m_saveFileSystem, title->getID(), account->getID())))
             return;
 
-        if (fsdevMountDevice(SAVE_DEVICE, m_saveFileSystem) == -1) {
-            fsFsClose(&m_saveFileSystem);
+        if (fsdevMountDevice(SAVE_DEVICE, this->m_saveFileSystem) == -1) {
+            fsFsClose(&this->m_saveFileSystem);
             return;
         }
 
-        m_initialized = true;
+        this->m_initialized = true;
     }
 
     SaveFileSystem::~SaveFileSystem() {
-        if (!m_initialized) return;
+        if (!this->m_initialized) return;
 
         fsdevUnmountDevice(SAVE_DEVICE);
-        fsFsClose(&m_saveFileSystem);
+        fsFsClose(&this->m_saveFileSystem);
     }
 
     std::map<u64, Title*>& SaveFileSystem::getAllTitles() {
@@ -28,15 +28,28 @@ namespace edz::save {
         if (titles.size() > 0)
             return titles;
 
+        NsApplicationRecord *appRecords = new NsApplicationRecord[1024]; // Nobody's going to have more than 1024 games hopefully...
+        size_t actualAppRecordCnt = 0;
+
+        EResult rc = nsListApplicationRecord(appRecords, 1024, 0, &actualAppRecordCnt);
+        delete[] appRecords;
+        if (rc.failed())
+            return titles;  // Return empty titles map on error
+        
+
+        // Get all installed games
+        for (u32 i = 0; i < actualAppRecordCnt; i++)
+            titles.insert({ appRecords[i].titleID, new Title(appRecords[i].titleID, true) });
+
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
             u64 &titleID = saveDataInfo.titleID;
 
-            if (titles.find(titleID) == titles.end()) {
-                titles.insert({ (u64)titleID, new Title(titleID) });
-            }
+            // Add titles that are not installed but still have a save file on the system
+            if (titles.find(titleID) == titles.end())
+                titles.insert({ titleID, new Title(titleID, false) });
 
-            titles[titleID]->addUserID(saveDataInfo.userID);
-
+            // Add what userIDs of all accounts that have a save file for this title
+            titles[titleID]->addUser(saveDataInfo.userID);
         }
 
         return titles;
@@ -68,6 +81,8 @@ namespace edz::save {
     }
 
     void SaveFileSystem::commit() {
+        if (!this->m_initialized) return;
+
         fsdevCommitDevice(SAVE_DEVICE);
     }
 
@@ -78,14 +93,15 @@ namespace edz::save {
         size_t totalSaveEntries = 0;
         std::vector<FsSaveDataInfo> saveDataInfos;
 
+
         if (R_FAILED(fsOpenSaveDataIterator(&iter, FsSaveDataSpaceId_NandUser)))
-            return saveDataInfos;
+            return saveDataInfos;   // Return empty saveDataInfos array
         
         Result rc;
         do {
             rc = fsSaveDataIteratorRead(&iter, &saveDataInfo, 1, &totalSaveEntries);
 
-            if (saveDataInfo.SaveDataType == FsSaveDataType_SaveData)
+            if (saveDataInfo.saveDataType == FsSaveDataType_SaveData)
                 saveDataInfos.push_back(saveDataInfo);
         } while(R_SUCCEEDED(rc) && totalSaveEntries > 0);
 

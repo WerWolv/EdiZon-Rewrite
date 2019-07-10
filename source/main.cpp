@@ -1,7 +1,6 @@
 #include "edizon.hpp"
 
 #include <Borealis.hpp>
-#include <ImageView.hpp>
 
 #include "helpers/file.hpp"
 #include "helpers/folder.hpp"
@@ -12,6 +11,8 @@
 #include <iomanip>
 #include <cstring>
 #include "cheat/cheat.hpp"
+
+Service *fsService;
 
 void initServices() {
     socketInitializeDefault();
@@ -41,27 +42,31 @@ void initInterface() {
     for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
         ss.str("");
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(sizeof(u64) * 2) << titleID;
-        ListItem *titleItem = new ListItem(title->getTitleName());
+        ListItem *titleItem = new ListItem(title->getName());
         titleItem->setValue(ss.str(), true, true);
         titleList->addView(titleItem);
 
         if (buffer == nullptr) {
-            titleIconSize = title->getTitleIconSize();
+            titleIconSize = title->getIconSize();
             buffer = new u8[titleIconSize];
-            title->getTitleIcon(buffer, titleIconSize);
+            title->getIcon(buffer, titleIconSize);
         }
     }
 
 
-    ImageView *image = new ImageView(buffer, titleIconSize, 256, 256);
     rootFrame->addTab("Titles", titleList);
-    rootFrame->addTab("Image", image);
 
     Application::pushView(rootFrame);
 }
 
+
+
+// Access Denied 0x0100A9900CB5C000
+
 int main(int argc, char* argv[]) {
     initServices();
+
+    fsService = fsGetServiceSession();
 
     //nxlinkStdio();
 
@@ -88,22 +93,20 @@ int main(int argc, char* argv[]) {
         }*/
 
         if (btn & KEY_B) {
-            edz::save::Title *title1 = 0;
-            edz::save::Account *account1 = 0;
             std::map<u64, edz::save::Title*> titles = edz::save::SaveFileSystem::getAllTitles();
             std::map<u128, edz::save::Account*> accounts =  edz::save::SaveFileSystem::getAllAccounts();
 
             for (auto &[titleID, title] : titles) {
-                title1 = title;
-                break;
             }
 
             for (auto &[userID, account] : accounts) {
-                account1 = account;
+                
                 break;
             }
-            edz::save::SaveFileSystem saveFileSystem(title1, account1);
-            saveFileSystem.getSaveFolder().copyTo("/test");
+
+        }
+
+        if (btn & KEY_Y) {
         }
 
         //consoleUpdate(nullptr);

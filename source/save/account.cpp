@@ -6,8 +6,8 @@ namespace edz::save {
             
         }
 
-        u128 Account::getUserID() {
-            return m_userID;
+        u128 Account::getID() {
+            return this->m_userID;
         }
 
 }

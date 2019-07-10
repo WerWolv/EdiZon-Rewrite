@@ -8,11 +8,11 @@ namespace edz {
     EResult::EResult(Result result) : m_module(static_cast<u32>(R_MODULE(result))), m_desc(static_cast<u32>(R_DESCRIPTION(result))) {}
 
     constexpr u32 EResult::getModule() {
-        return m_module;
+        return this->m_module;
     }
 
     constexpr u32 EResult::getDescription() {
-        return m_desc;
+        return this->m_desc;
     }
 
     bool EResult::operator==(EResult &other) {
@@ -32,11 +32,11 @@ namespace edz {
     }
 
     bool EResult::succeeded() {
-        return m_desc == 0;
+        return this->m_desc == 0;
     }
 
     bool EResult::failed() {
-        return m_desc != 0;
+        return this->m_desc != 0;
     }
 
     EResult EResult::operator=(u32 &other) {
@@ -52,6 +52,6 @@ namespace edz {
     }
 
     EResult::operator u32() const { 
-        return MAKERESULT(m_module, m_desc);
+        return MAKERESULT(this->m_module, this->m_desc);
     }
 }

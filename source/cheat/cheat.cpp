@@ -11,11 +11,11 @@ namespace edz::cheat {
     }
 
     std::string Cheat::getName() {
-        return m_name;
+        return this->m_name;
     }
 
     u32 Cheat::getID() {
-        return m_id;
+        return this->m_id;
     }
 
     bool Cheat::toggle() {
@@ -41,27 +41,27 @@ namespace edz::cheat {
     }
 
     FrozenAddress::FrozenAddress(u64 address, u8 width, u64 value) : m_frozen(false) {
-        m_frozenAddressEntry.address        = address;
-        m_frozenAddressEntry.value.width    = width;
-        m_frozenAddressEntry.value.value    = value;
+        this->m_frozenAddressEntry.address        = address;
+        this->m_frozenAddressEntry.value.width    = width;
+        this->m_frozenAddressEntry.value.value    = value;
     }
 
     FrozenAddress::FrozenAddress(u64 address, u8 width) : m_frozen(false) {
-        m_frozenAddressEntry.address        = address;
-        m_frozenAddressEntry.value.width    = width;
+        this->m_frozenAddressEntry.address        = address;
+        this->m_frozenAddressEntry.value.width    = width;
     }
 
 
     u64 FrozenAddress::getAddress() {
-        return m_frozenAddressEntry.address;
+        return this->m_frozenAddressEntry.address;
     }
 
     u8 FrozenAddress::getWidth() {
-        return m_frozenAddressEntry.value.width;
+        return this->m_frozenAddressEntry.value.width;
     }
 
     u64 FrozenAddress::getValue() {
-        return m_frozenAddressEntry.value.value;
+        return this->m_frozenAddressEntry.value.value;
     }
 
     u64 FrozenAddress::setValue(u64 value, u8 width) {
@@ -79,8 +79,8 @@ namespace edz::cheat {
 
         // Check if the value was set correctly
         if (std::memcmp(&value, &newValue, width) == 0) {
-            m_frozenAddressEntry.value.value = newValue;
-            m_frozenAddressEntry.value.width = width;
+            this->m_frozenAddressEntry.value.value = newValue;
+            this->m_frozenAddressEntry.value.width = width;
                     
             return newValue;
         }
@@ -92,18 +92,18 @@ namespace edz::cheat {
     bool FrozenAddress::toggle() {
         if (isFrozen()) {
             if (dmntcht::disableFrozenAddress(getAddress()).succeeded())
-                m_frozen = false;
+                this->m_frozen = false;
         }
         else {
             if (dmntcht::enableFrozenAddress(getAddress(), getWidth(), &m_frozenAddressEntry.value.value).succeeded())
-                m_frozen = true;
+                this->m_frozen = true;
         }
 
         return isFrozen();
     }
 
     bool FrozenAddress::isFrozen() {
-        return m_frozen;
+        return this->m_frozen;
     }
 
 
@@ -113,7 +113,7 @@ namespace edz::cheat {
         dmntcht::initialize();
 
         // Get process metadata
-        if (dmntcht::getCheatProcessMetadata(&m_processMetadata).failed())
+        if (dmntcht::getCheatProcessMetadata(&this->m_processMetadata).failed())
             return;
 
 
@@ -127,9 +127,9 @@ namespace edz::cheat {
         if (dmntcht::getCheats(cheatEntries, cheatCnt, 0, &cheatCnt).failed())
             return;
         
-        m_cheats.reserve(cheatCnt);
+        this->m_cheats.reserve(cheatCnt);
         for (auto &cheatEntry : cheatEntries)
-            m_cheats.push_back(new Cheat(cheatEntry));
+            this->m_cheats.push_back(new Cheat(cheatEntry));
 
 
         // Get all frozen addresses
@@ -142,20 +142,20 @@ namespace edz::cheat {
         if (dmntcht::getFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt).failed())
             return;
 
-        m_frozenAddresses.reserve(frozenAddressCnt);
+        this->m_frozenAddresses.reserve(frozenAddressCnt);
         for (auto &frozenAddressEntry : frozenAddressEntries)
-            m_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
+            this->m_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
 
     }   
 
     CheatManager::~CheatManager() {
-        for (auto &cheat : m_cheats)
+        for (auto &cheat : this->m_cheats)
             delete cheat;
-        m_cheats.clear();
+        this->m_cheats.clear();
 
-        for (auto &frozenAddress : m_frozenAddresses)
+        for (auto &frozenAddress : this->m_frozenAddresses)
             delete frozenAddress;
-        m_frozenAddresses.clear();
+        this->m_frozenAddresses.clear();
 
         dmntcht::exit();
     }
@@ -175,24 +175,24 @@ namespace edz::cheat {
 
 
     u64 CheatManager::getTitleID() {
-        return m_processMetadata.title_id;
+        return this->m_processMetadata.title_id;
     }
 
     u64 CheatManager::getProcessID() {
-        return m_processMetadata.process_id;
+        return this->m_processMetadata.process_id;
     }
 
     u64 CheatManager::getBuildID() {
-        return *reinterpret_cast<u64*>(m_processMetadata.main_nso_build_id);
+        return *reinterpret_cast<u64*>(this->m_processMetadata.main_nso_build_id);
     }
 
 
     std::vector<Cheat*>& CheatManager::getCheats() {
-        return m_cheats;
+        return this->m_cheats;
     }
 
     std::vector<FrozenAddress*>& CheatManager::getFrozenAddresses() {
-        return m_frozenAddresses;
+        return this->m_frozenAddresses;
     }
 
 
