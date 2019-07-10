@@ -1,6 +1,7 @@
 #pragma once
 
-#include <switch.h>
+#include <switch.h>         // libnx
+#include <Borealis.hpp>     // Borealis
 
 #include "edz_types.hpp"
 
