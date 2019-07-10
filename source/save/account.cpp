@@ -4,7 +4,7 @@
 
 namespace edz::save {
 
-        Account::Account(u128 userID, bool exists) : m_userID(userID), m_exists(exists) {
+        Account::Account(userid_t userID, bool exists) : m_userID(userID), m_exists(exists) {
             AccountProfile profile;
             AccountUserData userData;
             AccountProfileBase profileBase;
@@ -39,7 +39,7 @@ namespace edz::save {
             return this->m_nickname;
         }
 
-        u128 Account::getID() {
+        userid_t Account::getID() {
             return this->m_userID;
         }
 

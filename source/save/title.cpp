@@ -5,7 +5,7 @@
 
 namespace edz::save {
 
-    Title::Title(u64 titleID, bool isInstalled) : m_titleID(titleID), m_isInstalled(isInstalled) {
+    Title::Title(titleid_t titleID, bool isInstalled) : m_titleID(titleID), m_isInstalled(isInstalled) {
         NsApplicationControlData appControlData;
         size_t appControlDataSize = 0;
         NsApplicationContentMetaStatus appContentMetaStatus;
@@ -31,7 +31,7 @@ namespace edz::save {
         delete[] this->m_titleIcon;
     }
 
-    void Title::addUser(u128 userID) {
+    void Title::addUser(userid_t userID) {
         this->m_userIDs.push_back(userID);
     }
 
@@ -65,11 +65,11 @@ namespace edz::save {
         return this->m_iconSize;
     }
 
-    u64 Title::getID() {
+    titleid_t Title::getID() {
         return this->m_titleID;
     }
 
-    std::vector<u128> Title::getUserIDs() {
+    std::vector<userid_t> Title::getUserIDs() {
         return this->m_userIDs;
     }
 

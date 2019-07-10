@@ -26,10 +26,10 @@ namespace edz::cheat {
     class FrozenAddress {
     public:
         FrozenAddress(edz::dmntcht::DmntFrozenAddressEntry);
-        FrozenAddress(u64 address, u8 width, u64 value);
-        FrozenAddress(u64 address, u8 width);
+        FrozenAddress(addr_t address, u8 width, u64 value);
+        FrozenAddress(addr_t address, u8 width);
 
-        u64 getAddress();
+        addr_t getAddress();
         u8 getWidth();
         u64 getValue();
         u64 setValue(u64 value, u8 width);
@@ -57,18 +57,18 @@ namespace edz::cheat {
         bool forceAttach();
         bool hasCheatProcess();
 
-        u64 getTitleID();
-        u64 getProcessID();
-        u64 getBuildID();
+        titleid_t getTitleID();
+        processid_t getProcessID();
+        buildid_t getBuildID();
 
         std::vector<Cheat*>& getCheats();
         std::vector<FrozenAddress*>& getFrozenAddresses();
 
-        MemoryInfo queryMemory(u64 address);
+        MemoryInfo queryMemory(addr_t address);
         std::vector<MemoryInfo> getMemoryRegions();
 
-        EResult readMemory(u64 address, u8 *buffer, size_t bufferSize);
-        EResult writeMemory(u64 address, const u8 *buffer, size_t bufferSize);
+        EResult readMemory(addr_t address, u8 *buffer, size_t bufferSize);
+        EResult writeMemory(addr_t address, const u8 *buffer, size_t bufferSize);
 
     private:
         CheatManager();

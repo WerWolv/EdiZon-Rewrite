@@ -40,19 +40,19 @@ namespace edz::cheat {
 
     }
 
-    FrozenAddress::FrozenAddress(u64 address, u8 width, u64 value) : m_frozen(false) {
+    FrozenAddress::FrozenAddress(addr_t address, u8 width, u64 value) : m_frozen(false) {
         this->m_frozenAddressEntry.address        = address;
         this->m_frozenAddressEntry.value.width    = width;
         this->m_frozenAddressEntry.value.value    = value;
     }
 
-    FrozenAddress::FrozenAddress(u64 address, u8 width) : m_frozen(false) {
+    FrozenAddress::FrozenAddress(addr_t address, u8 width) : m_frozen(false) {
         this->m_frozenAddressEntry.address        = address;
         this->m_frozenAddressEntry.value.width    = width;
     }
 
 
-    u64 FrozenAddress::getAddress() {
+    addr_t FrozenAddress::getAddress() {
         return this->m_frozenAddressEntry.address;
     }
 
@@ -174,16 +174,16 @@ namespace edz::cheat {
     }
 
 
-    u64 CheatManager::getTitleID() {
+    titleid_t CheatManager::getTitleID() {
         return this->m_processMetadata.title_id;
     }
 
-    u64 CheatManager::getProcessID() {
+    processid_t CheatManager::getProcessID() {
         return this->m_processMetadata.process_id;
     }
 
-    u64 CheatManager::getBuildID() {
-        return *reinterpret_cast<u64*>(this->m_processMetadata.main_nso_build_id);
+    buildid_t CheatManager::getBuildID() {
+        return *reinterpret_cast<buildid_t*>(this->m_processMetadata.main_nso_build_id);
     }
 
 
@@ -196,7 +196,7 @@ namespace edz::cheat {
     }
 
 
-    MemoryInfo queryMemory(u64 address) {
+    MemoryInfo queryMemory(addr_t address) {
         MemoryInfo memInfo = { 0 };
 
         dmntcht::queryCheatProcessMemory(&memInfo, address);
@@ -208,7 +208,7 @@ namespace edz::cheat {
         MemoryInfo memInfo = { 0 };
         std::vector<MemoryInfo> memInfos;
 
-        u64 lastAddress = 0;
+        addr_t lastAddress = 0;
 
         do {
             lastAddress = memInfo.addr;
@@ -221,11 +221,11 @@ namespace edz::cheat {
     }
 
 
-    EResult CheatManager::readMemory(u64 address, u8 *buffer, size_t bufferSize) {
+    EResult CheatManager::readMemory(addr_t address, u8 *buffer, size_t bufferSize) {
         return dmntcht::readCheatProcessMemory(address, buffer, bufferSize);
     }
 
-    EResult CheatManager::writeMemory(u64 address, const u8 *buffer, size_t bufferSize) {
+    EResult CheatManager::writeMemory(addr_t address, const u8 *buffer, size_t bufferSize) {
         return dmntcht::writeCheatProcessMemory(address, buffer, bufferSize);
     }
 

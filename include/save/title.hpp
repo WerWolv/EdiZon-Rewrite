@@ -10,12 +10,12 @@
 namespace edz::save {
     class Title {
     public:
-        Title(u64 titleID, bool isInstalled);
+        Title(titleid_t titleID, bool isInstalled);
         ~Title();
 
-        void addUser(u128 userID);
+        void addUser(userid_t userID);
 
-        u64 getID();
+        titleid_t getID();
         std::string getName();
         std::string getVersionString();
         u32 getVersion();
@@ -26,15 +26,15 @@ namespace edz::save {
         void getIcon(u8 *buffer, size_t bufferSize);
         size_t getIconSize();
 
-        std::vector<u128> getUserIDs();
+        std::vector<userid_t> getUserIDs();
 
         EResult createSaveDataFileSystem(Account *account, u64 fileSystemSize);
 
 
     private:
-        u64 m_titleID;
+        titleid_t m_titleID;
         bool m_isInstalled;
-        std::vector<u128> m_userIDs;
+        std::vector<userid_t> m_userIDs;
 
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;

@@ -22,8 +22,8 @@ namespace edz::save {
         fsFsClose(&this->m_saveFileSystem);
     }
 
-    std::map<u64, Title*>& SaveFileSystem::getAllTitles() {
-        static std::map<u64, Title*> titles;
+    std::map<titleid_t, Title*>& SaveFileSystem::getAllTitles() {
+        static std::map<titleid_t, Title*> titles;
 
         if (titles.size() > 0)
             return titles;
@@ -43,7 +43,7 @@ namespace edz::save {
             titles.insert({ appRecords[i].titleID, new Title(appRecords[i].titleID, true) });
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
-            u64 &titleID = saveDataInfo.titleID;
+            titleid_t &titleID = saveDataInfo.titleID;
 
             // Add titles that are not installed but still have a save file on the system
             if (titles.find(titleID) == titles.end())
@@ -58,8 +58,8 @@ namespace edz::save {
         return titles;
     }
 
-    std::map<u128, Account*>& SaveFileSystem::getAllAccounts() {
-        static std::map<u128, Account*> accounts;
+    std::map<userid_t, Account*>& SaveFileSystem::getAllAccounts() {
+        static std::map<userid_t, Account*> accounts;
 
         if (accounts.size() > 0)
             return accounts;   
@@ -69,16 +69,16 @@ namespace edz::save {
         if (R_FAILED(accountGetUserCount(&userCount)))
             return accounts;    // Return empty accounts map on error
 
-        u128 userIDs[userCount];
+        userid_t userIDs[userCount];
         if (R_FAILED(accountListAllUsers(userIDs, userCount, &actualUserCount)))
             return accounts;    // Return empty accounts map on error
 
         // Get all existing accounts
-        for (u128 userID : userIDs)
+        for (userid_t userID : userIDs)
             accounts.insert({userID, new Account(userID, true)});
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
-            u128 &userID = saveDataInfo.userID;
+            userid_t &userID = saveDataInfo.userID;
 
             // Add accounts that don't exist on the system anymore but still have some save files stored
             if (accounts.find(userID) == accounts.end())

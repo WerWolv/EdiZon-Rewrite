@@ -21,5 +21,11 @@ typedef __int128_t s128;
 
 
 namespace edz {
-    
+    typedef u64 titleid_t;
+    typedef u128 userid_t;
+
+    typedef u64 processid_t;
+    typedef u64 buildid_t;
+
+    typedef u64 addr_t;
 }
