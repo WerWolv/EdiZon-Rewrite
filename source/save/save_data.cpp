@@ -70,8 +70,17 @@ namespace edz::save {
         if (R_FAILED(accountListAllUsers(userIDs, userCount, &actualUserCount)))
             return accounts;    // Return empty accounts map on error
 
+        // Get all existing accounts
         for (u128 userID : userIDs)
-            accounts.insert({userID, new Account(userID)});
+            accounts.insert({userID, new Account(userID, true)});
+
+        for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
+            u128 &userID = saveDataInfo.userID;
+
+            // Add accounts that don't exist on the system anymore but still have some save files stored
+            if (accounts.find(userID) == accounts.end())
+                accounts.insert({ userID, new Account(userID, false) });
+        }
 
         return accounts;
     }

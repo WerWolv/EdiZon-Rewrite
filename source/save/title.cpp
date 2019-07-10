@@ -1,6 +1,5 @@
 #include "save/title.hpp"
 
-#include <turbojpeg.h>
 #include <cstring>
 #include <string>
 
@@ -27,13 +26,6 @@ namespace edz::save {
 
         std::memcpy(this->m_titleIcon, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp));
         this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
-
-        /*tjhandle jpegDecompressor = tjInitDecompress();
-        s32 jpegSubsamp;
-
-        tjDecompressHeader2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), &m_iconWidth, &m_iconHeight, &jpegSubsamp);
-        tjDecompress2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), m_titleIcon, m_iconWidth, 0, m_iconHeight, TJPF_RGBA, TJFLAG_ACCURATEDCT);
-        tjDestroy(jpegDecompressor);*/
     }
 
     Title::~Title() {
@@ -70,7 +62,7 @@ namespace edz::save {
         std::memcpy(buffer, this->m_titleIcon, bufferSize);
     }
 
-    s32 Title::getIconSize() {
+    size_t Title::getIconSize() {
         return this->m_iconSize;
     }
 

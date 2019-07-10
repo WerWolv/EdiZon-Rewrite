@@ -24,7 +24,7 @@ namespace edz::save {
         bool hasSaveFile();
 
         void getIcon(u8 *buffer, size_t bufferSize);
-        s32 getIconSize();
+        size_t getIconSize();
 
         std::vector<u128> getUserIDs();
 
@@ -39,8 +39,7 @@ namespace edz::save {
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;
         u8 *m_titleIcon;
-        u32 m_iconSize;
-        s32 m_iconWidth, m_iconHeight;
+        size_t m_iconSize;
 
         EResult _fsCreateSaveDataFileSystem(const FsSave* save, const FsSaveCreate* create);
     };
