@@ -37,6 +37,11 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "string": "cpp",
+        "nanovg.h": "c",
+        "cstddef": "cpp",
+        "functional": "cpp",
+        "iomanip": "cpp"
     }
 }

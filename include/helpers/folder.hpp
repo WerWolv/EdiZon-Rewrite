@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <dirent.h>
 
 namespace edz::helper {
@@ -17,7 +18,10 @@ namespace edz::helper {
         std::string folderName();
 
         void copyTo(std::string newPath);
-        void removeFolder();        
+        void removeFolder();
+
+        std::map<std::string, File> getFiles();
+        std::map<std::string, Folder> getFolders();
 
     private:
         DIR *m_dir;

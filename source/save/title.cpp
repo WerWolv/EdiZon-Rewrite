@@ -1,10 +1,11 @@
-#include "title.hpp"
+#include "save/title.hpp"
 
 #include <turbojpeg.h>
 #include <cstring>
 #include <string>
 
-namespace edz {
+namespace edz::save {
+
     Title::Title(u64 titleID) : m_titleID(titleID) {
         NsApplicationControlData appControlData;
         size_t appControlDataSize = 0;
@@ -22,14 +23,17 @@ namespace edz {
         m_versionString = std::string(appControlData.nacp.version);
         m_version = appContentMetaStatus.title_version;
 
-        m_titleIcon = new u8[256 * 256 * 3];
+        m_titleIcon = new u8[appControlDataSize - sizeof(NsApplicationControlData::nacp)];
 
-        tjhandle jpegDecompressor = tjInitDecompress();
+        std::memcpy(m_titleIcon, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp));
+        m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
+
+        /*tjhandle jpegDecompressor = tjInitDecompress();
         s32 jpegSubsamp;
 
         tjDecompressHeader2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), &m_iconWidth, &m_iconHeight, &jpegSubsamp);
-        tjDecompress2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), m_titleIcon, m_iconWidth, 0, m_iconHeight, TJPF_RGB, TJFLAG_ACCURATEDCT);
-        tjDestroy(jpegDecompressor);
+        tjDecompress2(jpegDecompressor, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp), m_titleIcon, m_iconWidth, 0, m_iconHeight, TJPF_RGBA, TJFLAG_ACCURATEDCT);
+        tjDestroy(jpegDecompressor);*/
     }
 
     Title::~Title() {
@@ -57,7 +61,7 @@ namespace edz {
     }
 
     s32 Title::getTitleIconSize() {
-        return m_iconWidth * m_iconHeight * 3;
+        return m_iconSize;
     }
 
     u64 Title::getTitleID() {
@@ -67,4 +71,5 @@ namespace edz {
     std::vector<u128> Title::getUserIDs() {
         return m_userIDs;
     }
+    
 }

@@ -2,7 +2,7 @@
 
 namespace edz::helper {
         File::File(std::string filePath) : m_filePath(filePath) {
-
+            m_file = nullptr;
         }
 
         File::File(const File &file) {
@@ -45,20 +45,21 @@ namespace edz::helper {
         }
 
         void File::copyTo(std::string path) {
+
             FILE *dst = fopen(path.c_str(), "w");
+
+            size_t size = 0;
+            u64 offset = 0;
+            u8 *buffer = new u8[0x50000];
+
             openFile();
 
-            size_t readSize, writeSize;
-            u8 buffer[0xFFFF];
-
-            do {
-                readSize = fread(buffer, 1, sizeof(buffer), m_file);
-
-                if (readSize > 0)
-                    writeSize = fwrite(buffer, 1, readSize, dst);
-                else 
-                    writeSize = 0;
-            } while(readSize > 0 && readSize == writeSize);
+            while ((size = fread(buffer, 1, 0x50000, m_file)) > 0) {
+                fwrite(buffer, 1, size, dst);
+                offset += size;
+            }
+            
+            delete[] buffer;
 
             closeFile();
             fclose(dst);

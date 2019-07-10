@@ -1,11 +1,13 @@
-#include "save_data.hpp"
+#include "save/save_data.hpp"
 
-namespace edz::helper {
-    SaveFileSystem::SaveFileSystem(Title title, Account account) {
-        if (R_FAILED(fsMount_SaveData(&m_saveFileSystem, title.getTitleID(), account.getUserID())))
+namespace edz::save {
+
+    SaveFileSystem::SaveFileSystem(Title *title, Account *account) {
+
+        if (R_FAILED(fsMount_SaveData(&m_saveFileSystem, title->getTitleID(), account->getUserID())))
             return;
-        
-        if (R_FAILED(fsdevMountDevice(SAVE_DEVICE, m_saveFileSystem))) {
+
+        if (fsdevMountDevice(SAVE_DEVICE, m_saveFileSystem) == -1) {
             fsFsClose(&m_saveFileSystem);
             return;
         }
@@ -20,7 +22,7 @@ namespace edz::helper {
         fsFsClose(&m_saveFileSystem);
     }
 
-    std::map<u64, Title*> SaveFileSystem::getAllTitles() {
+    std::map<u64, Title*>& SaveFileSystem::getAllTitles() {
         static std::map<u64, Title*> titles;
 
         if (titles.size() > 0)
@@ -28,32 +30,31 @@ namespace edz::helper {
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
             u64 &titleID = saveDataInfo.titleID;
-            DEBUG_PRINT("1 %lx", titleID);
+
             if (titles.find(titleID) == titles.end()) {
-                DEBUG_PRINT("2 %lx", titleID);
                 titles.insert({ (u64)titleID, new Title(titleID) });
-                DEBUG_PRINT("3 %lx", titleID);
             }
-            DEBUG_PRINT("4 %lx", titleID);
+
             titles[titleID]->addUserID(saveDataInfo.userID);
-            DEBUG_PRINT("5 %lx", titleID);
+
         }
 
         return titles;
     }
 
-    std::map<u128, Account*> SaveFileSystem::getAllAccounts() {
+    std::map<u128, Account*>& SaveFileSystem::getAllAccounts() {
         static std::map<u128, Account*> accounts;
 
         if (accounts.size() > 0)
             return accounts;   
 
         s32 userCount;
+        size_t actualUserCount;
         if (R_FAILED(accountGetUserCount(&userCount)))
             return accounts;    // Return empty accounts map on error
 
         u128 userIDs[userCount];
-        if (R_FAILED(accountListAllUsers(userIDs, userCount, nullptr)))
+        if (R_FAILED(accountListAllUsers(userIDs, userCount, &actualUserCount)))
             return accounts;    // Return empty accounts map on error
 
         for (u128 userID : userIDs)
@@ -62,8 +63,8 @@ namespace edz::helper {
         return accounts;
     }
 
-    Folder SaveFileSystem::getSaveFolder() {
-        return Folder(SAVE_DEVICE);
+    edz::helper::Folder SaveFileSystem::getSaveFolder() {
+        return edz::helper::Folder(SAVE_DEVICE ":");
     }
 
     void SaveFileSystem::commit() {
@@ -92,4 +93,5 @@ namespace edz::helper {
 
         return saveDataInfos;
     }
+
 }

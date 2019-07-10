@@ -8,13 +8,13 @@
                 "C:/devkitPro/libnx/include/**",
                 "C:/devkitPro/portlibs/switch/include/**",
                 "C:/devkitPro/portlibs/switch/include/freetype2/**",
-                "./include/**"
+                "./include/**",
+                "./libs/borealis/library/include/**"
             ],
             "defines": [
                 "SWITCH",
-                "__SWITCH__",
-                "DEBUG",
-                "__BSD_VISIBLE"
+                "WINDOW_NAME=\"EdiZon\"",
+                "__SWITCH__"
             ],
             "compilerPath": "C:/devkitPro/devkitA64/bin/aarch64-none-elf-g++",
             "cStandard": "c11",

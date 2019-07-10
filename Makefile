@@ -54,8 +54,8 @@ endif
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/helpers
-INCLUDES	:=	include include/bridge include/helpers
+SOURCES		:=	source source/helpers source/save source/cheat
+INCLUDES	:=	include include/bridge include/helpers source/save source/cheat
 DATA		:=	data
 #ROMFS		:=	romfs
 
@@ -69,7 +69,8 @@ SPACE     := $(null) $(null)
 
 
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES) \
+			$(ARCH) $(DEFINES) 				 \
+			-DWINDOW_NAME=\"EdiZon\"		 \
 			-DVERSION_MAJOR=${VERSION_MAJOR} \
 			-DVERSION_MINOR=${VERSION_MINOR} \
 			-DVERSION_MICRO=${VERSION_MICRO} \
@@ -88,8 +89,10 @@ LIBS	:= -lnx -lstdc++fs -lturbojpeg
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH)
 
+export BOREALIS_PATH := ./libs/borealis
+include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

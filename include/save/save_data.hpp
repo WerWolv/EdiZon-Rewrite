@@ -8,19 +8,19 @@
 
 #include <map>
 
-#define SAVE_DEVICE "save:/"
+#define SAVE_DEVICE "save"
 
-namespace edz::helper {
+namespace edz::save {
 
     class SaveFileSystem {
     public:
-        SaveFileSystem(Title title, Account account);
+        SaveFileSystem(Title *title, Account *account);
         ~SaveFileSystem();
 
-        static std::map<u64, Title*> getAllTitles();
-        static std::map<u128, Account*> getAllAccounts();
+        static std::map<u64, Title*>& getAllTitles();
+        static std::map<u128, Account*>& getAllAccounts();
 
-        Folder getSaveFolder();
+        edz::helper::Folder getSaveFolder();
         void commit();
 
     private:

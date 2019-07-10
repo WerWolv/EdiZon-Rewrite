@@ -2,7 +2,7 @@
 
 #include "edizon.hpp"
 
-namespace edz {
+namespace edz::save {
 
     class Account {
     public:

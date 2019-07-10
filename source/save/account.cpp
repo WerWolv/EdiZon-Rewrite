@@ -1,6 +1,6 @@
-#include "account.hpp"
+#include "save/account.hpp"
 
-namespace edz {
+namespace edz::save {
 
         Account::Account(u128 userID) : m_userID(userID) {
             

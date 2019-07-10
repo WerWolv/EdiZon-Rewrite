@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-namespace edz {
+namespace edz::save {
     class Title {
     public:
         Title(u64 titleID);
@@ -30,6 +30,7 @@ namespace edz {
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;
         u8 *m_titleIcon;
+        u32 m_iconSize;
         s32 m_iconWidth, m_iconHeight;
     };
 }
