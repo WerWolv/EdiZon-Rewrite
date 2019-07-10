@@ -2,6 +2,8 @@
 
 #include <cstring>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 namespace edz::save {
 
@@ -31,8 +33,16 @@ namespace edz::save {
         delete[] this->m_titleIcon;
     }
 
-    void Title::addUser(userid_t userID) {
-        this->m_userIDs.push_back(userID);
+
+    titleid_t Title::getID() {
+        return this->m_titleID;
+    }
+
+    std::string Title::getIDString() {
+        std::stringstream sstream;
+        sstream << std::uppercase << std::setfill('0') << std::setw(sizeof(titleid_t) * 2) << std::hex << getID();
+
+        return sstream.str();
     }
 
     std::string Title::getName() {
@@ -65,12 +75,12 @@ namespace edz::save {
         return this->m_iconSize;
     }
 
-    titleid_t Title::getID() {
-        return this->m_titleID;
-    }
-
     std::vector<userid_t> Title::getUserIDs() {
         return this->m_userIDs;
+    }
+
+    void Title::addUser(userid_t userID) {
+        this->m_userIDs.push_back(userID);
     }
 
 

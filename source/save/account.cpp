@@ -1,6 +1,8 @@
 #include "save/account.hpp"
 
 #include <cstring>
+#include <sstream>
+#include <iomanip>
 
 namespace edz::save {
 
@@ -35,12 +37,19 @@ namespace edz::save {
         }
 
 
-        std::string Account::getNickname() {
-            return this->m_nickname;
-        }
-
         userid_t Account::getID() {
             return this->m_userID;
+        }
+
+        std::string Account::getIDString() {
+            std::stringstream sstream;
+            sstream << std::uppercase << std::setfill('0') << std::setw(sizeof(userid_t) * 2) << std::hex << static_cast<u64>(getID() >> 64) << static_cast<u64>(getID() & 0xFFFFFFFFFFFFFFFF);
+
+            return sstream.str();
+        }
+
+        std::string Account::getNickname() {
+            return this->m_nickname;
         }
 
         void Account::getIcon(u8 *buffer, size_t bufferSize) {

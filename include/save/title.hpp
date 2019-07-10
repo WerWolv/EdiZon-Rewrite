@@ -16,6 +16,8 @@ namespace edz::save {
         void addUser(userid_t userID);
 
         titleid_t getID();
+        std::string getIDString();
+
         std::string getName();
         std::string getVersionString();
         u32 getVersion();
