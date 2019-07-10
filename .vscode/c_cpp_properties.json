@@ -9,7 +9,8 @@
                 "C:/devkitPro/portlibs/switch/include/**",
                 "C:/devkitPro/portlibs/switch/include/freetype2/**",
                 "./include/**",
-                "./libs/borealis/library/include/**"
+                "./libs/borealis/library/include/**",
+                "./libs/json/include"
             ],
             "defines": [
                 "SWITCH",

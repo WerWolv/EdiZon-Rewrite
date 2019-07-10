@@ -89,7 +89,7 @@ LIBS	:= -lnx -lstdc++fs -lturbojpeg
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH)
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) ./libs/json
 
 export BOREALIS_PATH := ./libs/borealis
 include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
