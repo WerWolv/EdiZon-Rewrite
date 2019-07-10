@@ -23,7 +23,6 @@ namespace edz::save {
         this->m_version = appContentMetaStatus.title_version;
 
         this->m_titleIcon = new u8[appControlDataSize - sizeof(NsApplicationControlData::nacp)];
-
         std::memcpy(this->m_titleIcon, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp));
         this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
     }

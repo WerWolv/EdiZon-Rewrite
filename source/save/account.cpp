@@ -9,6 +9,7 @@ namespace edz::save {
             AccountUserData userData;
             AccountProfileBase profileBase;
 
+            // If account doesn't existing anymore, use default properties
             if (!exists) {
                 this->m_userIcon = nullptr;
                 this->m_userIconSize = 0;

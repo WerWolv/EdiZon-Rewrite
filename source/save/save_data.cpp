@@ -32,9 +32,10 @@ namespace edz::save {
         size_t actualAppRecordCnt = 0;
 
         EResult rc = nsListApplicationRecord(appRecords, 1024, 0, &actualAppRecordCnt);
-        delete[] appRecords;
-        if (rc.failed())
+        if (rc.failed()) {
+            delete[] appRecords;
             return titles;  // Return empty titles map on error
+        }
         
 
         // Get all installed games
@@ -51,6 +52,8 @@ namespace edz::save {
             // Add what userIDs of all accounts that have a save file for this title
             titles[titleID]->addUser(saveDataInfo.userID);
         }
+
+        delete[] appRecords;
 
         return titles;
     }
