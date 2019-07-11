@@ -3,7 +3,8 @@
 #include "edizon.hpp"
 
 #include <string>
-#include <vector>
+#include <map>
+#include <memory>
 
 namespace edz::save::edit::widget {
 
@@ -14,56 +15,83 @@ namespace edz::save::edit::widget {
         STRING,
         SLIDER,
         PROGRESS_BAR,
-        COMMENT,
-        IMAGE
+        COMMENT
     };
 
-    enum class ArgumentType {
-        INTEGER,
-        FLOAT,
-        BOOLEAN,
-        STRING
-    };
+    class _Arg {
+    public:
+        template <typename T>
+        static Arg create(T value) {
+            Arg ret = std::make_shared<Arg>();
 
-    template<typename T>
-    struct Argument{
-        std::string argName;
-        T value;
-
-        constexpr ArgumentType getType() {
-            if constexpr (std::is_same<T, s128>::value)
-                return INTEGER;
-            else if constexpr (std::is_same<T, double>::value)
-                return FLOAT;
-            else if constexpr (std::is_same<T, bool>::value)
-                return BOOLEAN;
-            else if constexpr (std::is_same<T, std::string>::value)
-                return STRING;
+            if (std::is_integral<T>::value) {
+                ret.arg.intArg = value;
+                ret.type = ArgumentType::INTEGER;
+            }
+            else if (std::is_floating_point<T>::value) {
+                ret.arg.floatArg = value;
+                ret.type = ArgumentType::FLOAT;
+            }
+            else if (std::is_same<T, bool>::value) {
+                ret.arg.boolArg = value;
+                ret.type = ArgumentType::BOOLEAN;
+            }
+            else if (std::is_same<T, std::string>::value) {
+                ret.arg.stringArg = value;
+                ret.type = ArgumentType::STRING;
+            }
             else static_assert(false, "Invalid argument type!");
+
+            return ret;
         }
+
+    private:
+        enum class ArgumentType {
+            INTEGER,
+            FLOAT,
+            BOOLEAN,
+            STRING
+        };
+
+        template<typename T>
+        struct Argument{
+            std::string argName;
+            T value;
+        };
+
+        union {
+            Argument<s128> intArg;
+            Argument<double> floatArg;
+            Argument<bool> boolArg;
+            Argument<std::string> stringArg;
+        } arg;
+
+        ArgumentType type;
+
+        _Arg();
     };
 
-    typedef union {
-        Argument<s128> intArg;
-        Argument<double> floatArg;
-        Argument<bool> boolArg;
-        Argument<std::string> stringArg;
-    } arg_t;
+    typedef std::shared_ptr<_Arg> Arg;
 
     class Widget {
     public:
-        Widget();
+        Widget(std::string name);
         virtual ~Widget();
 
         virtual WidgetType getWidgetType() = 0;
-        virtual View* getView() = 0;
 
-        void addArgument(arg_t *argument);
+        void sendValueToScript(Arg arg);
 
-    private:
+        void setDescription(std::string description);
+        void addArgument(std::string argumentName, Arg argument);
+        ListItem* getView();
+
+    protected:
         std::string m_name;
         std::string m_description;
-        std::vector<arg_t*> m_arguments;
+        std::map<std::string, Arg> m_arguments;
+
+        ListItem *m_widgetView = nullptr;
     };
 
 }
