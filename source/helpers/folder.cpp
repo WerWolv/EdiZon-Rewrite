@@ -133,6 +133,17 @@ namespace edz::helper {
         return folders;
     }
 
+    void Folder::foreach(std::function<void(struct dirent*)> callback) {
+        struct dirent *ent;
+
+        openDirectory();
+
+        while((ent = readdir(m_dir)) != nullptr)
+            callback(ent);
+
+        closeDirectory();
+    }
+
 
     void Folder::openDirectory() {
         if (this->m_dir != nullptr) return;

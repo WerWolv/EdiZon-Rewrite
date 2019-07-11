@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <dirent.h>
+#include <functional>
 
 namespace edz::helper {
     class Folder {
@@ -22,6 +23,8 @@ namespace edz::helper {
 
         std::map<std::string, File> getFiles();
         std::map<std::string, Folder> getFolders();
+
+        void foreach(std::function<void(struct dirent*)> callback);
 
     private:
         DIR *m_dir;
