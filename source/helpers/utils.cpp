@@ -26,6 +26,62 @@ namespace edz::helper {
         return true;
     }
 
+    bool askSwkbdText(std::function<void(std::string)> f, std::string headerText, std::string guideText, u8 maxStringLength, std::string initialText) {
+        SwkbdConfig config;
+
+        swkbdConfigMakePresetDefault(&config);
+        swkbdConfigSetHeaderText(&config, headerText.c_str());
+        swkbdConfigSetGuideText(&config, guideText.c_str());
+        swkbdConfigSetInitialText(&config, initialText.c_str());
+        swkbdConfigSetBlurBackground(&config, true);
+        swkbdConfigSetType(&config, SwkbdType_Normal);
+        swkbdConfigSetStringLenMax(&config, maxStringLength);
+        swkbdConfigSetStringLenMaxExt(&config, 1);
+        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
+
+        char buffer[0x100];
+
+        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+            f(buffer);
+
+            swkbdClose(&config);
+            return true;
+        }
+
+        swkbdClose(&config);
+
+        return false;
+    }
+
+    bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText, std::string guideText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
+        SwkbdConfig config;
+
+        swkbdConfigMakePresetDefault(&config);
+        swkbdConfigSetHeaderText(&config, headerText.c_str());
+        swkbdConfigSetGuideText(&config, guideText.c_str());
+        swkbdConfigSetInitialText(&config, initialText.c_str());
+        swkbdConfigSetBlurBackground(&config, true);
+        swkbdConfigSetType(&config, SwkbdType_NumPad);
+        swkbdConfigSetStringLenMax(&config, maxStringLength);
+        swkbdConfigSetLeftOptionalSymbolKey(&config, leftButton.c_str());
+        swkbdConfigSetRightOptionalSymbolKey(&config, rightButton.c_str());
+        swkbdConfigSetStringLenMaxExt(&config, 1);
+        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
+
+        char buffer[0x100];
+
+        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+            f(buffer);
+
+            swkbdClose(&config);
+            return true;
+        }
+
+        swkbdClose(&config);
+
+        return false;
+    }
+
     bool isServiceRunning(const char *serviceName) {
         Handle handle;
         bool running = R_FAILED(smRegisterService(&handle, serviceName, false, 1));
