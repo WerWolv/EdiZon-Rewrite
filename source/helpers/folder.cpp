@@ -60,6 +60,13 @@ namespace edz::helper {
         closeDirectory();
     }
 
+    void Folder::copyFrom(std::string oldPath) {
+        Folder oldFolder(oldPath);
+
+        this->removeFolder();
+        oldFolder.copyTo(this->m_path);
+    }
+
     void Folder::removeFolder() {
         struct dirent *entry;
 

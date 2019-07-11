@@ -19,6 +19,8 @@ namespace edz::helper {
         std::string folderName();
 
         void copyTo(std::string newPath);
+        void copyFrom(std::string oldPath);
+
         void removeFolder();
 
         std::map<std::string, File> getFiles();
