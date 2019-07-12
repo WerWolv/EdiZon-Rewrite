@@ -218,6 +218,26 @@ namespace edz::save::edit {
 
                 widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
             }
+
+            if (widget != nullptr) {
+                for (auto &[name, value] : widgetDescription["arguments"].items()) {
+                    std::shared_ptr<widget::Arg> argument;
+
+                    if (value.type() == json::value_t::number_integer || value.type() == json::value_t::number_unsigned)
+                        argument = widget::Arg::create(value.get<s128>());
+                    else if (value.type() == json::value_t::number_float)
+                        argument = widget::Arg::create(value.get<double>());
+                    else if (value.type() == json::value_t::boolean)
+                        argument = widget::Arg::create(value.get<bool>());
+                    else if (value.type() == json::value_t::string)
+                        argument = widget::Arg::create(value.get<std::string>());
+                    else continue;
+
+                    widget->addArgument(name, argument);
+                }
+
+                this->m_widgets[itemDescription["category"]].push_back(widget);
+            }
             
         }
     }

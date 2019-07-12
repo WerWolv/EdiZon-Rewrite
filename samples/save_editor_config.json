@@ -1,0 +1,31 @@
+{
+    "author" : "WerWolv",
+    "description" : "A sample save editor config to test the editor",
+    "scriptLanguage" : "python",
+    "beta" : true,
+    "all" : [
+        {
+            "pathRegex" : [ "path", "\\d+", "[a-zA-Z0-9]+_\\d+" ],
+            "fileNameRegex" : "filename\\.sav",
+            "script" : "test.py",
+            "items" : [
+                {
+                    "name" : "Test Value",
+                    "category" : "Test Category",
+                    "arguments" : {
+                        "numItems" : 555,
+                        "enabled" : true,
+                        "item" : "sword",
+                        "durability" : 0.125
+                    },
+                    "infoText" : "Test Value info text",
+                    "widget" : {
+                        "type" : "int",
+                        "minValue" : 0,
+                        "maxValue" : 1000
+                    }
+                }
+            ]
+        }
+    ]
+}
