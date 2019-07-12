@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "DKP Aarch64",
+            "name": "DKP Aarch64 Windows",
             "includePath": [
                 "C:/devkitPro/devkitA64/aarch64-none-elf/include/**",
                 "C:/devkitPro/devkitA64/lib/gcc/aarch64-none-elf/8.3.0/include/**",
@@ -18,6 +18,27 @@
                 "__SWITCH__"
             ],
             "compilerPath": "C:/devkitPro/devkitA64/bin/aarch64-none-elf-g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "DKP Aarch64 Linux",
+            "includePath": [
+                "/opt/devkitpro/devkitA64/aarch64-none-elf/include/**",
+                "/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/8.3.0/include/**",
+                "/opt/devkitpro/libnx/include/**",
+                "/opt/devkitpro/portlibs/switch/include/**",
+                "./include/**",
+                "./libs/borealis/library/include/**",
+                "./libs/json/include"
+            ],
+            "defines": [
+                "SWITCH",
+                "WINDOW_NAME=\"EdiZon\"",
+                "__SWITCH__"
+            ],
+            "compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"

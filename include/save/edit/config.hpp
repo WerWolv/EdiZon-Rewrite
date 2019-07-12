@@ -47,7 +47,7 @@ namespace edz::save::edit {
 
         ConfigLoadState m_configLoadState;
 
-        std::map<std::string, widget::Widget*> m_widgets;
+        std::map<std::string, std::vector<widget::Widget*>> m_widgets;
 
 
         void parseMetadata(nlohmann::json &j);

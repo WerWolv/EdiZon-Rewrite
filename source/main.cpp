@@ -10,6 +10,7 @@
 #include <cstring>
 #include "cheat/cheat.hpp"
 #include "helpers/utils.hpp"
+#include "save/edit/config.hpp"
 
 Service *fsService;
 

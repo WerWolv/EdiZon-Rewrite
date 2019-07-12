@@ -54,8 +54,8 @@ endif
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/helpers source/save source/cheat
-INCLUDES	:=	include include/bridge include/helpers source/save source/cheat
+SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat
+INCLUDES	:=	include
 DATA		:=	data
 #ROMFS		:=	romfs
 

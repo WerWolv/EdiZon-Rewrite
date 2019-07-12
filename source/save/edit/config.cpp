@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "save/edit/config.hpp"
 
 #include "save/save_data.hpp"
 
@@ -6,6 +6,7 @@
 #include <fstream>
 #include <regex>
 
+#include "save/edit/widgets/widget.hpp"
 #include "save/edit/widgets/widget_integer.hpp"
 #include "save/edit/widgets/widget_boolean.hpp"
 #include "save/edit/widgets/widget_string.hpp"
@@ -14,9 +15,9 @@
 #include "save/edit/widgets/widget_progressbar.hpp"
 #include "save/edit/widgets/widget_comment.hpp"
 
-using json = nlohmann::json;
-
 #define CONFIG_PATH EDIZON_BASE_DIR"/configs/"
+
+using json = nlohmann::json;
 
 namespace edz::save::edit {
 
@@ -68,7 +69,7 @@ namespace edz::save::edit {
     }
 
     Config::~Config() {
-        
+
     }
 
 
@@ -146,7 +147,6 @@ namespace edz::save::edit {
                         }
                     });
                 }
-
             }
 
             folderDepth++;
@@ -221,8 +221,6 @@ namespace edz::save::edit {
                 widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
             }
             
-            if (widget != nullptr)
-                this->m_widgets.insert({ itemDescription["category"], widget });
         }
     }
 

@@ -1,4 +1,4 @@
-#include "result.hpp"
+#include "helpers/result.hpp"
 
 namespace edz {
     EResult::EResult() : m_module(0), m_desc(0) {}
