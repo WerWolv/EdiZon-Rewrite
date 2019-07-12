@@ -8,7 +8,7 @@ namespace edz::save::edit::widget {
 
     class WidgetList : public Widget {
     public:
-        WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<Arg> arguments);
+        WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments);
         ~WidgetList();
 
         WidgetType getWidgetType();

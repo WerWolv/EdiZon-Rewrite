@@ -2,6 +2,8 @@
 
 #include "edizon.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include "save/title.hpp"
 #include "save/edit/widgets/widget.hpp"
 
@@ -9,7 +11,7 @@
 #include <vector>
 #include <map>
 
-namespace nlohmann { class json; }
+using json = nlohmann::json;
 
 namespace edz::save::edit {
 
@@ -50,9 +52,13 @@ namespace edz::save::edit {
         std::map<std::string, std::vector<widget::Widget*>> m_widgets;
 
 
-        void parseMetadata(nlohmann::json &j);
-        void parseVersionSpecificMetadata(nlohmann::json &j);
-        void parseWidgets(nlohmann::json &j);
+        bool jsonExists(json &j, std::string key);
+        std::shared_ptr<widget::Arg> jsonToArg(json::value_type jsonValue);
+
+
+        void parseMetadata(json &j);
+        void parseVersionSpecificMetadata(json &j);
+        void parseWidgets(json &j);
     };
 
 }

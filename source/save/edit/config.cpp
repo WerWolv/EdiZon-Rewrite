@@ -2,7 +2,6 @@
 
 #include "save/save_data.hpp"
 
-#include <nlohmann/json.hpp>
 #include <fstream>
 #include <regex>
 
@@ -17,10 +16,9 @@
 
 #define CONFIG_PATH EDIZON_BASE_DIR"/configs/"
 
-using json = nlohmann::json;
 
 namespace edz::save::edit {
-
+    
     Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
 
         try {
@@ -36,7 +34,7 @@ namespace edz::save::edit {
             // Parse config file
 
             json config;
-            config << configFile;
+            configFile >> config;
             
             // Load basic config information
             parseMetadata(config);
@@ -78,21 +76,21 @@ namespace edz::save::edit {
     }
     
 
-    bool jsonExists(json &j, std::string key) {
+    bool Config::jsonExists(json &j, std::string key) {
         return j.find(key) != j.end();
     }
 
-    widget::Arg jsonToArg(json::value_type jsonValue) {
-        widget::Arg ret = nullptr;
+    std::shared_ptr<widget::Arg> Config::jsonToArg(json::value_type jsonValue) {
+        std::shared_ptr<widget::Arg> ret = nullptr;
 
         if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
-            ret = widget::_Arg::create(jsonValue.get<s64>());
+            ret = widget::Arg::create(jsonValue.get<s64>());
         else if (jsonValue.type() == json::value_t::number_float)
-            ret = widget::_Arg::create(jsonValue.get<double>());
+            ret = widget::Arg::create(jsonValue.get<double>());
         else if (jsonValue.type() == json::value_t::boolean)
-            ret = widget::_Arg::create(jsonValue.get<bool>());
+            ret = widget::Arg::create(jsonValue.get<bool>());
         else if (jsonValue.type() == json::value_t::string)
-            ret = widget::_Arg::create(jsonValue.get<std::string>());
+            ret = widget::Arg::create(jsonValue.get<std::string>());
 
         return ret;
     }
@@ -136,7 +134,7 @@ namespace edz::save::edit {
             } else {
                 // Handle all further directories
                 for (std::string path : matchingPaths) {
-                    saveFileSystem->getSaveFolder().getFolders()[path].foreach([&](struct dirent* entry){
+                    saveFileSystem->getSaveFolder().getFolders().find(path)->second.foreach([&](struct dirent* entry){
                         if (entry->d_type == DT_DIR) {
                             if (std::regex_match(std::string(entry->d_name), std::regex(folderRegex))) {
                                 if (folderDepth < (pathRegex.size() - 1))
@@ -180,7 +178,7 @@ namespace edz::save::edit {
                 widget = new widget::WidgetInteger(itemDescription["name"], widgetDescription["minValue"], widgetDescription["maxValue"]);
             }
             else if (widgetDescription["type"] == "bool") {
-                widget::Arg onValue, offValue;
+                std::shared_ptr<widget::Arg> onValue, offValue;
 
                 if (widgetDescription["onValue"].type() != widgetDescription["offValue"].type()) continue;
 
@@ -202,7 +200,7 @@ namespace edz::save::edit {
                 if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
                 
                 std::vector<std::string> keys = widgetDescription["keys"];
-                std::vector<widget::Arg> values;
+                std::vector<std::shared_ptr<widget::Arg>> values;
 
                 for (auto value : widgetDescription["values"])
                     values.push_back(jsonToArg(value));

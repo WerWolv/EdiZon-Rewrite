@@ -19,30 +19,27 @@ namespace edz::save::edit::widget {
     };
 
 
-    class _Arg;
 
-    typedef std::shared_ptr<_Arg> Arg;
-
-    class _Arg {
+    class Arg {
     public:
         template <typename T>
-        static Arg create(T value) {
-            Arg ret = std::make_shared<Arg>();
+        static std::shared_ptr<widget::Arg> create(T value) {
+            std::shared_ptr<widget::Arg> ret = std::make_shared<Arg>();
 
-            if (std::is_integral<T>::value) {
-                ret->arg.intArg = value;
+            if constexpr (std::is_integral<T>::value) {
+                ret->intArg.value = value;
                 ret->type = ArgumentType::INTEGER;
             }
-            else if (std::is_floating_point<T>::value) {
-                ret->arg.floatArg = value;
+            else if constexpr (std::is_floating_point<T>::value) {
+                ret->floatArg.value = value;
                 ret->type = ArgumentType::FLOAT;
             }
-            else if (std::is_same<T, bool>::value) {
-                ret->arg.boolArg = value;
+            else if constexpr (std::is_same<T, bool>::value) {
+                ret->boolArg.value = value;
                 ret->type = ArgumentType::BOOLEAN;
             }
-            else if (std::is_same<T, std::string>::value) {
-                ret->arg.stringArg = value;
+            else if constexpr (std::is_same<T, std::string>::value) {
+                ret->stringArg.value = value;
                 ret->type = ArgumentType::STRING;
             }
 
@@ -63,16 +60,12 @@ namespace edz::save::edit::widget {
             T value;
         };
 
-        union {
-            Argument<s128> intArg;
-            Argument<double> floatArg;
-            Argument<bool> boolArg;
-            Argument<std::string> stringArg;
-        } arg;
+        Argument<s128> intArg;
+        Argument<double> floatArg;
+        Argument<bool> boolArg;
+        Argument<std::string> stringArg;
 
         ArgumentType type;
-
-        _Arg();
     };
 
 
@@ -83,16 +76,16 @@ namespace edz::save::edit::widget {
 
         virtual WidgetType getWidgetType() = 0;
 
-        void sendValueToScript(Arg arg);
+        void sendValueToScript(std::shared_ptr<widget::Arg> arg);
 
         void setDescription(std::string description);
-        void addArgument(std::string argumentName, Arg argument);
+        void addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument);
         ListItem* getView();
 
     protected:
         std::string m_name;
         std::string m_description;
-        std::map<std::string, Arg> m_arguments;
+        std::map<std::string, std::shared_ptr<widget::Arg>> m_arguments;
 
         ListItem *m_widgetView = nullptr;
     };

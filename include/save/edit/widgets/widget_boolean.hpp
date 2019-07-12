@@ -7,15 +7,15 @@ namespace edz::save::edit::widget {
 
     class WidgetBoolean : public Widget {
     public:
-        WidgetBoolean(std::string name, Arg onValue, Arg offValue);
+        WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
         ~WidgetBoolean();
 
         WidgetType getWidgetType();
 
     private:
         bool m_state;
-        Arg m_onValue;
-        Arg m_offValue;
+        std::shared_ptr<widget::Arg> m_onValue;
+        std::shared_ptr<widget::Arg> m_offValue;
     };
 
 }

@@ -55,7 +55,7 @@ TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
 SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat
-INCLUDES	:=	include
+INCLUDES	:=	include libs/json/include
 DATA		:=	data
 #ROMFS		:=	romfs
 

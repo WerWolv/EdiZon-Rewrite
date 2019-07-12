@@ -3,7 +3,7 @@
 
 namespace edz::save::edit::widget {
 
-    WidgetBoolean::WidgetBoolean(std::string name, Arg onValue, Arg offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
+    WidgetBoolean::WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
         this->m_widgetView->setValue(this->m_state ? "On" : "Off", this->m_state);
 
         this->m_widgetView->setClickListener([&](View *view){
