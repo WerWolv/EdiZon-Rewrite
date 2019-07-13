@@ -11,6 +11,7 @@ namespace edz::save::edit::widget {
         ~WidgetBoolean();
 
         WidgetType getWidgetType();
+        ListItem* getView();
 
     private:
         bool m_state;

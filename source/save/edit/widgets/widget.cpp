@@ -3,11 +3,12 @@
 namespace edz::save::edit::widget {
 
     Widget::Widget(std::string name) : m_name(name) {
-        this->m_widgetView = new ListItem(this->m_name, this->m_description);
+        this->m_widgetView = nullptr;
     }
 
     Widget::~Widget() {
-        delete this->m_widgetView;
+        if (this->m_widgetView != nullptr)
+            delete this->m_widgetView;
     }
 
 
@@ -23,8 +24,5 @@ namespace edz::save::edit::widget {
         this->m_arguments.insert({ argumentName, argument });
     }
 
-    ListItem* Widget::getView() {
-        return this->m_widgetView;
-    }
 
 }

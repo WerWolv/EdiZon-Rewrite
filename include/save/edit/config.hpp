@@ -27,7 +27,6 @@ namespace edz::save::edit {
     };
 
     typedef struct {
-        std::string name;
         std::vector<widget::Widget*> widgets;
     } WidgetCategory;
 
@@ -35,7 +34,7 @@ namespace edz::save::edit {
         std::vector<std::string> saveFilePaths;
         std::vector<std::string> saveFileNames;
 
-        std::vector<WidgetCategory> categories;
+        std::map<std::string, WidgetCategory> categories;
     } FileConfig;
 
     class Config {

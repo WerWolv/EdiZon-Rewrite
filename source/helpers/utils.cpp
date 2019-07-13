@@ -26,12 +26,14 @@ namespace edz::helper {
         return true;
     }
 
-    bool askSwkbdText(std::function<void(std::string)> f, std::string headerText, std::string guideText, u8 maxStringLength, std::string initialText) {
+    bool askSwkbdText(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
+
+        swkbdCreate(&config, 0);
 
         swkbdConfigMakePresetDefault(&config);
         swkbdConfigSetHeaderText(&config, headerText.c_str());
-        swkbdConfigSetGuideText(&config, guideText.c_str());
+        swkbdConfigSetSubText(&config, subText.c_str());
         swkbdConfigSetInitialText(&config, initialText.c_str());
         swkbdConfigSetBlurBackground(&config, true);
         swkbdConfigSetType(&config, SwkbdType_Normal);
@@ -53,12 +55,14 @@ namespace edz::helper {
         return false;
     }
 
-    bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText, std::string guideText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
+    bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText, std::string subText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
+
+        swkbdCreate(&config, 0);
 
         swkbdConfigMakePresetDefault(&config);
         swkbdConfigSetHeaderText(&config, headerText.c_str());
-        swkbdConfigSetGuideText(&config, guideText.c_str());
+        swkbdConfigSetSubText(&config, subText.c_str());
         swkbdConfigSetInitialText(&config, initialText.c_str());
         swkbdConfigSetBlurBackground(&config, true);
         swkbdConfigSetType(&config, SwkbdType_NumPad);

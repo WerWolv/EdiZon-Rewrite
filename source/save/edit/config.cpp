@@ -177,12 +177,12 @@ namespace edz::save::edit {
     void Config::parseWidgets(json &j, u16 fileNum) {
         for (auto itemDescription : j) {
             auto widgetDescription = itemDescription["widget"];
-
+            DEBUG_PRINT();
             widget::Widget *widget = nullptr;
-
+DEBUG_PRINT();
             if (widgetDescription["type"] == "int") {
                 if (widgetDescription["minValue"].type() != widgetDescription["maxValue"].type()) continue;
-
+DEBUG_PRINT();
                 // minValue and maxValue type have to be equal here, only checking one
                 if (widgetDescription["minValue"].type() != json::value_t::number_integer && widgetDescription["minValue"].type() != json::value_t::number_unsigned) continue;
 
@@ -198,6 +198,8 @@ namespace edz::save::edit {
                 onValue = jsonToArg(widgetDescription["onValue"]);
                 offValue = jsonToArg(widgetDescription["offValue"]);
 
+                widget = new widget::WidgetBoolean(itemDescription["name"], onValue, offValue);
+
             }
             else if (widgetDescription["type"] == "string") {
                 if (widgetDescription["minLength"].type() != widgetDescription["maxLength"].type()) continue;
@@ -205,7 +207,7 @@ namespace edz::save::edit {
                 // minValue and maxValue type have to be equal here, only checking one
                 if (widgetDescription["minLength"].type() != json::value_t::number_integer && widgetDescription["minLength"].type() != json::value_t::number_unsigned) continue;
 
-                widget = new widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["minLength"]);
+                widget = new widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["maxLength"]);
             }
             else if (widgetDescription["type"] == "list") {
                 /*if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
@@ -229,8 +231,13 @@ namespace edz::save::edit {
 
                 widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);*/
             }
+            DEBUG_PRINT();
 
             if (widget != nullptr) {
+                DEBUG_PRINT();
+                if (jsonExists(itemDescription, "infoText"))
+                    widget->setDescription(itemDescription["infoText"]);
+DEBUG_PRINT();
                 for (auto &[name, value] : widgetDescription["arguments"].items()) {
                     std::shared_ptr<widget::Arg> argument;
 
@@ -246,12 +253,8 @@ namespace edz::save::edit {
 
                     widget->addArgument(name, argument);
                 }  
-
-                WidgetCategory category;
-                category.name = itemDescription["category"];
-                category.widgets.push_back(widget);
-
-                this->m_fileConfigs[fileNum].categories.push_back(category);
+                
+                this->m_fileConfigs[fileNum].categories[itemDescription["category"]].widgets.push_back(widget);
             }
             
         }
@@ -261,15 +264,14 @@ namespace edz::save::edit {
         if (tabFrame == nullptr) return;
 
         for (auto &[fileNum, fileConfig] : this->m_fileConfigs) {
-            for (auto &category : fileConfig.categories) {
+            for (auto &[categoryName, category] : fileConfig.categories) {
                 List *list = new List();
-                
+
                 for (auto &widget : category.widgets)
                     list->addView(widget->getView());
 
-                tabFrame->addTab(category.name, list);
+                tabFrame->addTab(categoryName, list);
             }
-
         }
     }
 

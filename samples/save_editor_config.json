@@ -10,19 +10,59 @@
             "script" : "test.py",
             "items" : [
                 {
-                    "name" : "Test Value",
-                    "category" : "Test Category",
+                    "name" : "Integer Value A",
+                    "infoText" : "This is a sample integer value",
+                    "category" : "Category 1",
                     "arguments" : {
                         "numItems" : 555,
                         "enabled" : true,
                         "item" : "sword",
                         "durability" : 0.125
                     },
-                    "infoText" : "Test Value info text",
                     "widget" : {
                         "type" : "int",
                         "minValue" : 0,
                         "maxValue" : 1000
+                    }
+                },
+                {
+                    "name" : "Integer Value B",
+                    "infoText" : "This is a second sample integer value",
+                    "category" : "Category 2",
+                    "arguments" : {
+                        "test" : "Hello World"
+                    },
+                    "widget" : {
+                        "type" : "int",
+                        "minValue" : 0,
+                        "maxValue" : 1000
+                    }
+                },
+                {
+                    "name" : "Boolean Value",
+                    "infoText" : "This is a sample boolean value",
+                    "category" : "Category 1",
+                    "arguments" : {
+                        "derp" : 3.141592654
+                    },
+                    "widget" : {
+                        "type" : "bool",
+                        "onValue" : 69,
+                        "offValue" : 420
+                    }
+                },
+                {
+                    "name" : "String Value",
+                    "infoText" : "This is a sample boolean value",
+                    "category" : "Category 1",
+                    "arguments" : {
+                        "testA" : true,
+                        "testB" : false
+                    },
+                    "widget" : {
+                        "type" : "string",
+                        "minLength" : 5,
+                        "maxLength" : 32
                     }
                 }
             ]

@@ -110,6 +110,8 @@ int main(int argc, char* argv[]) {
 
     initInterface();
 
+    nxlinkStdio();
+
     while(Application::mainLoop());
     
     exitServices();

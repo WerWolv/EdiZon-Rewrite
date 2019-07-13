@@ -12,6 +12,7 @@ namespace edz::save::edit::widget {
         ~WidgetList();
 
         WidgetType getWidgetType();
+        ListItem* getView();
 
     private:
 

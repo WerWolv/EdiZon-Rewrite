@@ -11,6 +11,7 @@ namespace edz::save::edit::widget {
         ~WidgetComment();
 
         WidgetType getWidgetType();
+        ListItem* getView();
 
     private:
         std::string m_comment;
