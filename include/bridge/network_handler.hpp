@@ -58,7 +58,7 @@ namespace edz::bridge {
         threadCreate(&networkThread, networkLoop, nullptr, 0x5000, 0x2C, -2);
         threadStart(&networkThread);
         networkLoopRunning = true;
-
+        
         return 0;
     }
 

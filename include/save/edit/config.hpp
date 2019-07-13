@@ -2,8 +2,6 @@
 
 #include "edizon.hpp"
 
-#include <nlohmann/json.hpp>
-
 #include "save/title.hpp"
 #include "save/edit/widgets/widget.hpp"
 
@@ -11,7 +9,7 @@
 #include <vector>
 #include <map>
 
-using json = nlohmann::json;
+#include <nlohmann/json_fwd.hpp>
 
 namespace edz::save::edit {
 
@@ -27,6 +25,18 @@ namespace edz::save::edit {
         CONFIG_OUTDATED,
         TOO_MANY_REDIRECTS
     };
+
+    typedef struct {
+        std::string name;
+        std::vector<widget::Widget*> widgets;
+    } WidgetCategory;
+
+    typedef struct {
+        std::vector<std::string> saveFilePaths;
+        std::vector<std::string> saveFileNames;
+
+        std::vector<WidgetCategory> categories;
+    } FileConfig;
 
     class Config {
     public:
@@ -44,21 +54,15 @@ namespace edz::save::edit {
         bool m_isBeta;
         std::string m_description;
 
-        std::vector<std::string> m_saveFilePaths;
-        std::vector<std::string> m_saveFileNames;
-
         ConfigLoadState m_configLoadState;
 
-        std::map<std::string, std::vector<widget::Widget*>> m_widgets;
+        std::map<u16, FileConfig> m_fileConfigs;
 
+        bool jsonExists(nlohmann::json &j, std::string key);
 
-        bool jsonExists(json &j, std::string key);
-        std::shared_ptr<widget::Arg> jsonToArg(json::value_type jsonValue);
-
-
-        void parseMetadata(json &j);
-        void parseVersionSpecificMetadata(json &j);
-        void parseWidgets(json &j);
+        void parseMetadata(nlohmann::json &j);
+        void parseVersionSpecificMetadata(nlohmann::json &j, u16 fileNum);
+        void parseWidgets(nlohmann::json &j, u16 fileNum);
     };
 
 }

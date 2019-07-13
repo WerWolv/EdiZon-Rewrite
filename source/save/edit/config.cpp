@@ -2,10 +2,10 @@
 
 #include "save/save_data.hpp"
 
+
 #include <fstream>
 #include <regex>
 
-#include "save/edit/widgets/widget.hpp"
 #include "save/edit/widgets/widget_integer.hpp"
 #include "save/edit/widgets/widget_boolean.hpp"
 #include "save/edit/widgets/widget_string.hpp"
@@ -14,31 +14,46 @@
 #include "save/edit/widgets/widget_progressbar.hpp"
 #include "save/edit/widgets/widget_comment.hpp"
 
+#include <nlohmann/json.hpp>
+
 #define CONFIG_PATH EDIZON_BASE_DIR"/configs/"
 
+using json = nlohmann::json;
 
 namespace edz::save::edit {
+
+    std::shared_ptr<widget::Arg> jsonToArg(json::value_type jsonValue) {
+        std::shared_ptr<widget::Arg> ret = nullptr;
+
+        if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
+            ret = widget::Arg::create(jsonValue.get<s64>());
+        else if (jsonValue.type() == json::value_t::number_float)
+            ret = widget::Arg::create(jsonValue.get<double>());
+        else if (jsonValue.type() == json::value_t::boolean)
+            ret = widget::Arg::create(jsonValue.get<bool>());
+        else if (jsonValue.type() == json::value_t::string)
+            ret = widget::Arg::create(jsonValue.get<std::string>());
+
+        return ret;
+    }
     
     Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
 
         try {
-
-            std::ifstream configFile(CONFIG_PATH + title->getIDString() + ".json");
-
+            std::ifstream configFile(CONFIG_PATH"test.json");
             if (!configFile.is_open()) {
                 // File couldn't be opened, no config file present
                 this->m_configLoadState = ConfigLoadState::NO_CONFIG;
                 return;
             }
-            
-            // Parse config file
 
+            // Parse config file
             json config;
             configFile >> config;
-            
+
             // Load basic config information
             parseMetadata(config);
-            
+
 
             if (!jsonExists(config, title->getVersionString()) && !jsonExists(config, "all")) {
                 // No save editor for this game version configured
@@ -46,17 +61,24 @@ namespace edz::save::edit {
                 return;
             }
 
+            
+
             json configVersionMetadata;
 
             if (jsonExists(config, title->getVersionString()))
                 configVersionMetadata = config[title->getVersionString()];
             else configVersionMetadata = config["all"];
 
-            parseVersionSpecificMetadata(configVersionMetadata);
+            u16 fileNum = 0;
+            for (auto &fileDefinitions : configVersionMetadata) {
+                parseVersionSpecificMetadata(fileDefinitions, fileNum);
 
-            if (jsonExists(configVersionMetadata, "items"))
-                parseWidgets(configVersionMetadata["items"]);
-            else throw json::parse_error::create(100, 0, "No widgets specified");
+                if (jsonExists(fileDefinitions, "items"))
+                    parseWidgets(fileDefinitions["items"], fileNum);
+                else throw json::parse_error::create(100, 0, "No widgets specified");
+
+                fileNum++;
+            }
 
         } catch (json::parse_error &e) {
             this->m_configLoadState = ConfigLoadState::SYNTAX_ERROR;
@@ -80,23 +102,8 @@ namespace edz::save::edit {
         return j.find(key) != j.end();
     }
 
-    std::shared_ptr<widget::Arg> Config::jsonToArg(json::value_type jsonValue) {
-        std::shared_ptr<widget::Arg> ret = nullptr;
 
-        if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
-            ret = widget::Arg::create(jsonValue.get<s64>());
-        else if (jsonValue.type() == json::value_t::number_float)
-            ret = widget::Arg::create(jsonValue.get<double>());
-        else if (jsonValue.type() == json::value_t::boolean)
-            ret = widget::Arg::create(jsonValue.get<bool>());
-        else if (jsonValue.type() == json::value_t::string)
-            ret = widget::Arg::create(jsonValue.get<std::string>());
-
-        return ret;
-    }
-
-
-    void Config::parseMetadata(nlohmann::json &j) {
+    void Config::parseMetadata(json &j) {
         this->m_author = j["author"];
         this->m_description = j["description"];
         this->m_isBeta = j["beta"];
@@ -107,8 +114,9 @@ namespace edz::save::edit {
             this->m_scriptLanguage = ScriptLanguage::PYTHON;
     }
 
-    void Config::parseVersionSpecificMetadata(nlohmann::json &j) {
+    void Config::parseVersionSpecificMetadata(json &j, u16 fileNum) {
         auto saveFileSystem = new SaveFileSystem(this->m_title, this->m_account);
+
         std::vector<std::string> pathRegex = j["pathRegex"];
         std::string fileNameRegex = j["fileNameRegex"];
 
@@ -116,6 +124,8 @@ namespace edz::save::edit {
 
         bool inRootDirectory = true;
         u8 folderDepth = 0;
+
+        FileConfig fileConfig;
 
         // Parse save file path regex into the actual paths
         for (std::string folderRegex : pathRegex) {
@@ -140,7 +150,7 @@ namespace edz::save::edit {
                                 if (folderDepth < (pathRegex.size() - 1))
                                     tempMatchingPaths.push_back(path + "/" + entry->d_name);
                                 else // We reached the last level. Store the full paths for loading later
-                                    this->m_saveFilePaths.push_back(path + "/" + entry->d_name);
+                                    fileConfig.saveFilePaths.push_back(path + "/" + entry->d_name);
                             }
                         }
                     });
@@ -152,20 +162,21 @@ namespace edz::save::edit {
         }
 
         
-        for (std::string path : this->m_saveFilePaths) {
+        for (std::string path : fileConfig.saveFilePaths) {
             // Save data is still mounted to save:/ 
             edz::helper::Folder saveFileFolder("save:/" + path);
 
             for (auto &[fileName, file] : saveFileFolder.getFiles())
                 if (std::regex_match(fileName, std::regex(fileNameRegex)))
-                    this->m_saveFileNames.push_back(fileName);
+                    fileConfig.saveFileNames.push_back(fileName);
         }
 
+        m_fileConfigs[fileNum] = fileConfig;
     }
 
-    void Config::parseWidgets(nlohmann::json &j) {
+    void Config::parseWidgets(json &j, u16 fileNum) {
         for (auto itemDescription : j) {
-            auto widgetDescription = j["widget"];
+            auto widgetDescription = itemDescription["widget"];
 
             widget::Widget *widget = nullptr;
 
@@ -197,7 +208,7 @@ namespace edz::save::edit {
                 widget = new widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["minLength"]);
             }
             else if (widgetDescription["type"] == "list") {
-                if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
+                /*if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
                 
                 std::vector<std::string> keys = widgetDescription["keys"];
                 std::vector<std::shared_ptr<widget::Arg>> values;
@@ -205,7 +216,7 @@ namespace edz::save::edit {
                 for (auto value : widgetDescription["values"])
                     values.push_back(jsonToArg(value));
                 
-                widget = new widget::WidgetList(itemDescription["name"], keys, values);
+                widget = new widget::WidgetList(itemDescription["name"], keys, values);*/
             }
             else if (widgetDescription["type"] == "slider") {
 
@@ -214,9 +225,9 @@ namespace edz::save::edit {
 
             }
             else if (widgetDescription["type"] == "comment") {
-                if (widgetDescription["comment"].type() != json::value_t::string) continue;
+                /*if (widgetDescription["comment"].type() != json::value_t::string) continue;
 
-                widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
+                widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);*/
             }
 
             if (widget != nullptr) {
@@ -234,11 +245,31 @@ namespace edz::save::edit {
                     else continue;
 
                     widget->addArgument(name, argument);
-                }
+                }  
 
-                this->m_widgets[itemDescription["category"]].push_back(widget);
+                WidgetCategory category;
+                category.name = itemDescription["category"];
+                category.widgets.push_back(widget);
+
+                this->m_fileConfigs[fileNum].categories.push_back(category);
             }
             
+        }
+    }
+
+    void Config::createUI(TabFrame *tabFrame) {
+        if (tabFrame == nullptr) return;
+
+        for (auto &[fileNum, fileConfig] : this->m_fileConfigs) {
+            for (auto &category : fileConfig.categories) {
+                List *list = new List();
+                
+                for (auto &widget : category.widgets)
+                    list->addView(widget->getView());
+
+                tabFrame->addTab(category.name, list);
+            }
+
         }
     }
 

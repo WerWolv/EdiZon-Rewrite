@@ -4,6 +4,8 @@
 namespace edz::save::edit::widget {
 
     WidgetInteger::WidgetInteger(std::string name, s64 minValue, s64 maxValue) : Widget(name), m_minValue(minValue), m_maxValue(maxValue) {
+        this->m_currValue = minValue;
+
         this->m_widgetView->setValue(std::to_string(this->m_currValue));
 
         this->m_widgetView->setClickListener([&](View *view){

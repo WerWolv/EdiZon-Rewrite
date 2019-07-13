@@ -11,13 +11,14 @@
 #include "cheat/cheat.hpp"
 #include "helpers/utils.hpp"
 #include "save/edit/config.hpp"
+#include "helpers/lang_entry.hpp"
 
 Service *fsService;
 
 void initServices() {
     // Network sockets
     socketInitializeDefault();
-
+    
     // Title querying
     ncmInitialize();
     nsInitialize();
@@ -32,6 +33,12 @@ void initServices() {
     pcvInitialize();
     clkrstInitialize();
 
+    // RomFS for guide and localization
+    romfsInit();
+
+    // Language code setting querying
+    setInitialize();
+
     // Controller LED
     edz::helper::controllerLEDInitialize();
 }
@@ -44,6 +51,8 @@ void exitServices() {
     pctlExit();
     pcvExit();
     clkrstExit();
+    romfsExit();
+    setExit();
 }
 
 u8 *buffer = nullptr; 
@@ -51,21 +60,34 @@ size_t titleIconSize;
 void initInterface() {
     Application::init(StyleEnum::ACCURATE);
 
-    AppletFrame *rootFrame = new AppletFrame(true, false);
+    TabFrame *rootFrame = new TabFrame();
     rootFrame->setTitle("EdiZon");
 
-    List *titleList = new List();
-
-    std::stringstream ss;
+    /*std::stringstream ss;
     for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
         ss.str("");
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(sizeof(u64) * 2) << titleID;
         ListItem *titleItem = new ListItem(title->getName());
         titleItem->setValue(ss.str(), true, true);
         titleList->addView(titleItem);
+    }*/
+
+    edz::save::Title *title1;
+    edz::save::Account *acc1;
+
+    for (auto &[tid, title] : edz::save::SaveFileSystem::getAllTitles()) {
+        title1 = title;
+        break;
     }
 
-    rootFrame->setContentView(titleList);
+    for (auto &[tid, acc] : edz::save::SaveFileSystem::getAllAccounts()) {
+        acc1 = acc;
+        break;
+    }
+    
+    edz::save::edit::Config config(title1, acc1);
+
+    config.createUI(rootFrame);
 
     Application::pushView(rootFrame);
 }
@@ -90,8 +112,6 @@ int main(int argc, char* argv[]) {
 
     while(Application::mainLoop());
     
-    auto &titles = edz::save::SaveFileSystem::getAllTitles();
-
     exitServices();
 
     svcSetHeapSize(&haddr, ((u8*) envGetHeapOverrideAddr() + envGetHeapOverrideSize()) - (u8*) haddr); // clean up the heap
