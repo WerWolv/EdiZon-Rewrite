@@ -17,20 +17,21 @@ namespace edz::save::edit::widget {
         return WidgetType::INTEGER;
     }
 
-    ListItem* WidgetInteger::getView() {
+    View* WidgetInteger::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
+            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            this->m_widgetView->setValue(std::to_string(this->m_currValue));
+            listItem->setValue(std::to_string(this->m_currValue));
 
-            this->m_widgetView->setClickListener([&](View *view){
+            listItem->setClickListener([&](View *view){
                 edz::helper::askSwkbdNumber([&](std::string str){
 
                     s64 newValue = std::stoll(str);
                     this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));
-                    this->m_widgetView->setValue(std::to_string(this->m_currValue));
+                    listItem->setValue(std::to_string(this->m_currValue));
 
-                }, "Enter a value", "This will be the new value this value will be set to.", "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
+                }, edz::LangEntry("edz.widget.integer.title").get(), edz::LangEntry("edz.widget.integer.subtitle").get(), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
             });
             }
 

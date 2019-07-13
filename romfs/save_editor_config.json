@@ -66,6 +66,19 @@
                     }
                 },
                 {
+                    "name" : "Comment",
+                    "infoText" : "Some comment",
+                    "category" : "Category 1",
+                    "arguments" : {
+                        "testA" : true,
+                        "testB" : false
+                    },
+                    "widget" : {
+                        "type" : "comment",
+                        "comment" : "This very long and super hyper informative comment will help you a lot when trying to understand what this value above was meant to do..."
+                    }
+                },
+                {
                     "name" : "List Value",
                     "infoText" : "This is a sample list value",
                     "category" : "Category 1",

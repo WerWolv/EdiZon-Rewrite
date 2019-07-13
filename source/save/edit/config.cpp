@@ -40,7 +40,7 @@ namespace edz::save::edit {
     Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
 
         try {
-            std::ifstream configFile(CONFIG_PATH"test.json");
+            std::ifstream configFile("romfs:/save_editor_config.json");
             if (!configFile.is_open()) {
                 // File couldn't be opened, no config file present
                 this->m_configLoadState = ConfigLoadState::NO_CONFIG;
@@ -210,7 +210,7 @@ DEBUG_PRINT();
                 widget = new widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["maxLength"]);
             }
             else if (widgetDescription["type"] == "list") {
-                /*if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
+                if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
                 
                 std::vector<std::string> keys = widgetDescription["keys"];
                 std::vector<std::shared_ptr<widget::Arg>> values;
@@ -218,7 +218,7 @@ DEBUG_PRINT();
                 for (auto value : widgetDescription["values"])
                     values.push_back(jsonToArg(value));
                 
-                widget = new widget::WidgetList(itemDescription["name"], keys, values);*/
+                widget = new widget::WidgetList(itemDescription["name"], keys, values);
             }
             else if (widgetDescription["type"] == "slider") {
 
@@ -227,9 +227,9 @@ DEBUG_PRINT();
 
             }
             else if (widgetDescription["type"] == "comment") {
-                /*if (widgetDescription["comment"].type() != json::value_t::string) continue;
+                if (widgetDescription["comment"].type() != json::value_t::string) continue;
 
-                widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);*/
+                widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
             }
             DEBUG_PRINT();
 

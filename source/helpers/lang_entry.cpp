@@ -3,7 +3,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-namespace edz::helper {
+namespace edz {
 
     LangEntry::LangEntry(std::string unlocalizedString) : m_unlocalizedString(unlocalizedString) {
         static nlohmann::json json;

@@ -16,20 +16,21 @@ namespace edz::save::edit::widget {
         return WidgetType::STRING;
     }
 
-    ListItem* WidgetString::getView() {
+    View* WidgetString::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
+            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
             
-            this->m_widgetView->setValue(this->m_currValue);
+            listItem->setValue(this->m_currValue);
 
-            this->m_widgetView->setClickListener([&](View *view){
+            listItem->setClickListener([&](View *view){
                 edz::helper::askSwkbdText([&](std::string str){
                     if (str.length() < this->m_minLength) return;
 
                     this->m_currValue = str;
-                    this->m_widgetView->setValue(this->m_currValue);
+                    listItem->setValue(this->m_currValue);
 
-                }, "Enter a value", "This will be the new value this value will be set to.", this->m_maxLength, this->m_currValue);
+                }, edz::LangEntry("edz.widget.string.title").get(), edz::LangEntry("edz.widget.string.subtitle").get(), this->m_maxLength, this->m_currValue);
             });
         }
 

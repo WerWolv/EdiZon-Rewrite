@@ -11,7 +11,7 @@ namespace edz::save::edit::widget {
         ~WidgetSlider();
 
         WidgetType getWidgetType();
-        ListItem* getView();
+        View* getView();
 
     private:
 

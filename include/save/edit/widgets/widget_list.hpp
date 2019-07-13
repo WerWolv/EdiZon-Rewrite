@@ -12,10 +12,13 @@ namespace edz::save::edit::widget {
         ~WidgetList();
 
         WidgetType getWidgetType();
-        ListItem* getView();
+        View* getView();
 
     private:
+        std::vector<std::string> m_displayStrings;
+        std::vector<std::shared_ptr<widget::Arg>> m_arguments;
 
+        s16 m_currValue;
     };
 
 }

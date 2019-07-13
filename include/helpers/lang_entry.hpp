@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-namespace edz::helper {
+namespace edz {
 
     class LangEntry {
     public:

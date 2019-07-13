@@ -16,15 +16,16 @@ namespace edz::save::edit::widget {
         return WidgetType::BOOLEAN;
     }
 
-    ListItem* WidgetBoolean::getView() {
+    View* WidgetBoolean::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
+            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            this->m_widgetView->setValue(this->m_state ? "On" : "Off", !this->m_state);
+            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
 
-            this->m_widgetView->setClickListener([&](View *view){
+            listItem->setClickListener([&](View *view){
                 this->m_state = !this->m_state;
-                this->m_widgetView->setValue(this->m_state ? "On" : "Off", !this->m_state);
+                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
             });
         }
 

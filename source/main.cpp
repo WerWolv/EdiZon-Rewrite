@@ -107,9 +107,7 @@ int main(int argc, char* argv[]) {
     fake_heap_end = (char*) haddr + 0x10000000;
 
     initServices();
-
     initInterface();
-
     nxlinkStdio();
 
     while(Application::mainLoop());

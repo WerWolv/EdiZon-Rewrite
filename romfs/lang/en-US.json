@@ -1,4 +1,11 @@
 {
     "edz.name" : "EdiZon",
-    "edz.dev" : "WerWolv"
+    "edz.dev" : "WerWolv",
+
+    "edz.widget.integer.title" : "Enter a value",
+    "edz.widget.integer.subtitle" : "This will be the new value for this property.",
+    "edz.widget.string.title" : "Enter some text",
+    "edz.widget.string.subtitle" : "This will be the new text for this property.",
+    "edz.widget.boolean.on" : "On",
+    "edz.widget.boolean.off" : "Off"
 }

@@ -11,7 +11,7 @@ namespace edz::save::edit::widget {
         ~WidgetInteger();
 
         WidgetType getWidgetType();
-        ListItem* getView();
+        View* getView();
 
     private:
         s64 m_currValue;

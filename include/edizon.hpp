@@ -5,6 +5,8 @@
 
 #include "edz_types.hpp"
 
+#include "helpers/lang_entry.hpp"
+
 #define DEBUG_PRINT(x, ...) (printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__))
 
 /* || EDIZON COMPILE TIME SETTINGS || */
