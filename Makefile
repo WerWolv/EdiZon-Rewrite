@@ -55,7 +55,7 @@ TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
 SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat
-INCLUDES	:=	include libs/json/include
+INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python
 DATA		:=	data
 ROMFS		:=	romfs
 
@@ -83,13 +83,13 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx -lstdc++fs -lturbojpeg
+LIBS	:= -lpython3.8m -lnx -lstdc++fs -lturbojpeg -lz
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) ./libs/json
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
 
 export BOREALIS_PATH := ./libs/borealis
 include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
@@ -105,14 +105,14 @@ export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/EdiZon
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+CFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+BINFILES		:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C

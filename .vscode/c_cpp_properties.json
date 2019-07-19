@@ -10,7 +10,8 @@
                 "C:/devkitPro/portlibs/switch/include/freetype2/**",
                 "./include/**",
                 "./libs/borealis/library/include/**",
-                "./libs/json/include"
+                "./libs/json/include",
+                "./libs/libpython/include"
             ],
             "defines": [
                 "SWITCH",
@@ -31,7 +32,8 @@
                 "/opt/devkitpro/portlibs/switch/include/**",
                 "./include/**",
                 "./libs/borealis/library/include/**",
-                "./libs/json/include"
+                "./libs/json/include",
+                "./libs/libpython/include"
             ],
             "defines": [
                 "SWITCH",
