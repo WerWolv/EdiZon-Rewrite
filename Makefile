@@ -54,8 +54,9 @@ endif
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat
-INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python
+SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat libs/lua libs/mruby/src libs/quickjs
+INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/quickjs
+EXCLUDES	:=	onelua.c lua.c
 DATA		:=	data
 ROMFS		:=	romfs
 
@@ -109,7 +110,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))))
 CPPFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES		:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))

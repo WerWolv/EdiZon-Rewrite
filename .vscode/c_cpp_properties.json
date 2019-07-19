@@ -11,7 +11,10 @@
                 "./include/**",
                 "./libs/borealis/library/include/**",
                 "./libs/json/include",
-                "./libs/libpython/include"
+                "./libs/libpython/include",
+                "./libs/lua",
+                "./libs/mruby/include",
+                "./libs/quickjs"
             ],
             "defines": [
                 "SWITCH",
@@ -33,7 +36,10 @@
                 "./include/**",
                 "./libs/borealis/library/include/**",
                 "./libs/json/include",
-                "./libs/libpython/include"
+                "./libs/libpython/include",
+                "./libs/lua",
+                "./libs/mruby/include",
+                "./libs/quickjs"
             ],
             "defines": [
                 "SWITCH",
