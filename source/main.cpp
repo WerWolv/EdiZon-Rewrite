@@ -11,9 +11,9 @@
 #include "cheat/cheat.hpp"
 #include "helpers/utils.hpp"
 #include "save/edit/config.hpp"
+#include "save/edit/script/script.hpp"
 #include "helpers/lang_entry.hpp"
 
-Service *fsService;
 
 void initServices() {
     // Network sockets
@@ -41,6 +41,9 @@ void initServices() {
 
     // Controller LED
     edz::helper::controllerLEDInitialize();
+
+    // UI (Borealis)
+    Application::init(StyleEnum::ACCURATE);
 }
 
 void exitServices() {
@@ -53,12 +56,13 @@ void exitServices() {
     clkrstExit();
     romfsExit();
     setExit();
+    Application::quit();
 }
+
 
 u8 *buffer = nullptr; 
 size_t titleIconSize;
 void initInterface() {
-    Application::init(StyleEnum::ACCURATE);
 
     TabFrame *rootFrame = new TabFrame();
     rootFrame->setTitle("EdiZon");
@@ -100,15 +104,19 @@ int main(int argc, char* argv[]) {
     void *haddr;
     extern char *fake_heap_end;
     
-    // Setup Heap for swkbd on applets
-    Result rc = svcSetHeapSize(&haddr, 0x10000000);
-    if (R_FAILED(rc))
-        fatalSimple(0xDEAD);
-    fake_heap_end = (char*) haddr + 0x10000000;
-
     initServices();
-    initInterface();
-    nxlinkStdio();
+
+    // Setup Heap for swkbd on applets
+    // If this fails, something's messed up with the hb environment. Applets and probably other things will not work, abort.
+    if (edz::EResult(svcSetHeapSize(&haddr, 0x10000000)).failed()) {
+        Application::crash(edz::LangEntry("edz.error.heap").get());
+        while(Application::mainLoop());
+        exitServices();
+
+        return 0;
+    }
+
+    fake_heap_end = (char*) haddr + 0x10000000;
 
     while(Application::mainLoop());
     

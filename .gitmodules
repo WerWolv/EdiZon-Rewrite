@@ -4,3 +4,9 @@
 [submodule "libs/json"]
 	path = libs/json
 	url = https://github.com/nlohmann/json
+[submodule "libs/lua"]
+	path = libs/lua
+	url = https://github.com/lua/lua
+[submodule "libs/mruby"]
+	path = libs/mruby
+	url = https://github.com/mruby/mruby

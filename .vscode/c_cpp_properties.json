@@ -13,8 +13,7 @@
                 "./libs/json/include",
                 "./libs/libpython/include",
                 "./libs/lua",
-                "./libs/mruby/include",
-                "./libs/quickjs"
+                "./libs/mruby/include"
             ],
             "defines": [
                 "SWITCH",
@@ -38,8 +37,7 @@
                 "./libs/json/include",
                 "./libs/libpython/include",
                 "./libs/lua",
-                "./libs/mruby/include",
-                "./libs/quickjs"
+                "./libs/mruby/include"
             ],
             "defines": [
                 "SWITCH",

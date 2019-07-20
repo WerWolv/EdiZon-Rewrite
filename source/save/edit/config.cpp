@@ -22,17 +22,17 @@ using json = nlohmann::json;
 
 namespace edz::save::edit {
 
-    std::shared_ptr<widget::Arg> jsonToArg(json::value_type jsonValue) {
+    std::shared_ptr<widget::Arg> jsonToArg(std::string argName, json::value_type jsonValue) {
         std::shared_ptr<widget::Arg> ret = nullptr;
 
         if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
-            ret = widget::Arg::create(jsonValue.get<s64>());
+            ret = widget::Arg::create(argName, jsonValue.get<s64>());
         else if (jsonValue.type() == json::value_t::number_float)
-            ret = widget::Arg::create(jsonValue.get<double>());
+            ret = widget::Arg::create(argName, jsonValue.get<double>());
         else if (jsonValue.type() == json::value_t::boolean)
-            ret = widget::Arg::create(jsonValue.get<bool>());
+            ret = widget::Arg::create(argName, jsonValue.get<bool>());
         else if (jsonValue.type() == json::value_t::string)
-            ret = widget::Arg::create(jsonValue.get<std::string>());
+            ret = widget::Arg::create(argName, jsonValue.get<std::string>());
 
         return ret;
     }
@@ -195,8 +195,8 @@ DEBUG_PRINT();
 
                 // onValue and offValue type have to be equal here, only checking one
 
-                onValue = jsonToArg(widgetDescription["onValue"]);
-                offValue = jsonToArg(widgetDescription["offValue"]);
+                onValue = jsonToArg("onValue", widgetDescription["onValue"]);
+                offValue = jsonToArg("offValue", widgetDescription["offValue"]);
 
                 widget = new widget::WidgetBoolean(itemDescription["name"], onValue, offValue);
 
@@ -216,7 +216,7 @@ DEBUG_PRINT();
                 std::vector<std::shared_ptr<widget::Arg>> values;
 
                 for (auto value : widgetDescription["values"])
-                    values.push_back(jsonToArg(value));
+                    values.push_back(jsonToArg("value", value));
                 
                 widget = new widget::WidgetList(itemDescription["name"], keys, values);
             }
@@ -242,13 +242,13 @@ DEBUG_PRINT();
                     std::shared_ptr<widget::Arg> argument;
 
                     if (value.type() == json::value_t::number_integer || value.type() == json::value_t::number_unsigned)
-                        argument = widget::Arg::create(value.get<s128>());
+                        argument = widget::Arg::create(name, value.get<s128>());
                     else if (value.type() == json::value_t::number_float)
-                        argument = widget::Arg::create(value.get<double>());
+                        argument = widget::Arg::create(name, value.get<double>());
                     else if (value.type() == json::value_t::boolean)
-                        argument = widget::Arg::create(value.get<bool>());
+                        argument = widget::Arg::create(name, value.get<bool>());
                     else if (value.type() == json::value_t::string)
-                        argument = widget::Arg::create(value.get<std::string>());
+                        argument = widget::Arg::create(name, value.get<std::string>());
                     else continue;
 
                     widget->addArgument(name, argument);

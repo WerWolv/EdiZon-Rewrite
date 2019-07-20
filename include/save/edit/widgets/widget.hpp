@@ -23,49 +23,46 @@ namespace edz::save::edit::widget {
     class Arg {
     public:
         template <typename T>
-        static std::shared_ptr<widget::Arg> create(T value) {
+        static std::shared_ptr<widget::Arg> create(std::string name, T value) {
             std::shared_ptr<widget::Arg> ret = std::make_shared<Arg>();
 
             if constexpr (std::is_integral<T>::value) {
-                ret->intArg.value = value;
+                ret->intArg = value;
                 ret->type = ArgumentType::INTEGER;
             }
             else if constexpr (std::is_floating_point<T>::value) {
-                ret->floatArg.value = value;
+                ret->floatArg = value;
                 ret->type = ArgumentType::FLOAT;
             }
             else if constexpr (std::is_same<T, bool>::value) {
-                ret->boolArg.value = value;
+                ret->boolArg = value;
                 ret->type = ArgumentType::BOOLEAN;
             }
             else if constexpr (std::is_same<T, std::string>::value) {
-                ret->stringArg.value = value;
+                ret->stringArg = value;
                 ret->type = ArgumentType::STRING;
             }
+
+            ret->name = name;
 
             return ret;
         }
 
-    private:
         enum class ArgumentType {
+            INVALID,
             INTEGER,
             FLOAT,
             BOOLEAN,
             STRING
         };
 
-        template<typename T>
-        struct Argument{
-            std::string argName;
-            T value;
-        };
+        s128 intArg = 0;
+        double floatArg = 0;
+        bool boolArg = false;
+        std::string stringArg;
 
-        Argument<s128> intArg;
-        Argument<double> floatArg;
-        Argument<bool> boolArg;
-        Argument<std::string> stringArg;
-
-        ArgumentType type;
+        ArgumentType type = ArgumentType::INVALID;
+        std::string name;
     };
 
 
