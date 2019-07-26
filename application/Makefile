@@ -93,7 +93,7 @@ LIBS	:= -lpython3.8m -lnx -lstdc++fs -lturbojpeg -lz
 LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
 
 export BOREALIS_PATH := libs/borealis
-include $(CURDIR)/$(BOREALIS_PATH)/library/borealis.mk
+include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
