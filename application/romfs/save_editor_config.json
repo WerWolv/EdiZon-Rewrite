@@ -91,6 +91,18 @@
                         "keys" : [ "Value 1", "Value 2", "Value 3", "Value 4"],
                         "values" : [ 555, 1337, 69, 420 ]
                     }
+                },
+                {
+                    "name" : "Progress bar",
+                    "infoText" : "This is a sample progress bar",
+                    "category" : "Category 3",
+                    "arguments" : {
+                        "testA" : true,
+                        "testB" : false
+                    },
+                    "widget" : {
+                        "type" : "progress"
+                    }
                 }
             ]
         }

@@ -30,8 +30,8 @@ void initServices() {
     pctlInitialize();
 
     // Overclock
-    pcvInitialize();
-    clkrstInitialize();
+    //pcvInitialize();
+    //clkrstInitialize();
 
     // RomFS for guide and localization
     romfsInit();
@@ -75,23 +75,22 @@ void initInterface() {
         titleItem->setValue(ss.str(), true, true);
         titleList->addView(titleItem);
     }*/
-
-    edz::save::Title *title1;
-    edz::save::Account *acc1;
-
-    for (auto &[tid, title] : edz::save::SaveFileSystem::getAllTitles()) {
-        title1 = title;
-        break;
-    }
-
-    for (auto &[tid, acc] : edz::save::SaveFileSystem::getAllAccounts()) {
-        acc1 = acc;
-        break;
-    }
     
-    edz::save::edit::Config config(title1, acc1);
+    //edz::save::edit::Config config(nullptr, nullptr);
 
-    config.createUI(rootFrame);
+    //config.createUI(rootFrame);
+    List *list = new List();
+
+    ListItem *item = new ListItem("TX service running", std::to_string(edz::helper::isServiceRunning("tx")));
+    ListItem *item2 = new ListItem("Run TX service");
+    item2->setClickListener([](View* view){ 
+        Handle handle;
+        smRegisterService(&handle, "tx", false, 1);
+     });
+
+     list->addView(item);
+     list->addView(item2);
+     rootFrame->addTab("Test", list);
 
     Application::pushView(rootFrame);
 }
@@ -115,6 +114,8 @@ int main(int argc, char* argv[]) {
 
         return 0;
     }
+
+    initInterface();
 
     fake_heap_end = (char*) haddr + 0x10000000;
 
