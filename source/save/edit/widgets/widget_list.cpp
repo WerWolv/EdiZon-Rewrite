@@ -24,7 +24,7 @@ namespace edz::save::edit::widget {
             listItem->setValue(this->m_displayStrings[this->m_currValue]);
 
             listItem->setClickListener([&](View *view){
-                SelectView::open(this->m_name, this->m_displayStrings, [&](s32 selectedItem){
+                Dropdown::open(this->m_name, this->m_displayStrings, [&](s32 selectedItem){
                     if (selectedItem == -1) return;
 
                     this->m_currValue = selectedItem;
