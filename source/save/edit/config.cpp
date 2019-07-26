@@ -224,7 +224,7 @@ DEBUG_PRINT();
 
             }
             else if (widgetDescription["type"] == "progress") {
-
+                widget = new widget::WidgetProgressbar(itemDescription["name"]);
             }
             else if (widgetDescription["type"] == "comment") {
                 if (widgetDescription["comment"].type() != json::value_t::string) continue;

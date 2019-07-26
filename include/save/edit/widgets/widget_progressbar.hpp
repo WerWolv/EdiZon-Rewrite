@@ -14,7 +14,7 @@ namespace edz::save::edit::widget {
         View* getView();
 
     private:
-
+        u8 m_progress;
     };
 
 }
