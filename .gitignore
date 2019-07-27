@@ -1,2 +1,5 @@
-build/
-out/
+application/build/
+application/out/
+
+sysmodule/build/
+sysmodule/out/
