@@ -1,12 +1,15 @@
-[submodule "libs/borealis"]
+[submodule "application/libs/borealis"]
 	path = application/libs/borealis
 	url = https://github.com/natinusala/borealis
-[submodule "libs/json"]
+[submodule "application/libs/json"]
 	path = application/libs/json
 	url = https://github.com/nlohmann/json
-[submodule "libs/lua"]
+[submodule "application/libs/lua"]
 	path = application/libs/lua
 	url = https://github.com/lua/lua
-[submodule "libs/mruby"]
+[submodule "application/libs/mruby"]
 	path = application/libs/mruby
 	url = https://github.com/mruby/mruby
+[submodule "application/libs/zipper"]
+	path = application/libs/zipper
+	url = https://github.com/sebastiandev/zipper
