@@ -22,6 +22,7 @@ namespace edz::helper {
         void copyFrom(std::string oldPath);
 
         void removeFolder();
+        void createDirectories();
 
         std::map<std::string, File> getFiles();
         std::map<std::string, Folder> getFolders();

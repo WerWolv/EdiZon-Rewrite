@@ -14,11 +14,14 @@ namespace edz::helper {
         ~File();
 
         std::string fileName();
-        std::string path();
+        std::string filePath();
+        std::string basePath();
+
         size_t fileSize();
 
         void removeFile();
         void copyTo(std::string path);
+        void createDirectories();
 
         bool valid();
 

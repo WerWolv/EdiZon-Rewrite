@@ -1,5 +1,8 @@
 #include "helpers/file.hpp"
 
+#include <cstring>
+#include <helpers/folder.hpp>
+
 namespace edz::helper {
         File::File(std::string filePath) : m_filePath(filePath) {
             this->m_file = nullptr;
@@ -19,8 +22,12 @@ namespace edz::helper {
             return std::filesystem::path(this->m_filePath).filename();
         }
 
-        std::string File::path() {
+        std::string File::filePath() {
             return this->m_filePath;
+        }
+
+        std::string File::basePath() {
+            return std::filesystem::path(this->m_filePath).parent_path();
         }
 
         size_t File::fileSize() {
@@ -63,6 +70,12 @@ namespace edz::helper {
 
             closeFile();
             fclose(dst);
+        }
+
+        void File::createDirectories() {
+            Folder folder(this->basePath());
+
+            folder.createDirectories();
         }
 
         bool File::valid() {

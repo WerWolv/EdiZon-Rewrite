@@ -97,6 +97,18 @@ namespace edz::helper {
         closeDirectory();
     }
 
+    void Folder::createDirectories() {
+        std::vector<char> path(this->m_path.c_str(), this->m_path.c_str() + this->m_path.size() + 1);
+        
+        for (u8 i = 0; i < path.size(); i++) {
+            if (path[i] != '/') continue;
+
+            path[i] = '\0';
+            mkdir(&path[0], 0777);
+            path[i] = '/';
+        }
+    }
+
 
     std::map<std::string, File> Folder::getFiles() {
         struct dirent *entry;
