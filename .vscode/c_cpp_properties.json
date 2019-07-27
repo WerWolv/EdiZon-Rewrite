@@ -8,12 +8,12 @@
                 "C:/devkitPro/libnx/include/**",
                 "C:/devkitPro/portlibs/switch/include/**",
                 "C:/devkitPro/portlibs/switch/include/freetype2/**",
-                "./include/**",
-                "./libs/borealis/library/include/**",
-                "./libs/json/include",
-                "./libs/libpython/include",
-                "./libs/lua",
-                "./libs/mruby/include"
+                "./application/include/**",
+                "./application/libs/borealis/library/include/**",
+                "./application/libs/json/include",
+                "./application/libs/libpython/include",
+                "./application/libs/lua",
+                "./application/libs/mruby/include"
             ],
             "defines": [
                 "SWITCH",
@@ -32,12 +32,12 @@
                 "/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/8.3.0/include/**",
                 "/opt/devkitpro/libnx/include/**",
                 "/opt/devkitpro/portlibs/switch/include/**",
-                "./include/**",
-                "./libs/borealis/library/include/**",
-                "./libs/json/include",
-                "./libs/libpython/include",
-                "./libs/lua",
-                "./libs/mruby/include"
+                "./application/include/**",
+                "./application/libs/borealis/library/include/**",
+                "./application/libs/json/include",
+                "./application/libs/libpython/include",
+                "./application/libs/lua",
+                "./application/libs/mruby/include"
             ],
             "defines": [
                 "SWITCH",
