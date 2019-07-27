@@ -54,8 +54,8 @@ endif
 TARGET		:=	EdiZon
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat libs/lua libs/mruby/src libs/quickjs
-INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/quickjs
+SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat libs/lua libs/mruby/src
+INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include
 EXCLUDES	:=	onelua.c lua.c
 DATA		:=	data
 ROMFS		:=	romfs
@@ -84,7 +84,7 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lpython3.8m -lnx -lstdc++fs -lturbojpeg -lz
+LIBS	:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lminizip -lstdc++fs -lturbojpeg
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -182,7 +182,7 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean all install
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(ROMFS)
