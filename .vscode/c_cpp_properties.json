@@ -13,7 +13,10 @@
                 "./application/libs/json/include",
                 "./application/libs/libpython/include",
                 "./application/libs/lua",
-                "./application/libs/mruby/include"
+                "./application/libs/mruby/include",
+                "./application/libs/zipper/zipper",
+                "./sysmodule/include/**",
+                "./sysmodule/libs/libstratosphere/include"
             ],
             "defines": [
                 "SWITCH",
@@ -37,7 +40,10 @@
                 "./application/libs/json/include",
                 "./application/libs/libpython/include",
                 "./application/libs/lua",
-                "./application/libs/mruby/include"
+                "./application/libs/mruby/include",
+                "./application/libs/zipper/zipper",
+                "./sysmodule/include/**",
+                "./sysmodule/libs/libstratosphere/include"
             ],
             "defines": [
                 "SWITCH",
