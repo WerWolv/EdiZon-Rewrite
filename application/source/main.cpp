@@ -13,12 +13,19 @@
 #include "save/edit/config.hpp"
 #include "save/edit/script/script.hpp"
 #include "helpers/lang_entry.hpp"
+#include "helpers/curl.hpp"
+#include <zipper.h>
+#include <unzipper.h>
+#include <fstream>
 
 
 void initServices() {
     // Network sockets
     socketInitializeDefault();
     
+    // Curl
+    curl_global_init(CURL_GLOBAL_ALL);
+
     // Title querying
     ncmInitialize();
     nsInitialize();
@@ -30,8 +37,8 @@ void initServices() {
     pctlInitialize();
 
     // Overclock
-    //pcvInitialize();
-    //clkrstInitialize();
+    pcvInitialize();
+    clkrstInitialize();
 
     // RomFS for guide and localization
     romfsInit();
@@ -44,10 +51,13 @@ void initServices() {
 
     // UI (Borealis)
     Application::init(StyleEnum::ACCURATE);
+        nxlinkStdio();
+
 }
 
 void exitServices() {
     socketExit();
+    curl_global_cleanup();
     ncmExit();
     nsExit();
     accountExit();
@@ -79,18 +89,6 @@ void initInterface() {
     //edz::save::edit::Config config(nullptr, nullptr);
 
     //config.createUI(rootFrame);
-    List *list = new List();
-
-    ListItem *item = new ListItem("TX service running", std::to_string(edz::helper::isServiceRunning("tx")));
-    ListItem *item2 = new ListItem("Run TX service");
-    item2->setClickListener([](View* view){ 
-        Handle handle;
-        smRegisterService(&handle, "tx", false, 1);
-     });
-
-     list->addView(item);
-     list->addView(item2);
-     rootFrame->addTab("Test", list);
 
     Application::pushView(rootFrame);
 }
@@ -104,6 +102,7 @@ int main(int argc, char* argv[]) {
     extern char *fake_heap_end;
     
     initServices();
+    initInterface();
 
     // Setup Heap for swkbd on applets
     // If this fails, something's messed up with the hb environment. Applets and probably other things will not work, abort.
@@ -115,9 +114,8 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    initInterface();
-
     fake_heap_end = (char*) haddr + 0x10000000;
+
 
     while(Application::mainLoop());
     
