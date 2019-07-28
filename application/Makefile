@@ -51,46 +51,47 @@ else
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 endif
 
-TARGET		:=	EdiZon
-OUTDIR		:=	out
-BUILD		:=	build
-SOURCES		:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat libs/lua libs/mruby/src
-INCLUDES	:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include
-EXCLUDES	:=	onelua.c lua.c
-DATA		:=	data
-ROMFS		:=	romfs
+TARGET			:=	EdiZon
+OUTDIR			:=	out
+BUILD			:=	build
+SOURCES			:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat libs/lua libs/mruby/src libs/zipper/zipper libs/zipper/minizip
+INCLUDES		:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/zipper/zipper libs/zipper/minizip
+EXT_INCLUDES	:=  
+EXCLUDES		:=	onelua.c lua.c iowin32.c minizip.c miniunz.c
+DATA			:=	data
+ROMFS			:=	romfs
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+ARCH		:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-null      :=
-SPACE     := $(null) $(null)
+null      	:=
+SPACE     	:= $(null) $(null)
 
+DEFINES 	+= -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES) 				 \
-			-DWINDOW_NAME=\"EdiZon\"		 \
-			-DVERSION_MAJOR=${VERSION_MAJOR} \
-			-DVERSION_MINOR=${VERSION_MINOR} \
-			-DVERSION_MICRO=${VERSION_MICRO} \
-			-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
-
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
+				$(ARCH) $(DEFINES) 				 \
+				-DWINDOW_NAME=\"EdiZon\"		 \
+				-DVERSION_MAJOR=${VERSION_MAJOR} \
+				-DVERSION_MINOR=${VERSION_MINOR} \
+				-DVERSION_MICRO=${VERSION_MICRO} \
+				-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\" \
+				$(INCLUDE) $(EXT_INCLUDE) -D__SWITCH__
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS		:=	-g $(ARCH)
+LDFLAGS		:=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lminizip -lstdc++fs -lturbojpeg
+LIBS		:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lstdc++fs -lturbojpeg
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
+LIBDIRS		:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
 
 export BOREALIS_PATH := libs/borealis
 include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
@@ -134,24 +135,13 @@ export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 export OFILES 		:=	$(OFILES_BIN) $(OFILES_SRC)
 export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+						$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+						-I$(CURDIR)/$(BUILD)
+
+export EXT_INCLUDE	:=	$(foreach dir,$(EXT_INCLUDES),-I$(dir))
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-ifeq ($(strip $(CONFIG_JSON)),)
-	jsons := $(wildcard *.json)
-	ifneq (,$(findstring $(TARGET).json,$(jsons)))
-		export APP_JSON := $(TOPDIR)/$(TARGET).json
-	else
-		ifneq (,$(findstring config.json,$(jsons)))
-			export APP_JSON := $(TOPDIR)/config.json
-		endif
-	endif
-else
-	export APP_JSON := $(TOPDIR)/$(CONFIG_JSON)
-endif
 
 ifeq ($(strip $(ICON)),)
 	icons := $(wildcard *.jpg)
@@ -168,14 +158,6 @@ endif
 
 ifeq ($(strip $(NO_ICON)),)
 	export NROFLAGS += --icon=$(APP_ICON)
-endif
-
-ifeq ($(strip $(NO_NACP)),)
-	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/EdiZon.nacp
-endif
-
-ifneq ($(APP_TITLEID),)
-	export NACPFLAGS += --titleid=$(APP_TITLEID)
 endif
 
 ifneq ($(ROMFS),)
@@ -210,25 +192,9 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-ifeq ($(strip $(APP_JSON)),)
-
 all	:	$(OUTPUT).nro
 
-ifeq ($(strip $(NO_NACP)),)
-$(OUTPUT).nro	:	$(OUTPUT).elf $(OUTPUT).nacp
-else
 $(OUTPUT).nro	:	$(OUTPUT).elf
-endif
-
-else
-
-all	:	$(OUTPUT).nsp
-
-$(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
-
-$(OUTPUT).nso	:	$(OUTPUT).elf
-
-endif
 
 $(OUTPUT).elf	:	$(OFILES)
 
