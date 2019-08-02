@@ -1,6 +1,7 @@
 {
     "edz.name" : "EdiZon",
-    "edz.dev" : "Ac_K",
+    "edz.dev" : "WerWolv",
+    "edz.translator" : "Ac_K",
 
     "edz.widget.integer.title" : "Entrer une valeur",
     "edz.widget.integer.subtitle" : "Cela va être la nouvelle valeur de l'élément.",
