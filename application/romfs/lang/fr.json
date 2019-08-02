@@ -7,8 +7,8 @@
     "edz.widget.integer.subtitle" : "Cela va être la nouvelle valeur de l'élément.",
     "edz.widget.string.title" : "Entrer du texte",
     "edz.widget.string.subtitle" : "Cela va être le nouveau texte de l'élément.",
-    "edz.widget.boolean.on" : "On",
-    "edz.widget.boolean.off" : "Off",
+    "edz.widget.boolean.on" : "Oui",
+    "edz.widget.boolean.off" : "Non",
 
     "edz.error.heap" : "Une erreur s'est produite lors de la configuration mémoire."
 }
