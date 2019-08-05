@@ -40,9 +40,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source source/overlay libs/libstratosphere/source
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include libs/libstratosphere/include libs/stb
 #ROMFS	:=	romfs
 
 #---------------------------------------------------------------------------------
@@ -50,17 +50,17 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
+CFLAGS	:=	-g -Wall -Og -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2
 
-CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions
+CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx
+LIBS	:= -lnx `freetype-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -156,7 +156,7 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean all install
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)
@@ -169,6 +169,10 @@ $(BUILD):
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(OUTDIR)
+
+#---------------------------------------------------------------------------------
+install: all
+	@lftp -e "cd atmosphere;cd titles;cd 0100000000ED1504;put ./out/exefs.nsp;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

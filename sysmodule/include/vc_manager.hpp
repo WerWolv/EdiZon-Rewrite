@@ -10,18 +10,18 @@
 
 namespace edz::vc {
 
-    class EdzVCManager {
+    class VirtualControllerManager {
     public:  
-        static EdzVCManager& getInstance() {
-            static EdzVCManager instance;
+        static VirtualControllerManager& getInstance() {
+            static VirtualControllerManager instance;
             
             return instance;
         }
 
-        EdzVCManager(EdzVCManager const&) = delete;
-        void operator=(EdzVCManager const&) = delete;
+        VirtualControllerManager(VirtualControllerManager const&) = delete;
+        void operator=(VirtualControllerManager const&) = delete;
         
-        void process();
+        void process(u64 kDown);
         
         bool isVCConnected();
         EResult connectVC(u64 bodyColor, u64 buttonColor);
@@ -36,12 +36,13 @@ namespace edz::vc {
         EResult clearVCFrames(VirtualControllerButtonID vcButtonID);
 
     private:
-        EdzVCManager();
-        ~EdzVCManager();
+        VirtualControllerManager();
+        ~VirtualControllerManager();
 
         std::map<u64, VirtualControllerButtonID> m_buttonIDs;
         std::map<VirtualControllerButtonID, std::vector<VirtualControllerFrame>> m_vcPlaybacks;
 
         Mutex m_btnMutex;
+        u64 m_hldsHandle;
     };
 }
