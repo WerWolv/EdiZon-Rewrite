@@ -5,7 +5,7 @@
 
 namespace edz::vc {
     
-    typedef u32 VirtualControllerButtonID;
+    using VirtualControllerButtonID = u32;
 
     enum class VirtualControllerAction {
         PAUSE,

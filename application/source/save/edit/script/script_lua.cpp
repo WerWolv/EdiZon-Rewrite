@@ -2,7 +2,7 @@
 
 namespace edz::save::edit {
 
-    typedef int (ScriptLua::*mem_func)(lua_State *s);
+    using mem_func = int (ScriptLua::*)(lua_State *s);
     template <mem_func func>
     int dispatch(lua_State *s) {
         ScriptLua *ptr = *static_cast<ScriptLua**>(lua_getextraspace(s));

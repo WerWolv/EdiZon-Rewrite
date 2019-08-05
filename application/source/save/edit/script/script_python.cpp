@@ -2,7 +2,7 @@
 
 namespace edz::save::edit {
 
-    typedef PyObject *(ScriptPython::*mem_func)(PyObject *, PyObject *);
+    using mem_func = PyObject* (ScriptPython::*)(PyObject *, PyObject *);
     template <mem_func func>
     PyObject *dispatch(PyObject *self, PyObject *args) {
         ScriptPython *ptr = *reinterpret_cast<ScriptPython**>(&python_extraspace);

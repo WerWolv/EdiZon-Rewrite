@@ -42,7 +42,7 @@ template<typename T>
 inline constexpr bool has_alpha_v = has_alpha<T>::value;
 
 template<typename T>
-struct col_underlying_type { typedef decltype(T::r) type; };
+struct col_underlying_type { using type = decltype(T::r); };
 
 template<typename T>
 using col_underlying_type_t = typename col_underlying_type<T>::type;
