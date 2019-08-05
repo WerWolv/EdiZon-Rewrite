@@ -9,5 +9,5 @@
     "edz.widget.boolean.on" : "On",
     "edz.widget.boolean.off" : "Off",
 
-    "edz.error.heap" : "An error occured during heap setup."
+    "edz.error.heap" : "An error occurred during heap setup."
 }

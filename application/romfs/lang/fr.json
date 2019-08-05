@@ -1,13 +1,14 @@
 {
     "edz.name" : "EdiZon",
     "edz.dev" : "WerWolv",
+    "edz.translator" : "Ac_K",
 
-    "edz.widget.integer.title" : "Enter a value",
-    "edz.widget.integer.subtitle" : "This will be the new value for this property.",
-    "edz.widget.string.title" : "Enter some text",
-    "edz.widget.string.subtitle" : "This will be the new text for this property.",
-    "edz.widget.boolean.on" : "On",
-    "edz.widget.boolean.off" : "Off",
+    "edz.widget.integer.title" : "Entrer une valeur",
+    "edz.widget.integer.subtitle" : "Cela va être la nouvelle valeur de l'élément.",
+    "edz.widget.string.title" : "Entrer du texte",
+    "edz.widget.string.subtitle" : "Cela va être le nouveau texte de l'élément.",
+    "edz.widget.boolean.on" : "Oui",
+    "edz.widget.boolean.off" : "Non",
 
-    "edz.error.heap" : "An error occured during heap setup."
+    "edz.error.heap" : "Une erreur s'est produite lors de la configuration mémoire."
 }
