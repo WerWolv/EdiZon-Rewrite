@@ -25,6 +25,8 @@ namespace edz::save {
         bool isInstalled();
         bool hasSaveFile();
 
+        bool isRunning();
+
         void getIcon(u8 *buffer, size_t bufferSize);
         size_t getIconSize();
 

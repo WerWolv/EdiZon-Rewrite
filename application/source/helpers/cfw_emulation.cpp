@@ -8,25 +8,19 @@ namespace edz::helper {
         CFW operator|(CFW l, CFW r) {
             return static_cast<CFW>(static_cast<u8>(l) | static_cast<u8>(r));
         }
-
-        CFW getEmulatableCFWs() {
-            // ReiNX has both the rnx and tx servoce running already. Since those shouldn't be killed, CFW emulation cannot be used here
-            if (isOnRNX())
-                return CFW::RNX;
-
-            // SXOS has only the tx service running an can therefor at least emulate ReiNX
-            if (isOnSXOS())
-                return CFW::SXOS | CFW::RNX;
-
-            // Atmosphere has neither the rnx nor the tx service running and can therefor emulate ReiNX and SXOS
-            if (isOnAMS())
-                return CFW::AMS | CFW::RNX | CFW::SXOS;
-
-            return CFW::NONE;
+        /*
+                    Not emulated        Emulated
+            AMS         edz                - 
+            RNX     rnx, tx             rnx, tx
+            SX      tx                    tx
+        */
+        bool canEmulateCFW() {
+            // This feature is based on being able to launch the rnx and tx service. Since one or more of them are present on non-atmosphere, this is only supported on atmosphere
+            return isServiceRunning("edz");
         }
 
         void emulate(CFW cfw) {
-            if ((getEmulatableCFWs() | cfw) == CFW::NONE) return;
+            if (!canEmulateCFW()) return;
 
 
 

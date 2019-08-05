@@ -22,7 +22,7 @@
 void initServices() {
     // Network sockets
     socketInitializeDefault();
-    
+
     // Curl
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -51,7 +51,6 @@ void initServices() {
 
     // UI (Borealis)
     Application::init(StyleEnum::ACCURATE);
-        nxlinkStdio();
 
 }
 
@@ -74,8 +73,18 @@ u8 *buffer = nullptr;
 size_t titleIconSize;
 void initInterface() {
 
-    TabFrame *rootFrame = new TabFrame();
+    AppletFrame *rootFrame = new AppletFrame(false, false);
     rootFrame->setTitle("EdiZon");
+
+    BoxLayout *box = new BoxLayout(BoxLayoutOrientation::VERTICAL);
+
+    for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
+        u8 buffer[title->getIconSize()];
+        title->getIcon(buffer, sizeof(buffer));
+        Image *image = new Image(buffer, sizeof(buffer));
+        image->setImageScaleType(ImageScaleType::VIEW_RESIZE);
+        box->addView(box);
+    }
 
     /*std::stringstream ss;
     for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
@@ -100,26 +109,28 @@ void initInterface() {
 int main(int argc, char* argv[]) {
     void *haddr;
     extern char *fake_heap_end;
+
+    printf("Adasdasda\n");
     
     initServices();
     initInterface();
 
     // Setup Heap for swkbd on applets
     // If this fails, something's messed up with the hb environment. Applets and probably other things will not work, abort.
-    if (edz::EResult(svcSetHeapSize(&haddr, 0x10000000)).failed()) {
+    /*if (edz::EResult(svcSetHeapSize(&haddr, 0x10000000)).failed()) {
         Application::crash(edz::LangEntry("edz.error.heap").get());
         while(Application::mainLoop());
         exitServices();
 
         return 0;
-    }
+    }*/
 
-    fake_heap_end = (char*) haddr + 0x10000000;
+    //fake_heap_end = (char*) haddr + 0x10000000;
 
 
     while(Application::mainLoop());
     
     exitServices();
 
-    svcSetHeapSize(&haddr, ((u8*) envGetHeapOverrideAddr() + envGetHeapOverrideSize()) - (u8*) haddr); // clean up the heap
+    //svcSetHeapSize(&haddr, ((u8*) envGetHeapOverrideAddr() + envGetHeapOverrideSize()) - (u8*) haddr); // clean up the heap
 }

@@ -20,14 +20,23 @@ namespace edz::save {
                 return;
             }
 
-            accountGetProfile(&profile, userID);
-            accountProfileGet(&profile, &userData, &profileBase);
-            accountProfileGetImageSize(&profile, &this->m_userIconSize);
+            if (EResult(accountGetProfile(&profile, userID)).failed())
+                throw std::exception();
+            
+            if (EResult(accountProfileGet(&profile, &userData, &profileBase)).failed())
+                throw std::exception();
+
+            if (EResult(accountProfileGetImageSize(&profile, &this->m_userIconSize)).failed())
+                throw std::exception();
+
 
             this->m_nickname = std::string(profileBase.username);
 
             this->m_userIcon = new u8[this->m_userIconSize];
-            accountProfileLoadImage(&profile, this->m_userIcon, this->m_userIconSize, &this->m_userIconSize);
+            if (EResult(accountProfileLoadImage(&profile, this->m_userIcon, this->m_userIconSize, &this->m_userIconSize)).failed()) {
+                delete[] this->m_userIcon;
+                throw std::exception();
+            }
 
             accountProfileClose(&profile);
         }

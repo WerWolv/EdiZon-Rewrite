@@ -15,9 +15,14 @@ namespace edz::save {
 
         std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
 
-        nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize);
-        nsListApplicationContentMetaStatus(titleID, 0, &appContentMetaStatus, sizeof(NsApplicationContentMetaStatus), nullptr);
-        nacpGetLanguageEntry(&appControlData.nacp, &languageEntry);
+        if (EResult(nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
+            throw std::exception();
+            
+        if (EResult(nsListApplicationContentMetaStatus(titleID, 0, &appContentMetaStatus, sizeof(NsApplicationContentMetaStatus), nullptr)))
+            throw std::exception();
+
+        if (EResult(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry)))
+            throw std::exception();
 
         this->m_titleName = std::string(languageEntry->name);
         this->m_titleAuthor = std::string(languageEntry->author);
@@ -64,6 +69,21 @@ namespace edz::save {
 
     bool Title::hasSaveFile() {
         return this->getUserIDs().size() > 0;
+    }
+
+
+    bool Title::isRunning() {
+        static titleid_t runningTitleID = 0;
+
+        // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
+        if (runningTitleID == 0) {
+            u64 pid = 0;
+
+            pmdmntGetApplicationPid(&pid);
+            pminfoGetTitleId(&runningTitleID, pid);
+        }
+
+        return this->getID() == runningTitleID;
     }
 
 

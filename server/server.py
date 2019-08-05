@@ -74,7 +74,7 @@ if __name__ == "__main__":
     print(f"Starting EdiZon save file provider server on Port {PORT}...\n")
     print(f"{SERVER_NAME} : {MOTD}")
 
-    http_server = WSGIServer(('', PORT), app)
+    http_server = WSGIServer(('0.0.0.0', PORT), app)
 
     if not os.path.exists(SAVE_FILE_DIR):
         os.mkdir(SAVE_FILE_DIR)

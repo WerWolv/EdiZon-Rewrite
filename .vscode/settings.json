@@ -61,6 +61,8 @@
         "map": "cpp",
         "memory_resource": "cpp",
         "regex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "vi_shim.h": "c",
+        "switch.h": "c"
     }
 }

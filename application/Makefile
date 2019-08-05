@@ -164,6 +164,10 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
+ifeq ($(strip $(NO_NACP)),)
+	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/EdiZon.nacp
+endif
+
 .PHONY: $(BUILD) clean all install
 
 #---------------------------------------------------------------------------------
@@ -194,7 +198,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 all	:	$(OUTPUT).nro
 
-$(OUTPUT).nro	:	$(OUTPUT).elf
+$(OUTPUT).nro	:	$(OUTPUT).elf $(OUTPUT).nacp
 
 $(OUTPUT).elf	:	$(OFILES)
 

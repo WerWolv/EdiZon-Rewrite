@@ -26,6 +26,8 @@ namespace edz::save {
     private:
         static std::vector<FsSaveDataInfo> getTitleSaveFileData();
 
+        u16 m_openFileSystemID;
+
         FsFileSystem m_saveFileSystem;
         bool m_initialized = false;
     };

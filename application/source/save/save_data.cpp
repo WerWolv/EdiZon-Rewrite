@@ -3,11 +3,14 @@
 namespace edz::save {
 
     SaveFileSystem::SaveFileSystem(Title *title, Account *account) {
+        static u16 usedIDs = 0;
 
         if (R_FAILED(fsMount_SaveData(&this->m_saveFileSystem, title->getID(), account->getID())))
             return;
 
-        if (fsdevMountDevice(SAVE_DEVICE, this->m_saveFileSystem) == -1) {
+        this->m_openFileSystemID = usedIDs++;
+
+        if (fsdevMountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str(), this->m_saveFileSystem) == -1) {
             fsFsClose(&this->m_saveFileSystem);
             return;
         }
@@ -18,7 +21,7 @@ namespace edz::save {
     SaveFileSystem::~SaveFileSystem() {
         if (!this->m_initialized) return;
 
-        fsdevUnmountDevice(SAVE_DEVICE);
+        fsdevUnmountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
         fsFsClose(&this->m_saveFileSystem);
     }
 
@@ -31,23 +34,42 @@ namespace edz::save {
         NsApplicationRecord *appRecords = new NsApplicationRecord[1024]; // Nobody's going to have more than 1024 games hopefully...
         size_t actualAppRecordCnt = 0;
 
-        EResult rc = nsListApplicationRecord(appRecords, 1024, 0, &actualAppRecordCnt);
-        if (rc.failed()) {
+        if (EResult(nsListApplicationRecord(appRecords, 1024, 0, &actualAppRecordCnt)).failed()) {
             delete[] appRecords;
             return titles;  // Return empty titles map on error
         }
         
 
         // Get all installed games
-        for (u32 i = 0; i < actualAppRecordCnt; i++)
-            titles.insert({ appRecords[i].titleID, new Title(appRecords[i].titleID, true) });
+        for (u32 i = 0; i < actualAppRecordCnt; i++) {
+            Title *title = nullptr;
+
+            try {
+                title = new Title(appRecords[i].titleID, true);
+            } catch (std::exception e) {
+                continue;
+            } 
+
+            if (title != nullptr)
+                titles.insert({ appRecords[i].titleID, title });
+        }
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
             titleid_t &titleID = saveDataInfo.titleID;
 
             // Add titles that are not installed but still have a save file on the system
-            if (titles.find(titleID) == titles.end())
-                titles.insert({ titleID, new Title(titleID, false) });
+            if (titles.find(titleID) == titles.end()) {
+                Title *title = nullptr;
+
+                try {
+                    title = new Title(titleID, false);
+                } catch (std::exception e) {
+                    continue;
+                }
+
+                if (title != nullptr)
+                    titles.insert({ titleID, title });
+            }
 
             // Add what userIDs of all accounts that have a save file for this title
             titles[titleID]->addUser(saveDataInfo.userID);
@@ -66,36 +88,56 @@ namespace edz::save {
 
         s32 userCount;
         size_t actualUserCount;
-        if (R_FAILED(accountGetUserCount(&userCount)))
+        if (EResult(accountGetUserCount(&userCount)).failed())
             return accounts;    // Return empty accounts map on error
 
         userid_t userIDs[userCount];
-        if (R_FAILED(accountListAllUsers(userIDs, userCount, &actualUserCount)))
+        if (EResult(accountListAllUsers(userIDs, userCount, &actualUserCount)).failed())
             return accounts;    // Return empty accounts map on error
 
         // Get all existing accounts
-        for (userid_t userID : userIDs)
-            accounts.insert({userID, new Account(userID, true)});
+        for (userid_t userID : userIDs) {
+            Account *account = nullptr;
+
+            try {
+                account = new Account(userID, true);
+            } catch (std::exception e) {
+                continue;
+            }
+
+            if (account != nullptr)
+                accounts.insert({userID, account});
+        }
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
             userid_t &userID = saveDataInfo.userID;
 
             // Add accounts that don't exist on the system anymore but still have some save files stored
-            if (accounts.find(userID) == accounts.end())
-                accounts.insert({ userID, new Account(userID, false) });
+            if (accounts.find(userID) == accounts.end()) {
+                Account *account = nullptr;
+
+                try {
+                    account = new Account(userID, false);
+                } catch (std::exception e) {
+                    continue;
+                }
+
+                if (account != nullptr)
+                    accounts.insert({userID, account});
+            }
         }
 
         return accounts;
     }
 
     edz::helper::Folder SaveFileSystem::getSaveFolder() {
-        return edz::helper::Folder(SAVE_DEVICE ":");
+        return edz::helper::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":");
     }
 
     void SaveFileSystem::commit() {
         if (!this->m_initialized) return;
 
-        fsdevCommitDevice(SAVE_DEVICE);
+        fsdevCommitDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
     }
 
 
