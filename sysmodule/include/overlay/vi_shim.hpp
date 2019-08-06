@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2019 averne
  * Copyright (C) 2019 WerWolv
  * 
  * This file is part of EdiZon.
@@ -19,24 +20,6 @@
 
 #pragma once
 
-#include <edizon.hpp>
+#include <switch.h>
 
-#include "save/edit/widgets/widget.hpp"
-
-namespace edz::save::edit::widget {
-
-    class WidgetBoolean : public Widget {
-    public:
-        WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
-        ~WidgetBoolean();
-
-        WidgetType getWidgetType();
-        View* getView();
-
-    private:
-        bool m_state;
-        std::shared_ptr<widget::Arg> m_onValue;
-        std::shared_ptr<widget::Arg> m_offValue;
-    };
-
-}
+Result viDestroyManagedLayer(u64 layer_id);
