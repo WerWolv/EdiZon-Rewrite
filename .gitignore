@@ -1,5 +1,6 @@
 application/build/
 application/out/
+application/romfs/sysmodule
 
 sysmodule/build/
 sysmodule/out/

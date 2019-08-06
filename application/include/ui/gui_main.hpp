@@ -11,21 +11,15 @@ namespace edz::ui {
         ~GuiMain() { }
 
         View* setupUI() {
-            AppletFrame *rootFrame = new AppletFrame(false, false);
-
-            List *titleList = new List();
+            BoxLayout *rootFrame = new BoxLayout(BoxLayoutOrientation::VERTICAL);
 
             for (auto& [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
-                ListItem *item = new ListItem(title->getName());
                 u8 buffer[title->getIconSize()];
                 title->getIcon(buffer, sizeof(buffer));
 
-                item->setThumbnail(buffer, sizeof(buffer));
-                titleList->addView(item);
+                Image *image = new Image(buffer, sizeof(buffer));
+                rootFrame->addView(image, false);
             }
-
-            rootFrame->setTitle("EdiZon");
-            rootFrame->setContentView(titleList);
 
             return rootFrame;
         }

@@ -20,7 +20,7 @@ namespace edz::helper {
         size_t fileSize();
 
         void removeFile();
-        void copyTo(std::string path);
+        File copyTo(std::string path);
         void createDirectories();
 
         bool valid();

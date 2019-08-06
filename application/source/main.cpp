@@ -10,15 +10,18 @@
 #include "ui/gui.hpp"
 #include "ui/gui_main.hpp"
 
+
 using namespace edz;
 using namespace edz::ui;
 
 EResult initServices() {
     // UI (Borealis)
-    TRY(!Application::init(StyleEnum::ACCURATE));
+    if (!Application::init(StyleEnum::ACCURATE))
+        return ResultEdzBorealisInitFailed;
 
     // Curl
-    TRY(curl_global_init(CURL_GLOBAL_ALL));
+    if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
+        return ResultEdzCurlInitFailed;
 
     // Title querying
     TRY(ncmInitialize());
@@ -37,6 +40,11 @@ EResult initServices() {
     // Language code setting querying
     TRY(setInitialize());
 
+    // Companion sysmodule launching
+    TRY(pmdmntInitialize());
+    TRY(pmshellInitialize());
+    TRY(pminfoInitialize());
+
     // Controller LED
     TRY(hidsysInitialize());
     TRY(helper::controllerLEDInitialize());
@@ -45,7 +53,6 @@ EResult initServices() {
 }
 
 void exitServices() {
-    socketExit();
     curl_global_cleanup();
     ncmExit();
     nsExit();
@@ -53,8 +60,12 @@ void exitServices() {
     pctlExit();
     pcvExit();
     clkrstExit();
-    romfsExit();
     setExit();
+    pmdmntExit();
+    pmshellExit();
+    pminfoExit();
+    hidsysExit();
+
     Application::quit();
 }
 
@@ -64,14 +75,13 @@ int main(int argc, char* argv[]) {
         Gui::fatal(edz::LangEntry("edz.fatal.service.init").get() + res.getString());
 
         exitServices();
-        return 1;
+        return -1;
     }
 
     Gui::changeTo<GuiMain>();
 
-    while (Application::mainLoop()) {
+    while (Application::mainLoop())
         Gui::tick();
-    }
     
     exitServices();
 }

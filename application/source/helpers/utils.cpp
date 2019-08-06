@@ -4,6 +4,9 @@
 #include <ctime>
 #include <cstring>
 
+#include "save/title.hpp"
+#include "helpers/file.hpp"
+
 #define MHz *1E6
 
 namespace edz::helper {
@@ -110,6 +113,23 @@ namespace edz::helper {
         return !isOnRNX() && !isOnSXOS();
     }
 
+
+    std::string getLFSTitlesPath() {
+        if (isOnAMS())
+            return "/atmosphere/titles";
+        
+        if (isOnRNX())
+            return "/ReiNX/titles";
+
+        if (isOnSXOS())
+            return "/sxos/titles";
+    }
+
+    std::string getLFSCheatsPath(save::Title *title) {
+        return getLFSTitlesPath() + "/" + title->getIDString() + "/cheats";
+    }
+
+
     std::string getCurrentTimeString() {
         char buffer[0x10];
 
@@ -162,6 +182,57 @@ namespace edz::helper {
     void setLedState(bool state) {
         for(u8 i = 0; i < uniquePadCnt; i++)
             hidsysSetNotificationLedPattern(state ? &patternOn : &patternOff, uniquePadIds[i]);
+    }
+
+
+    static constexpr titleid_t _edizonBackgroundServiceTitleId = 0x0100000000ED1204;
+
+    EResult startBackgroundService(bool startOnBoot) {
+        u64 pid = 0;
+
+        pmdmntGetTitlePid(&pid, _edizonBackgroundServiceTitleId);
+        if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
+
+        {
+            File romfsSysmoduleFile("romfs:/sysmodule/exefs.nsp");
+            romfsSysmoduleFile.copyTo(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
+        }
+
+        if (EResult(pmshellLaunchProcess(0, _edizonBackgroundServiceTitleId, FsStorageId_None, &pid)).failed()) {
+            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").removeFile();
+            return ResultEdzSysmoduleLaunchFailed;
+        }
+
+        if (!startOnBoot)
+            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").removeFile();
+        else {
+            // Create boot2.flag file to let the sysmodule get started on boot
+            File file(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag"); 
+            file.createDirectories();
+            file.write(nullptr, 0);
+        }
+
+        return ResultSuccess;
+    }
+
+    EResult stopBackgroundService(bool startOnBoot) {
+        u64 pid = 0;
+
+        if (!startOnBoot) {
+            File sysmoduleFile(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
+            File flagFile(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag");
+
+            sysmoduleFile.removeFile();
+            flagFile.removeFile();
+        }
+
+        pmdmntGetTitlePid(&pid, _edizonBackgroundServiceTitleId);
+        if (pid == 0) return ResultEdzSysmoduleNotRunning;
+
+        if (EResult(pmshellTerminateProcessByProcessId(pid)).failed())
+            return ResultEdzSysmoduleTerminationFailed;
+        
+        return ResultSuccess;
     }
 
 }

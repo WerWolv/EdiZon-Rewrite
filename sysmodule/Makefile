@@ -172,7 +172,7 @@ clean:
 
 #---------------------------------------------------------------------------------
 install: all
-	@lftp -e "cd atmosphere;cd titles;cd 0100000000ED1504;put ./out/exefs.nsp;bye" $(IP)
+	@lftp -e "cd atmosphere;cd titles;mkdir 0100000000ED1204;cd 0100000000ED1204;put ./out/exefs.nsp;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

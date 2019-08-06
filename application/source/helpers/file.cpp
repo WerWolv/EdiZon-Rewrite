@@ -51,7 +51,9 @@ namespace edz::helper {
             remove(this->m_filePath.c_str());
         }
 
-        void File::copyTo(std::string path) {
+        File File::copyTo(std::string path) {
+            Folder dstFolder(File(path).basePath());
+            dstFolder.createDirectories();
 
             FILE *dst = fopen(path.c_str(), "w");
 
@@ -70,6 +72,8 @@ namespace edz::helper {
 
             closeFile();
             fclose(dst);
+
+            return File(path);
         }
 
         void File::createDirectories() {
@@ -93,7 +97,8 @@ namespace edz::helper {
             size_t readSize = 0;
             
             openFile();
-            readSize = fread(buffer, 1, bufferSize, this->m_file);
+            if (buffer != nullptr && bufferSize != 0)
+                readSize = fread(buffer, 1, bufferSize, this->m_file);
             closeFile();
 
             return readSize;
@@ -103,7 +108,8 @@ namespace edz::helper {
             size_t writeSize = 0;
 
             openFile();
-            writeSize = fwrite(buffer, 1, bufferSize, this->m_file);
+            if (buffer != nullptr && bufferSize != 0)
+                writeSize = fwrite(buffer, 1, bufferSize, this->m_file);
             closeFile();
 
             return writeSize;            

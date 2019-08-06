@@ -1,13 +1,14 @@
 {
     "edz.name" : "EdiZon",
     "edz.dev" : "WerWolv",
+    "edz.translator" : "WerWolv",
 
-    "edz.widget.integer.title" : "Enter a value",
-    "edz.widget.integer.subtitle" : "This will be the new value for this property.",
-    "edz.widget.string.title" : "Enter some text",
-    "edz.widget.string.subtitle" : "This will be the new text for this property.",
-    "edz.widget.boolean.on" : "On",
-    "edz.widget.boolean.off" : "Off",
+    "edz.widget.integer.title" : "Gib einen Wert ein",
+    "edz.widget.integer.subtitle" : "Dies wird der neue Wert für dieses Objekt sein.",
+    "edz.widget.string.title" : "Gib einen Textwert ein",
+    "edz.widget.string.subtitle" : "Dies wird der neue Textwert für dieses Objekt sein.",
+    "edz.widget.boolean.on" : "Ein",
+    "edz.widget.boolean.off" : "Aus",
 
-    "edz.error.heap" : "An error occurred during heap setup."
+    "edz.error.heap" : "Ein Fehler während der Serviceinitialisierung ist aufgetreten.\nFehlercode: "
 }

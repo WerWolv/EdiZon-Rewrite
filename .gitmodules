@@ -7,9 +7,6 @@
 [submodule "application/libs/lua"]
 	path = application/libs/lua
 	url = https://github.com/lua/lua
-[submodule "application/libs/mruby"]
-	path = application/libs/mruby
-	url = https://github.com/mruby/mruby
 [submodule "application/libs/zipper"]
 	path = application/libs/zipper
 	url = https://github.com/sebastiandev/zipper

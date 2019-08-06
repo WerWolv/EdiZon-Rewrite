@@ -49,7 +49,7 @@ namespace edz::helper {
                 continue;
 
             if (entry->d_type == DT_DIR) {
-                Folder folder(this->m_path + entry->d_name + std::string("/"), entry->d_name);
+                Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
                 folder.copyTo(newPath + folder.folderName());
             } else if (entry->d_type == DT_REG) {
                 File file(this->m_path + std::string(entry->d_name));
@@ -81,7 +81,7 @@ namespace edz::helper {
             if (entry->d_type == DT_DIR) {
 
                 {
-                    Folder folder(this->m_path + entry->d_name + std::string("/"), entry->d_name);
+                    Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
                     folder.removeFolder();
                 }
 
@@ -144,7 +144,7 @@ namespace edz::helper {
                 continue;
 
             if (entry->d_type == DT_DIR)
-                folders.insert({ entry->d_name, Folder(this->m_path + std::string("/") + entry->d_name, entry->d_name) });
+                folders.insert({ entry->d_name, Folder(this->m_path + "/"s + entry->d_name, entry->d_name) });
         }
 
         closeDirectory();

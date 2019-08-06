@@ -8,7 +8,7 @@
 #include "helpers/lang_entry.hpp"
 
 #define DEBUG_PRINT(x, ...) (printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__))
-#define TRY(x) if (edz::EResult(x).failed()) return x; 
+#define TRY(x) if (::edz::EResult(x).failed()) return x; 
 
 /* || EDIZON COMPILE TIME SETTINGS || */
 

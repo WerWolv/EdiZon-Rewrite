@@ -7,6 +7,10 @@
 
 namespace edz::helper {
 
+    namespace edz::save {
+        class Title;
+    }
+
     bool askPctl(std::function<void()> f);
     bool askSwkbdText(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
     bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", std::string leftButton = "", std::string rightButton = "", u8 maxStringLength = 32, std::string initialText = "");
@@ -15,6 +19,9 @@ namespace edz::helper {
     bool isOnAMS();
     bool isOnRNX();
     bool isOnSXOS();
+
+    std::string getLFSTitlesPath();
+    std::string getLFSCheatsPath(edz::save::Title *title);
 
     template <typename ...Args>
     std::string formatString(const std::string& format, Args && ...args) {
@@ -34,4 +41,7 @@ namespace edz::helper {
     EResult controllerLEDInitialize();
     void setLedState(bool state);
     
+    EResult startBackgroundService(bool startOnBoot);
+    EResult stopBackgroundService(bool startOnBoot);
+
 }
