@@ -32,8 +32,8 @@
 #define ASSERT_STANDARD_LAYOUT(x) static_assert(std::is_standard_layout_v<x>, #x " is not standard layout")
 
 #define TRY_FATAL(exp) ({ \
-    if (Result rc = exp; R_FAILED(rc)) \
-        fatal(rc); \
+    if (EResult res = exp; res.failed()) \
+        fatal(res); \
 })
 
 #define INIT_SERV(s, ...) TRY_FATAL(s##Initialize(__VA_ARGS__))

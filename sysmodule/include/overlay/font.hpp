@@ -28,6 +28,8 @@
 
 #include "overlay/constants.hpp"
 
+#include "helpers/result.hpp"
+
 namespace edz::ovl {
 
     struct bbox { float xMin, yMin, xMax, yMax; };
@@ -37,7 +39,7 @@ namespace edz::ovl {
             static inline PlFontData g_stdFont, g_extFont;
 
         public:
-            static Result initialize();
+            static EResult initialize();
             static void finalize();
 
             BuiltinFont() = default;
@@ -63,7 +65,7 @@ namespace edz::ovl {
             static inline FT_Face g_stdFace, g_extFace, g_lastFace;
 
         public:
-            static Result initialize();
+            static EResult initialize();
             static void finalize();
 
             FreetypeFont();
@@ -123,7 +125,7 @@ namespace edz::ovl {
             inline const int getLastGlyph() const { return this->m_lastGlyph; }
 
         public:
-            static Result initialize();
+            static EResult initialize();
             static void finalize();
 
             StbFont();

@@ -22,7 +22,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-#include "edz_vc_types.hpp"
+#include "vc/edz_vc_types.hpp"
 
 namespace edz::vc {
 

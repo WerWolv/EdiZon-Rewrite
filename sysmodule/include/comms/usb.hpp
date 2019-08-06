@@ -20,7 +20,7 @@
 #pragma once
 
 #include <switch.h>
-#include <result.hpp>
+#include "helpers/result.hpp"
 
 #include <functional>
 

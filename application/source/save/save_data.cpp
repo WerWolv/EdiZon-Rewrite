@@ -149,13 +149,13 @@ namespace edz::save {
         if (R_FAILED(fsOpenSaveDataIterator(&iter, FsSaveDataSpaceId_NandUser)))
             return saveDataInfos;   // Return empty saveDataInfos array
         
-        Result rc;
+        EResult res;
         do {
-            rc = fsSaveDataIteratorRead(&iter, &saveDataInfo, 1, &totalSaveEntries);
+            res = fsSaveDataIteratorRead(&iter, &saveDataInfo, 1, &totalSaveEntries);
 
             if (saveDataInfo.saveDataType == FsSaveDataType_SaveData)
                 saveDataInfos.push_back(saveDataInfo);
-        } while(R_SUCCEEDED(rc) && totalSaveEntries > 0);
+        } while(res.succeeded() && totalSaveEntries > 0);
 
         fsSaveDataIteratorClose(&iter);
 

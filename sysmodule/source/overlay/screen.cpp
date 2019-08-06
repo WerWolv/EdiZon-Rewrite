@@ -33,16 +33,16 @@ extern "C" u64 __nx_vi_layer_id;
 
 namespace edz::ovl {
 
-    Result Screen::initialize() {
-        Result rc = 0;
+    EResult Screen::initialize() {
+        EResult res = 0;
 
-        if (R_FAILED(rc = viInitialize(ViServiceType_Manager)))
+        if (EResult(res = viInitialize(ViServiceType_Manager)).failed())
             goto end;
 
-        if (R_FAILED(rc = viOpenDefaultDisplay(&Screen::g_display)))
+        if (EResult(res = viOpenDefaultDisplay(&Screen::g_display)).failed())
             goto close_serv;
 
-        if (R_FAILED(rc = viGetDisplayVsyncEvent(&Screen::g_display, &Screen::g_vsyncEvent)))
+        if (EResult(res = viGetDisplayVsyncEvent(&Screen::g_display, &Screen::g_vsyncEvent)).failed())
             goto close_display;
 
         goto end;
@@ -53,7 +53,7 @@ namespace edz::ovl {
         viExit();
     end:
 
-        return rc;
+        return res;
     }
 
     void Screen::finalize() {
@@ -65,34 +65,34 @@ namespace edz::ovl {
 
     Screen::Screen() {
 
-        Result rc = 0;
+        EResult res = 0;
         u64 layer_id = 0;
 
-        if (R_FAILED(rc = viCreateManagedLayer(&Screen::g_display, (ViLayerFlags)0, 0, &__nx_vi_layer_id)))
+        if (EResult(res = viCreateManagedLayer(&Screen::g_display, (ViLayerFlags)0, 0, &__nx_vi_layer_id)).failed())
             goto fatal;
 
-        if (R_FAILED(rc = viCreateLayer(&Screen::g_display, &this->m_layer)))
+        if (EResult(res = viCreateLayer(&Screen::g_display, &this->m_layer)).failed())
             goto close_managed_layer;
 
-        if (R_FAILED(rc = viSetLayerScalingMode(&this->m_layer, ViScalingMode_FitToLayer)))
+        if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_FitToLayer)).failed())
             goto close_layer;
 
         u64 layer_z; // s64 ?
-        if (R_SUCCEEDED(rc = viGetDisplayMaximumZ(&Screen::g_display, &layer_z)) && (layer_z > 0)) {
-            if (R_FAILED(rc = viSetLayerZ(&this->m_layer, layer_z)))
+        if (EResult(res = viGetDisplayMaximumZ(&Screen::g_display, &layer_z)).succeeded() && (layer_z > 0)) {
+            if (EResult(res = viSetLayerZ(&this->m_layer, layer_z)).failed())
                 goto close_layer;
         }
 
-        if (R_FAILED(rc = viSetLayerSize(&this->m_layer, LAYER_WIDTH, LAYER_HEIGHT)))
+        if (EResult(res = viSetLayerSize(&this->m_layer, LAYER_WIDTH, LAYER_HEIGHT)).failed())
             goto close_layer;
 
-        if (R_FAILED(rc = viSetLayerPosition(&this->m_layer, LAYER_X, LAYER_Y)))
+        if (EResult(res = viSetLayerPosition(&this->m_layer, LAYER_X, LAYER_Y)).failed())
             goto close_layer;
 
-        if (R_FAILED(rc = nwindowCreateFromLayer(&this->m_window, &this->m_layer)))
+        if (EResult(res = nwindowCreateFromLayer(&this->m_window, &this->m_layer)).failed())
             goto close_layer;
 
-        if (R_FAILED(rc = framebufferCreate(&this->m_frameBufferObject, &this->m_window, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_4444, 2)))
+        if (EResult(res = framebufferCreate(&this->m_frameBufferObject, &this->m_window, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_4444, 2)).failed())
             goto close_window;
 
         return;
@@ -108,7 +108,7 @@ namespace edz::ovl {
     fatal:
         finalize();
 
-        fatalSimple(rc);
+        fatalSimple(res);
     }
 
     Screen::~Screen() {

@@ -30,6 +30,8 @@
 #include "overlay/color.hpp"
 #include "overlay/font.hpp"
 
+#include "helpers/result.hpp"
+
 namespace edz::ovl {
 
     enum class TextAlignment {
@@ -51,10 +53,10 @@ namespace edz::ovl {
             std::unordered_map<size_t, std::pair<u16, u16>> m_stringDimensions;
 
         public:
-            static Result initialize();
+            static EResult initialize();
             static void finalize();
 
-            static inline Result waitForVsync() { return eventWait(&g_vsyncEvent, U64_MAX); }
+            static inline EResult waitForVsync() { return eventWait(&g_vsyncEvent, U64_MAX); }
 
             Screen();
             ~Screen();

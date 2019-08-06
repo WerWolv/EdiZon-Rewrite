@@ -28,16 +28,16 @@
 
 namespace edz::ovl {
 
-    Result BuiltinFont::initialize() {
-        Result rc = 0;
+    EResult BuiltinFont::initialize() {
+        EResult res = 0;
 
-        if (R_FAILED(rc = plInitialize()))
+        if (EResult(res = plInitialize()).failed())
             goto end;
 
-        if (R_FAILED(rc = plGetSharedFontByType(&BuiltinFont::g_stdFont, PlSharedFontType_Standard)))
+        if (EResult(res = plGetSharedFontByType(&BuiltinFont::g_stdFont, PlSharedFontType_Standard)).failed())
             goto close_serv;
 
-        if (R_FAILED(rc = plGetSharedFontByType(&BuiltinFont::g_extFont, PlSharedFontType_NintendoExt)))
+        if (EResult(res = plGetSharedFontByType(&BuiltinFont::g_extFont, PlSharedFontType_NintendoExt)).failed())
             goto close_serv;
 
         goto end;
@@ -45,7 +45,7 @@ namespace edz::ovl {
     close_serv:
         plExit();
     end:
-        return rc;
+        return res;
     }
 
     void BuiltinFont::finalize() {
@@ -60,20 +60,20 @@ namespace edz::ovl {
         return nullptr;
     }
 
-    Result FreetypeFont::initialize() {
-        Result rc = 0;
+    EResult FreetypeFont::initialize() {
+        EResult res = 0;
         FT_Error ft_rc = 0;
 
-        if (R_FAILED(rc = BuiltinFont::initialize()))
+        if (EResult(res = BuiltinFont::initialize()).failed())
             goto finalize;
 
-        if (R_FAILED(ft_rc = FT_Init_FreeType(&FreetypeFont::g_ftLib)))
+        if (EResult(ft_rc = FT_Init_FreeType(&FreetypeFont::g_ftLib)).failed())
             goto finalize;
 
-        if (R_FAILED(ft_rc = FT_New_Memory_Face(FreetypeFont::g_ftLib, (FT_Bytes)BuiltinFont::g_stdFont.address, BuiltinFont::g_stdFont.size, 0, &FreetypeFont::g_stdFace)))
+        if (EResult(ft_rc = FT_New_Memory_Face(FreetypeFont::g_ftLib, (FT_Bytes)BuiltinFont::g_stdFont.address, BuiltinFont::g_stdFont.size, 0, &FreetypeFont::g_stdFace)).failed())
             goto close_ft;
 
-        if (R_FAILED(ft_rc = FT_New_Memory_Face(FreetypeFont::g_ftLib, (FT_Bytes)BuiltinFont::g_extFont.address, BuiltinFont::g_extFont.size, 0, &FreetypeFont::g_extFace)))
+        if (EResult(ft_rc = FT_New_Memory_Face(FreetypeFont::g_ftLib, (FT_Bytes)BuiltinFont::g_extFont.address, BuiltinFont::g_extFont.size, 0, &FreetypeFont::g_extFace)).failed())
             goto close_std_face;
 
         goto end;
@@ -86,7 +86,7 @@ namespace edz::ovl {
         finalize();
     end:
 
-        return (Result)(rc | ft_rc);
+        return (EResult)(res | ft_rc);
     }
 
     void FreetypeFont::finalize() {
@@ -140,19 +140,19 @@ namespace edz::ovl {
 
     }
 
-    Result StbFont::initialize() {
-        Result rc = 0;
+    EResult StbFont::initialize() {
+        EResult res = 0;
 
-        if (R_FAILED(rc = BuiltinFont::initialize()))
+        if (EResult(res = BuiltinFont::initialize()).failed())
             goto finalize;
 
         if (stbtt_InitFont(&StbFont::g_stdInfo, (u8 *)StbFont::g_stdFont.address, 0) == 0) {
-            rc = 0xabcd;
+            res = 0xabcd;
             goto finalize;
         }
 
         if (stbtt_InitFont(&StbFont::g_extInfo, (u8 *)StbFont::g_extFont.address, 0) == 0) {
-            rc = 0xabcde;
+            res = 0xabcde;
             goto finalize;
         }
 
@@ -161,7 +161,7 @@ namespace edz::ovl {
     finalize:
         finalize();
     end:
-        return rc;
+        return res;
     }
 
     void StbFont::finalize() {

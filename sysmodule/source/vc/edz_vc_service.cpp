@@ -17,10 +17,10 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "edz_vc_service.hpp"
+#include "vc/edz_vc_service.hpp"
 
-#include "vc_manager.hpp"
-#include "results.hpp"
+#include "vc/vc_manager.hpp"
+#include "helpers/results.hpp"
 
 namespace edz::vc {
 

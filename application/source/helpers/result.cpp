@@ -69,7 +69,7 @@ namespace edz {
     }
 
     EResult EResult::operator=(EResult &other) {
-        return edz::EResult(other.getDescription());
+        return EResult(other.getDescription());
     }
 
     EResult EResult::operator=(Result other) {

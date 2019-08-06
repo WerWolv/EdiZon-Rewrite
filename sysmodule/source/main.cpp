@@ -21,8 +21,8 @@
 
 #include <stratosphere.hpp>
 
-#include "edz_vc_service.hpp"
-#include "vc_manager.hpp"
+#include "vc/edz_vc_service.hpp"
+#include "vc/vc_manager.hpp"
 #include "overlay/font.hpp"
 #include "overlay/screen.hpp"
 
@@ -51,37 +51,37 @@ extern "C" {
     }
 
     void __attribute__((weak)) __appInit(void) {
-        Result rc;
+        edz::EResult res;
         smInitialize();
 
         if (hosversionGet() == 0) {
-            rc = setsysInitialize();
-            if (R_SUCCEEDED(rc)) {
+            res = setsysInitialize();
+            if (res.succeeded()) {
                 SetSysFirmwareVersion fw;
-                rc = setsysGetFirmwareVersion(&fw);
-                if (R_SUCCEEDED(rc))
+                res = setsysGetFirmwareVersion(&fw);
+                if (res.succeeded())
                     hosversionSet(MAKEHOSVERSION(fw.major, fw.minor, fw.micro));
                 setsysExit();
             }
         }
 
-        rc = hidInitialize();
-        if (R_FAILED(rc))
+        res = hidInitialize();
+        if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
-        rc = hiddbgInitialize();
-        if (R_FAILED(rc))
+        res = hiddbgInitialize();
+        if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
-        rc = fsInitialize();
-        if (R_FAILED(rc))
+        res = fsInitialize();
+        if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
         fsdevMountSdmc();
 
         plInitialize();
 
-        if (R_FAILED(Screen::initialize()))
+        if (edz::ovl::Screen::initialize().failed())
             fatalSimple(1);
 
     }
@@ -97,7 +97,7 @@ extern "C" {
         smExit();
         plExit();
 
-        Screen::finalize();
+        edz::ovl::Screen::finalize();
     }
 
 }
@@ -144,16 +144,16 @@ static void hidLoop(void *args) {
 
 static void ovlLoop(void *args) {
     //svcSleepThread(5E9); // Wait 5 seconds to make sure pl is ready
-    StbFont::initialize();
-    StbFont *font = new StbFont();
+    edz::ovl::StbFont::initialize();
+    edz::ovl::StbFont *font = new edz::ovl::StbFont();
     font->setFontSize(0, 32);
-    Screen *screen = new Screen();
+    edz::ovl::Screen *screen = new edz::ovl::Screen();
 
-    rgba4444_t color(0, 0, 0, 0xF);
+    edz::ovl::rgba4444_t color(0, 0, 0, 0xF);
 
     while (true) {
         screen->fill(color);
-        screen->drawText(font, 10, 50, rgba4444_t(0xF, 0xF, 0xF, 0xF), "Hello World");
+        screen->drawText(font, 10, 50, edz::ovl::rgba4444_t(0xF, 0xF, 0xF, 0xF), "Hello World");
         screen->flush();
     }
     

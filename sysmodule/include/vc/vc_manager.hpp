@@ -20,8 +20,8 @@
 #pragma once
 
 #include <switch.h>
-#include "edz_vc_types.hpp"
-#include "result.hpp"
+#include "vc/edz_vc_types.hpp"
+#include "helpers/result.hpp"
 
 #include <vector>
 #include <map>
