@@ -144,8 +144,8 @@ namespace edz::helper {
         }
     }
 
-    void controllerLEDInitialize() {
-        hidsysGetUniquePadsFromNpad(hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1, uniquePadIds, 2, &uniquePadCnt);
+    EResult controllerLEDInitialize() {
+        TRY(hidsysGetUniquePadsFromNpad(hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1, uniquePadIds, 2, &uniquePadCnt));
 
         std::memset(&patternOn, 0x00, sizeof(HidsysNotificationLedPattern));
         std::memset(&patternOff, 0x00, sizeof(HidsysNotificationLedPattern));
@@ -155,6 +155,8 @@ namespace edz::helper {
         patternOn.miniCycles[0].ledIntensity = 0x0F;
         patternOn.miniCycles[0].transitionSteps = 0x0F;
         patternOn.miniCycles[0].finalStepDuration = 0x0F;
+
+        return ResultSuccess;
     }
 
     void setLedState(bool state) {

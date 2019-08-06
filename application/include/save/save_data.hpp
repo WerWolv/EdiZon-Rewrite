@@ -17,8 +17,8 @@ namespace edz::save {
         SaveFileSystem(Title *title, Account *account);
         ~SaveFileSystem();
 
-        static std::map<titleid_t, Title*>& getAllTitles();
-        static std::map<userid_t, Account*>& getAllAccounts();
+        static std::map<titleid_t, std::unique_ptr<Title>>& getAllTitles();
+        static std::map<userid_t, std::unique_ptr<Account>>& getAllAccounts();
 
         edz::helper::Folder getSaveFolder();
         void commit();

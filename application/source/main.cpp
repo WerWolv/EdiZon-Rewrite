@@ -1,57 +1,47 @@
 #include "edizon.hpp"
+#include <Borealis.hpp>
 
-#include "helpers/file.hpp"
-#include "helpers/folder.hpp"
-#include "save/title.hpp"
-#include "save/account.hpp"
-#include "save/save_data.hpp"
-#include <sstream>
-#include <iomanip>
-#include <cstring>
-#include "cheat/cheat.hpp"
-#include "helpers/utils.hpp"
-#include "save/edit/config.hpp"
-#include "save/edit/script/script.hpp"
-#include "helpers/lang_entry.hpp"
+#include <vector>
+#include <functional>
+
 #include "helpers/curl.hpp"
-#include <zipper.h>
-#include <unzipper.h>
-#include <fstream>
+#include "helpers/utils.hpp"
 
+#include "ui/gui.hpp"
+#include "ui/gui_main.hpp"
 
-void initServices() {
-    // Network sockets
-    socketInitializeDefault();
+using namespace edz;
+using namespace edz::ui;
+
+EResult initServices() {
+    // UI (Borealis)
+    TRY(!Application::init(StyleEnum::ACCURATE));
 
     // Curl
-    curl_global_init(CURL_GLOBAL_ALL);
+    TRY(curl_global_init(CURL_GLOBAL_ALL));
 
     // Title querying
-    ncmInitialize();
-    nsInitialize();
+    TRY(ncmInitialize());
+    TRY(nsInitialize());
 
     // Account querying
-    accountInitialize();
+    TRY(accountInitialize());
 
     // Parential control lockdown
-    pctlInitialize();
+    TRY(pctlInitialize());
 
     // Overclock
-    pcvInitialize();
-    clkrstInitialize();
-
-    // RomFS for guide and localization
-    romfsInit();
+    TRY(pcvInitialize());
+    TRY(clkrstInitialize());
 
     // Language code setting querying
-    setInitialize();
+    TRY(setInitialize());
 
     // Controller LED
-    edz::helper::controllerLEDInitialize();
+    TRY(hidsysInitialize());
+    TRY(helper::controllerLEDInitialize());
 
-    // UI (Borealis)
-    Application::init(StyleEnum::ACCURATE);
-
+    return ResultSuccess;
 }
 
 void exitServices() {
@@ -68,69 +58,20 @@ void exitServices() {
     Application::quit();
 }
 
+int main(int argc, char* argv[]) {  
+    EResult res = initServices();
+    if (res.failed()) {
+        Gui::fatal(edz::LangEntry("edz.fatal.service.init").get() + res.getString());
 
-u8 *buffer = nullptr; 
-size_t titleIconSize;
-void initInterface() {
-
-    AppletFrame *rootFrame = new AppletFrame(false, false);
-    rootFrame->setTitle("EdiZon");
-
-    BoxLayout *box = new BoxLayout(BoxLayoutOrientation::VERTICAL);
-
-    for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
-        u8 buffer[title->getIconSize()];
-        title->getIcon(buffer, sizeof(buffer));
-        Image *image = new Image(buffer, sizeof(buffer));
-        image->setImageScaleType(ImageScaleType::VIEW_RESIZE);
-        box->addView(box);
+        exitServices();
+        return 1;
     }
 
-    /*std::stringstream ss;
-    for (auto [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
-        ss.str("");
-        ss << std::uppercase << std::hex << std::setfill('0') << std::setw(sizeof(u64) * 2) << titleID;
-        ListItem *titleItem = new ListItem(title->getName());
-        titleItem->setValue(ss.str(), true, true);
-        titleList->addView(titleItem);
-    }*/
-    
-    //edz::save::edit::Config config(nullptr, nullptr);
+    Gui::changeTo<GuiMain>();
 
-    //config.createUI(rootFrame);
-
-    Application::pushView(rootFrame);
-}
-
-
-
-// Access Denied 0x0100A9900CB5C000
-
-int main(int argc, char* argv[]) {
-    void *haddr;
-    extern char *fake_heap_end;
-
-    printf("Adasdasda\n");
-    
-    initServices();
-    initInterface();
-
-    // Setup Heap for swkbd on applets
-    // If this fails, something's messed up with the hb environment. Applets and probably other things will not work, abort.
-    /*if (edz::EResult(svcSetHeapSize(&haddr, 0x10000000)).failed()) {
-        Application::crash(edz::LangEntry("edz.error.heap").get());
-        while(Application::mainLoop());
-        exitServices();
-
-        return 0;
-    }*/
-
-    //fake_heap_end = (char*) haddr + 0x10000000;
-
-
-    while(Application::mainLoop());
+    while (Application::mainLoop()) {
+        Gui::tick();
+    }
     
     exitServices();
-
-    //svcSetHeapSize(&haddr, ((u8*) envGetHeapOverrideAddr() + envGetHeapOverrideSize()) - (u8*) haddr); // clean up the heap
 }

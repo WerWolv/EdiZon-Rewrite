@@ -1,10 +1,12 @@
 #pragma once
 
 #include <switch.h>
+#include <string>
 
 #define MODULE_EDIZON 555
 
 namespace edz {
+
     class EResult {
     public:
         EResult();
@@ -13,9 +15,9 @@ namespace edz {
 
         EResult(Result result);
 
-        constexpr u32 getModule();
-
-        constexpr u32 getDescription();
+        u32 getModule();
+        u32 getDescription();
+        std::string getString();
 
         bool operator==(EResult &other);
         bool operator==(Result &other);
@@ -34,4 +36,7 @@ namespace edz {
     private:
         const u32 m_module, m_desc;
     };
+
+    constexpr Result ResultSuccess = MAKERESULT(0, 0);
+
 }
