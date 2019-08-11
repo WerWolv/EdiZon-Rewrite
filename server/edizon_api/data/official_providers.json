@@ -1,0 +1,10 @@
+{
+    "providers" : [
+        {
+            "name"  : "Test",
+            "owner" : "WerWolv",
+            "description" : "A test save file repo for testing",
+            "url"   : "https://werwolv.net"
+        }
+    ]
+}
