@@ -54,7 +54,7 @@ namespace edz::ovl {
 
         public:
             static EResult initialize();
-            static void finalize();
+            static void exit();
 
             static inline EResult waitForVsync() { return eventWait(&g_vsyncEvent, U64_MAX); }
 

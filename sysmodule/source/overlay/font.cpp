@@ -48,7 +48,7 @@ namespace edz::ovl {
         return res;
     }
 
-    void BuiltinFont::finalize() {
+    void BuiltinFont::exit() {
         plExit();
     }
 
@@ -83,17 +83,17 @@ namespace edz::ovl {
     close_ft:
         FT_Done_FreeType(FreetypeFont::g_ftLib);
     finalize:
-        finalize();
+        exit();
     end:
 
         return (EResult)(res | ft_rc);
     }
 
-    void FreetypeFont::finalize() {
+    void FreetypeFont::exit() {
         FT_Done_Face(FreetypeFont::g_extFace);
         FT_Done_Face(FreetypeFont::g_stdFace);
         FT_Done_FreeType(FreetypeFont::g_ftLib);
-        BuiltinFont::finalize();
+        BuiltinFont::exit();
     }
 
     FreetypeFont::FreetypeFont() {
@@ -159,13 +159,13 @@ namespace edz::ovl {
         goto end;
 
     finalize:
-        finalize();
+        exit();
     end:
         return res;
     }
 
-    void StbFont::finalize() {
-        BuiltinFont::finalize();
+    void StbFont::exit() {
+        BuiltinFont::exit();
     }
 
     StbFont::StbFont() {

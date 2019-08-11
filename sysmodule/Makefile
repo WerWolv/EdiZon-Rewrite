@@ -40,7 +40,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 TARGET		:=	$(notdir $(CURDIR))
 OUTDIR		:=	out
 BUILD		:=	build
-SOURCES		:=	source source/overlay libs/libstratosphere/source
+SOURCES		:=	source source/overlay source/comms source/helpers source/vc libs/libstratosphere/source
 DATA		:=	data
 INCLUDES	:=	include libs/libstratosphere/include libs/stb
 #ROMFS	:=	romfs
@@ -172,7 +172,8 @@ clean:
 
 #---------------------------------------------------------------------------------
 install: all
-	@lftp -e "cd atmosphere;cd titles;mkdir 0100000000ED1204;cd 0100000000ED1204;put ./out/exefs.nsp;bye" $(IP)
+	@touch ./out/boot2.flag
+	@lftp -e "cd atmosphere;cd titles;mkdir 0100000000ED1204;cd 0100000000ED1204;mkdir flags;put ./out/exefs.nsp;cd flags; put ./out/boot2.flag;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

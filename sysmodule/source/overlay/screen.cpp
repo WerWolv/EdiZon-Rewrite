@@ -56,7 +56,7 @@ namespace edz::ovl {
         return res;
     }
 
-    void Screen::finalize() {
+    void Screen::exit() {
 
         eventClose(&Screen::g_vsyncEvent);
         viCloseDisplay(&Screen::g_display);
@@ -106,7 +106,7 @@ namespace edz::ovl {
         layer_id = (layer_id == 0) ? this->m_layer.layer_id : layer_id;
         viDestroyManagedLayer(layer_id);
     fatal:
-        finalize();
+        exit();
 
         fatalSimple(res);
     }

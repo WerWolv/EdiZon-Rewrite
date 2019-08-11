@@ -24,12 +24,15 @@
 #include "comms/packets.hpp"
 
 #include <functional>
+#include <queue>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-namespace edz::comms::usb {
+namespace edz::comms::tcp {
 
-    class USBManager {
+    class TCPManager {
     public:
-        USBManager() = delete;
+        TCPManager() = delete;
 
         static EResult initialize();
         static void exit();
@@ -38,14 +41,16 @@ namespace edz::comms::usb {
 
         static void setHandleCallback(std::function<void(edz::comms::common_packet_t*, edz::comms::common_packet_t*)> handleCallback);
 
-        static bool isBusy();
-        static EResult abort();
-
-        static inline bool s_shouldAbort = false;
     private:
-        static inline std::function<void(edz::comms::common_packet_t*, edz::comms::common_packet_t*)> s_handleCallback;
-
+        static inline bool s_initialized = false;
         static inline bool s_busy = false;
+        static inline bool s_listening = false;
+
+        static inline int s_serverSocket = 0, s_clientSocket;
+        static inline struct sockaddr_in s_serverAddress = { 0 };
+        static inline struct sockaddr_in s_clientAddress = { 0 };
+
+        static inline std::function<void(edz::comms::common_packet_t*, edz::comms::common_packet_t*)> s_handleCallback;
     };
 
 }

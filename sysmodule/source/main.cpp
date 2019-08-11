@@ -25,6 +25,10 @@
 #include "vc/vc_manager.hpp"
 #include "overlay/font.hpp"
 #include "overlay/screen.hpp"
+#include "helpers/results.hpp"
+
+#include "comms/tcp.hpp"
+#include "comms/usb.hpp"
 
 #include <stdio.h>
 
@@ -65,6 +69,37 @@ extern "C" {
             }
         }
 
+        SocketInitConfig sockConf = {
+            .bsdsockets_version = 1,
+
+            .tcp_tx_buf_size = 0x800,
+            .tcp_rx_buf_size = 0x1000,
+            .tcp_tx_buf_max_size = 0x4000,
+            .tcp_rx_buf_max_size = 0x4000,
+
+            .udp_tx_buf_size = 0x2400,
+            .udp_rx_buf_size = 0xA500,
+
+            .sb_efficiency = 4,
+
+            .serialized_out_addrinfos_max_size = 0x1000,
+            .serialized_out_hostent_max_size = 0x200,
+            .bypass_nsd = false,
+            .dns_timeout = 0,
+        };
+
+        res = socketInitialize(&sockConf);
+        if (res.failed())
+            fatalSimple(res);
+
+        res = edz::comms::tcp::TCPManager::initialize();
+        if (res.failed())
+            fatalSimple(edz::ResultEdzTCPInitFailed);
+
+        res = edz::comms::usb::USBManager::initialize();
+        if (res.failed())
+            fatalSimple(edz::ResultEdzUSBInitFailed);
+
         res = hidInitialize();
         if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
@@ -77,12 +112,14 @@ extern "C" {
         if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
+        res = plInitialize();
+        if (res.failed())
+            fatalSimple(edz::ResultEdzFontInitFailed);
+
         fsdevMountSdmc();
 
-        plInitialize();
-
         if (edz::ovl::Screen::initialize().failed())
-            fatalSimple(1);
+            fatalSimple(edz::ResultEdzScreenInitFailed);
 
     }
 
@@ -96,20 +133,25 @@ extern "C" {
         hiddbgExit();
         smExit();
         plExit();
-
-        edz::ovl::Screen::finalize();
+        
+        edz::comms::tcp::TCPManager::exit();
+        edz::comms::usb::USBManager::exit();
+        edz::ovl::Screen::exit();
     }
 
 }
 
+
 static void netLoop(void *args) {
     while (true) {
+        edz::comms::tcp::TCPManager::process();
         svcSleepThread(1E6); // Sleep 1ms
     }
 } 
 
 static void usbLoop(void *args) {
     while (true) {
+        edz::comms::usb::USBManager::process();
         svcSleepThread(1E6); // Sleep 1ms
     }
 } 
@@ -156,6 +198,10 @@ static void ovlLoop(void *args) {
         screen->drawText(font, 10, 50, edz::ovl::rgba4444_t(0xF, 0xF, 0xF, 0xF), "Hello World");
         screen->flush();
     }
+
+    delete screen;
+    delete font;
+    edz::ovl::StbFont::exit();
     
 }
 
@@ -164,15 +210,15 @@ int main(int argc, char* argv[]) {
 
     //edz::vc::VirtualControllerManager::getInstance().connectVC(0xFFFF00FF, 0xFFFFFFFF);
 
-    threadCreate(&netThread, netLoop, nullptr, 0x500, 0x2C, -2);
-    threadCreate(&usbThread, usbLoop, nullptr, 0x500, 0x2C, -2);
+    threadCreate(&netThread, netLoop, nullptr, 0x20500, 0x2C, -2);
+    threadCreate(&usbThread, usbLoop, nullptr, 0x30000, 0x2C, -2);
     threadCreate(&hidThread, hidLoop, nullptr, 0x500, 0x2C, -2);
     threadCreate(&ovlThread, ovlLoop, nullptr, 0x2000, 0x2C, -2);
 
     threadStart(&netThread);
     threadStart(&usbThread);
-    threadStart(&hidThread);
-    threadStart(&ovlThread);
+    //threadStart(&hidThread);
+    //threadStart(&ovlThread);
 
     consoleDebugInit(debugDevice_SVC);
 

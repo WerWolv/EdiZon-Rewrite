@@ -20,32 +20,17 @@
 #pragma once
 
 #include <switch.h>
-#include "helpers/result.hpp"
-#include "comms/packets.hpp"
 
-#include <functional>
+namespace edz::comms {
 
-namespace edz::comms::usb {
+    typedef struct {
+        u32 magic;  // EDZN
+        enum class PacketType : u16 { HEART_BEAT = 0, GET = 1, SET = 2, CONTINUE = 3 } type;
+        enum class Origin : u8 { TCP = 'T', USB = 'U' } origin;
+        u16 payloadSize;
+        u8 payload[0xFFFF - sizeof(magic) - sizeof(PacketType) - sizeof(Origin) - sizeof(payloadSize)];
+    } PACKED common_packet_t;
 
-    class USBManager {
-    public:
-        USBManager() = delete;
-
-        static EResult initialize();
-        static void exit();
-
-        static void process();
-
-        static void setHandleCallback(std::function<void(edz::comms::common_packet_t*, edz::comms::common_packet_t*)> handleCallback);
-
-        static bool isBusy();
-        static EResult abort();
-
-        static inline bool s_shouldAbort = false;
-    private:
-        static inline std::function<void(edz::comms::common_packet_t*, edz::comms::common_packet_t*)> s_handleCallback;
-
-        static inline bool s_busy = false;
-    };
+    static_assert(sizeof(common_packet_t) == 0xFFFF, "Incorrect bridge packet definition!");
 
 }

@@ -40,7 +40,7 @@ namespace edz::ovl {
 
         public:
             static EResult initialize();
-            static void finalize();
+            static void exit();
 
             BuiltinFont() = default;
             virtual ~BuiltinFont() = default;
@@ -66,7 +66,7 @@ namespace edz::ovl {
 
         public:
             static EResult initialize();
-            static void finalize();
+            static void exit();
 
             FreetypeFont();
             virtual ~FreetypeFont();
@@ -126,7 +126,7 @@ namespace edz::ovl {
 
         public:
             static EResult initialize();
-            static void finalize();
+            static void exit();
 
             StbFont();
             virtual ~StbFont();
