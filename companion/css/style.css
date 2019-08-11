@@ -1,0 +1,92 @@
+.titlebar {
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+    height: 20px;
+    background-color: #574038;
+    font-size: 6px;
+}
+   
+#exit-button {
+    -webkit-app-region: no-drag;
+    top: 0px;
+    right: 0px;
+    font-size: 14px;
+    height: 20px;
+    width: 36px;
+    right: 0;
+    position: absolute;
+    background-color: #574038;
+    border-color: #574038;
+    border-style: solid;
+    border: none;
+    outline: none;
+}
+
+#maximize-button {
+  -webkit-app-region: no-drag;
+  top: 0px;
+  right: 36px;
+  font-size: 14px;
+  height: 20px;
+  width: 36px;
+  position: absolute;
+  background-color: #574038;
+  border-color: #574038;
+  border-style: solid;
+  border: none;
+  outline: none;
+  padding-top: -2px;
+  margin-top: -2px;
+}
+
+#minimize-button {
+  -webkit-app-region: no-drag;
+  top: 0px;
+  right: 72px;
+  font-size: 14px;
+  height: 20px;
+  width: 36px;
+  position: absolute;
+  background-color: #574038;
+  border-color: #574038;
+  border-style: solid;
+  border: none;
+  outline: none;
+}
+
+#exit-button:hover {
+  background-color: #e3454d;
+  border-color: #e3454d;
+}
+
+#maximize-button:hover {
+  background-color: #362823;
+  border-color: #362823;
+}
+
+#minimize-button:hover {
+  background-color: #362823;
+  border-color: #362823;
+}
+
+.demo-layout-waterfall .mdl-layout__header-row .mdl-navigation__link:last-of-type  {
+  padding-right: 0;
+}
+
+.logo {
+  position:relative;
+  top:50%;
+}
+
+.fab {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 30px;
+}
+
+body {
+    position: fixed; 
+    overflow-y: hidden;
+    width: 100%;
+}

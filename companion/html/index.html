@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="./../css/material.min.css">
+    <link rel="stylesheet" href="./../css/material.brown-orange.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="./../css/style.css">
+    <script src="./../js/material.min.js"></script>
+    <script src="./../js/edizon.js"></script>
+    <script src="./../js/usb.js"
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+  <body onload="">
+    <div class="titlebar" ondblclick="maximize()">
+      <img top=0 width=20 height=20 src="./../assets/edizon_logo.png">
+      <button id="exit-button" onclick="closeWindow()">✕</button>
+      <button id="maximize-button" onclick="maximizeWindow()">🗖</button>
+      <button id="minimize-button" onclick="minimizeWindow()">—</button>
+    </div>
+  <!-- Uses a header that contracts as the page scrolls down. --> 
+    <div class="demo-layout-waterfall mdl-layout mdl-js-layout test2">
+      <header class="mdl-layout__header mdl-layout__header--waterfall">
+        <!-- Top row, always visible -->
+        <div class="mdl-layout__header-row">
+          <!-- Title -->
+          <span class="mdl-layout-title">EdiZon</span>
+          <div class="mdl-layout-spacer"></div>
+          <img class="logo" width=128 height=128 src="./../assets/edizon_logo.png">
+          <div class="mdl-layout-spacer"></div>
+        </div>
+        <!-- Bottom row, not visible on scroll -->
+        <div class="mdl-layout__header-row">
+          <div class="mdl-layout-spacer"></div>
+          <!-- Navigation -->
+          <nav class="mdl-navigation">
+            <a class="mdl-navigation__link">Not connected to any device</a>
+          </nav>
+        </div>
+      </header>
+      <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Features</span>
+        <nav class="mdl-navigation">
+          <a class="mdl-navigation__link" href="">Save file manager</a>
+          <a class="mdl-navigation__link" href="">Cheat creator</a>
+          <a class="mdl-navigation__link" href="">Link</a>
+          <a class="mdl-navigation__link" href="">Link</a>
+        </nav>
+      </div>
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          <!-- FAB button -->
+          <div class="fab">
+            <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="interactToDevice()">
+              <i class="material-icons">power</i>
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

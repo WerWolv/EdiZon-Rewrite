@@ -4,15 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
-
+        {
+            "type": "electron",
+            "request": "launch",
+            "name": "Electron: Launch Companion app",
+            "appDir": "${workspaceFolder}/companion",
+            "sourceMaps": true
+        },
         {
             "name": "Python: EdiZon server",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/server/server.py",
+            "program": "${workspaceFolder}/server/edizon_api/edizon_api.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/server"
+            "cwd": "${workspaceFolder}/server/edizon_api"
 
         }
     ]

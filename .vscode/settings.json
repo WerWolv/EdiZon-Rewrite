@@ -64,6 +64,8 @@
         "shared_mutex": "cpp",
         "vi_shim.h": "c",
         "switch.h": "c",
-        "fenv.h": "c"
-    }
+        "fenv.h": "c",
+        "cfenv": "cpp"
+    },
+    "python.pythonPath": "/bin/python3.8"
 }

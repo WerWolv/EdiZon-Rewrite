@@ -4,3 +4,5 @@ application/romfs/sysmodule
 
 sysmodule/build/
 sysmodule/out/
+
+companion/node_modules

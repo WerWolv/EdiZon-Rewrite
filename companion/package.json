@@ -1,0 +1,14 @@
+{
+  "name": "edizon-companion",
+  "version": "1.0.0",
+  "description": "The official EdiZon companion app for cheat development",
+  "main": "js/main.js",
+  "scripts": {
+    "test": "electron ."
+  },
+  "author": "WerWolv",
+  "license": "GPL-2.0-only",
+  "dependencies": {
+    "usb": "^1.6.0"
+  }
+}
