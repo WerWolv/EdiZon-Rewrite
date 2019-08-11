@@ -12,7 +12,7 @@ sysmodule:
 	@cp ./sysmodule/out/exefs.nsp ./application/romfs/sysmodule/exefs.nsp
 
 install:
-	$(MAKE) -c application install
+	$(MAKE) -C application install
 
 clean:
 	$(MAKE) -C application clean
