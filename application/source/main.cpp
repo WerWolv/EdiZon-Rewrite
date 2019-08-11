@@ -28,6 +28,7 @@
 
 #include "ui/gui.hpp"
 #include "ui/gui_main.hpp"
+#include "ui/gui_cheats.hpp"
 
 
 using namespace edz;
@@ -97,7 +98,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Gui::changeTo<GuiMain>();
+    Gui::changeTo<GuiCheats>();
 
     while (Application::mainLoop())
         Gui::tick();
