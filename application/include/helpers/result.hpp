@@ -55,17 +55,5 @@ namespace edz {
     private:
         const u32 m_module, m_desc;
     };
-
-
-    constexpr Result ResultSuccess                          = MAKERESULT(0, 0);
-
-    constexpr Result ResultEdzBorealisInitFailed            = MAKERESULT(MODULE_EDIZON, 1);
-    constexpr Result ResultEdzCurlInitFailed                = MAKERESULT(MODULE_EDIZON, 2);
-
-    constexpr Result ResultEdzSysmoduleAlreadyRunning       = MAKERESULT(MODULE_EDIZON, 101);
-    constexpr Result ResultEdzSysmoduleNotRunning           = MAKERESULT(MODULE_EDIZON, 102);
-    constexpr Result ResultEdzSysmoduleLaunchFailed         = MAKERESULT(MODULE_EDIZON, 103);
-    constexpr Result ResultEdzSysmoduleTerminationFailed    = MAKERESULT(MODULE_EDIZON, 104);
-
-
+    
 }

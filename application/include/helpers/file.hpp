@@ -43,7 +43,7 @@ namespace edz::helper {
         File copyTo(std::string path);
         void createDirectories();
 
-        bool valid();
+        bool exists();
 
         s32 read(u8 *buffer, size_t bufferSize);
         s32 write(u8 *buffer, size_t bufferSize);

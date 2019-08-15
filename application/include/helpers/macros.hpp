@@ -19,21 +19,7 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#define TRY(x) if (EResult res = x; ::edz::EResult(res).failed()) return res;
 
-#include "helpers/result.hpp"
-#include "helpers/results.hpp"
+#define PRINT_DEBUG(x, ...) (printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__))
 
-namespace edz {
-
-    using titleid_t = u64;
-    using userid_t = u128;
-
-    using processid_t = u64;
-    using buildid_t = u64;
-
-    using addr_t = u64;
-
-}

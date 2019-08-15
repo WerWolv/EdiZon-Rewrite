@@ -64,7 +64,13 @@ namespace edz::cheat {
 
     class CheatManager {
     public:
-        static CheatManager& getInstance() {
+        static CheatManager& get() {
+            static CheatManager instance;
+            
+            return instance;
+        }
+
+        CheatManager& operator->() {
             static CheatManager instance;
             
             return instance;
