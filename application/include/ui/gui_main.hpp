@@ -24,6 +24,8 @@
 #include "ui/gui.hpp"
 #include "save/save_data.hpp"
 
+#include "ui/elements/title_button.hpp"
+
 namespace edz::ui {
 
     class GuiMain : public Gui {
@@ -31,21 +33,35 @@ namespace edz::ui {
         GuiMain() : Gui() { }
         ~GuiMain() { }
 
-        View* setupUI() {
-            BoxLayout *rootFrame = new BoxLayout(BoxLayoutOrientation::VERTICAL);
-
+        View* setupUI() override {
+            AppletFrame *rootFrame = new AppletFrame(false, false);
+            BoxLayout *list = new BoxLayout(BoxLayoutOrientation::VERTICAL);
+            int i = 0;
+            BoxLayout *boxLayout = nullptr;
             for (auto& [titleID, title] : edz::save::SaveFileSystem::getAllTitles()) {
                 u8 buffer[title->getIconSize()];
                 title->getIcon(buffer, sizeof(buffer));
+                
+                elements::TitleButton *titleButton = new elements::TitleButton(buffer, sizeof(buffer));
+                
+                if (i++ % 3 == 0) {
+                    if (boxLayout != nullptr) {
+                        list->addView(boxLayout);
+                        boxLayout->expand(true);
+                    }
+                    
+                    boxLayout = new BoxLayout(BoxLayoutOrientation::HORIZONTAL);
+                }
 
-                Image *image = new Image(buffer, sizeof(buffer));
-                rootFrame->addView(image, false);
+                boxLayout->addView(titleButton, false);
             }
+
+            rootFrame->setContentView(list);
 
             return rootFrame;
         }
 
-        void update() {
+        void update() override {
             
         }
     };

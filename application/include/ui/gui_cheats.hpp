@@ -33,7 +33,7 @@ namespace edz::ui {
         GuiCheats() : Gui() { }
         ~GuiCheats() { }
 
-        View* setupUI() {
+        View* setupUI() override {
             TabFrame *rootFrame = new TabFrame();
             rootFrame->setTitle("EdiZon");
             rootFrame->setSubtitle("");
@@ -52,10 +52,10 @@ namespace edz::ui {
             List *cheatList = new List(0);
             cheatList->addView(new Header("Global Category"));
 
-            for (auto cheat : edz::cheat::CheatManager::getInstance().getCheats())
+            for (auto cheat : edz::cheat::CheatManager::get().getCheats())
                 cheatList->addView(new ToggleListItem(cheat->getName(), cheat->isEnabled()));
 
-            if (edz::cheat::CheatManager::getInstance().getCheats().size() == 0) {
+            if (edz::cheat::CheatManager::get().getCheats().size() == 0) {
                 cheatList->setSpacing(10);
                 cheatList->addView(new Label(LabelStyle::DESCRIPTION, "No cheats for this game loaded"));
             }
@@ -68,7 +68,7 @@ namespace edz::ui {
             return rootFrame;
         }
 
-        void update() {
+        void update() override {
             
         }
     };

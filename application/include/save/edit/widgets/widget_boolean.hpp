@@ -30,8 +30,8 @@ namespace edz::save::edit::widget {
         WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
         ~WidgetBoolean();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         bool m_state;

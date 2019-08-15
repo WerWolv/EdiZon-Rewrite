@@ -30,8 +30,8 @@ namespace edz::save::edit::widget {
         WidgetString(std::string name, u32 minLength, u32 maxLength);
         ~WidgetString();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         std::string m_currValue;

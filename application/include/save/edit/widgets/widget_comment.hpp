@@ -30,8 +30,8 @@ namespace edz::save::edit::widget {
         WidgetComment(std::string name, std::string comment);
         ~WidgetComment();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         std::string m_comment;

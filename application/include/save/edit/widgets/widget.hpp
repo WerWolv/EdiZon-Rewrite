@@ -93,10 +93,10 @@ namespace edz::save::edit::widget {
         virtual WidgetType getWidgetType() = 0;
         virtual View* getView() = 0;
 
-        void sendValueToScript(std::shared_ptr<widget::Arg> arg);
+        virtual void sendValueToScript(std::shared_ptr<widget::Arg> arg) final;
 
-        void setDescription(std::string description);
-        void addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument);
+        virtual void setDescription(std::string description) final;
+        virtual void addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument) final;
 
     protected:
         std::string m_name;

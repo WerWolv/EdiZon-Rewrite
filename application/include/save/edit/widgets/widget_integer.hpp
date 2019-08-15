@@ -29,8 +29,8 @@ namespace edz::save::edit::widget {
         WidgetInteger(std::string name, s64 minValue, s64 maxValue);
         ~WidgetInteger();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         s64 m_currValue;

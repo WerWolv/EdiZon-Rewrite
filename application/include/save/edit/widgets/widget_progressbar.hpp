@@ -29,8 +29,8 @@ namespace edz::save::edit::widget {
         WidgetProgressbar(std::string name);
         ~WidgetProgressbar();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         u8 m_progress;

@@ -19,21 +19,24 @@
 
 #pragma once
 
-#include <edizon.hpp>
-#include "save/edit/widgets/widget.hpp"
+#include <Borealis.hpp>
 
-namespace edz::save::edit::widget {
+#include <string>
+#include <vector>
 
-    class WidgetSlider : public Widget {
+namespace edz::ui::elements {
+
+    class TitleButton : public View {
     public:
-        WidgetSlider(std::string name);
-        ~WidgetSlider();
+        TitleButton(unsigned char *buffer, size_t bufferSize);
+        ~TitleButton();
 
-        WidgetType getWidgetType() override;
-        View* getView() override;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
+        void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
+        View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
 
     private:
-
+        Image *m_image;
     };
 
 }

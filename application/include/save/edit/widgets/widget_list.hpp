@@ -31,8 +31,8 @@ namespace edz::save::edit::widget {
         WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments);
         ~WidgetList();
 
-        WidgetType getWidgetType();
-        View* getView();
+        WidgetType getWidgetType() override;
+        View* getView() override;
 
     private:
         std::vector<std::string> m_displayStrings;
