@@ -58,12 +58,20 @@ namespace edz::save::edit {
     
     Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
 
+    }
+
+    Config::~Config() {
+
+    }
+
+
+    EResult Config::load() {
+        
         try {
-            std::ifstream configFile("romfs:/save_editor_config.json");
+            std::ifstream configFile(EDIZON_BASE_DIR "/configs/" + this->m_title->getIDString() + ".json");
             if (!configFile.is_open()) {
                 // File couldn't be opened, no config file present
-                this->m_configLoadState = ConfigLoadState::NO_CONFIG;
-                return;
+                return ResultEdzEditorNoConfigFound;
             }
 
             // Parse config file
@@ -74,18 +82,17 @@ namespace edz::save::edit {
             parseMetadata(config);
 
 
-            if (!jsonExists(config, title->getVersionString()) && !jsonExists(config, "all")) {
+            if (!jsonExists(config, this->m_title->getVersionString()) && !jsonExists(config, "all")) {
                 // No save editor for this game version configured
-                this->m_configLoadState = ConfigLoadState::CONFIG_OUTDATED;
-                return;
+                return ResultEdzEditorConfigOutdated;
             }
 
             
 
             json configVersionMetadata;
 
-            if (jsonExists(config, title->getVersionString()))
-                configVersionMetadata = config[title->getVersionString()];
+            if (jsonExists(config, this->m_title->getVersionString()))
+                configVersionMetadata = config[this->m_title->getVersionString()];
             else configVersionMetadata = config["all"];
 
             u16 fileNum = 0;
@@ -100,20 +107,10 @@ namespace edz::save::edit {
             }
 
         } catch (json::parse_error &e) {
-            this->m_configLoadState = ConfigLoadState::SYNTAX_ERROR;
-            return;
+            return ResultEdzEditorScriptSyntaxError;
         }
 
-        this->m_configLoadState = ConfigLoadState::LOADED;
-    }
-
-    Config::~Config() {
-
-    }
-
-
-    ConfigLoadState Config::getLoadState() {
-        return this->m_configLoadState;
+        return ResultSuccess;
     }
     
 
@@ -126,6 +123,7 @@ namespace edz::save::edit {
         this->m_author = j["author"];
         this->m_description = j["description"];
         this->m_isBeta = j["beta"];
+        this->m_script = j["script"];
 
         if (j["scriptLanguage"] == "lua") 
             this->m_scriptLanguage = ScriptLanguage::LUA;
@@ -182,8 +180,7 @@ namespace edz::save::edit {
 
         
         for (std::string path : fileConfig.saveFilePaths) {
-            // Save data is still mounted to save:/ 
-            edz::helper::Folder saveFileFolder("save:/" + path);
+            edz::helper::Folder saveFileFolder(saveFileSystem->getSaveFolder().path() + path);
 
             for (auto &[fileName, file] : saveFileFolder.getFiles())
                 if (std::regex_match(fileName, std::regex(fileNameRegex)))
@@ -196,12 +193,11 @@ namespace edz::save::edit {
     void Config::parseWidgets(json &j, u16 fileNum) {
         for (auto itemDescription : j) {
             auto widgetDescription = itemDescription["widget"];
-            DEBUG_PRINT();
             widget::Widget *widget = nullptr;
-DEBUG_PRINT();
+
             if (widgetDescription["type"] == "int") {
                 if (widgetDescription["minValue"].type() != widgetDescription["maxValue"].type()) continue;
-DEBUG_PRINT();
+
                 // minValue and maxValue type have to be equal here, only checking one
                 if (widgetDescription["minValue"].type() != json::value_t::number_integer && widgetDescription["minValue"].type() != json::value_t::number_unsigned) continue;
 
@@ -250,13 +246,12 @@ DEBUG_PRINT();
 
                 widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
             }
-            DEBUG_PRINT();
+
 
             if (widget != nullptr) {
-                DEBUG_PRINT();
                 if (jsonExists(itemDescription, "infoText"))
                     widget->setDescription(itemDescription["infoText"]);
-DEBUG_PRINT();
+                    
                 for (auto &[name, value] : widgetDescription["arguments"].items()) {
                     std::shared_ptr<widget::Arg> argument;
 
@@ -292,6 +287,26 @@ DEBUG_PRINT();
                 tabFrame->addTab(categoryName, list);
             }
         }
+    }
+
+    std::string Config::getAuthor() {
+        return this->m_author;
+    }
+
+    std::string Config::getDescription() {
+        return this->m_description;
+    }
+
+    ScriptLanguage Config::getScriptLanguage() {
+        return this->m_scriptLanguage;
+    }
+
+    std::string Config::getScript() {
+        return this->m_script;
+    }
+
+    bool Config::isBeta() {
+        return this->m_isBeta;
     }
 
 }

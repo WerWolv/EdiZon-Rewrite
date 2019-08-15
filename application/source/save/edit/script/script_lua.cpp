@@ -28,25 +28,15 @@ namespace edz::save::edit {
         return ((*ptr).*func)(s);
     }
 
-    ScriptLua::ScriptLua(std::string scriptName) : Script(scriptName) {
+    ScriptLua::ScriptLua(std::string path) : Script(path) {
         this->m_ctx = luaL_newstate(); 
         luaL_openlibs(this->m_ctx);
 
         *static_cast<ScriptLua**>(lua_getextraspace(this->m_ctx)) = this;
 
-        const luaL_Reg regs[] {
-            { "getDataAsBuffer", &dispatch<&ScriptLua::getDataAsBuffer> },
-            { "getDataAsString", &dispatch<&ScriptLua::getDataAsString> },
-            { "getArgument",     &dispatch<&ScriptLua::getArgument>     },
-            { nullptr, nullptr }
-        };
+        lua_pushcfunction(this->m_ctx, &dispatch<ScriptLua::luaopen_edizon>);
 
-        luaL_newlib(this->m_ctx, regs);
-        lua_setglobal(this->m_ctx, "edizon");
-
-        std::string scriptPath = EDIZON_BASE_DIR"/editor/scripts" + scriptName;
-
-        if (luaL_loadfile(this->m_ctx, scriptPath.c_str()) != 0) {
+        if (luaL_loadfile(this->m_ctx, path.c_str()) != 0) {
             error("Failed to load Lua script file");
             return;
         }
@@ -65,13 +55,13 @@ namespace edz::save::edit {
     }
 
 
-    std::shared_ptr<widget::Arg> ScriptLua::getValue() {
+    std::tuple<EResult, std::shared_ptr<widget::Arg>> ScriptLua::getValue() {
         std::shared_ptr<widget::Arg> out;
 
         lua_getglobal(this->m_ctx, "getValue");
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
             error("Lua script's getValue function failed: %s", lua_tostring(this->m_ctx, -1));
-            return out;  // Return empty argument
+            return { ResultEdzScriptRuntimeError, out };  // Return empty argument
         }
 
 
@@ -87,10 +77,10 @@ namespace edz::save::edit {
 
         lua_pop(this->m_ctx, 1);
 
-        return out;
+        return { ResultSuccess, out };
     }
 
-    void ScriptLua::setValue(std::shared_ptr<widget::Arg> value) {
+    EResult ScriptLua::setValue(std::shared_ptr<widget::Arg> value) {
         lua_getglobal(this->m_ctx, "setValue");
 
         switch(value->type) {
@@ -108,18 +98,22 @@ namespace edz::save::edit {
                 break;
         }
 
-        if (lua_pcall(this->m_ctx, 1, 0, 0))
+        if (lua_pcall(this->m_ctx, 1, 0, 0)) {
             error("Lua script's setValue function failed: %s", lua_tostring(this->m_ctx, -1));
+            return ResultEdzScriptRuntimeError;
+        }
+
+        return ResultSuccess;
     }
 
-    std::vector<u8> ScriptLua::getModifiedSaveFileData() {
+    std::tuple<EResult, std::vector<u8>> ScriptLua::getModifiedSaveData() {
         std::vector<u8> out;
 
-        lua_getglobal(this->m_ctx, "getModifiedSaveFileData");
+        lua_getglobal(this->m_ctx, "getModifiedSaveData");
 
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
-            error("Lua script's getModifiedSaveFileData function failed: %s", lua_tostring(this->m_ctx, -1));
-            return out; // Return empty buffer
+            error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
+            return { ResultEdzScriptRuntimeError, out }; // Return empty buffer
         }
 
         lua_pushnil(this->m_ctx);
@@ -131,9 +125,20 @@ namespace edz::save::edit {
 
         lua_pop(this->m_ctx, 1);
 
-        return out;
+        return { ResultSuccess, out };
     }
 
+
+    int ScriptLua::luaopen_edizon(lua_State *ctx) {
+        const luaL_Reg regs[] {
+            { "getDataAsBuffer", &dispatch<&ScriptLua::getDataAsBuffer> },
+            { "getDataAsString", &dispatch<&ScriptLua::getDataAsString> },
+            { "getArgument",     &dispatch<&ScriptLua::getArgument>     },
+            { nullptr, nullptr }
+        };
+
+        luaL_newlib(ctx, regs);
+    }
 
     int ScriptLua::getArgument(lua_State *ctx) {
         std::string argName = std::string(lua_tostring(ctx, -1), lua_strlen(ctx, -1));
@@ -168,7 +173,7 @@ namespace edz::save::edit {
 
         for (u64 i = 0; i < this->m_saveFileSize; i++) {
             lua_pushinteger(ctx, i + 1);
-            lua_pushinteger(ctx, this->m_saveFileData[i]);
+            lua_pushinteger(ctx, this->m_saveData[i]);
             lua_settable(ctx, -3);
         }
 
@@ -176,10 +181,10 @@ namespace edz::save::edit {
     }
 
     int ScriptLua::getDataAsString(lua_State *ctx) {
-        std::string saveFileDataString = std::string(reinterpret_cast<char*>(this->m_saveFileData), this->m_saveFileSize);
-        saveFileDataString += "\x00";
+        std::string saveDataString = std::string(reinterpret_cast<char*>(this->m_saveData), this->m_saveSize);
+        saveDataString += "\x00";
 
-        lua_pushstring(ctx, saveFileDataString.c_str());
+        lua_pushstring(ctx, saveDataString.c_str());
 
         return 1;
     }

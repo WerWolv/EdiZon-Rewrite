@@ -23,7 +23,7 @@
 
 namespace edz::save::edit {
 
-    Script::Script(std::string scriptName) {
+    Script::Script(std::string path) {
         this->m_saveFileData = nullptr;
     }
 

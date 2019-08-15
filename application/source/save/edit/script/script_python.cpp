@@ -28,13 +28,13 @@ namespace edz::save::edit {
         return ((*ptr).*func)(self, args);
     }
 
-    ScriptPython::ScriptPython(std::string scriptName) : Script(scriptName) {
+    ScriptPython::ScriptPython(std::string path) : Script(path) {
         Py_Initialize();
 
         PyObject *sysPath = PySys_GetObject("path");
-        PyObject *stdlibPath = PyUnicode_FromString("romfs:/libs/python");
-        PyObject *scriptPath = PyUnicode_FromString(EDIZON_BASE_DIR"/editor/scripts");
-        PyObject *libsPath = PyUnicode_FromString(EDIZON_BASE_DIR"/editor/scripts/libs");
+        PyObject *stdlibPath = PyUnicode_FromString("romfs:/libraries/python");
+        PyObject *scriptPath = PyUnicode_FromString(EDIZON_BASE_DIR "/scripts");
+        PyObject *libsPath = PyUnicode_FromString(EDIZON_BASE_DIR "/scripts/libs");
 
         PyList_Insert(sysPath, 0, stdlibPath);
         PyList_Insert(sysPath, 0, scriptPath);
@@ -65,14 +65,14 @@ namespace edz::save::edit {
 
         this->m_ctx = PyImport_Import(PyUnicode_FromString("__main__"));
 
-        FILE *scriptFile = fopen(std::string(EDIZON_BASE_DIR"/editor/scripts" + scriptName).c_str(), "r");
+        FILE *scriptFile = fopen(std::string(path).c_str(), "r");
 
         if (scriptFile == nullptr) {
             error("Failed to load Python script file");
             return;
         }
 
-        if(PyRun_SimpleFileEx(scriptFile, std::string(EDIZON_BASE_DIR"/editor/scripts" + scriptName).c_str(), true) != 0) {
+        if(PyRun_SimpleFileEx(scriptFile, std::string(path).c_str(), true) != 0) {
             error("Failed to execute Python script's global scope:");
             PyErr_Print();
             printf("\n");
@@ -91,21 +91,21 @@ namespace edz::save::edit {
     }
 
 
-    std::shared_ptr<widget::Arg> ScriptPython::getValue() {
+    std::tuple<EResult, std::shared_ptr<widget::Arg>> ScriptPython::getValue() {
         std::shared_ptr<widget::Arg> out;
 
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "getValue");
         PyObject *result = PyObject_CallObject(func, nullptr);
 
         if (result == nullptr) 
-            return nullptr; // Return empty argument
+            return { ResultEdzScriptRuntimeError, nullptr };
 
         if (PyErr_Occurred() != nullptr) {
             error("Python script's getValue function failed:");
             PyErr_Print();
             printf("\n");
 
-            return;
+            return { ResultEdzScriptRuntimeError, nullptr };
         }
 
         if (PyLong_Check(result))
@@ -116,12 +116,15 @@ namespace edz::save::edit {
             out = widget::Arg::create("value", PyObject_IsTrue(result));
         else if (PyUnicode_Check(result))
             out = widget::Arg::create("value", PyUnicode_AsUnicode(result));
-        else error("Invalid value returned from Python script's getValue!");
+        else {
+            error("Invalid value returned from Python script's getValue!");
+            return { ResultEdzScriptRuntimeError, nullptr };
+        }
         
-        return out;
+        return { ResultSuccess, out };
     }
 
-    void ScriptPython::setValue(std::shared_ptr<widget::Arg> value) {
+    EResult ScriptPython::setValue(std::shared_ptr<widget::Arg> value) {
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "setValue");
 
 
@@ -138,34 +141,40 @@ namespace edz::save::edit {
             case widget::Arg::ArgumentType::STRING:
                 PyObject_CallObject(func, PyTuple_Pack(1, PyUnicode_FromString(value->stringArg.c_str())));
                 break;
+            default:
+                return ResultEdzScriptInvalidArgument;
         }
 
         if (PyErr_Occurred() != nullptr) {
             error("Python script's setValue function failed:");
             PyErr_Print();
             printf("\n");
+
+            return ResultEdzScriptRuntimeError;
         }
+
+        return ResultSuccess;
     }
 
-    std::vector<u8> ScriptPython::getModifiedSaveFileData() {
-        PyObject *func = PyObject_GetAttrString(this->m_ctx, "getModifiedSaveFileData");
+    std::tuple<EResult, std::vector<u8>> ScriptPython::getModifiedSaveData() {
+        PyObject *func = PyObject_GetAttrString(this->m_ctx, "getModifiedSaveData");
         PyObject *result = PyObject_CallObject(func, nullptr);
 
         if (result == nullptr) 
-            return std::vector<u8>(); // Return empty buffer
+            return { ResultEdzScriptRuntimeError, std::vector<u8>() }; // Return empty buffer
 
         if (PyErr_Occurred() != nullptr) {
-            error("Python script's getModifiedSaveFileData function failed:");
+            error("Python script's getModifiedSaveData function failed:");
             PyErr_Print();
             printf("\n");
 
-            return std::vector<u8>(); // Return empty buffer
+            return { ResultEdzScriptRuntimeError, std::vector<u8>() }; // Return empty buffer
         }
 
         size_t size = PyByteArray_Size(result);
         char *data = PyByteArray_AsString(result);
 
-        return std::vector<u8>(data, data + size);
+        return { ResultSuccess, std::vector<u8>(data, data + size) };
     }
     
 
@@ -192,11 +201,11 @@ namespace edz::save::edit {
     }
 
     PyObject* ScriptPython::getDataAsBuffer(PyObject *self, PyObject *args) {
-        return PyByteArray_FromStringAndSize(reinterpret_cast<char*>(this->m_saveFileData), this->m_saveFileSize);
+        return PyByteArray_FromStringAndSize(reinterpret_cast<char*>(this->m_saveData), this->m_saveSize);
     }
 
     PyObject* ScriptPython::getDataAsString(PyObject *self, PyObject *args) {
-        std::string string(reinterpret_cast<char*>(this->m_saveFileData), this->m_saveFileSize);
+        std::string string(reinterpret_cast<char*>(this->m_saveData), this->m_saveSize);
 
         return PyUnicode_FromStringAndSize(string.c_str(), string.length());
     }
