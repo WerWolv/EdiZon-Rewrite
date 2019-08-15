@@ -27,28 +27,39 @@
 
 namespace edz::web {
 
-    class EdiZonAPI {
+    class SwitchCheatsDBAPI {
     public:
-        EdiZonAPI();
-        ~EdiZonAPI();
+        SwitchCheatsDBAPI();
+        ~SwitchCheatsDBAPI();
 
         typedef struct {
+            u32 id;
+            buildid_t buildID;
+            std::string content;
+            std::string credits;
+        } cheat_t;
+
+        typedef struct {
+            u32 id;
             std::string name;
-            std::string owner;
-            std::string description;
+            std::string creationDate;
             std::string url;
-        } official_provider_t;
+            userid_t userID;
+            std::string userName;
+        } save_file_t;
 
         typedef struct {
+            std::string slug;
             std::string name;
-            std::string changelog;
-            std::string tag;
-            std::string date;
-            u32 downloadCount;
-        } release_info_t;
+            std::string image;
+            titleid_t titleID;
+            std::vector<cheat_t> cheats;
+        } cheat_response_t; 
 
-        std::pair<EResult, std::vector<official_provider_t>> getOfficialProviders();
-        std::pair<EResult, release_info_t> getReleaseInfo();
+        std::pair<EResult, cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
+        std::pair<EResult, u32> getCheatCount();
+        std::pair<EResult, save_file_t> getSaveFiles();
+        EResult addSaveFile();
 
     private:
         edz::helper::Curl curl;
