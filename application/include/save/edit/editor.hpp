@@ -21,34 +21,31 @@
 
 #include <edizon.hpp>
 
-#include <string>
-#include <vector>
-#include <map>
+#include "helpers/file.hpp"
 
-#include "save/edit/widgets/widget.hpp"
+#include "save/title.hpp"
+#include "save/account.hpp"
+
+#include "save/edit/config.hpp"
+#include "save/edit/script/script.hpp"
 
 namespace edz::save::edit {
 
-    class Script {
+    class Editor {
     public:
-        Script(std::string path);
-        virtual ~Script();
+        Editor(Editor const&) = delete;
+        void operator=(Editor const&) = delete;
 
-        virtual void setSaveData(u8 *buffer, size_t bufferSize) final;
-        virtual void addArgument(std::string argName, std::shared_ptr<widget::Arg> arg) final;
-        virtual void clearArguments() final;
+        static std::tuple<EResult, Config*, Script*> load(Title *title, Account *account, std::string saveFilePath);
+        static EResult store();
 
+    private:
+        Editor();
+        ~Editor();
 
-        virtual std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() = 0;
-        virtual EResult setValue(std::shared_ptr<widget::Arg> value) = 0;
-        virtual std::tuple<EResult, std::vector<u8>> getModifiedSaveData() = 0;
-
-    protected:
-        std::string m_scriptName;
-        std::map<std::string, std::shared_ptr<widget::Arg>> m_arguments;
-
-        u8 *m_saveData;
-        size_t m_saveSize;
+        static inline Config *s_config = nullptr;
+        static inline Script *s_script = nullptr;
+        static inline edz::helper::File *s_currentSaveFile = nullptr;
     };
 
 }

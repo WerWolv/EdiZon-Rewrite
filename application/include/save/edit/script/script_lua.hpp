@@ -33,6 +33,9 @@
 #define LUA_COMPAT_5_3
 
 extern "C" {
+    #define LUA_PATH_DEFAULT EDIZON_BASE_DIR "/scripts/?.lua;" \
+                             EDIZON_BASE_DIR "/scripts/libs/?.lua;" 
+
     #include "lua.h"
     #include "lualib.h"
     #include "lauxlib.h"
@@ -42,18 +45,20 @@ namespace edz::save::edit {
 
     class ScriptLua : public Script {
     public:
-        ScriptLua(std::string scriptName);
+        ScriptLua(std::string path);
         ~ScriptLua();
 
 
-        std::shared_ptr<widget::Arg> getValue();
-        void setValue(std::shared_ptr<widget::Arg> value);
-        std::vector<u8> getModifiedSaveFileData();
+        std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() override;
+        EResult setValue(std::shared_ptr<widget::Arg> value) override;
+        std::tuple<EResult, std::vector<u8>> getModifiedSaveData() override;
 
     private:
         lua_State *m_ctx;
 
         // Script callable functions
+        int luaopen_edizon(lua_State *ctx);
+
         int getArgument(lua_State *ctx);
         int getDataAsBuffer(lua_State *ctx);
         int getDataAsString(lua_State *ctx);

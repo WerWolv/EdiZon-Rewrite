@@ -37,14 +37,6 @@ namespace edz::save::edit {
         PYTHON
     };
 
-    enum class ConfigLoadState {
-        LOADED,
-        NO_CONFIG,
-        SYNTAX_ERROR,
-        CONFIG_OUTDATED,
-        TOO_MANY_REDIRECTS
-    };
-
     typedef struct {
         std::vector<widget::Widget*> widgets;
     } WidgetCategory;
@@ -61,18 +53,23 @@ namespace edz::save::edit {
         Config(Title *title, Account *account);
         ~Config();
 
+        EResult load();
         void createUI(TabFrame *tabFrame);
-        ConfigLoadState getLoadState();
+
+        std::string getAuthor();
+        std::string getDescription();
+        ScriptLanguage getScriptLanguage();
+        std::string getScript();
+        bool isBeta();
     private:
         Title *m_title;
         Account *m_account;
 
         std::string m_author;
-        ScriptLanguage m_scriptLanguage;
-        bool m_isBeta;
         std::string m_description;
-
-        ConfigLoadState m_configLoadState;
+        ScriptLanguage m_scriptLanguage;
+        std::string m_script;
+        bool m_isBeta;
 
         std::map<u16, FileConfig> m_fileConfigs;
 

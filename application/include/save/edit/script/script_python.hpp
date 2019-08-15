@@ -34,13 +34,13 @@ namespace edz::save::edit {
 
     class ScriptPython : public Script {
     public:
-        ScriptPython(std::string scriptName);
+        ScriptPython(std::string path);
         ~ScriptPython();
 
 
-        std::shared_ptr<widget::Arg> getValue();
-        void setValue(std::shared_ptr<widget::Arg> value);
-        std::vector<u8> getModifiedSaveFileData();
+        std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() override;
+        EResult setValue(std::shared_ptr<widget::Arg> value) override;
+        std::tuple<EResult, std::vector<u8>> getModifiedSaveData() override;
 
     private:
         PyObject *m_ctx;
