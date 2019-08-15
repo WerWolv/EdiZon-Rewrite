@@ -50,9 +50,9 @@ namespace edz::helper {
         }
 
         size_t File::fileSize() {
-            openFile();
+            if (!exists()) return -1;
 
-            if (!valid()) return -1;
+            openFile();
 
             size_t fileSize;
             fseek(this->m_file, 0, SEEK_END);
@@ -63,9 +63,7 @@ namespace edz::helper {
         }
 
         void File::removeFile() {
-            openFile();
-            if (!valid()) return;
-            closeFile();
+            if (!exists()) return;
 
             remove(this->m_filePath.c_str());
         }
@@ -101,8 +99,8 @@ namespace edz::helper {
             folder.createDirectories();
         }
 
-        bool File::valid() {
-            openFile();
+        bool File::exists() {
+            this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
             if (this->m_file != nullptr) {
                 closeFile();

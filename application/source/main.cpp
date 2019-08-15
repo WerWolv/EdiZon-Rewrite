@@ -30,6 +30,8 @@
 #include "ui/gui_main.hpp"
 #include "ui/gui_cheats.hpp"
 
+#include "cheat/cheat.hpp"
+
 
 using namespace edz;
 using namespace edz::ui;
@@ -38,6 +40,8 @@ EResult initServices() {
     // UI (Borealis)
     if (!Application::init(StyleEnum::ACCURATE))
         return ResultEdzBorealisInitFailed;
+
+    setLogLevel(LogLevel::DEBUG);
 
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
@@ -98,7 +102,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Gui::changeTo<GuiCheats>();
+    Gui::changeTo<GuiMain>();
 
     while (Application::mainLoop())
         Gui::tick();

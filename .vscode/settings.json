@@ -65,7 +65,11 @@
         "vi_shim.h": "c",
         "switch.h": "c",
         "fenv.h": "c",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "random": "cpp",
+        "set": "cpp"
     },
     "python.pythonPath": "/bin/python3.8"
 }
