@@ -6,3 +6,6 @@ sysmodule/build/
 sysmodule/out/
 
 companion/node_modules
+
+server/api_endpoint/config.py
+server/api_endpoint/__pycache__/
