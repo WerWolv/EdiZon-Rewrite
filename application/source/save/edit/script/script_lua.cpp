@@ -34,7 +34,11 @@ namespace edz::save::edit {
 
         *static_cast<ScriptLua**>(lua_getextraspace(this->m_ctx)) = this;
 
+        // Make it possible to include the edizon module using require('edizon')
+        luaL_getsubtable(this->m_ctx, LUA_REGISTRYINDEX, LUA_PRELOAD_TABLE);
         lua_pushcfunction(this->m_ctx, &dispatch<ScriptLua::luaopen_edizon>);
+        lua_setfield(this->m_ctx, -2, "edizon");
+        lua_pop(this->m_ctx, 1);
 
         if (luaL_loadfile(this->m_ctx, path.c_str()) != 0) {
             error("Failed to load Lua script file");
@@ -169,9 +173,9 @@ namespace edz::save::edit {
     }
 
     int ScriptLua::getDataAsBuffer(lua_State *ctx) {
-        lua_createtable(ctx, this->m_saveFileSize, 0);
+        lua_createtable(ctx, this->m_saveSize, 0);
 
-        for (u64 i = 0; i < this->m_saveFileSize; i++) {
+        for (u64 i = 0; i < this->m_saveSize; i++) {
             lua_pushinteger(ctx, i + 1);
             lua_pushinteger(ctx, this->m_saveData[i]);
             lua_settable(ctx, -3);
