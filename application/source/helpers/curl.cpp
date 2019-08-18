@@ -18,6 +18,7 @@
  */
 
 #include "helpers/curl.hpp"
+#include "helpers/file.hpp"
 
 #include <cstring>
 
@@ -58,8 +59,9 @@ namespace edz::helper {
         return curl->getProgressCallback()((static_cast<double>(ulnow) / static_cast<double>(ultotal)) * 100);
     }
 
-    EResult Curl::get(std::string path, std::string &response) {
+    std::pair<EResult, std::string> Curl::get(std::string path) {
         CURLcode result;
+        std::string response;
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
@@ -78,14 +80,15 @@ namespace edz::helper {
 
         if (result != CURLE_OK) {
             debug(curl_easy_strerror(result));
-            return EResult(MODULE_EDIZON, 1);
+            return { ResultEdzCurlError, "" };
         }
 
-        return EResult(0, 0);
+        return { ResultSuccess, response };
     }
 
-    EResult Curl::download(std::string path, std::vector<u8> &data, std::string &response) {
+    std::pair<EResult, std::vector<u8>> Curl::download(std::string path) {
         CURLcode result;
+        std::vector<u8> data;
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
@@ -107,13 +110,13 @@ namespace edz::helper {
 
         if (result != CURLE_OK) {
             debug(curl_easy_strerror(result));
-            return EResult(MODULE_EDIZON, 1);
+            return { ResultEdzCurlError, std::vector<u8>() };
         }
 
-        return EResult(0, 0);
+        return { ResultSuccess, data };
     }
 
-    EResult Curl::download(std::string path, std::string downloadPath, std::string &response) {
+    EResult Curl::download(std::string path, std::string downloadPath) {
         CURLcode result;
 
         struct curl_slist *headers = nullptr;
@@ -146,8 +149,10 @@ namespace edz::helper {
         return EResult(0, 0);
     }
 
-    EResult Curl::upload(std::string path, std::string fileName, std::vector<u8> &data, std::string &response) {
+    std::pair<EResult, std::string> Curl::upload(std::string path, std::string fileName, std::vector<u8> &data) {
         CURLcode result;
+        std::string response;
+
         curl_mime *mime = curl_mime_init(this->m_curl);
         curl_mimepart *part = curl_mime_addpart(mime);
 
@@ -176,10 +181,53 @@ namespace edz::helper {
 
         if (result != CURLE_OK) {
             debug(curl_easy_strerror(result));
-            return EResult(MODULE_EDIZON, 1);
+            return { ResultEdzCurlError, "" };
         }
 
-        return EResult(0, 0);
+        return { ResultSuccess, response };
+    }
+
+    std::pair<EResult, std::string> Curl::upload(std::string path, std::string uploadPath) {
+        CURLcode result;
+        std::string response;
+
+        helper::File file(uploadPath);
+        std::vector<u8> data;
+        data.reserve(file.fileSize());
+        file.read(&data[0], file.fileSize());
+
+        curl_mime *mime = curl_mime_init(this->m_curl);
+        curl_mimepart *part = curl_mime_addpart(mime);
+
+        curl_mime_data(part, reinterpret_cast<const char*>(&data[0]), file.fileSize());
+        curl_mime_filename(part, file.fileName().c_str());
+        curl_mime_name(part, "file");
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Cache-Control: no-cache");
+
+        curl_easy_setopt(this->m_curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(this->m_curl, CURLOPT_MIMEPOST, this);
+        curl_easy_setopt(this->m_curl, CURLOPT_URL, (this->m_baseURL + path).c_str());
+        curl_easy_setopt(this->m_curl, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_easy_setopt(this->m_curl, CURLOPT_WRITEFUNCTION, writeToString);
+        curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(this->m_curl, CURLOPT_WRITEDATA, &response);
+        curl_easy_setopt(this->m_curl, CURLOPT_XFERINFOFUNCTION, &xferinfo);
+        curl_easy_setopt(this->m_curl, CURLOPT_XFERINFODATA, this);
+        curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        
+        result = curl_easy_perform(this->m_curl);
+
+        if (result != CURLE_OK) {
+            debug(curl_easy_strerror(result));
+            return { ResultEdzCurlError, "" };
+        }
+
+        return { ResultSuccess, response };
     }
 
 
