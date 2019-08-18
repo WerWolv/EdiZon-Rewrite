@@ -25,7 +25,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     class File {
     public:
@@ -33,13 +33,13 @@ namespace edz::helper {
         File(const File &file);
         ~File();
 
-        std::string fileName();
-        std::string filePath();
-        std::string basePath();
+        std::string name();
+        std::string path();
+        std::string parent();
 
-        size_t fileSize();
+        size_t size();
 
-        void removeFile();
+        void remove();
         File copyTo(std::string path);
         void createDirectories();
 

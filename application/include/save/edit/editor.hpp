@@ -45,7 +45,7 @@ namespace edz::save::edit {
 
         static inline Config *s_config = nullptr;
         static inline Script *s_script = nullptr;
-        static inline edz::helper::File *s_currentSaveFile = nullptr;
+        static inline edz::hlp::File *s_currentSaveFile = nullptr;
     };
 
 }

@@ -39,7 +39,7 @@ namespace edz::save {
         static std::map<titleid_t, std::unique_ptr<Title>>& getAllTitles();
         static std::map<userid_t, std::unique_ptr<Account>>& getAllAccounts();
 
-        edz::helper::Folder getSaveFolder();
+        edz::hlp::Folder getSaveFolder();
         void commit();
 
     private:

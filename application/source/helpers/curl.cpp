@@ -22,7 +22,7 @@
 
 #include <cstring>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     Curl::Curl(std::string baseURL) : m_baseURL(baseURL) {
         this->m_curl = curl_easy_init();
@@ -191,16 +191,16 @@ namespace edz::helper {
         CURLcode result;
         std::string response;
 
-        helper::File file(uploadPath);
+        hlp::File file(uploadPath);
         std::vector<u8> data;
-        data.reserve(file.fileSize());
-        file.read(&data[0], file.fileSize());
+        data.reserve(file.size());
+        file.read(&data[0], file.size());
 
         curl_mime *mime = curl_mime_init(this->m_curl);
         curl_mimepart *part = curl_mime_addpart(mime);
 
-        curl_mime_data(part, reinterpret_cast<const char*>(&data[0]), file.fileSize());
-        curl_mime_filename(part, file.fileName().c_str());
+        curl_mime_data(part, reinterpret_cast<const char*>(&data[0]), file.size());
+        curl_mime_filename(part, file.name().c_str());
         curl_mime_name(part, "file");
 
         struct curl_slist *headers = nullptr;

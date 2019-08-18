@@ -26,7 +26,7 @@
 #include <functional>
 #include <curl/curl.h>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     class Curl {
     public:

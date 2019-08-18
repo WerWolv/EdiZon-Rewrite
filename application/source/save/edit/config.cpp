@@ -180,7 +180,7 @@ namespace edz::save::edit {
 
         
         for (std::string path : fileConfig.saveFilePaths) {
-            edz::helper::Folder saveFileFolder(saveFileSystem->getSaveFolder().path() + path);
+            edz::hlp::Folder saveFileFolder(saveFileSystem->getSaveFolder().path() + path);
 
             for (auto &[fileName, file] : saveFileFolder.getFiles())
                 if (std::regex_match(fileName, std::regex(fileNameRegex)))

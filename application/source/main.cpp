@@ -32,6 +32,8 @@
 
 #include "cheat/cheat.hpp"
 
+#include "api/switchcheatsdb_api.hpp"
+
 
 using namespace edz;
 using namespace edz::ui;
@@ -71,7 +73,7 @@ EResult initServices() {
 
     // Controller LED
     TRY(hidsysInitialize());
-    TRY(helper::controllerLEDInitialize());
+    TRY(hlp::controllerLEDInitialize());
 
     return ResultSuccess;
 }
@@ -94,8 +96,7 @@ void exitServices() {
 }
 
 int main(int argc, char* argv[]) {  
-    EResult res = initServices();
-    if (res.failed()) {
+    if (EResult res = initServices(); res.failed()) {
         Gui::fatal(edz::LangEntry("edz.fatal.service.init").get() + res.getString());
 
         exitServices();

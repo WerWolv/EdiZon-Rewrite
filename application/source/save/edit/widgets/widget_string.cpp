@@ -43,7 +43,7 @@ namespace edz::save::edit::widget {
             listItem->setValue(this->m_currValue);
 
             listItem->setClickListener([&](View *view){
-                edz::helper::askSwkbdText([&](std::string str){
+                edz::hlp::askSwkbdText([&](std::string str){
                     if (str.length() < this->m_minLength) return;
 
                     this->m_currValue = str;

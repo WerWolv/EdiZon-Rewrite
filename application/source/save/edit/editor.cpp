@@ -40,7 +40,7 @@ namespace edz::save::edit {
             return { ResultEdzEditorAlreadyLoaded, nullptr, nullptr };
 
         {
-            edz::helper::File configFile(EDIZON_BASE_DIR "/configs/" + title->getIDString() + ".json");
+            edz::hlp::File configFile(EDIZON_BASE_DIR "/configs/" + title->getIDString() + ".json");
 
             if (!configFile.exists())
                 return { ResultEdzEditorNoConfigFound, nullptr, nullptr };
@@ -57,7 +57,7 @@ namespace edz::save::edit {
         }
 
         {
-            edz::helper::File scriptFile(EDIZON_BASE_DIR "/scripts/" + Editor::s_config->getScript());
+            edz::hlp::File scriptFile(EDIZON_BASE_DIR "/scripts/" + Editor::s_config->getScript());
 
             if (!scriptFile.exists())  {
                 delete Editor::s_config;
@@ -72,7 +72,7 @@ namespace edz::save::edit {
         else if (Editor::s_config->getScriptLanguage() == ScriptLanguage::PYTHON)
             Editor::s_script = new ScriptPython(EDIZON_BASE_DIR "/scripts/" + Editor::s_config->getScript());
         
-        Editor::s_currentSaveFile = new edz::helper::File(saveFilePath);
+        Editor::s_currentSaveFile = new edz::hlp::File(saveFilePath);
         
         size_t saveDataSize = Editor::s_currentSaveFile->fileSize();
         std::vector<u8> saveData;

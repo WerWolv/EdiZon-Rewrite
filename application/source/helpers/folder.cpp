@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <cstring>
 
-namespace edz::helper {
+namespace edz::hlp {
     Folder::Folder(std::string path) {
         this->m_dir = nullptr;
 
@@ -46,7 +46,7 @@ namespace edz::helper {
         return this->m_path;
     }
 
-    std::string Folder::folderName() {
+    std::string Folder::name() {
         return this->m_folderName;
     }
 
@@ -69,10 +69,10 @@ namespace edz::helper {
 
             if (entry->d_type == DT_DIR) {
                 Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
-                folder.copyTo(newPath + folder.folderName());
+                folder.copyTo(newPath + folder.name());
             } else if (entry->d_type == DT_REG) {
                 File file(this->m_path + std::string(entry->d_name));
-                file.copyTo(newPath + file.fileName());
+                file.copyTo(newPath + file.name());
             }
         }
 
@@ -82,11 +82,11 @@ namespace edz::helper {
     void Folder::copyFrom(std::string oldPath) {
         Folder oldFolder(oldPath);
 
-        this->removeFolder();
+        this->remove();
         oldFolder.copyTo(this->m_path);
     }
 
-    void Folder::removeFolder() {
+    void Folder::remove() {
         struct dirent *entry;
 
         openDirectory();
@@ -101,13 +101,13 @@ namespace edz::helper {
 
                 {
                     Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
-                    folder.removeFolder();
+                    folder.remove();
                 }
 
                 rmdir((this->m_path + entry->d_name).c_str());
             } else if (entry->d_type == DT_REG) {
                 File file(this->m_path + "/" + std::string(entry->d_name));
-                file.removeFile();
+                file.remove();
             }
         }
 

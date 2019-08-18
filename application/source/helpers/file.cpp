@@ -22,7 +22,7 @@
 #include <cstring>
 #include <helpers/folder.hpp>
 
-namespace edz::helper {
+namespace edz::hlp {
         File::File(std::string filePath) : m_filePath(filePath) {
             this->m_file = nullptr;
         }
@@ -37,19 +37,19 @@ namespace edz::helper {
         }
         
 
-        std::string File::fileName() {
+        std::string File::name() {
             return std::filesystem::path(this->m_filePath).filename();
         }
 
-        std::string File::filePath() {
+        std::string File::path() {
             return this->m_filePath;
         }
 
-        std::string File::basePath() {
+        std::string File::parent() {
             return std::filesystem::path(this->m_filePath).parent_path();
         }
 
-        size_t File::fileSize() {
+        size_t File::size() {
             if (!exists()) return -1;
 
             openFile();
@@ -62,14 +62,14 @@ namespace edz::helper {
             return fileSize;
         }
 
-        void File::removeFile() {
+        void File::remove() {
             if (!exists()) return;
 
-            remove(this->m_filePath.c_str());
+            ::remove(this->m_filePath.c_str());
         }
 
         File File::copyTo(std::string path) {
-            Folder dstFolder(File(path).basePath());
+            Folder dstFolder(File(path).parent());
             dstFolder.createDirectories();
 
             FILE *dst = fopen(path.c_str(), "w");
@@ -94,7 +94,7 @@ namespace edz::helper {
         }
 
         void File::createDirectories() {
-            Folder folder(this->basePath());
+            Folder folder(this->parent());
 
             folder.createDirectories();
         }

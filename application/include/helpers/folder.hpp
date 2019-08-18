@@ -29,7 +29,7 @@
 #include <dirent.h>
 #include <functional>
 
-namespace edz::helper {
+namespace edz::hlp {
     class Folder {
     public:
         Folder(std::string path);
@@ -37,12 +37,12 @@ namespace edz::helper {
         ~Folder();
 
         std::string path();
-        std::string folderName();
+        std::string name();
 
         void copyTo(std::string newPath);
         void copyFrom(std::string oldPath);
 
-        void removeFolder();
+        void remove();
         void createDirectories();
 
         std::map<std::string, File> getFiles();

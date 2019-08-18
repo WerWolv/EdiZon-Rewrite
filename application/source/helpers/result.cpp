@@ -37,7 +37,7 @@ namespace edz {
     }
 
     std::string EResult::getString() {
-        return edz::helper::formatString("2%03d-%04d (0x%x)", this->getModule(), this->getDescription(), static_cast<u32>(*this));
+        return edz::hlp::formatString("2%03d-%04d (0x%x)", this->getModule(), this->getDescription(), static_cast<u32>(*this));
     }
 
     bool EResult::operator==(EResult &other) {

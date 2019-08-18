@@ -129,8 +129,8 @@ namespace edz::save {
         return accounts;
     }
 
-    edz::helper::Folder SaveFileSystem::getSaveFolder() {
-        return edz::helper::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":");
+    edz::hlp::Folder SaveFileSystem::getSaveFolder() {
+        return edz::hlp::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":");
     }
 
     void SaveFileSystem::commit() {

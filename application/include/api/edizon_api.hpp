@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace edz::web {
+namespace edz::api {
 
     class EdiZonAPI {
     public:
@@ -51,7 +51,7 @@ namespace edz::web {
         std::pair<EResult, release_info_t> getReleaseInfo();
 
     private:
-        edz::helper::Curl curl;
+        edz::hlp::Curl curl;
     };
 
 }

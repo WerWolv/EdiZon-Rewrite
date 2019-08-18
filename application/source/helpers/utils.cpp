@@ -28,7 +28,7 @@
 
 #define MHz *1E6
 
-namespace edz::helper {
+namespace edz::hlp {
 
     static HidsysNotificationLedPattern patternOn, patternOff;
     static u64 uniquePadIds[0x10];

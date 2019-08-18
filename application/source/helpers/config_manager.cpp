@@ -19,7 +19,7 @@
 
 #include "helpers/config_manager.hpp"
 
-namespace edz::helper {
+namespace edz::hlp {
 
 
 

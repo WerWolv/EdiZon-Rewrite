@@ -66,7 +66,7 @@ namespace edz::api {
         EResult addSaveFile();
 
     private:
-        edz::helper::Curl m_curl;
+        edz::hlp::Curl m_curl;
     };
 
 }

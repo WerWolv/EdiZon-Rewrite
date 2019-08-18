@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     class ConfigManager {
     public:

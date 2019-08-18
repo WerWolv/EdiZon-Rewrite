@@ -24,7 +24,7 @@
 #include <string>
 #include <functional>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     namespace edz::save {
         class Title;

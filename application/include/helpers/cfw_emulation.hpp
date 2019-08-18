@@ -21,7 +21,7 @@
 
 #include <edizon.hpp>
 
-namespace edz::helper {
+namespace edz::hlp {
 
     namespace CFWEmulation {
 

@@ -44,7 +44,7 @@ namespace edz::save::edit::widget {
             listItem->setValue(std::to_string(this->m_currValue));
 
             listItem->setClickListener([&](View *view){
-                edz::helper::askSwkbdNumber([&](std::string str){
+                edz::hlp::askSwkbdNumber([&](std::string str){
 
                     s64 newValue = std::stoll(str);
                     this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));

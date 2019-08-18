@@ -20,7 +20,7 @@
 #include "helpers/cfw_emulation.hpp"
 #include "helpers/utils.hpp"
 
-namespace edz::helper {
+namespace edz::hlp {
 
     namespace CFWEmulation {
         
