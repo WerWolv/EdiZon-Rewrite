@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace edz::web {
+namespace edz::api {
 
     class SwitchCheatsDBAPI {
     public:
@@ -56,13 +56,17 @@ namespace edz::web {
             std::vector<cheat_t> cheats;
         } cheat_response_t; 
 
+        // Unauthenticated
+        std::pair<EResult, std::string> getToken(std::string email, std::string password);
+
+        // Authenticated
         std::pair<EResult, cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
         std::pair<EResult, u32> getCheatCount();
         std::pair<EResult, save_file_t> getSaveFiles();
         EResult addSaveFile();
 
     private:
-        edz::helper::Curl curl;
+        edz::helper::Curl m_curl;
     };
 
 }
