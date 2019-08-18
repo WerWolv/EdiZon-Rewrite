@@ -54,7 +54,7 @@ endif
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES			:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat source/ui/elements libs/lua libs/mruby/src libs/zipper/zipper libs/zipper/minizip libs/quickjs
+SOURCES			:=	source source/helpers source/save source/save/edit source/save/edit/widgets source/cheat source/ui/elements source/api libs/lua libs/mruby/src libs/zipper/zipper libs/zipper/minizip libs/quickjs
 INCLUDES		:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/zipper/zipper libs/zipper/minizip libs/quickjs
 EXT_INCLUDES	:=  
 EXCLUDES		:=	onelua.c lua.c iowin32.c minizip.c miniunz.c

@@ -28,7 +28,7 @@ namespace edz::helper {
 
     class ConfigManager {
     public:
-        static ConfigManager& getInstance() {
+        static ConfigManager& get() {
             static ConfigManager instance;
             
             return instance;
@@ -44,7 +44,7 @@ namespace edz::helper {
 
             struct update {
                 std::string localCommitSha;
-                std::string switchcheatsdbUsername;
+                std::string switchcheatsdbEmail;
                 std::string switchcheatsdbApiToken;
             };
 
@@ -57,13 +57,15 @@ namespace edz::helper {
             };
         } config_t;
         
+        config_t& getConfig();
+
+        void load();
+        void store();
 
     private:
         ConfigManager();
         ~ConfigManager();
 
-        void load();
-        void store();
     };
 
 }

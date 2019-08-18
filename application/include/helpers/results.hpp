@@ -23,27 +23,32 @@
 
 namespace edz {
 
+    #define EDZRES(desc) MAKERESULT(MODULE_EDIZON, desc)
+
     constexpr Result ResultSuccess                          = MAKERESULT(0, 0);
 
-    constexpr Result ResultEdzBorealisInitFailed            = MAKERESULT(MODULE_EDIZON, 1);
-    constexpr Result ResultEdzCurlInitFailed                = MAKERESULT(MODULE_EDIZON, 2);
+    constexpr Result ResultEdzBorealisInitFailed            = EDZRES(1);
+    constexpr Result ResultEdzCurlInitFailed                = EDZRES(2);
 
-    constexpr Result ResultEdzSysmoduleAlreadyRunning       = MAKERESULT(MODULE_EDIZON, 101);
-    constexpr Result ResultEdzSysmoduleNotRunning           = MAKERESULT(MODULE_EDIZON, 102);
-    constexpr Result ResultEdzSysmoduleLaunchFailed         = MAKERESULT(MODULE_EDIZON, 103);
-    constexpr Result ResultEdzSysmoduleTerminationFailed    = MAKERESULT(MODULE_EDIZON, 104);
+    constexpr Result ResultEdzSysmoduleAlreadyRunning       = EDZRES(101);
+    constexpr Result ResultEdzSysmoduleNotRunning           = EDZRES(102);
+    constexpr Result ResultEdzSysmoduleLaunchFailed         = EDZRES(103);
+    constexpr Result ResultEdzSysmoduleTerminationFailed    = EDZRES(104);
 
-    constexpr Result ResultEdzEditorNoConfigFound           = MAKERESULT(MODULE_EDIZON, 201);
-    constexpr Result ResultEdzEditorNoScriptFound           = MAKERESULT(MODULE_EDIZON, 202);
-    constexpr Result ResultEdzEditorConfigOutdated          = MAKERESULT(MODULE_EDIZON, 203);
-    constexpr Result ResultEdzEditorScriptSyntaxError       = MAKERESULT(MODULE_EDIZON, 204);
-    constexpr Result ResultEdzEditorTooManyRedirects        = MAKERESULT(MODULE_EDIZON, 205);
-    constexpr Result ResultEdzEditorAlreadyLoaded           = MAKERESULT(MODULE_EDIZON, 206);
-    constexpr Result ResultEdzEditorNotLoaded               = MAKERESULT(MODULE_EDIZON, 207);
-    constexpr Result ResultEdzEditorLoadFailed              = MAKERESULT(MODULE_EDIZON, 208);
-    constexpr Result ResultEdzEditorStoreFailed             = MAKERESULT(MODULE_EDIZON, 209);
+    constexpr Result ResultEdzEditorNoConfigFound           = EDZRES(201);
+    constexpr Result ResultEdzEditorNoScriptFound           = EDZRES(202);
+    constexpr Result ResultEdzEditorConfigOutdated          = EDZRES(203);
+    constexpr Result ResultEdzEditorScriptSyntaxError       = EDZRES(204);
+    constexpr Result ResultEdzEditorTooManyRedirects        = EDZRES(205);
+    constexpr Result ResultEdzEditorAlreadyLoaded           = EDZRES(206);
+    constexpr Result ResultEdzEditorNotLoaded               = EDZRES(207);
+    constexpr Result ResultEdzEditorLoadFailed              = EDZRES(208);
+    constexpr Result ResultEdzEditorStoreFailed             = EDZRES(209);
 
-    constexpr Result ResultEdzScriptRuntimeError            = MAKERESULT(MODULE_EDIZON, 301);
-    constexpr Result ResultEdzScriptInvalidArgument         = MAKERESULT(MODULE_EDIZON, 302);
+    constexpr Result ResultEdzScriptRuntimeError            = EDZRES(301);
+    constexpr Result ResultEdzScriptInvalidArgument         = EDZRES(302);
+
+    constexpr Result ResultEdzCurlError                     = EDZRES(401);
+    constexpr Result ResultEdzAPIError                      = EDZRES(402);
 
 }
