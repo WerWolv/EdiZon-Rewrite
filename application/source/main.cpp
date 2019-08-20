@@ -44,6 +44,7 @@ EResult initServices() {
         return ResultEdzBorealisInitFailed;
 
     setLogLevel(LogLevel::DEBUG);
+    Application::setCommonFooter(VERSION_STRING);
 
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
@@ -61,7 +62,7 @@ EResult initServices() {
 
     // Overclock
     TRY(pcvInitialize());
-    TRY(clkrstInitialize());
+    clkrstInitialize();     // Don't check here because this service is only available on 8.0.0+
 
     // Language code setting querying
     TRY(setInitialize());
@@ -96,6 +97,7 @@ void exitServices() {
 }
 
 int main(int argc, char* argv[]) {  
+
     if (EResult res = initServices(); res.failed()) {
         Gui::fatal(edz::LangEntry("edz.fatal.service.init").get() + res.getString());
 
