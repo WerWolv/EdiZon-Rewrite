@@ -74,7 +74,7 @@ namespace edz::save::edit {
         
         Editor::s_currentSaveFile = new edz::hlp::File(saveFilePath);
         
-        size_t saveDataSize = Editor::s_currentSaveFile->fileSize();
+        size_t saveDataSize = Editor::s_currentSaveFile->size();
         std::vector<u8> saveData;
 
         saveData.reserve(saveDataSize);
