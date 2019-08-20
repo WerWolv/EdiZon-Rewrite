@@ -23,6 +23,8 @@
 
 #include <string>
 #include <functional>
+#include <sstream>
+#include <iomanip>
 
 namespace edz::hlp {
 
@@ -32,7 +34,10 @@ namespace edz::hlp {
 
     bool askPctl(std::function<void()> f);
     bool askSwkbdText(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
+    bool askSwkbdPassword(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
     bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", std::string leftButton = "", std::string rightButton = "", u8 maxStringLength = 32, std::string initialText = "");
+    
+    bool isTitleRunning();
     bool isServiceRunning(const char *serviceName);
 
     bool isOnAMS();
@@ -41,6 +46,9 @@ namespace edz::hlp {
 
     std::string getLFSTitlesPath();
     std::string getLFSCheatsPath(edz::save::Title *title);
+
+    bool isInAppletMode();
+    bool isInApplicationMode();
 
     template <typename ...Args>
     std::string formatString(const std::string& format, Args && ...args) {
@@ -51,6 +59,16 @@ namespace edz::hlp {
 
         return output;
     }
+
+    template<typename T>
+    std::string toHexString(T value) {
+        std::stringstream sstream;
+        sstream << std::uppercase << std::setfill('0') << std::setw(sizeof(T) * 2) << std::hex << value;
+
+        return sstream.str();
+    }
+
+    std::string limitStringLength(std::string string, size_t maxLength);
 
     std::string getCurrentTimeString();
     u8 getCurrentBatteryPercentage();

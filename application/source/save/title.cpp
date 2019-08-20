@@ -48,9 +48,9 @@ namespace edz::save {
         this->m_versionString = std::string(appControlData.nacp.version);
         this->m_version = appContentMetaStatus.title_version;
 
-        this->m_titleIcon = new u8[appControlDataSize - sizeof(NsApplicationControlData::nacp)];
-        std::memcpy(this->m_titleIcon, appControlData.icon, appControlDataSize - sizeof(NsApplicationControlData::nacp));
         this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
+        this->m_titleIcon = new u8[this->m_iconSize];
+        std::memcpy(this->m_titleIcon, appControlData.icon, this->m_iconSize);
     }
 
     Title::~Title() {
@@ -71,6 +71,10 @@ namespace edz::save {
 
     std::string Title::getName() {
         return this->m_titleName;
+    }
+
+    std::string Title::getAuthor() {
+        return this->m_titleAuthor;
     }
 
     std::string Title::getVersionString() {
@@ -105,9 +109,32 @@ namespace edz::save {
         return this->getID() == runningTitleID;
     }
 
+    titleid_t Title::getRunningTitleID() {
+        static titleid_t runningTitleID = 0;
 
-    void Title::getIcon(u8 *buffer, size_t bufferSize) {
-        std::memcpy(buffer, this->m_titleIcon, bufferSize);
+        // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
+        if (runningTitleID == 0) {
+            processid_t pid = Title::getRunningProcessID();
+            pminfoGetTitleId(&runningTitleID, pid);
+        }
+
+        return runningTitleID;
+    }
+
+    processid_t Title::getRunningProcessID() {
+        static processid_t runningProcessId = 0;
+
+        // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
+        if (runningProcessId == 0)
+            pmdmntGetApplicationPid(&runningProcessId);
+        
+
+        return runningProcessId;
+    }
+
+
+    void Title::getIcon(u8 *buffer, size_t size) {
+        std::memcpy(buffer, this->m_titleIcon, this->m_iconSize);
     }
 
     size_t Title::getIconSize() {

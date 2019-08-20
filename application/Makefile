@@ -71,7 +71,7 @@ SPACE     	:= $(null) $(null)
 
 DEFINES 	+= -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 
-CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
+CFLAGS		:=	-g -Wall -Og -ffunction-sections \
 				$(ARCH) $(DEFINES) 				 \
 				-DWINDOW_NAME=\"EdiZon\"		 \
 				-DVERSION_MAJOR=${VERSION_MAJOR} \

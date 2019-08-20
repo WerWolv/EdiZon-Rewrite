@@ -21,6 +21,7 @@
             "defines": [
                 "SWITCH",
                 "WINDOW_NAME=\"EdiZon\"",
+                "VERSION_STRING=\"v0.0.0\"",
                 "__SWITCH__"
             ],
             "compilerPath": "C:/devkitPro/devkitA64/bin/aarch64-none-elf-g++",
@@ -50,6 +51,7 @@
             "defines": [
                 "SWITCH",
                 "WINDOW_NAME=\"EdiZon\"",
+                "VERSION_STRING=\"v0.0.0\"",
                 "__SWITCH__"
             ],
             "compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++",

@@ -38,6 +38,7 @@ namespace edz::save {
         std::string getIDString();
 
         std::string getName();
+        std::string getAuthor();
         std::string getVersionString();
         u32 getVersion();
 
@@ -45,8 +46,10 @@ namespace edz::save {
         bool hasSaveFile();
 
         bool isRunning();
+        static titleid_t getRunningTitleID();
+        static processid_t getRunningProcessID();
 
-        void getIcon(u8 *buffer, size_t bufferSize);
+        void getIcon(u8 *buffer, size_t size);
         size_t getIconSize();
 
         std::vector<userid_t> getUserIDs();

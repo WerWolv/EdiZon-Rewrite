@@ -19,26 +19,30 @@
 
 #pragma once
 
+#include <edizon.hpp>
 #include <Borealis.hpp>
-
-#include <ui/elements/title_button.hpp>
 
 #include <string>
 #include <vector>
 
-namespace edz::ui::elements {
+#include "save/title.hpp"
 
-    class TitleList : public BoxLayout {
+#include <memory>
+
+namespace edz::ui::element {
+
+    class TitleInfo : public View {
     public:
-        TitleList();
-        ~TitleList();
+        TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title, processid_t processID, buildid_t buildID);
+        ~TitleInfo();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
         void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
         View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
 
     private:
-        std::vector<TitleButton*> m_titleButtons;
+        Table *m_table;
+        Image *m_image;
     };
 
 }

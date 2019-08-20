@@ -18,6 +18,7 @@
  */
 
 #include "cheat/cheat.hpp"
+#include "helpers/utils.hpp"
 
 #include <cstring>
 
@@ -180,6 +181,10 @@ namespace edz::cheat {
     }
 
 
+    bool CheatManager::isCheatServiceAvailable() {
+        return hlp::isServiceRunning("dmnt:cht");
+    }
+
     bool CheatManager::forceAttach() {
         return dmntcht::forceOpenCheatProcess().succeeded();
     }
@@ -202,7 +207,10 @@ namespace edz::cheat {
     }
 
     buildid_t CheatManager::getBuildID() {
-        return *reinterpret_cast<buildid_t*>(this->m_processMetadata.main_nso_build_id);
+        buildid_t buildid = 0;
+
+        std::memcpy(&buildid, this->m_processMetadata.main_nso_build_id, sizeof(buildid_t));
+        return buildid;
     }
 
 
@@ -215,7 +223,7 @@ namespace edz::cheat {
     }
 
 
-    MemoryInfo queryMemory(addr_t address) {
+    MemoryInfo CheatManager::queryMemory(addr_t address) {
         MemoryInfo memInfo = { 0 };
 
         dmntcht::queryCheatProcessMemory(&memInfo, address);
@@ -223,7 +231,7 @@ namespace edz::cheat {
         return memInfo;
     }
 
-    std::vector<MemoryInfo> getMemoryRegions() {
+    std::vector<MemoryInfo> CheatManager::getMemoryRegions() {
         MemoryInfo memInfo = { 0 };
         std::vector<MemoryInfo> memInfos;
 

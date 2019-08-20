@@ -77,6 +77,35 @@ namespace edz::hlp {
         return false;
     }
 
+    bool askSwkbdPassword(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
+        SwkbdConfig config;
+
+        swkbdCreate(&config, 0);
+
+        swkbdConfigMakePresetPassword(&config);
+        swkbdConfigSetHeaderText(&config, headerText.c_str());
+        swkbdConfigSetSubText(&config, subText.c_str());
+        swkbdConfigSetInitialText(&config, initialText.c_str());
+        swkbdConfigSetBlurBackground(&config, true);
+        swkbdConfigSetType(&config, SwkbdType_Normal);
+        swkbdConfigSetStringLenMax(&config, maxStringLength);
+        swkbdConfigSetStringLenMaxExt(&config, 1);
+        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
+
+        char buffer[0x100];
+
+        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+            f(buffer);
+
+            swkbdClose(&config);
+            return true;
+        }
+
+        swkbdClose(&config);
+
+        return false;
+    }
+
     bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText, std::string subText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
 
@@ -108,6 +137,34 @@ namespace edz::hlp {
         return false;
     }
 
+    bool isTitleRunning() {
+        u64 runningTitlePid = 0, edizonPid = 0;
+
+        if (EResult(pmdmntGetApplicationPid(&runningTitlePid)).failed())
+            return false;
+
+        if (EResult(svcGetProcessId(&edizonPid, CUR_PROCESS_HANDLE)).failed())
+            return false;
+
+        return runningTitlePid > 0 && runningTitlePid != edizonPid;
+    }
+
+    bool isInApplicationMode() {
+        u64 runningTitlePid = 0, edizonPid = 0;
+
+        if (EResult(pmdmntGetApplicationPid(&runningTitlePid)).failed())
+            return false;
+
+        if (EResult(svcGetProcessId(&edizonPid, CUR_PROCESS_HANDLE)).failed())
+            return false;
+
+        return runningTitlePid == edizonPid;
+    }
+
+    bool isInAppletMode() {
+        return !isInApplicationMode();
+    }
+
     bool isServiceRunning(const char *serviceName) {
         Handle handle;
         bool running = R_FAILED(smRegisterService(&handle, serviceName, false, 1));
@@ -135,13 +192,15 @@ namespace edz::hlp {
 
     std::string getLFSTitlesPath() {
         if (isOnAMS())
-            return "/atmosphere/titles";
+            return "sdmc:/atmosphere/titles";
         
         if (isOnRNX())
-            return "/ReiNX/titles";
+            return "sdmc:/ReiNX/titles";
 
         if (isOnSXOS())
-            return "/sxos/titles";
+            return "sdmc:/sxos/titles";
+
+        return "";
     }
 
     std::string getLFSCheatsPath(save::Title *title) {
@@ -165,6 +224,21 @@ namespace edz::hlp {
         psmGetBatteryChargePercentage(&percentage);
 
         return percentage;
+    }
+
+    std::string limitStringLength(std::string string, size_t maxLength) {
+        if (string.length() <= maxLength)
+            return string;
+
+        char modString[string.length() + 1];
+        std::strcpy(modString, string.c_str());
+
+        modString[maxLength - 3] = '.'; 
+        modString[maxLength - 2] = '.';
+        modString[maxLength - 1] = '.';
+        modString[maxLength - 0] = '\0';
+
+        return std::string(modString);
     }
 
     void overclockSystem(bool enable) {
@@ -218,12 +292,12 @@ namespace edz::hlp {
         }
 
         if (EResult(pmshellLaunchProcess(0, _edizonBackgroundServiceTitleId, FsStorageId_None, &pid)).failed()) {
-            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").removeFile();
+            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").remove();
             return ResultEdzSysmoduleLaunchFailed;
         }
 
         if (!startOnBoot)
-            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").removeFile();
+            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").remove();
         else {
             // Create boot2.flag file to let the sysmodule get started on boot
             File file(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag"); 
@@ -241,8 +315,8 @@ namespace edz::hlp {
             File sysmoduleFile(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
             File flagFile(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag");
 
-            sysmoduleFile.removeFile();
-            flagFile.removeFile();
+            sysmoduleFile.remove();
+            flagFile.remove();
         }
 
         pmdmntGetTitlePid(&pid, _edizonBackgroundServiceTitleId);

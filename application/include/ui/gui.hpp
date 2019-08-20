@@ -39,6 +39,19 @@ namespace edz::ui {
         }
 
         template<typename T, typename... Args>
+        static void replaceWith(Args... args) {
+            Application::popView();
+            
+            if (Gui::s_currentGui != nullptr)
+                delete Gui::s_currentGui;
+            
+            Gui::s_currentGui = new T(args...);
+
+            Application::pushView(Gui::s_currentGui->setupUI());
+            Gui::s_guiStackSize++;
+        }
+
+        template<typename T, typename... Args>
         static void changeTo(Args... args) {
             if (Gui::s_currentGui != nullptr)
                 delete Gui::s_currentGui;

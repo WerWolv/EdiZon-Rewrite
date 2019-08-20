@@ -44,8 +44,8 @@ namespace edz::save {
         fsFsClose(&this->m_saveFileSystem);
     }
 
-    std::map<titleid_t, std::unique_ptr<Title>>& SaveFileSystem::getAllTitles() {
-        static std::map<titleid_t, std::unique_ptr<Title>> titles;
+    std::map<titleid_t, std::shared_ptr<Title>>& SaveFileSystem::getAllTitles() {
+        static std::map<titleid_t, std::shared_ptr<Title>> titles;
 
         if (titles.size() > 0)
             return titles;
@@ -62,8 +62,8 @@ namespace edz::save {
         // Get all installed games
         for (u32 i = 0; i < actualAppRecordCnt; i++) {
             try {
-                titles.insert({ appRecords[i].titleID, std::make_unique<Title>(appRecords[i].titleID, true) });
-            } catch (std::exception e) {
+                titles.insert({ appRecords[i].titleID, std::make_shared<Title>(appRecords[i].titleID, true) });
+            } catch (std::exception& e) {
                 continue;
             }                 
         }
@@ -74,8 +74,8 @@ namespace edz::save {
             // Add titles that are not installed but still have a save file on the system
             if (titles.find(titleID) == titles.end()) {
                 try {
-                    titles.insert({ titleID, std::make_unique<Title>(titleID, false) });
-                } catch (std::exception e) {
+                    titles.insert({ titleID, std::make_shared<Title>(titleID, false) });
+                } catch (std::exception& e) {
                     continue;
                 }
             }
@@ -89,8 +89,8 @@ namespace edz::save {
         return titles;
     }
 
-    std::map<userid_t, std::unique_ptr<Account>>& SaveFileSystem::getAllAccounts() {
-        static std::map<userid_t, std::unique_ptr<Account>> accounts;
+    std::map<userid_t, std::shared_ptr<Account>>& SaveFileSystem::getAllAccounts() {
+        static std::map<userid_t, std::shared_ptr<Account>> accounts;
 
         if (accounts.size() > 0)
             return accounts;   
@@ -107,8 +107,8 @@ namespace edz::save {
         // Get all existing accounts
         for (userid_t userID : userIDs) {
             try {
-                accounts.insert({userID, std::make_unique<Account>(userID, true) });
-            } catch (std::exception e) {
+                accounts.insert({userID, std::make_shared<Account>(userID, true) });
+            } catch (std::exception& e) {
                 continue;
             }
         }
@@ -119,8 +119,8 @@ namespace edz::save {
             // Add accounts that don't exist on the system anymore but still have some save files stored
             if (accounts.find(userID) == accounts.end()) {
                 try {
-                    accounts.insert({ userID, std::make_unique<Account>(userID, false) });
-                } catch (std::exception e) {
+                    accounts.insert({ userID, std::make_shared<Account>(userID, false) });
+                } catch (std::exception& e) {
                     continue;
                 }
             }

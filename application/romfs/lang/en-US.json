@@ -1,6 +1,8 @@
 {
     "edz.name" : "EdiZon",
-    "edz.dev" : "WerWolv",
+    "edz.dev" : "by WerWolv",
+
+    "switchcheatsdb.name" : "SwitchCheatsDB",
 
     "edz.widget.integer.title" : "Enter a value",
     "edz.widget.integer.subtitle" : "This will be the new value for this property.",
@@ -8,6 +10,32 @@
     "edz.widget.string.subtitle" : "This will be the new text for this property.",
     "edz.widget.boolean.on" : "On",
     "edz.widget.boolean.off" : "Off",
+
+    "edz.gui.main.titles.tab" : "Titles",
+    "edz.gui.main.cheats.tab" : "Cheats",
+    "edz.gui.main.running.tab" : "Running Title",
+    "edz.gui.main.about.tab" : "About",
+    "edz.gui.main.settings.tab" : "Settings",
+    "edz.gui.main.titles.options" : "Options",
+    "edz.gui.main.titles.style" : "Display Style",
+    "edz.gui.main.titles.style.list" : "List",
+    "edz.gui.main.titles.style.grid" : "Grid",
+    "edz.gui.main.running.general" : "General Information",
+    "edz.gui.main.running.memory" : "Memory Sections",
+    "edz.gui.main.cheats.header.desc" : "Information",
+    "edz.gui.main.cheats.label.desc" : "Here FAQ about cheats...",
+    "edz.gui.main.cheats.header.cheats" : "Cheats",
+    "edz.gui.main.cheats.error.no_cheats" : "No cheats were loaded for this title",
+    "edz.gui.main.cheats.error.application_mode" : "EdiZon is running in application mode and cannot modify the memory of the current title. Please restart EdiZon using the Album.",
+    "edz.gui.main.cheats.error.dmnt_cht_missing" : "EdiZon depends on the dmnt:cht service to run cheats. Please make sure you installed your CFW correctly and that it has support for it.",
+    "edz.gui.main.about.label.edz" : "EdiZon is a multipurpose game enhancement tool for the Nintendo Switch. Special thanks to everybody that got involved in the development of this homebrew.",
+    "edz.gui.main.about.label.switchcheatsdb" : "To use most of the online features of EdiZon (save uploading and automatic cheats update) a SwitchCheatsDB account is required. Please visit switchcheatsdb.com for more information.",
+    "edz.gui.main.about.email" : "Email",
+    "edz.gui.main.about.email.help" : "Please enter your SwitchCheatsDB email address",
+    "edz.gui.main.about.password" : "Password",
+    "edz.gui.main.about.password.help" : "Please enter your SwitchCheatsDB password",
+    "edz.gui.main.about.login" : "Login",
+
 
     "edz.fatal.service.init" : "An error occurred during service initialization.\nError code: "
 }

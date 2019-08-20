@@ -79,6 +79,8 @@ namespace edz::cheat {
         CheatManager(CheatManager const&) = delete;
         void operator=(CheatManager const&) = delete;
 
+        bool isCheatServiceAvailable();
+
         bool forceAttach();
         bool hasCheatProcess();
 

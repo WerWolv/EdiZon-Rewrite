@@ -23,20 +23,34 @@
 
 #include <string>
 #include <vector>
+#include <save/title.hpp>
 
-namespace edz::ui::elements {
+namespace edz::ui::element {
 
     class TitleButton : public View {
     public:
-        TitleButton(unsigned char *buffer, size_t bufferSize);
+        TitleButton(unsigned char *buffer, size_t bufferSize, u8 column);
         ~TitleButton();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
         void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
         View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
 
+        u8 getColumn();
     private:
         Image *m_image;
+        u8 m_column;
+    };
+
+    class HorizontalTitleList : public BoxLayout {
+        public:
+            HorizontalTitleList();
+            ~HorizontalTitleList();
+
+            std::vector<BoxLayoutChild*> getChildren();
+            void addTitle(save::Title *title);
+            View* defaultFocus(View *oldFocus);
+            
     };
 
 }
