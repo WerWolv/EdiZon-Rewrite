@@ -91,7 +91,7 @@ namespace edz::ui {
 
                 element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle, save::Title::getRunningProcessID(), cheat::CheatManager::get().getBuildID());
 
-                delete iconBuffer;
+                delete[] iconBuffer;
 
                 titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.general").get(), true));
                 titleInfoList->addView(titleInfo);
@@ -235,7 +235,7 @@ namespace edz::ui {
                     
                     titleItem->setThumbnail(iconBuffer, iconSize);
 
-                    delete iconBuffer;
+                    delete[] iconBuffer;
 
                     this->m_titleList->addView(titleItem);
                     this->m_titleListEntries++;
