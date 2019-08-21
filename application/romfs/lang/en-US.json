@@ -37,5 +37,7 @@
     "edz.gui.main.about.login" : "Login",
 
 
-    "edz.fatal.service.init" : "An error occurred during service initialization.\nError code: "
+    "edz.fatal.service.init" : "An error occurred during service initialization.\nError code: ",
+    "edz.fatal.exception" : "A fatal exception occured!",
+    "edz.fatal.exception.reason" : "Reason"
 }

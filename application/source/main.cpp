@@ -23,6 +23,8 @@
 #include <vector>
 #include <functional>
 
+#include <stdlib.h>
+
 #include "helpers/curl.hpp"
 #include "helpers/utils.hpp"
 
@@ -36,6 +38,60 @@
 
 using namespace edz;
 using namespace edz::ui;
+
+
+void exitServices();
+
+extern "C" {
+
+    alignas(16) u8 __nx_exception_stack[0x1000];
+    u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
+
+    void __libnx_exception_handler(ThreadExceptionDump *ctx) {
+        std::string errorDesc;
+
+        switch (ctx->error_desc) {
+            case ThreadExceptionDesc_BadSVC:
+                errorDesc = "Bad SVC";
+                break;
+            case ThreadExceptionDesc_InstructionAbort:
+                errorDesc = "Instruction Abort";
+                break;
+            case ThreadExceptionDesc_MisalignedPC:
+                errorDesc = "Misaligned Program Counter";
+                break;
+            case ThreadExceptionDesc_MisalignedSP:
+                errorDesc = "Misaligned Stack Pointer";
+                break;
+            case ThreadExceptionDesc_SError:
+                errorDesc = "SError";
+                break;
+            case ThreadExceptionDesc_Trap:
+                errorDesc = "SIGTRAP";
+                break;
+            case ThreadExceptionDesc_Other:
+                errorDesc = "Segmentation Fault";
+                break;
+            default:
+                errorDesc = "Unknown Exception [ 0x" + hlp::toHexString<u16>(ctx->error_desc) + " ]";
+                break;
+        }
+
+        Gui::fatal("%s\n\n%s: %s\nPC: %016lx",
+            edz::LangEntry("edz.fatal.exception").get().c_str(),
+            edz::LangEntry("edz.fatal.exception.reason").get().c_str(),
+            errorDesc.c_str(),
+            ctx->pc);
+        
+        exitServices();
+
+        #if DEBUG_MODE_ENABLED
+            exit(-3);
+        #endif
+    }
+
+
+}
 
 EResult initServices() {
     // UI (Borealis)
@@ -78,6 +134,25 @@ EResult initServices() {
     return ResultSuccess;
 }
 
+EResult createFolderStructure() {
+    std::string paths[] = {
+        EDIZON_BASE_DIR "/scripts/libs",
+        EDIZON_BASE_DIR "/configs",
+        EDIZON_BASE_DIR "/backups",
+        EDIZON_BASE_DIR "/batch_backups",
+        EDIZON_BASE_DIR "/restore",
+        EDIZON_BASE_DIR "/cheats",
+        EDIZON_BASE_DIR "/tmp"
+    };
+
+    for (auto path : paths) {
+        hlp::Folder folder(path);
+        TRY(folder.createDirectories());
+    }
+
+    return ResultSuccess;
+}
+
 void exitServices() {
     curl_global_cleanup();
     ncmExit();
@@ -104,6 +179,20 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // Create folder structure
+    if (EResult res = createFolderStructure(); res.failed()) {
+        Gui::fatal(edz::LangEntry("edz.fatal.folder_structure.init").get());
+
+        exitServices();
+        return -2;
+    }
+
+    *((u64*)8) = 16;
+
+    // Clear the tmp folder
+    hlp::clearTmpFolder(); 
+
+    // Set the startup Gui
     Gui::changeTo<GuiMain>();
 
     while (Application::mainLoop())
