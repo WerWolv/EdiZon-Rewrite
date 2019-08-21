@@ -24,8 +24,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
 namespace edz::save::edit {
 
@@ -35,17 +36,17 @@ namespace edz::save::edit {
         virtual ~Script();
 
         virtual void setSaveData(u8 *buffer, size_t bufferSize) final;
-        virtual void addArgument(std::string argName, std::shared_ptr<widget::Arg> arg) final;
+        virtual void addArgument(std::string argName, std::shared_ptr<ui::widget::Arg> arg) final;
         virtual void clearArguments() final;
 
 
-        virtual std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() = 0;
-        virtual EResult setValue(std::shared_ptr<widget::Arg> value) = 0;
+        virtual std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> getValue() = 0;
+        virtual EResult setValue(std::shared_ptr<ui::widget::Arg> value) = 0;
         virtual std::tuple<EResult, std::vector<u8>> getModifiedSaveData() = 0;
 
     protected:
         std::string m_scriptName;
-        std::map<std::string, std::shared_ptr<widget::Arg>> m_arguments;
+        std::map<std::string, std::shared_ptr<ui::widget::Arg>> m_arguments;
 
         u8 *m_saveData;
         size_t m_saveSize;

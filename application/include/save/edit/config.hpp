@@ -22,13 +22,15 @@
 #include <edizon.hpp>
 
 #include "save/title.hpp"
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
 #include <string>
 #include <vector>
 #include <map>
 
 #include <nlohmann/json_fwd.hpp>
+
+class TabFrame;
 
 namespace edz::save::edit {
 
@@ -38,7 +40,7 @@ namespace edz::save::edit {
     };
 
     typedef struct {
-        std::vector<widget::Widget*> widgets;
+        std::vector<ui::widget::Widget*> widgets;
     } WidgetCategory;
 
     typedef struct {

@@ -26,7 +26,7 @@
 #include <map>
 
 #include "save/edit/script/script.hpp"
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
 #define LLONG_MAX INT64_MAX
 #define LLONG_MIN INT64_MIN
@@ -49,8 +49,8 @@ namespace edz::save::edit {
         ~ScriptLua();
 
 
-        std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() override;
-        EResult setValue(std::shared_ptr<widget::Arg> value) override;
+        std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> getValue() override;
+        EResult setValue(std::shared_ptr<ui::widget::Arg> value) override;
         std::tuple<EResult, std::vector<u8>> getModifiedSaveData() override;
 
     private:

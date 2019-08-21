@@ -20,23 +20,20 @@
 #pragma once
 
 #include <edizon.hpp>
+#include "ui/widgets/widget.hpp"
 
-#include "save/edit/widgets/widget.hpp"
+namespace edz::ui::widget {
 
-namespace edz::save::edit::widget {
-
-    class WidgetBoolean : public Widget {
+    class WidgetProgressbar : public Widget {
     public:
-        WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
-        ~WidgetBoolean();
+        WidgetProgressbar(std::string name);
+        ~WidgetProgressbar();
 
         WidgetType getWidgetType() override;
         View* getView() override;
 
     private:
-        bool m_state;
-        std::shared_ptr<widget::Arg> m_onValue;
-        std::shared_ptr<widget::Arg> m_offValue;
+        u8 m_progress;
     };
 
 }

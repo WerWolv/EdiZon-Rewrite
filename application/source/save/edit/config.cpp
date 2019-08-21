@@ -25,15 +25,16 @@
 #include <fstream>
 #include <regex>
 
-#include "save/edit/widgets/widget_integer.hpp"
-#include "save/edit/widgets/widget_boolean.hpp"
-#include "save/edit/widgets/widget_string.hpp"
-#include "save/edit/widgets/widget_list.hpp"
-#include "save/edit/widgets/widget_slider.hpp"
-#include "save/edit/widgets/widget_progressbar.hpp"
-#include "save/edit/widgets/widget_comment.hpp"
+#include "ui/widgets/widget_integer.hpp"
+#include "ui/widgets/widget_boolean.hpp"
+#include "ui/widgets/widget_string.hpp"
+#include "ui/widgets/widget_list.hpp"
+#include "ui/widgets/widget_slider.hpp"
+#include "ui/widgets/widget_progressbar.hpp"
+#include "ui/widgets/widget_comment.hpp"
 
 #include <nlohmann/json.hpp>
+#include <Borealis.hpp>
 
 #define CONFIG_PATH EDIZON_BASE_DIR"/configs/"
 
@@ -41,17 +42,17 @@ using json = nlohmann::json;
 
 namespace edz::save::edit {
 
-    std::shared_ptr<widget::Arg> jsonToArg(std::string argName, json::value_type jsonValue) {
-        std::shared_ptr<widget::Arg> ret = nullptr;
+    std::shared_ptr<ui::widget::Arg> jsonToArg(std::string argName, json::value_type jsonValue) {
+        std::shared_ptr<ui::widget::Arg> ret = nullptr;
 
         if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
-            ret = widget::Arg::create(argName, jsonValue.get<s64>());
+            ret = ui::widget::Arg::create(argName, jsonValue.get<s64>());
         else if (jsonValue.type() == json::value_t::number_float)
-            ret = widget::Arg::create(argName, jsonValue.get<double>());
+            ret = ui::widget::Arg::create(argName, jsonValue.get<double>());
         else if (jsonValue.type() == json::value_t::boolean)
-            ret = widget::Arg::create(argName, jsonValue.get<bool>());
+            ret = ui::widget::Arg::create(argName, jsonValue.get<bool>());
         else if (jsonValue.type() == json::value_t::string)
-            ret = widget::Arg::create(argName, jsonValue.get<std::string>());
+            ret = ui::widget::Arg::create(argName, jsonValue.get<std::string>());
 
         return ret;
     }
@@ -193,7 +194,7 @@ namespace edz::save::edit {
     void Config::parseWidgets(json &j, u16 fileNum) {
         for (auto itemDescription : j) {
             auto widgetDescription = itemDescription["widget"];
-            widget::Widget *widget = nullptr;
+            ui::widget::Widget *widget = nullptr;
 
             if (widgetDescription["type"] == "int") {
                 if (widgetDescription["minValue"].type() != widgetDescription["maxValue"].type()) continue;
@@ -201,10 +202,10 @@ namespace edz::save::edit {
                 // minValue and maxValue type have to be equal here, only checking one
                 if (widgetDescription["minValue"].type() != json::value_t::number_integer && widgetDescription["minValue"].type() != json::value_t::number_unsigned) continue;
 
-                widget = new widget::WidgetInteger(itemDescription["name"], widgetDescription["minValue"], widgetDescription["maxValue"]);
+                widget = new ui::widget::WidgetInteger(itemDescription["name"], widgetDescription["minValue"], widgetDescription["maxValue"]);
             }
             else if (widgetDescription["type"] == "bool") {
-                std::shared_ptr<widget::Arg> onValue, offValue;
+                std::shared_ptr<ui::widget::Arg> onValue, offValue;
 
                 if (widgetDescription["onValue"].type() != widgetDescription["offValue"].type()) continue;
 
@@ -213,7 +214,7 @@ namespace edz::save::edit {
                 onValue = jsonToArg("onValue", widgetDescription["onValue"]);
                 offValue = jsonToArg("offValue", widgetDescription["offValue"]);
 
-                widget = new widget::WidgetBoolean(itemDescription["name"], onValue, offValue);
+                widget = new ui::widget::WidgetBoolean(itemDescription["name"], onValue, offValue);
 
             }
             else if (widgetDescription["type"] == "string") {
@@ -222,29 +223,29 @@ namespace edz::save::edit {
                 // minValue and maxValue type have to be equal here, only checking one
                 if (widgetDescription["minLength"].type() != json::value_t::number_integer && widgetDescription["minLength"].type() != json::value_t::number_unsigned) continue;
 
-                widget = new widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["maxLength"]);
+                widget = new ui::widget::WidgetString(itemDescription["name"], widgetDescription["minLength"], widgetDescription["maxLength"]);
             }
             else if (widgetDescription["type"] == "list") {
                 if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
                 
                 std::vector<std::string> keys = widgetDescription["keys"];
-                std::vector<std::shared_ptr<widget::Arg>> values;
+                std::vector<std::shared_ptr<ui::widget::Arg>> values;
 
                 for (auto value : widgetDescription["values"])
                     values.push_back(jsonToArg("value", value));
                 
-                widget = new widget::WidgetList(itemDescription["name"], keys, values);
+                widget = new ui::widget::WidgetList(itemDescription["name"], keys, values);
             }
             else if (widgetDescription["type"] == "slider") {
 
             }
             else if (widgetDescription["type"] == "progress") {
-                widget = new widget::WidgetProgressbar(itemDescription["name"]);
+                widget = new ui::widget::WidgetProgressbar(itemDescription["name"]);
             }
             else if (widgetDescription["type"] == "comment") {
                 if (widgetDescription["comment"].type() != json::value_t::string) continue;
 
-                widget = new widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
+                widget = new ui::widget::WidgetComment(itemDescription["name"], widgetDescription["comment"]);
             }
 
 
@@ -253,16 +254,16 @@ namespace edz::save::edit {
                     widget->setDescription(itemDescription["infoText"]);
                     
                 for (auto &[name, value] : widgetDescription["arguments"].items()) {
-                    std::shared_ptr<widget::Arg> argument;
+                    std::shared_ptr<ui::widget::Arg> argument;
 
                     if (value.type() == json::value_t::number_integer || value.type() == json::value_t::number_unsigned)
-                        argument = widget::Arg::create(name, value.get<s128>());
+                        argument = ui::widget::Arg::create(name, value.get<s128>());
                     else if (value.type() == json::value_t::number_float)
-                        argument = widget::Arg::create(name, value.get<double>());
+                        argument = ui::widget::Arg::create(name, value.get<double>());
                     else if (value.type() == json::value_t::boolean)
-                        argument = widget::Arg::create(name, value.get<bool>());
+                        argument = ui::widget::Arg::create(name, value.get<bool>());
                     else if (value.type() == json::value_t::string)
-                        argument = widget::Arg::create(name, value.get<std::string>());
+                        argument = ui::widget::Arg::create(name, value.get<std::string>());
                     else continue;
 
                     widget->addArgument(name, argument);

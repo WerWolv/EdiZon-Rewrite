@@ -17,35 +17,39 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "save/edit/widgets/widget_boolean.hpp"
+#include "ui/widgets/widget_list.hpp"
 #include "helpers/utils.hpp"
 #include <Borealis.hpp>
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    WidgetBoolean::WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
-        this->m_state = false;
+    WidgetList::WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments) : Widget(name), m_displayStrings(displayStrings), m_arguments(arguments) {
+        this->m_currValue = 0;
     }
 
-    WidgetBoolean::~WidgetBoolean() {
+    WidgetList::~WidgetList() {
 
     }
 
 
-    WidgetType WidgetBoolean::getWidgetType() {
-        return WidgetType::BOOLEAN;
+    WidgetType WidgetList::getWidgetType() {
+        return WidgetType::LIST;
     }
 
-    View* WidgetBoolean::getView() {
+    View* WidgetList::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
             ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
+            listItem->setValue(this->m_displayStrings[this->m_currValue]);
 
             listItem->setClickListener([&](View *view){
-                this->m_state = !this->m_state;
-                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
+                Dropdown::open(this->m_name, this->m_displayStrings, [&](s32 selectedItem){
+                    if (selectedItem == -1) return;
+
+                    this->m_currValue = selectedItem;
+                    listItem->setValue(this->m_displayStrings[selectedItem]);
+                }, this->m_currValue);
             });
         }
 

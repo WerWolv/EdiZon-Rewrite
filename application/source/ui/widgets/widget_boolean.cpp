@@ -17,43 +17,37 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "save/edit/widgets/widget_integer.hpp"
+#include "ui/widgets/widget_boolean.hpp"
 #include "helpers/utils.hpp"
 #include <Borealis.hpp>
-#include <math.h>
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    WidgetInteger::WidgetInteger(std::string name, s64 minValue, s64 maxValue) : Widget(name), m_minValue(minValue), m_maxValue(maxValue) {
-        this->m_currValue = minValue;
+    WidgetBoolean::WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
+        this->m_state = false;
     }
 
-    WidgetInteger::~WidgetInteger() {
+    WidgetBoolean::~WidgetBoolean() {
 
     }
 
 
-    WidgetType WidgetInteger::getWidgetType() {
-        return WidgetType::INTEGER;
+    WidgetType WidgetBoolean::getWidgetType() {
+        return WidgetType::BOOLEAN;
     }
 
-    View* WidgetInteger::getView() {
+    View* WidgetBoolean::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
             ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            listItem->setValue(std::to_string(this->m_currValue));
+            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
 
             listItem->setClickListener([&](View *view){
-                edz::hlp::askSwkbdNumber([&](std::string str){
-
-                    s64 newValue = std::stoll(str);
-                    this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));
-                    listItem->setValue(std::to_string(this->m_currValue));
-
-                }, edz::LangEntry("edz.widget.integer.title").get(), edz::LangEntry("edz.widget.integer.subtitle").get(), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
+                this->m_state = !this->m_state;
+                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
             });
-            }
+        }
 
         return this->m_widgetView;
     }

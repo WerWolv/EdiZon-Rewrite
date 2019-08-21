@@ -20,11 +20,12 @@
 #pragma once
 
 #include <switch.h>         // libnx
+#include <Logger.hpp>       // Borealis Logger
 
-#include "edz_types.hpp"
+#include "edz_types.hpp"    // Types associated with EdiZon
 
-#include "helpers/lang_entry.hpp"
-#include "helpers/macros.hpp"
+#include "helpers/lang_entry.hpp"   // Translation helper
+#include "helpers/macros.hpp"   // Helper macros
 
 /* || EDIZON COMPILE TIME SETTINGS || */
 

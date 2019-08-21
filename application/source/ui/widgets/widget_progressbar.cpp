@@ -17,28 +17,31 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "save/edit/widgets/widget_comment.hpp"
+#include "ui/widgets/widget_progressbar.hpp"
 #include "helpers/utils.hpp"
 #include <Borealis.hpp>
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    WidgetComment::WidgetComment(std::string name, std::string comment) : Widget(name), m_comment(comment) {
+    WidgetProgressbar::WidgetProgressbar(std::string name) : Widget(name) {
+        this->m_progress = 0;
+    }
+
+    WidgetProgressbar::~WidgetProgressbar() {
 
     }
 
-    WidgetComment::~WidgetComment() {
 
+    WidgetType WidgetProgressbar::getWidgetType() {
+        return WidgetType::PROGRESS_BAR;
     }
 
-
-    WidgetType WidgetComment::getWidgetType() {
-        return WidgetType::COMMENT;
-    }
-
-    View* WidgetComment::getView() {
+    View* WidgetProgressbar::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new Label(LabelStyle::REGULAR, this->m_comment, true);
+            this->m_widgetView = new ProgressDisplay(PROGRESS_DISPLAY_STYLE_PERCENTAGE);
+            ProgressDisplay *progressBar = reinterpret_cast<ProgressDisplay*>(this->m_widgetView);
+            
+            progressBar->setProgress(this->m_progress, 100);
         }
 
         return this->m_widgetView;

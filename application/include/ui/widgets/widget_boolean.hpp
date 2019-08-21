@@ -21,20 +21,22 @@
 
 #include <edizon.hpp>
 
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    class WidgetComment : public Widget {
+    class WidgetBoolean : public Widget {
     public:
-        WidgetComment(std::string name, std::string comment);
-        ~WidgetComment();
+        WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
+        ~WidgetBoolean();
 
         WidgetType getWidgetType() override;
         View* getView() override;
 
     private:
-        std::string m_comment;
+        bool m_state;
+        std::shared_ptr<widget::Arg> m_onValue;
+        std::shared_ptr<widget::Arg> m_offValue;
     };
 
 }

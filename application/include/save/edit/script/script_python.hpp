@@ -26,7 +26,7 @@
 #include <map>
 
 #include "save/edit/script/script.hpp"
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
 #include <python/Python.h>
 
@@ -38,8 +38,8 @@ namespace edz::save::edit {
         ~ScriptPython();
 
 
-        std::tuple<EResult, std::shared_ptr<widget::Arg>> getValue() override;
-        EResult setValue(std::shared_ptr<widget::Arg> value) override;
+        std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> getValue() override;
+        EResult setValue(std::shared_ptr<ui::widget::Arg> value) override;
         std::tuple<EResult, std::vector<u8>> getModifiedSaveData() override;
 
     private:

@@ -17,11 +17,11 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "save/edit/widgets/widget_string.hpp"
+#include "ui/widgets/widget_string.hpp"
 #include "helpers/utils.hpp"
 #include <Borealis.hpp>
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
     WidgetString::WidgetString(std::string name, u32 minLength, u32 maxLength) : Widget(name), m_minLength(minLength), m_maxLength(maxLength) {
         this->m_currValue = "";

@@ -17,23 +17,31 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "ui/widgets/widget.hpp"
 
-#include <edizon.hpp>
-#include "save/edit/widgets/widget.hpp"
+namespace edz::ui::widget {
 
-namespace edz::save::edit::widget {
+    Widget::Widget(std::string name) : m_name(name) {
+        this->m_widgetView = nullptr;
+    }
 
-    class WidgetProgressbar : public Widget {
-    public:
-        WidgetProgressbar(std::string name);
-        ~WidgetProgressbar();
+    Widget::~Widget() {
+        if (this->m_widgetView != nullptr)
+            delete this->m_widgetView;
+    }
 
-        WidgetType getWidgetType() override;
-        View* getView() override;
 
-    private:
-        u8 m_progress;
-    };
+    void Widget::sendValueToScript(std::shared_ptr<widget::Arg> arg) {
+
+    }
+
+    void Widget::setDescription(std::string description) {
+        this->m_description = description;
+    }
+
+    void Widget::addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument) {
+        this->m_arguments.insert({ argumentName, argument });
+    }
+
 
 }

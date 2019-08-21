@@ -21,24 +21,20 @@
 
 #include <edizon.hpp>
 
-#include "save/edit/widgets/widget.hpp"
-#include <vector>
+#include "ui/widgets/widget.hpp"
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    class WidgetList : public Widget {
+    class WidgetComment : public Widget {
     public:
-        WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments);
-        ~WidgetList();
+        WidgetComment(std::string name, std::string comment);
+        ~WidgetComment();
 
         WidgetType getWidgetType() override;
         View* getView() override;
 
     private:
-        std::vector<std::string> m_displayStrings;
-        std::vector<std::shared_ptr<widget::Arg>> m_arguments;
-
-        s16 m_currValue;
+        std::string m_comment;
     };
 
 }

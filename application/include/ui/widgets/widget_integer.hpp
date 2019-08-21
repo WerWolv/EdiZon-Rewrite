@@ -20,20 +20,22 @@
 #pragma once
 
 #include <edizon.hpp>
-#include "save/edit/widgets/widget.hpp"
+#include "ui/widgets/widget.hpp"
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    class WidgetSlider : public Widget {
+    class WidgetInteger : public Widget {
     public:
-        WidgetSlider(std::string name);
-        ~WidgetSlider();
+        WidgetInteger(std::string name, s64 minValue, s64 maxValue);
+        ~WidgetInteger();
 
         WidgetType getWidgetType() override;
         View* getView() override;
 
     private:
-
+        s64 m_currValue;
+        s64 m_minValue;
+        s64 m_maxValue;
     };
 
 }

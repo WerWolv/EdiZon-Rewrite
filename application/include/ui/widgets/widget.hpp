@@ -28,7 +28,7 @@
 
 class View;
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
     enum class WidgetType {
         INTEGER,

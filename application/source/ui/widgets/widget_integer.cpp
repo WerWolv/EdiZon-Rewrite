@@ -17,41 +17,43 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "save/edit/widgets/widget_list.hpp"
+#include "ui/widgets/widget_integer.hpp"
 #include "helpers/utils.hpp"
 #include <Borealis.hpp>
+#include <math.h>
 
-namespace edz::save::edit::widget {
+namespace edz::ui::widget {
 
-    WidgetList::WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments) : Widget(name), m_displayStrings(displayStrings), m_arguments(arguments) {
-        this->m_currValue = 0;
+    WidgetInteger::WidgetInteger(std::string name, s64 minValue, s64 maxValue) : Widget(name), m_minValue(minValue), m_maxValue(maxValue) {
+        this->m_currValue = minValue;
     }
 
-    WidgetList::~WidgetList() {
+    WidgetInteger::~WidgetInteger() {
 
     }
 
 
-    WidgetType WidgetList::getWidgetType() {
-        return WidgetType::LIST;
+    WidgetType WidgetInteger::getWidgetType() {
+        return WidgetType::INTEGER;
     }
 
-    View* WidgetList::getView() {
+    View* WidgetInteger::getView() {
         if (this->m_widgetView == nullptr) {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
             ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            listItem->setValue(this->m_displayStrings[this->m_currValue]);
+            listItem->setValue(std::to_string(this->m_currValue));
 
             listItem->setClickListener([&](View *view){
-                Dropdown::open(this->m_name, this->m_displayStrings, [&](s32 selectedItem){
-                    if (selectedItem == -1) return;
+                edz::hlp::askSwkbdNumber([&](std::string str){
 
-                    this->m_currValue = selectedItem;
-                    listItem->setValue(this->m_displayStrings[selectedItem]);
-                }, this->m_currValue);
+                    s64 newValue = std::stoll(str);
+                    this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));
+                    listItem->setValue(std::to_string(this->m_currValue));
+
+                }, edz::LangEntry("edz.widget.integer.title").get(), edz::LangEntry("edz.widget.integer.subtitle").get(), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
             });
-        }
+            }
 
         return this->m_widgetView;
     }
