@@ -25,6 +25,7 @@
 
 #include "save/title.hpp"
 #include "helpers/file.hpp"
+#include "helpers/folder.hpp"
 
 #define MHz *1E6
 
@@ -326,6 +327,40 @@ namespace edz::hlp {
             return ResultEdzSysmoduleTerminationFailed;
         
         return ResultSuccess;
+    }
+
+    Folder createTmpFolder() {
+        static const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+        while (true) {
+            char randomName[17];
+
+            for (int i = 0; i < sizeof(randomName); i++)
+                randomName[i] = charset[rand() % (sizeof(charset) - 1)];
+            randomName[sizeof(randomName) - 1] = '\0';
+
+            Folder tmpFolder(EDIZON_BASE_DIR "/tmp/" + std::string(randomName));
+
+            if (!tmpFolder.exists()) {
+                tmpFolder.createDirectories();
+                return tmpFolder;
+            }
+        }
+
+        Folder tmpFolder(EDIZON_BASE_DIR "/tmp/0");
+        tmpFolder.createDirectories();
+
+        return tmpFolder;
+    }
+
+    void clearTmpFolder() {
+        Folder tmpFolder(EDIZON_BASE_DIR "/tmp");
+
+        tmpFolder.remove();
+        tmpFolder.createDirectories();
     }
 
 }

@@ -26,8 +26,7 @@ namespace edz::ui::widget {
     }
 
     Widget::~Widget() {
-        if (this->m_widgetView != nullptr)
-            delete this->m_widgetView;
+
     }
 
 

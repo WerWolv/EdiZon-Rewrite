@@ -86,14 +86,15 @@ namespace edz::hlp {
         oldFolder.copyTo(this->m_path);
     }
 
-    void Folder::remove() {
+    EResult Folder::remove() {
+        EResult res;
         struct dirent *entry;
 
         openDirectory();
 
-        if (this->m_dir == nullptr) return;
+        if (this->m_dir == nullptr) return ResultSuccess;
 
-        while ((entry = readdir(this->m_dir)) != nullptr) {
+        while ((entry = readdir(this->m_dir)) != nullptr && res == 0) {
             if(std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
                 continue;
 
@@ -101,31 +102,42 @@ namespace edz::hlp {
 
                 {
                     Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
-                    folder.remove();
+                    res = folder.remove();
+
+                    if (res.failed())
+                        return res;
                 }
 
-                rmdir((this->m_path + entry->d_name).c_str());
+                res = rmdir((this->m_path + entry->d_name).c_str());
+                if (res.failed())
+                    return res;
             } else if (entry->d_type == DT_REG) {
                 File file(this->m_path + "/" + std::string(entry->d_name));
                 file.remove();
             }
         }
 
-        rmdir(this->m_path.c_str());
+        res = rmdir(this->m_path.c_str());
 
         closeDirectory();
+
+        return res;
     }
 
-    void Folder::createDirectories() {
+    EResult Folder::createDirectories() {
+        EResult res;
+
         std::vector<char> path(this->m_path.c_str(), this->m_path.c_str() + this->m_path.size() + 1);
         
-        for (u8 i = 0; i < path.size(); i++) {
+        for (u8 i = 0; i < path.size() && res == 0; i++) {
             if (path[i] != '/') continue;
 
             path[i] = '\0';
-            mkdir(&path[0], 0777);
+            res = mkdir(&path[0], 0777);
             path[i] = '/';
         }
+
+        return res;
     }
 
 

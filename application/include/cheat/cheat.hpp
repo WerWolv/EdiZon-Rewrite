@@ -70,12 +70,6 @@ namespace edz::cheat {
             return instance;
         }
 
-        CheatManager& operator->() {
-            static CheatManager instance;
-            
-            return instance;
-        }
-
         CheatManager(CheatManager const&) = delete;
         void operator=(CheatManager const&) = delete;
 

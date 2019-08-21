@@ -54,7 +54,7 @@ namespace edz::save {
 
         std::vector<userid_t> getUserIDs();
 
-        EResult createSaveDataFileSystem(Account *account, u64 fileSystemSize);
+        EResult createSaveDataFileSystem(Account *account);
 
 
     private:
@@ -62,6 +62,7 @@ namespace edz::save {
         bool m_isInstalled;
         std::vector<userid_t> m_userIDs;
 
+        NacpStruct m_nacp;
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;
         u8 *m_titleIcon;

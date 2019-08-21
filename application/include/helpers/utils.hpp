@@ -26,6 +26,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "helpers/folder.hpp"
+
 namespace edz::hlp {
 
     namespace edz::save {
@@ -80,5 +82,8 @@ namespace edz::hlp {
     
     EResult startBackgroundService(bool startOnBoot);
     EResult stopBackgroundService(bool startOnBoot);
+
+    Folder createTmpFolder();
+    void clearTmpFolder();
 
 }

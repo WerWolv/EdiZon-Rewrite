@@ -38,12 +38,13 @@ namespace edz::hlp {
 
         std::string path();
         std::string name();
+        bool exists();
 
         void copyTo(std::string newPath);
         void copyFrom(std::string oldPath);
 
-        void remove();
-        void createDirectories();
+        EResult remove();
+        EResult createDirectories();
 
         std::map<std::string, File> getFiles();
         std::map<std::string, Folder> getFolders();

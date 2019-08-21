@@ -47,6 +47,7 @@ namespace edz::save {
         this->m_titleAuthor = std::string(languageEntry->author);
         this->m_versionString = std::string(appControlData.nacp.version);
         this->m_version = appContentMetaStatus.title_version;
+        std::memcpy(&this->m_nacp, &appControlData.nacp, sizeof(NacpStruct));
 
         this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
         this->m_titleIcon = new u8[this->m_iconSize];
@@ -150,7 +151,7 @@ namespace edz::save {
     }
 
 
-    EResult Title::createSaveDataFileSystem(Account *account, u64 fileSystemSize) {
+    EResult Title::createSaveDataFileSystem(Account *account) {
         FsSave save;
         save.titleID = this->getID();
         save.userID = account->getID();
@@ -159,9 +160,9 @@ namespace edz::save {
         save.index = 0;
 
         FsSaveCreate saveCreate;
-        saveCreate.size = fileSystemSize;
-        saveCreate.journalSize = fileSystemSize;
-        saveCreate.blockSize = fileSystemSize;
+        saveCreate.size = this->m_nacp.userAccountSaveDataSize;
+        saveCreate.journalSize = this->m_nacp.userAccountSaveDataJournalSize;
+        saveCreate.blockSize = 0x4000;
         saveCreate.ownerId = this->getID();
         saveCreate.flags = 0;
         saveCreate.saveDataSpaceId = FsSaveDataSpaceId_NandUser;

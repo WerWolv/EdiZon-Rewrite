@@ -71,8 +71,9 @@ namespace edz::ui {
             Gui::s_guiStackSize--;
         }
 
-        static void fatal(std::string error) {
-            Application::crash(error);
+        template<typename... Args>
+        static void fatal(std::string format, Args... args) {
+            Application::crash(hlp::formatString(format, args...));
             while (Application::mainLoop());
         }
 
