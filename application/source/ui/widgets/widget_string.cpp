@@ -50,7 +50,7 @@ namespace edz::ui::widget {
                     this->m_currValue = str;
                     listItem->setValue(this->m_currValue);
 
-                }, edz::LangEntry("edz.widget.string.title").get(), edz::LangEntry("edz.widget.string.subtitle").get(), this->m_maxLength, this->m_currValue);
+                }, edz::LangEntry("edz.widget.string.title"), edz::LangEntry("edz.widget.string.subtitle"), this->m_maxLength, this->m_currValue);
             });
         }
 

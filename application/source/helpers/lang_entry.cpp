@@ -50,8 +50,28 @@ namespace edz {
         LangEntry::m_localizedStrings.insert({ unlocalizedString, json[unlocalizedString] });
     }
 
-    std::string LangEntry::get() {
+    std::string LangEntry::get() const {
         return LangEntry::m_localizedStrings[this->m_unlocalizedString];
     }
 
+    const char* LangEntry::c_str() const {
+        return get().c_str();
+    }
+
+    LangEntry::operator std::string() const {
+        return get();
+    }
+
+    std::string LangEntry::operator+(std::string other) const {
+        return get() + other;
+    }
+
+    std::string LangEntry::operator+(LangEntry other) const {
+        return get() + other.get();
+    }
+
+}
+
+std::string operator+(std::string left, edz::LangEntry right) {
+    return left + right.get();
 }

@@ -77,9 +77,9 @@ extern "C" {
                 break;
         }
 
-        Gui::fatal("%s\n\n%s: %s\nPC: %016lx",
-            edz::LangEntry("edz.fatal.exception").get().c_str(),
-            edz::LangEntry("edz.fatal.exception.reason").get().c_str(),
+        Gui::fatal("%s\n\n%s: %s\nPC: 0x%016lx",
+            edz::LangEntry("edz.fatal.exception").c_str(),
+            edz::LangEntry("edz.fatal.exception.reason").c_str(),
             errorDesc.c_str(),
             ctx->pc);
         
@@ -172,8 +172,9 @@ void exitServices() {
 
 int main(int argc, char* argv[]) {  
 
+    // Try to initialize all services
     if (EResult res = initServices(); res.failed()) {
-        Gui::fatal(edz::LangEntry("edz.fatal.service.init").get() + res.getString());
+        Gui::fatal(edz::LangEntry("edz.fatal.service.init") + res.getString());
 
         exitServices();
         return -1;
@@ -181,13 +182,11 @@ int main(int argc, char* argv[]) {
 
     // Create folder structure
     if (EResult res = createFolderStructure(); res.failed()) {
-        Gui::fatal(edz::LangEntry("edz.fatal.folder_structure.init").get());
+        Gui::fatal(edz::LangEntry("edz.fatal.folder_structure.init"));
 
         exitServices();
         return -2;
     }
-
-    *((u64*)8) = 16;
 
     // Clear the tmp folder
     hlp::clearTmpFolder(); 
@@ -195,8 +194,10 @@ int main(int argc, char* argv[]) {
     // Set the startup Gui
     Gui::changeTo<GuiMain>();
 
+    // Main loop for UI
     while (Application::mainLoop())
         Gui::tick();
     
+    // Exit services
     exitServices();
 }

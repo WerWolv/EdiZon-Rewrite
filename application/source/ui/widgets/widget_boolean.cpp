@@ -41,11 +41,11 @@ namespace edz::ui::widget {
             this->m_widgetView = new ListItem(this->m_name, this->m_description);
             ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
 
-            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
+            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on") : edz::LangEntry("edz.widget.boolean.off"), !this->m_state);
 
             listItem->setClickListener([&](View *view){
                 this->m_state = !this->m_state;
-                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on").get() : edz::LangEntry("edz.widget.boolean.off").get(), !this->m_state);
+                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on") : edz::LangEntry("edz.widget.boolean.off"), !this->m_state);
             });
         }
 

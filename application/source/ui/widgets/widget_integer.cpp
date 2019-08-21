@@ -51,7 +51,7 @@ namespace edz::ui::widget {
                     this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));
                     listItem->setValue(std::to_string(this->m_currValue));
 
-                }, edz::LangEntry("edz.widget.integer.title").get(), edz::LangEntry("edz.widget.integer.subtitle").get(), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
+                }, edz::LangEntry("edz.widget.integer.title"), edz::LangEntry("edz.widget.integer.subtitle"), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
             });
             }
 

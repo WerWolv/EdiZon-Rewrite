@@ -38,45 +38,46 @@ namespace edz::ui {
 
         View* setupUI() override {
             TabFrame *rootFrame = new TabFrame();
-            rootFrame->setTitle(edz::LangEntry("edz.name").get());
+            rootFrame->setTitle(edz::LangEntry("edz.name"));
 
             // Title list
-            this->m_titleList = new List();
+            {
+                this->m_titleList = new List();
 
-            this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.options").get(), false));
+                this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.options"), false));
 
-            ListItem *sortingOption = new ListItem(edz::LangEntry("edz.gui.main.titles.style").get());
-            sortingOption->setValue(edz::LangEntry("edz.gui.main.titles.style.list").get(), false, true);
-            sortingOption->setClickListener([&](View *view) {
+                ListItem *sortingOption = new ListItem(edz::LangEntry("edz.gui.main.titles.style"));
+                sortingOption->setValue(edz::LangEntry("edz.gui.main.titles.style.list"), false, true);
+                sortingOption->setClickListener([&](View *view) {
 
-                for (u16 i = this->m_titleListEntries; i > 3; i--)
-                    this->m_titleList->removeView(i - 1, true);
+                    for (u16 i = this->m_titleListEntries; i > 3; i--)
+                        this->m_titleList->removeView(i - 1, true);
+
+                    this->m_titleListEntries = 3;
+
+                    if (this->m_sortingStyle == SortingStyle::GRID) {
+                        this->m_sortingStyle = SortingStyle::LIST;
+                        static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.list"), false, true);
+                        constructTitleListView();
+                    }
+                    else if (this->m_sortingStyle == SortingStyle::LIST) {
+                        this->m_sortingStyle = SortingStyle::GRID;
+                        static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.grid"), false, true);
+                        constructTitleGridView();
+                    }
+
+                });
+
+                this->m_titleList->addView(sortingOption);
+
+                this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.tab"), false));
 
                 this->m_titleListEntries = 3;
 
-                if (this->m_sortingStyle == SortingStyle::GRID) {
-                    this->m_sortingStyle = SortingStyle::LIST;
-                    static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.list").get(), false, true);
-                    constructTitleListView();
-                }
-                else if (this->m_sortingStyle == SortingStyle::LIST) {
-                    this->m_sortingStyle = SortingStyle::GRID;
-                    static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.grid").get(), false, true);
-                    constructTitleGridView();
-                }
+                constructTitleListView();
 
-            });
-
-            this->m_titleList->addView(sortingOption);
-
-            this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.tab").get(), false));
-
-            this->m_titleListEntries = 3;
-
-            constructTitleListView();
-
-            rootFrame->addTab(edz::LangEntry("edz.gui.main.titles.tab").get(), this->m_titleList);
-
+                rootFrame->addTab(edz::LangEntry("edz.gui.main.titles.tab"), this->m_titleList);
+            }
 
             // Running title information
             if (hlp::isTitleRunning() && cheat::CheatManager::get().isCheatServiceAvailable()) {
@@ -93,9 +94,9 @@ namespace edz::ui {
 
                 delete[] iconBuffer;
 
-                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.general").get(), true));
+                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.general"), true));
                 titleInfoList->addView(titleInfo);
-                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.memory").get(), true));
+                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.memory"), true));
 
                 Table *regionsTable = new Table();
 
@@ -141,76 +142,82 @@ namespace edz::ui {
                 titleInfoList->addView(regionsTable);
                 titleInfoList->addView(new ListItem(""));
 
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.running.tab").get(), titleInfoList);
+                rootFrame->addTab(edz::LangEntry("edz.gui.main.running.tab"), titleInfoList);
             }
 
 
             // Cheats
-            List *cheatsList = new List();
+            {
+                List *cheatsList = new List();
 
-            cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.desc").get(), true));
-            cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.label.desc").get(), true));
-            cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.cheats").get(), cheat::CheatManager::get().getCheats().size() == 0));
+                cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.desc"), true));
+                cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.label.desc"), true));
+                cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.cheats"), cheat::CheatManager::get().getCheats().size() == 0));
 
-            if (cheat::CheatManager::get().isCheatServiceAvailable()) {
-                if (cheat::CheatManager::get().getCheats().size() > 0) {
-                    for (auto cheat : cheat::CheatManager::get().getCheats()) {
-                        ToggleListItem *cheatItem = new ToggleListItem(cheat->getName(), cheat->isEnabled(), "",
-                            edz::LangEntry("edz.widget.boolean.on").get(), edz::LangEntry("edz.widget.boolean.off").get());
+                if (cheat::CheatManager::get().isCheatServiceAvailable()) {
+                    if (cheat::CheatManager::get().getCheats().size() > 0) {
+                        for (auto cheat : cheat::CheatManager::get().getCheats()) {
+                            ToggleListItem *cheatItem = new ToggleListItem(cheat->getName(), cheat->isEnabled(), "",
+                                edz::LangEntry("edz.widget.boolean.on"), edz::LangEntry("edz.widget.boolean.off"));
 
-                        cheatsList->addView(cheatItem);
+                            cheatsList->addView(cheatItem);
+                        }
+                    } else {
+                        if (hlp::isInAppletMode())
+                            cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.no_cheats"), true));
+                        else
+                            cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.application_mode"), true));
                     }
-                } else {
-                    if (hlp::isInAppletMode())
-                        cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.no_cheats").get(), true));
-                    else
-                        cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.application_mode").get(), true));
-                }
-            } 
-            else 
-                cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.dmnt_cht_missing").get(), true));
+                } 
+                else 
+                    cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.dmnt_cht_missing"), true));
 
-            rootFrame->addTab(edz::LangEntry("edz.gui.main.cheats.tab").get(), cheatsList);
-
+                rootFrame->addTab(edz::LangEntry("edz.gui.main.cheats.tab"), cheatsList);
+            }
 
             // Settings
-            List *settingsList = new List();
+            {
+                List *settingsList = new List();
 
-            settingsList->addView(new Header(edz::LangEntry("switchcheatsdb.name").get(), false));
+                settingsList->addView(new Header(edz::LangEntry("switchcheatsdb.name"), false));
 
-            InputListItem *emailItem = new InputListItem(edz::LangEntry("edz.gui.main.about.email").get(), "", edz::LangEntry("edz.gui.main.about.email.help").get());
-            ListItem *passwordItem = new ListItem(edz::LangEntry("edz.gui.main.about.password").get());
-            passwordItem->setClickListener([&](View *view) {
-                hlp::askSwkbdPassword([&](std::string text) {
-                    this->m_password = text;
+                InputListItem *emailItem = new InputListItem(edz::LangEntry("edz.gui.main.about.email"), "", edz::LangEntry("edz.gui.main.about.email.help"));
+                ListItem *passwordItem = new ListItem(edz::LangEntry("edz.gui.main.about.password"));
+                passwordItem->setClickListener([&](View *view) {
+                    hlp::askSwkbdPassword([&](std::string text) {
+                        this->m_password = text;
 
-                    std::string itemText = "";
-                    for (u8 i = 0; i < text.length(); i++)
-                        itemText += "●";
+                        std::string itemText = "";
+                        for (u8 i = 0; i < text.length(); i++)
+                            itemText += "●";
 
-                    static_cast<ListItem*>(view)->setValue(itemText);
-                }, edz::LangEntry("edz.gui.main.about.password").get(), edz::LangEntry("edz.gui.main.about.password.help").get());
-            });
+                        static_cast<ListItem*>(view)->setValue(itemText);
+                    }, edz::LangEntry("edz.gui.main.about.password"), edz::LangEntry("edz.gui.main.about.password.help"));
+                });
 
-            settingsList->addView(emailItem);
-            settingsList->addView(passwordItem);
-            
-            ListItem *loginButton = new ListItem(edz::LangEntry("edz.gui.main.about.login").get());
-            settingsList->addView(loginButton);
-            settingsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.switchcheatsdb").get(), true));
-            
-            settingsList->addView(new ListItemGroupSpacing(true));
+                settingsList->addView(emailItem);
+                settingsList->addView(passwordItem);
+                
+                ListItem *loginButton = new ListItem(edz::LangEntry("edz.gui.main.about.login"));
+                settingsList->addView(loginButton);
+                settingsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.switchcheatsdb"), true));
+                
+                settingsList->addView(new ListItemGroupSpacing(true));
 
-            rootFrame->addTab(edz::LangEntry("edz.gui.main.settings.tab").get(), settingsList);
+                rootFrame->addTab(edz::LangEntry("edz.gui.main.settings.tab"), settingsList);
+            }
+
 
             // About
-            List *aboutList = new List();
+            {
+                List *aboutList = new List();
 
-            aboutList->addView(new Header(edz::LangEntry("edz.name").get() + " " VERSION_STRING + " "s + edz::LangEntry("edz.dev").get(), false));
-            aboutList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.edz").get(), true));
+                aboutList->addView(new Header(edz::LangEntry("edz.name") + " " VERSION_STRING + " "s + edz::LangEntry("edz.dev"), false));
+                aboutList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.edz"), true));
 
-            rootFrame->addSeparator();
-            rootFrame->addTab(edz::LangEntry("edz.gui.main.about.tab").get(), aboutList);
+                rootFrame->addSeparator();
+                rootFrame->addTab(edz::LangEntry("edz.gui.main.about.tab"), aboutList);
+            }
 
             return rootFrame;
         }

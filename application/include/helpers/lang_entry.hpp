@@ -30,7 +30,13 @@ namespace edz {
     public:
         LangEntry(std::string unlocalizedString);
 
-        std::string get();
+        std::string get() const;
+        const char* c_str() const;
+
+        operator std::string() const;
+        std::string operator+(std::string other) const;
+        std::string operator+(LangEntry other) const;
+
 
     private:
         std::string m_unlocalizedString;
@@ -39,3 +45,5 @@ namespace edz {
     };
 
 }
+
+std::string operator+(std::string left, edz::LangEntry right);
