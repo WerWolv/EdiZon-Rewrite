@@ -19,6 +19,7 @@
 
 #include "save/edit/widgets/widget_boolean.hpp"
 #include "helpers/utils.hpp"
+#include <Borealis.hpp>
 
 namespace edz::save::edit::widget {
 

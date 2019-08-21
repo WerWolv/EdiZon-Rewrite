@@ -20,7 +20,6 @@
 #pragma once
 
 #include <switch.h>         // libnx
-#include <Borealis.hpp>
 
 #include "edz_types.hpp"
 

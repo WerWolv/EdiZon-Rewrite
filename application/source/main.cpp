@@ -28,7 +28,6 @@
 
 #include "ui/gui.hpp"
 #include "ui/gui_main.hpp"
-#include "ui/gui_cheats.hpp"
 
 #include "cheat/cheat.hpp"
 

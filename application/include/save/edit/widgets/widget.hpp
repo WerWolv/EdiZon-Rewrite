@@ -25,6 +25,9 @@
 #include <map>
 #include <memory>
 
+
+class View;
+
 namespace edz::save::edit::widget {
 
     enum class WidgetType {

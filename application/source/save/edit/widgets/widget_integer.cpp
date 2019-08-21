@@ -19,6 +19,7 @@
 
 #include "save/edit/widgets/widget_integer.hpp"
 #include "helpers/utils.hpp"
+#include <Borealis.hpp>
 #include <math.h>
 
 namespace edz::save::edit::widget {

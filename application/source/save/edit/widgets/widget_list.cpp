@@ -19,6 +19,7 @@
 
 #include "save/edit/widgets/widget_list.hpp"
 #include "helpers/utils.hpp"
+#include <Borealis.hpp>
 
 namespace edz::save::edit::widget {
 
