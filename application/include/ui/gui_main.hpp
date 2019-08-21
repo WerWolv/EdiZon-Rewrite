@@ -48,10 +48,9 @@ namespace edz::ui {
             ListItem *sortingOption = new ListItem(edz::LangEntry("edz.gui.main.titles.style").get());
             sortingOption->setValue(edz::LangEntry("edz.gui.main.titles.style.list").get(), false, true);
             sortingOption->setClickListener([&](View *view) {
-                for (u16 i = this->m_titleListEntries; i > 3; i--) {
-                    
+
+                for (u16 i = this->m_titleListEntries; i > 3; i--)
                     this->m_titleList->removeView(i - 1, true);
-                }
 
                 this->m_titleListEntries = 3;
 
@@ -65,6 +64,7 @@ namespace edz::ui {
                     static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.grid").get(), false, true);
                     constructTitleGridView();
                 }
+
             });
 
             this->m_titleList->addView(sortingOption);
@@ -225,6 +225,22 @@ namespace edz::ui {
             u16 m_titleListEntries;
             enum class SortingStyle { LIST, GRID } m_sortingStyle;
 
+            void constructTitlePopup(save::Title *title) {
+                size_t iconSize = title->getIconSize();
+                u8 *iconBuffer = new u8[iconSize];
+                title->getIcon(iconBuffer, iconSize);
+
+                TabFrame *rootFrame = new TabFrame();
+                rootFrame->addTab("Software Information", new Rectangle(nvgRGB(0xFF, 0x00, 0x00)));
+                rootFrame->addSeparator();
+                rootFrame->addTab("Save Management", new Rectangle(nvgRGB(0x00, 0xFF, 0x00)));
+                rootFrame->addTab("Save Editing", new Rectangle(nvgRGB(0x00, 0x00, 0xFF)));
+
+                PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "Ver. " + title->getVersionString(), title->getAuthor());
+
+                delete[] iconBuffer;
+            }
+
             void constructTitleListView() {
                 for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles()) {
                     ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
@@ -236,6 +252,11 @@ namespace edz::ui {
                     titleItem->setThumbnail(iconBuffer, iconSize);
 
                     delete[] iconBuffer;
+                    
+                    titleItem->setClickListener([&](View *view) {
+                        constructTitlePopup(title.get());
+                    });
+
 
                     this->m_titleList->addView(titleItem);
                     this->m_titleListEntries++;
@@ -252,7 +273,20 @@ namespace edz::ui {
                     if (column % 4 == 0)
                         hLists.push_back(new element::HorizontalTitleList());
                     
-                    hLists[hLists.size() - 1]->addTitle(title.get());
+                    size_t iconSize = title->getIconSize();
+                    u8 *iconBuffer = new u8[iconSize];
+                    title->getIcon(iconBuffer, iconSize);
+
+                    element::TitleButton *titleButton = new element::TitleButton(iconBuffer, iconSize, column % 4);
+
+                    titleButton->setClickListener([&](View *view) {
+                        constructTitlePopup(title.get());
+                    });
+
+                    hLists[hLists.size() - 1]->addView(titleButton);
+
+                    delete[] iconBuffer;
+
 
                     column++;
                 }

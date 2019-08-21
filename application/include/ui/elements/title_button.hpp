@@ -35,11 +35,16 @@ namespace edz::ui::element {
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
         void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
         View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+        bool onClick() override;
+
+        void setClickListener(EventListener listener);
 
         u8 getColumn();
     private:
         Image *m_image;
         u8 m_column;
+
+        EventListener m_clickListener = nullptr;
     };
 
     class HorizontalTitleList : public BoxLayout {

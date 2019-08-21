@@ -54,6 +54,18 @@ namespace edz::ui::element {
         return this;
     }
 
+    bool TitleButton::onClick()
+    {
+        if (this->m_clickListener)
+            this->m_clickListener(this);
+
+        return this->m_clickListener != nullptr;
+    }
+
+    void TitleButton::setClickListener(EventListener listener) {
+        this->m_clickListener = listener;
+    }
+
     u8 TitleButton::getColumn() {
         return this->m_column;
     }
