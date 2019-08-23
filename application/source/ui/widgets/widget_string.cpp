@@ -44,7 +44,7 @@ namespace edz::ui::widget {
             listItem->setValue(this->m_currValue);
 
             listItem->setClickListener([&](View *view){
-                edz::hlp::askSwkbdText([&](std::string str){
+                edz::hlp::openSwkbdForText([&](std::string str){
                     if (str.length() < this->m_minLength) return;
 
                     this->m_currValue = str;

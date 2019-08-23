@@ -36,7 +36,7 @@ namespace edz::save::edit {
 
         // Make it possible to include the edizon module using require('edizon')
         luaL_getsubtable(this->m_ctx, LUA_REGISTRYINDEX, LUA_PRELOAD_TABLE);
-        lua_pushcfunction(this->m_ctx, &dispatch<ScriptLua::luaopen_edizon>);
+        lua_pushcfunction(this->m_ctx, &dispatch<&ScriptLua::luaopen_edizon>);
         lua_setfield(this->m_ctx, -2, "edizon");
         lua_pop(this->m_ctx, 1);
 
@@ -59,8 +59,8 @@ namespace edz::save::edit {
     }
 
 
-    std::tuple<EResult, std::shared_ptr<widget::Arg>> ScriptLua::getValue() {
-        std::shared_ptr<widget::Arg> out;
+    std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> ScriptLua::getValue() {
+        std::shared_ptr<ui::widget::Arg> out;
 
         lua_getglobal(this->m_ctx, "getValue");
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
@@ -70,13 +70,13 @@ namespace edz::save::edit {
 
 
         if (lua_isinteger(this->m_ctx, -1))
-            out = widget::Arg::create("value", lua_tointeger(this->m_ctx, -1));
+            out = ui::widget::Arg::create("value", lua_tointeger(this->m_ctx, -1));
         else if (lua_isnumber(this->m_ctx, -1))
-            out = widget::Arg::create("value", lua_tonumber(this->m_ctx, -1));
+            out = ui::widget::Arg::create("value", lua_tonumber(this->m_ctx, -1));
         else if (lua_isboolean(this->m_ctx, -1))
-            out = widget::Arg::create("value", lua_toboolean(this->m_ctx, -1));
+            out = ui::widget::Arg::create("value", lua_toboolean(this->m_ctx, -1));
         else if (lua_isstring(this->m_ctx, -1))
-            out = widget::Arg::create("value", lua_tostring(this->m_ctx, -1));
+            out = ui::widget::Arg::create("value", lua_tostring(this->m_ctx, -1));
         else error("Invalid value returned from Lua script's getValue!");
 
         lua_pop(this->m_ctx, 1);
@@ -84,20 +84,20 @@ namespace edz::save::edit {
         return { ResultSuccess, out };
     }
 
-    EResult ScriptLua::setValue(std::shared_ptr<widget::Arg> value) {
+    EResult ScriptLua::setValue(std::shared_ptr<ui::widget::Arg> value) {
         lua_getglobal(this->m_ctx, "setValue");
 
         switch(value->type) {
-            case widget::Arg::ArgumentType::INTEGER:
+            case ui::widget::Arg::ArgumentType::INTEGER:
                 lua_pushinteger(this->m_ctx, value->intArg);
                 break;
-            case widget::Arg::ArgumentType::FLOAT:
+            case ui::widget::Arg::ArgumentType::FLOAT:
                 lua_pushnumber(this->m_ctx, value->floatArg);
                 break;
-            case widget::Arg::ArgumentType::BOOLEAN:
+            case ui::widget::Arg::ArgumentType::BOOLEAN:
                 lua_pushboolean(this->m_ctx, value->boolArg);
                 break;            
-            case widget::Arg::ArgumentType::STRING:
+            case ui::widget::Arg::ArgumentType::STRING:
                 lua_pushstring(this->m_ctx, value->stringArg.c_str());
                 break;
         }
@@ -142,12 +142,14 @@ namespace edz::save::edit {
         };
 
         luaL_newlib(ctx, regs);
+
+        return 1;
     }
 
     int ScriptLua::getArgument(lua_State *ctx) {
         std::string argName = std::string(lua_tostring(ctx, -1), lua_strlen(ctx, -1));
 
-        std::shared_ptr<widget::Arg> arg = this->m_arguments.at(argName);
+        std::shared_ptr<ui::widget::Arg> arg = this->m_arguments.at(argName);
 
         if (arg == nullptr) {
             lua_pushnil(ctx);
@@ -155,16 +157,16 @@ namespace edz::save::edit {
         }
 
         switch(arg->type) {
-            case widget::Arg::ArgumentType::INTEGER:
+            case ui::widget::Arg::ArgumentType::INTEGER:
                 lua_pushinteger(ctx, arg->intArg);
                 break;
-            case widget::Arg::ArgumentType::FLOAT:
+            case ui::widget::Arg::ArgumentType::FLOAT:
                 lua_pushnumber(ctx, arg->floatArg);
                 break;
-            case widget::Arg::ArgumentType::BOOLEAN:
+            case ui::widget::Arg::ArgumentType::BOOLEAN:
                 lua_pushboolean(ctx, arg->boolArg);
                 break;            
-            case widget::Arg::ArgumentType::STRING:
+            case ui::widget::Arg::ArgumentType::STRING:
                 lua_pushstring(ctx, arg->stringArg.c_str());
                 break;
         }

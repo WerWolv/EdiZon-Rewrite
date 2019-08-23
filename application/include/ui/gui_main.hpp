@@ -25,6 +25,7 @@
 #include "save/save_data.hpp"
 #include "helpers/utils.hpp"
 #include "cheat/cheat.hpp"
+#include "save/save_manager.hpp"
 
 #include "ui/elements/title_info.hpp"
 #include "ui/elements/title_button.hpp"
@@ -184,7 +185,7 @@ namespace edz::ui {
                 InputListItem *emailItem = new InputListItem(edz::LangEntry("edz.gui.main.about.email"), "", edz::LangEntry("edz.gui.main.about.email.help"));
                 ListItem *passwordItem = new ListItem(edz::LangEntry("edz.gui.main.about.password"));
                 passwordItem->setClickListener([&](View *view) {
-                    hlp::askSwkbdPassword([&](std::string text) {
+                    hlp::openSwkbdForPassword([&](std::string text) {
                         this->m_password = text;
 
                         std::string itemText = "";

@@ -49,7 +49,7 @@ extern "C" {
 
     void __libnx_exception_handler(ThreadExceptionDump *ctx) {
         std::string errorDesc;
-
+        return;
         switch (ctx->error_desc) {
             case ThreadExceptionDesc_BadSVC:
                 errorDesc = "Bad SVC";
@@ -70,16 +70,18 @@ extern "C" {
                 errorDesc = "SIGTRAP";
                 break;
             case ThreadExceptionDesc_Other:
-                errorDesc = "Segmentation Fault";
+                errorDesc = "Segmentation Fault " + hlp::toHexString(ctx->afsr0) + " " + hlp::toHexString(ctx->afsr1);
                 break;
             default:
                 errorDesc = "Unknown Exception [ 0x" + hlp::toHexString<u16>(ctx->error_desc) + " ]";
                 break;
         }
 
+        printf(errorDesc.c_str());
+
         Gui::fatal("%s\n\n%s: %s\nPC: 0x%016lx",
-            edz::LangEntry("edz.fatal.exception").c_str(),
-            edz::LangEntry("edz.fatal.exception.reason").c_str(),
+            edz::LangEntry("edz.fatal.exception").get().c_str(),
+            edz::LangEntry("edz.fatal.exception.reason").get().c_str(),
             errorDesc.c_str(),
             ctx->pc);
         
@@ -127,6 +129,8 @@ EResult initServices() {
     TRY(pmshellInitialize());
     TRY(pminfoInitialize());
 
+    TRY(splInitialize());
+
     // Controller LED
     TRY(hidsysInitialize());
     TRY(hlp::controllerLEDInitialize());
@@ -136,13 +140,14 @@ EResult initServices() {
 
 EResult createFolderStructure() {
     std::string paths[] = {
-        EDIZON_BASE_DIR "/scripts/libs",
-        EDIZON_BASE_DIR "/configs",
-        EDIZON_BASE_DIR "/backups",
-        EDIZON_BASE_DIR "/batch_backups",
-        EDIZON_BASE_DIR "/restore",
-        EDIZON_BASE_DIR "/cheats",
-        EDIZON_BASE_DIR "/tmp"
+        EDIZON_BACKUP_DIR,
+        EDIZON_BATCH_BACKUP_DIR,
+        EDIZON_COMMON_RESTORE_DIR,
+        EDIZON_CONFIGS_DIR,
+        EDIZON_SCRIPTS_DIR,
+        EDIZON_LIBS_DIR,
+        EDIZON_CHEATS_DIR,
+        EDIZON_TMP_DIR
     };
 
     for (auto path : paths) {
@@ -166,6 +171,7 @@ void exitServices() {
     pmshellExit();
     pminfoExit();
     hidsysExit();
+    splExit();
 
     Application::quit();
 }

@@ -24,25 +24,25 @@
 namespace edz::save::edit {
 
     Script::Script(std::string path) {
-        this->m_saveFileData = nullptr;
+        this->m_saveData = nullptr;
     }
 
     Script::~Script() {
-        if (this->m_saveFileData != nullptr)
-            delete[] this->m_saveFileData;
+        if (this->m_saveData != nullptr)
+            delete[] this->m_saveData;
     }
 
-    void Script::setSaveFileData(u8 *buffer, size_t bufferSize) {
-        if (this->m_saveFileData != nullptr)
-            delete[] this->m_saveFileData;
+    void Script::setSaveData(u8 *buffer, size_t bufferSize) {
+        if (this->m_saveData != nullptr)
+            delete[] this->m_saveData;
 
-        this->m_saveFileData = new u8[bufferSize];
-        this->m_saveFileSize = bufferSize;
+        this->m_saveData = new u8[bufferSize];
+        this->m_saveSize = bufferSize;
 
-        std::memcpy(this->m_saveFileData, buffer, bufferSize);
+        std::memcpy(this->m_saveData, buffer, bufferSize);
     }
 
-    void Script::addArgument(std::string argName, std::shared_ptr<widget::Arg> arg) {
+    void Script::addArgument(std::string argName, std::shared_ptr<ui::widget::Arg> arg) {
         this->m_arguments.insert({ argName, arg });
     }
 

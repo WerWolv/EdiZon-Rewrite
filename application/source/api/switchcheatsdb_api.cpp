@@ -19,12 +19,14 @@
 
 #include "api/switchcheatsdb_api.hpp"
 #include <nlohmann/json.hpp>
+#include "helpers/utils.hpp"
 
 namespace edz::api {
 
     using json = nlohmann::json;
 
     SwitchCheatsDBAPI::SwitchCheatsDBAPI() : m_curl(SWITCHCHEATSDB_API_URL) {
+
     }
 
     SwitchCheatsDBAPI::~SwitchCheatsDBAPI() {
@@ -34,7 +36,12 @@ namespace edz::api {
 
     std::pair<EResult, std::string> SwitchCheatsDBAPI::getToken(std::string email, std::string password) {
         std::string token;
-        auto [result, response] = this->m_curl.get("/token");
+
+        json body;
+        body["email"] = email;
+        body["password"] = password;
+
+        auto [result, response] = this->m_curl.post("/token", body.dump());
 
         if (result.failed())
             return { ResultEdzAPIError, "" };
@@ -42,7 +49,7 @@ namespace edz::api {
         try {
             json responseJson = json::parse(response);
             token = responseJson["token"];
-        } catch (json::parse_error e) {
+        } catch (std::exception& e) {
             printf("%s\n", response.c_str());
             return { ResultEdzAPIError, "" };
         }

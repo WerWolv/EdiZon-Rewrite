@@ -21,7 +21,7 @@
 
 #include <switch.h>
 
-#define MODULE_EDIZON 555
+#define MODULE_EDIZONSYSMODULE 338
 
 namespace edz {
     class EResult {

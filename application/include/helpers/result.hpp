@@ -22,7 +22,7 @@
 #include <switch.h>
 #include <string>
 
-#define MODULE_EDIZON 555
+#define MODULE_EDIZON 337
 
 namespace edz {
 

@@ -21,10 +21,12 @@
 
 namespace edz::save::edit {
 
+    static std::map<PyObject*,ScriptPython*> pythonExtraSpace;
+
     using mem_func = PyObject* (ScriptPython::*)(PyObject *, PyObject *);
     template <mem_func func>
     PyObject *dispatch(PyObject *self, PyObject *args) {
-        ScriptPython *ptr = *reinterpret_cast<ScriptPython**>(&python_extraspace);
+        ScriptPython *ptr = *reinterpret_cast<ScriptPython**>(&pythonExtraSpace[self]);
         return ((*ptr).*func)(self, args);
     }
 
@@ -65,6 +67,8 @@ namespace edz::save::edit {
 
         this->m_ctx = PyImport_Import(PyUnicode_FromString("__main__"));
 
+        pythonExtraSpace.insert({ this->m_ctx, this });
+
         FILE *scriptFile = fopen(std::string(path).c_str(), "r");
 
         if (scriptFile == nullptr) {
@@ -91,8 +95,8 @@ namespace edz::save::edit {
     }
 
 
-    std::tuple<EResult, std::shared_ptr<widget::Arg>> ScriptPython::getValue() {
-        std::shared_ptr<widget::Arg> out;
+    std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> ScriptPython::getValue() {
+        std::shared_ptr<ui::widget::Arg> out;
 
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "getValue");
         PyObject *result = PyObject_CallObject(func, nullptr);
@@ -109,13 +113,13 @@ namespace edz::save::edit {
         }
 
         if (PyLong_Check(result))
-            out = widget::Arg::create("value", PyLong_AsLong(result));
+            out = ui::widget::Arg::create("value", PyLong_AsLong(result));
         else if (PyFloat_Check(result))
-            out = widget::Arg::create("value", PyFloat_AsDouble(result));
+            out = ui::widget::Arg::create("value", PyFloat_AsDouble(result));
         else if (PyBool_Check(result))
-            out = widget::Arg::create("value", PyObject_IsTrue(result));
+            out = ui::widget::Arg::create("value", PyObject_IsTrue(result));
         else if (PyUnicode_Check(result))
-            out = widget::Arg::create("value", PyUnicode_AsUnicode(result));
+            out = ui::widget::Arg::create("value", PyUnicode_AsUnicode(result));
         else {
             error("Invalid value returned from Python script's getValue!");
             return { ResultEdzScriptRuntimeError, nullptr };
@@ -124,23 +128,24 @@ namespace edz::save::edit {
         return { ResultSuccess, out };
     }
 
-    EResult ScriptPython::setValue(std::shared_ptr<widget::Arg> value) {
+    EResult ScriptPython::setValue(std::shared_ptr<ui::widget::Arg> value) {
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "setValue");
 
 
         switch(value->type) {
-            case widget::Arg::ArgumentType::INTEGER:
+            case ui::widget::Arg::ArgumentType::INTEGER:
                 PyObject_CallObject(func, PyTuple_Pack(1, PyLong_FromLong(value->intArg)));
                 break;
-            case widget::Arg::ArgumentType::FLOAT:
+            case ui::widget::Arg::ArgumentType::FLOAT:
                 PyObject_CallObject(func, PyTuple_Pack(1, PyFloat_FromDouble(value->floatArg)));
                 break;
-            case widget::Arg::ArgumentType::BOOLEAN:
+            case ui::widget::Arg::ArgumentType::BOOLEAN:
                 PyObject_CallObject(func, PyTuple_Pack(1, PyBool_FromLong(value->boolArg)));
                 break;            
-            case widget::Arg::ArgumentType::STRING:
+            case ui::widget::Arg::ArgumentType::STRING:
                 PyObject_CallObject(func, PyTuple_Pack(1, PyUnicode_FromString(value->stringArg.c_str())));
                 break;
+            case ui::widget::Arg::ArgumentType::INVALID: [[fallthrough]]
             default:
                 return ResultEdzScriptInvalidArgument;
         }
@@ -182,22 +187,26 @@ namespace edz::save::edit {
         char *argName;
         PyArg_ParseTuple(args, "s", &argName);
 
-        std::shared_ptr<widget::Arg> arg = this->m_arguments.at(argName);
+        std::shared_ptr<ui::widget::Arg> arg = this->m_arguments.at(argName);
 
         if (arg == nullptr) {
             return nullptr;
         }
 
         switch(arg->type) {
-            case widget::Arg::ArgumentType::INTEGER:
+            case ui::widget::Arg::ArgumentType::INTEGER:
                 return PyLong_FromLong(arg->intArg);
-            case widget::Arg::ArgumentType::FLOAT:
+            case ui::widget::Arg::ArgumentType::FLOAT:
                 return PyFloat_FromDouble(arg->floatArg);
-            case widget::Arg::ArgumentType::BOOLEAN:
+            case ui::widget::Arg::ArgumentType::BOOLEAN:
                 return PyBool_FromLong(arg->boolArg);
-            case widget::Arg::ArgumentType::STRING:
+            case ui::widget::Arg::ArgumentType::STRING:
                 return PyUnicode_FromString(arg->stringArg.c_str());
+            case ui::widget::Arg::ArgumentType::INVALID:
+                return nullptr;
         }
+
+        return nullptr;
     }
 
     PyObject* ScriptPython::getDataAsBuffer(PyObject *self, PyObject *args) {

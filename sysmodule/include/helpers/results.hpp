@@ -20,27 +20,28 @@
 #pragma once
 
 #include <switch.h>
+#include "helpers/result.hpp"
 
 namespace edz {
 
-    static constexpr u32 Module_Edz = 555;
+    #define EDZRES(desc) MAKERESULT(MODULE_EDIZONSYSMODULE, desc)
 
     static constexpr Result ResultSuccess                           = MAKERESULT(0, 0);
 
-    static constexpr Result ResultEdzAlreadyRegistered              = MAKERESULT(Module_Edz, 1);
-    static constexpr Result ResultEdzUnknownButtonID                = MAKERESULT(Module_Edz, 2);
-    static constexpr Result ResultEdzInvalidButtonCombination       = MAKERESULT(Module_Edz, 3);
-    static constexpr Result ResultEdzAttachFailed                   = MAKERESULT(Module_Edz, 4);
-    static constexpr Result ResultEdzDetachFailed                   = MAKERESULT(Module_Edz, 5);
-    static constexpr Result ResultEdzInvalidBuffer                  = MAKERESULT(Module_Edz, 6);
+    static constexpr Result ResultEdzAlreadyRegistered              = EDZRES(1);
+    static constexpr Result ResultEdzUnknownButtonID                = EDZRES(2);
+    static constexpr Result ResultEdzInvalidButtonCombination       = EDZRES(3);
+    static constexpr Result ResultEdzAttachFailed                   = EDZRES(4);
+    static constexpr Result ResultEdzDetachFailed                   = EDZRES(5);
+    static constexpr Result ResultEdzInvalidBuffer                  = EDZRES(6);
 
-    static constexpr Result ResultEdzTCPInitFailed                  = MAKERESULT(Module_Edz, 101);
-    static constexpr Result ResultEdzUSBInitFailed                  = MAKERESULT(Module_Edz, 102);
-    static constexpr Result ResultEdzScreenInitFailed               = MAKERESULT(Module_Edz, 103);
-    static constexpr Result ResultEdzFontInitFailed                 = MAKERESULT(Module_Edz, 104);
+    static constexpr Result ResultEdzTCPInitFailed                  = EDZRES(101);
+    static constexpr Result ResultEdzUSBInitFailed                  = EDZRES(102);
+    static constexpr Result ResultEdzScreenInitFailed               = EDZRES(103);
+    static constexpr Result ResultEdzFontInitFailed                 = EDZRES(104);
 
-    static constexpr Result ResultEdzSocketInitFailed               = MAKERESULT(Module_Edz, 201);
+    static constexpr Result ResultEdzSocketInitFailed               = EDZRES(201);
 
-    static constexpr Result ResultEdzAbortFailed                    = MAKERESULT(Module_Edz, 301);
+    static constexpr Result ResultEdzAbortFailed                    = EDZRES(301);
 
 }
