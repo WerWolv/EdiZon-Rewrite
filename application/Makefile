@@ -7,7 +7,7 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+include $(TOPDIR)/../switch_rules
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -54,10 +54,12 @@ endif
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES			:=	source source/helpers source/save source/save/edit source/ui/widgets source/cheat source/ui/elements source/api libs/lua libs/mruby/src libs/zipper/zipper libs/zipper/minizip libs/quickjs
+SOURCES_TOP		:=	source libs/lua libs/zipper/zipper libs/zipper/minizip
+SOURCES			+=  $(filter-out $(EXT_INCLUDES),$(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null)))
 INCLUDES		:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/zipper/zipper libs/zipper/minizip libs/quickjs
-EXT_INCLUDES	:=  
-EXCLUDES		:=	onelua.c lua.c iowin32.c minizip.c miniunz.c
+EXT_INCLUDES	:=  libs/zipper/minizip/aes libs/lua/testes/libs
+EXCLUDE_FOLDERS := 
+EXCLUDES		:=	onelua.c lua.c iowin32.c minizip.c miniunz.c dirent.c 
 DATA			:=	data
 ROMFS			:=	romfs
 
@@ -112,9 +114,9 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 CFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))))
-CPPFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES		:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+CPPFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp))))
+SFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))))
+BINFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*))))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -179,12 +181,12 @@ $(BUILD):
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo clean ...
+	@echo " RM   " $(BUILD) $(OUTDIR) $(ROMFS)/sysmodule
 	@rm -fr $(BUILD) $(OUTDIR) $(ROMFS)/sysmodule
 
 #---------------------------------------------------------------------------------
-install: $(BUILD) $(ROMFS)
-	@echo installing ...
+install: all
+	@echo " NXLNK" $@
 	@nxlink -s $(OUTDIR)/EdiZon.nro -a $(IP)
 
 #---------------------------------------------------------------------------------
@@ -209,7 +211,7 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
 #---------------------------------------------------------------------------------
-	@echo $(notdir $<)
+	@echo " BIN  " $@
 	@$(bin2o)
 
 -include $(DEPENDS)

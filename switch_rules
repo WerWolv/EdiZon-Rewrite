@@ -1,0 +1,120 @@
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro)
+endif
+
+include $(DEVKITPRO)/devkitA64/base_tools
+
+#---------------------------------------------------------------------------------
+%.a:
+#---------------------------------------------------------------------------------
+	@echo " AR   " $@
+	@rm -f $@
+	$(AR) -rc $@ $^
+
+
+#---------------------------------------------------------------------------------
+%.o: %.cpp
+	@echo " CXX  " $(notdir $<)
+	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.c
+	@echo " CC   " $(notdir $<)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.s
+	@echo " CC   " $(notdir $<)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.S
+	@echo " CC   " $(notdir $<)
+	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+# canned command sequence for binary data
+#---------------------------------------------------------------------------------
+define bin2o
+	@echo " BIN   " $(notdir $<)
+	@bin2s $< | $(AS) -o $(@)
+	echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' -e 's/[^A-Za-z0-9_]/_/g')`"_end[];" > `(echo $(<F) | tr . _)`.h
+	echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' -e 's/[^A-Za-z0-9_]/_/g')`"[];" >> `(echo $(<F) | tr . _)`.h
+	echo "extern const u32" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' -e 's/[^A-Za-z0-9_]/_/g')`_size";" >> `(echo $(<F) | tr . _)`.h
+endef
+
+PORTLIBS	:=	$(PORTLIBS_PATH)/switch
+PATH	:=	$(PORTLIBS)/bin:$(PATH)
+
+LIBNX	?=	$(DEVKITPRO)/libnx
+
+ifeq ($(strip $(APP_TITLE)),)
+APP_TITLE	:=	$(notdir $(OUTPUT))
+endif
+
+ifeq ($(strip $(APP_AUTHOR)),)
+APP_AUTHOR	:=	Unspecified Author
+endif
+
+ifeq ($(strip $(APP_VERSION)),)
+APP_VERSION	:=	1.0.0
+endif
+
+ifeq ($(strip $(APP_ICON)),)
+APP_ICON	:=	$(LIBNX)/default_icon.jpg
+endif
+
+#---------------------------------------------------------------------------------
+%.nacp: $(MAKEFILE_LIST)
+	@echo " NACP " $(notdir $@)
+	@nacptool --create "$(APP_TITLE)" "$(APP_AUTHOR)" "$(APP_VERSION)" $@ $(NACPFLAGS)
+
+#---------------------------------------------------------------------------------
+%.npdm: $(APP_JSON)
+	@echo " NPDM " $(notdir $@)
+	@npdmtool $< $@
+
+#---------------------------------------------------------------------------------
+define make_pfs0
+	@echo " PFS0 " $@
+	@mkdir -p exefs
+	@[ $(BUILD_EXEFS_SRC) ] && [ -d $(BUILD_EXEFS_SRC) ] && cp -R $(BUILD_EXEFS_SRC)/* exefs || echo > /dev/null
+	@cp $*.nso exefs/main
+	@[ $(APP_JSON) ] && cp $*.npdm exefs/main.npdm || echo > /dev/null
+	@build_pfs0 exefs $@
+endef
+
+ifeq ($(strip $(APP_JSON)),)
+%.pfs0: %.nso
+else
+%.pfs0: %.nso %.npdm
+endif
+	$(make_pfs0)
+
+ifeq ($(strip $(APP_JSON)),)
+%.nsp: %.nso
+else
+%.nsp: %.nso %.npdm
+endif
+	$(make_pfs0)
+
+#---------------------------------------------------------------------------------
+%.nso: %.elf
+	@echo " NSO  " $(notdir $@)
+	@elf2nso $< $@
+
+#---------------------------------------------------------------------------------
+%.nro: %.elf
+	@echo " NRO  " $(notdir $@)
+	@elf2nro $< $@ $(NROFLAGS) 1> /dev/null
+
+#---------------------------------------------------------------------------------
+%.kip: %.elf
+	@echo " KIP  " $(notdir $@)
+	@elf2kip $< $(APP_JSON) $@
+
+#---------------------------------------------------------------------------------
+%.elf:
+	@echo " LD   " $(notdir $@)
+	@$(LD) $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+	@$(NM) -CSn $@ > $(notdir $*.lst)

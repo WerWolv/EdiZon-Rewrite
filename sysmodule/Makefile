@@ -7,7 +7,7 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+include $(TOPDIR)/../switch_rules
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -37,13 +37,12 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR))
-OUTDIR		:=	out
-BUILD		:=	build
-SOURCES		:=	source source/overlay source/comms source/helpers source/vc source/olsc
-DATA		:=	data
-INCLUDES	:=	include libs/libstratosphere/include libs/stb
-#ROMFS	:=	romfs
+TARGET			:=	$(notdir $(CURDIR))
+OUTDIR			:=	out
+BUILD			:=	build
+SOURCES_TOP		:=	source libs/libstratosphere/source
+SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
+INCLUDES		:=	include libs/libstratosphere/include libs/stb
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -60,13 +59,13 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lstratosphere -lnx `freetype-config --libs`
+LIBS	:= -lnx `freetype-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/libs/libstratosphere
+LIBDIRS	:= $(PORTLIBS) $(LIBNX)
 
 
 #---------------------------------------------------------------------------------
@@ -163,17 +162,17 @@ endif
 all: $(BUILD)
 
 $(BUILD):
-	@$(MAKE) -C libs/libstratosphere
 	@[ -d $@ ] || mkdir -p $@ $(BUILD) $(OUTDIR)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo clean ...
+	@echo " RM   " $(BUILD) $(OUTDIR)
 	@rm -fr $(BUILD) $(OUTDIR)
 
 #---------------------------------------------------------------------------------
 install: all
+	@echo " LFTP " $@
 	@touch ./out/boot2.flag
 	@lftp -e "cd atmosphere;cd titles;mkdir 0100000000ED1204;cd 0100000000ED1204;mkdir flags;put ./out/exefs.nsp;cd flags; put ./out/boot2.flag;bye" $(IP)
 
@@ -215,7 +214,7 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
 #---------------------------------------------------------------------------------
-	@echo $(notdir $<)
+	@echo " BIN  " $@
 	@$(bin2o)
 
 -include $(DEPENDS)
