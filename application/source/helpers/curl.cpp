@@ -85,6 +85,37 @@ namespace edz::hlp {
 
         return { ResultSuccess, response };
     }
+    
+    std::pair<EResult, std::string> Curl::post(std::string path, std::string body) {
+        CURLcode result;
+        std::string response;
+
+        struct curl_slist *headers = nullptr;
+        curl_slist_append(headers, "Cache-Control: no-cache");
+        curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(this->m_curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(this->m_curl, CURLOPT_URL, std::string(this->m_baseURL + path).c_str());
+        curl_easy_setopt(this->m_curl, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_easy_setopt(this->m_curl, CURLOPT_POSTFIELDS, body.c_str());
+        curl_easy_setopt(this->m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(this->m_curl, CURLOPT_WRITEFUNCTION, writeToString);
+        curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(this->m_curl, CURLOPT_WRITEDATA, &response);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+
+        result = curl_easy_perform(this->m_curl);
+
+        if (result != CURLE_OK) {
+            debug(curl_easy_strerror(result));
+            return { ResultEdzCurlError, "" };
+        }
+
+        return { ResultSuccess, response };
+    }
+
 
     std::pair<EResult, std::vector<u8>> Curl::download(std::string path) {
         CURLcode result;
