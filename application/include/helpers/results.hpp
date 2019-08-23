@@ -29,6 +29,7 @@ namespace edz {
 
     constexpr Result ResultEdzBorealisInitFailed            = EDZRES(1);
     constexpr Result ResultEdzCurlInitFailed                = EDZRES(2);
+    constexpr Result ResultEdzNotYetImplemented             = EDZRES(3);
 
     constexpr Result ResultEdzSysmoduleAlreadyRunning       = EDZRES(101);
     constexpr Result ResultEdzSysmoduleNotRunning           = EDZRES(102);
@@ -51,4 +52,6 @@ namespace edz {
     constexpr Result ResultEdzCurlError                     = EDZRES(401);
     constexpr Result ResultEdzAPIError                      = EDZRES(402);
 
+    constexpr Result ResultEdzSaveNoSaveFS                  = EDZRES(501);
+    constexpr Result ResultEdzSaveNoSuchBackup              = EDZRES(502);
 }

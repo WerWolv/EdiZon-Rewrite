@@ -33,7 +33,7 @@ namespace edz::save {
         NacpLanguageEntry *languageEntry = nullptr;
 
         std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
-
+        
         if (EResult(nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
             throw std::exception();
             
@@ -93,6 +93,17 @@ namespace edz::save {
 
     bool Title::hasSaveFile() {
         return this->getUserIDs().size() > 0;
+    }
+
+    bool Title::hasSaveFile(Account *account) {
+        if (!hasSaveFile())
+            return false;
+
+        for (userid_t userID : getUserIDs())
+            if (account->getID() == userID)
+                return true;
+        
+        return false;
     }
 
 

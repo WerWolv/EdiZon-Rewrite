@@ -24,6 +24,8 @@
 #include <cstring>
 
 #include "save/title.hpp"
+#include "save/account.hpp"
+#include "save/save_data.hpp"
 #include "helpers/file.hpp"
 #include "helpers/folder.hpp"
 
@@ -36,7 +38,7 @@ namespace edz::hlp {
     static size_t uniquePadCnt;
 
 
-    bool askPctl(std::function<void()> f) {
+    bool openPctlPrompt(std::function<void()> f) {
         bool restricted = false;
         pctlIsRestrictionEnabled(&restricted);
 
@@ -49,7 +51,7 @@ namespace edz::hlp {
         return true;
     }
 
-    bool askSwkbdText(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
+    bool openSwkbdForText(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
 
         swkbdCreate(&config, 0);
@@ -78,7 +80,7 @@ namespace edz::hlp {
         return false;
     }
 
-    bool askSwkbdPassword(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
+    bool openSwkbdForPassword(std::function<void(std::string)> f, std::string headerText, std::string subText, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
 
         swkbdCreate(&config, 0);
@@ -107,7 +109,7 @@ namespace edz::hlp {
         return false;
     }
 
-    bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText, std::string subText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
+    bool openSwkbdForNumber(std::function<void(std::string)> f, std::string headerText, std::string subText, std::string leftButton, std::string rightButton, u8 maxStringLength, std::string initialText) {
         SwkbdConfig config;
 
         swkbdCreate(&config, 0);
@@ -137,6 +139,52 @@ namespace edz::hlp {
 
         return false;
     }
+
+    bool openPlayerSelect(std::function<void(save::Account*)> f) {
+        bool result = false;
+
+        struct UserReturnData{
+            u64 result;
+            u128 userID;
+        } PACKED;
+
+        struct UserReturnData outdata;
+
+        AppletHolder aph;
+        AppletStorage ast;
+        AppletStorage hast1;
+        LibAppletArgs args;
+
+        u8 indata[0xA0] = { 0 };
+        indata[0x96] = 1;
+
+        appletCreateLibraryApplet(&aph, AppletId_playerSelect, LibAppletMode_AllForeground);
+        libappletArgsCreate(&args, 0);
+        libappletArgsPush(&args, &aph);
+
+        appletCreateStorage(&hast1, 0xA0);
+
+        appletStorageWrite(&hast1, 0, indata, 0xA0);
+        appletHolderPushInData(&aph, &hast1);
+        appletHolderStart(&aph);
+
+        if (appletHolderWaitInteractiveOut(&aph)) {
+            f(save::SaveFileSystem::getAllAccounts()[outdata.userID].get());
+
+            result = true;
+        }
+
+        appletHolderJoin(&aph);
+        appletHolderPopOutData(&aph, &ast);
+        appletStorageRead(&ast, 0, &outdata, 24);
+
+        appletHolderClose(&aph);
+        appletStorageClose(&ast);
+        appletStorageClose(&hast1);
+
+        return result;
+    }
+
 
     bool isTitleRunning() {
         u64 runningTitlePid = 0, edizonPid = 0;
@@ -338,7 +386,7 @@ namespace edz::hlp {
         while (true) {
             char randomName[17];
 
-            for (int i = 0; i < sizeof(randomName); i++)
+            for (u8 i = 0; i < sizeof(randomName); i++)
                 randomName[i] = charset[rand() % (sizeof(charset) - 1)];
             randomName[sizeof(randomName) - 1] = '\0';
 

@@ -19,18 +19,26 @@
 
 #pragma once
 
-#include <switch.h>         // libnx
-#include <Logger.hpp>       // Borealis Logger
+#include <switch.h>                 // libnx
+#include <Logger.hpp>               // Borealis Logger
 
-#include "edz_types.hpp"    // Types associated with EdiZon
+#include "edz_types.hpp"            // Types associated with EdiZon
 
 #include "helpers/lang_entry.hpp"   // Translation helper
-#include "helpers/macros.hpp"   // Helper macros
+#include "helpers/macros.hpp"       // Helper macros
 
 /* || EDIZON COMPILE TIME SETTINGS || */
 
-/* The EdiZon folder base path on the SD card */
-#define EDIZON_BASE_DIR             "sdmc:/switch/EdiZon"
+/* The EdiZon paths on the SD card */
+#define EDIZON_BASE_DIR                 "sdmc:/switch/EdiZon"
+    #define EDIZON_BACKUP_DIR               EDIZON_BASE_DIR "/backups"
+    #define EDIZON_BATCH_BACKUP_DIR         EDIZON_BASE_DIR "/batch_backups"
+    #define EDIZON_COMMON_RESTORE_DIR       EDIZON_BASE_DIR "/restore"
+    #define EDIZON_CONFIGS_DIR              EDIZON_BASE_DIR "/configs"
+    #define EDIZON_SCRIPTS_DIR              EDIZON_BASE_DIR "/scripts"
+    #define EDIZON_LIBS_DIR                 EDIZON_BASE_DIR "/scripts/libs"
+    #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
+    #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
 
 /* Whether the splash screen should be displayed on launch */
 #define SPLASH_ENABLED              true
@@ -39,7 +47,7 @@
 #define EDIZON_API_VERSION          "v4"
 #define SWITCHCHEATSDB_API_VERSION  "v1"
 
-/* Web API URL */
+/* Web API URLs */
 #define EDIZON_API_URL              "http://api.edizon.werwolv.net/" EDIZON_API_VERSION 
 #define SWITCHCHEATSDB_API_URL      "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
 

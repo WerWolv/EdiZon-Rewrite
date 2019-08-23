@@ -44,6 +44,7 @@ namespace edz::save {
 
         bool isInstalled();
         bool hasSaveFile();
+        bool hasSaveFile(Account *account);
 
         bool isRunning();
         static titleid_t getRunningTitleID();

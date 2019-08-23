@@ -28,16 +28,19 @@
 
 #include "helpers/folder.hpp"
 
+namespace edz::save {
+    class Title;
+    class Account;
+}
+
 namespace edz::hlp {
 
-    namespace edz::save {
-        class Title;
-    }
 
-    bool askPctl(std::function<void()> f);
-    bool askSwkbdText(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
-    bool askSwkbdPassword(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
-    bool askSwkbdNumber(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", std::string leftButton = "", std::string rightButton = "", u8 maxStringLength = 32, std::string initialText = "");
+    bool openPctlPrompt(std::function<void()> f);
+    bool openSwkbdForText(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
+    bool openSwkbdForPassword(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");
+    bool openSwkbdForNumber(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", std::string leftButton = "", std::string rightButton = "", u8 maxStringLength = 32, std::string initialText = "");
+    bool openPlayerSelect(std::function<void(save::Account*)> f);
     
     bool isTitleRunning();
     bool isServiceRunning(const char *serviceName);
