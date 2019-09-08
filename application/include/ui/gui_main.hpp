@@ -37,278 +37,30 @@ namespace edz::ui {
         GuiMain() : Gui() { }
         ~GuiMain() { }
 
-        View* setupUI() override {
-            TabFrame *rootFrame = new TabFrame();
-            rootFrame->setTitle(edz::LangEntry("edz.name"));
+        enum class DisplayStyle { LIST, GRID };
+        enum class SortingStyle { NAME, AUTHOR, LAST_PLAYED, PLAY_TIME };
 
-            // Title list
-            {
-                this->m_titleList = new List();
-
-                this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.options"), false));
-
-                ListItem *sortingOption = new ListItem(edz::LangEntry("edz.gui.main.titles.style"));
-                sortingOption->setValue(edz::LangEntry("edz.gui.main.titles.style.list"), false, true);
-                sortingOption->setClickListener([&](View *view) {
-
-                    for (u16 i = this->m_titleListEntries; i > 3; i--)
-                        this->m_titleList->removeView(i - 1, true);
-
-                    this->m_titleListEntries = 3;
-
-                    if (this->m_sortingStyle == SortingStyle::GRID) {
-                        this->m_sortingStyle = SortingStyle::LIST;
-                        static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.list"), false, true);
-                        constructTitleListView();
-                    }
-                    else if (this->m_sortingStyle == SortingStyle::LIST) {
-                        this->m_sortingStyle = SortingStyle::GRID;
-                        static_cast<ListItem*>(view)->setValue(edz::LangEntry("edz.gui.main.titles.style.grid"), false, true);
-                        constructTitleGridView();
-                    }
-
-                });
-
-                this->m_titleList->addView(sortingOption);
-
-                this->m_titleList->addView(new Header(edz::LangEntry("edz.gui.main.titles.tab"), false));
-
-                this->m_titleListEntries = 3;
-
-                constructTitleListView();
-
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.titles.tab"), this->m_titleList);
-            }
-
-            // Running title information
-            if (hlp::isTitleRunning() && cheat::CheatManager::get().isCheatServiceAvailable()) {
-                cheat::CheatManager::get().forceAttach();
-                List *titleInfoList = new List();
-
-                std::shared_ptr<save::Title> runningTitle = save::SaveFileSystem::getAllTitles()[save::Title::getRunningTitleID()];
-                
-                size_t iconSize = runningTitle->getIconSize();
-                u8 *iconBuffer = new u8[iconSize];
-                runningTitle->getIcon(iconBuffer, iconSize);
-
-                element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle, save::Title::getRunningProcessID(), cheat::CheatManager::get().getBuildID());
-
-                delete[] iconBuffer;
-
-                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.general"), true));
-                titleInfoList->addView(titleInfo);
-                titleInfoList->addView(new Header(edz::LangEntry("edz.gui.main.running.memory"), true));
-
-                Table *regionsTable = new Table();
-
-                bool foundHeap = false;
-                u16 currCodeRegion = 0;
-                u16 codeRegionCnt = 0;
-
-                for (MemoryInfo region : cheat::CheatManager::get().getMemoryRegions())
-                    if (region.type == MemType_CodeStatic && region.perm == Perm_Rx)
-                        codeRegionCnt++;
-
-                for (MemoryInfo region : cheat::CheatManager::get().getMemoryRegions()) {
-                    std::string regionName = "";
-
-                    if (region.type == MemType_Heap && !foundHeap) {
-                        foundHeap = true;
-                        regionName = "heap";
-                    } else if (region.type == MemType_CodeStatic && region.perm == Perm_Rx) {
-                        if (currCodeRegion == 0 && codeRegionCnt == 1) {
-                            regionName = "main";
-                            continue;
-                        } else {
-                            switch (currCodeRegion) {
-                                case 0:
-                                    regionName = "rtld";
-                                    break;
-                                case 1:
-                                    regionName = "main";
-                                    break;
-                                case 2:
-                                    regionName = "sdk";
-                                    break;
-                                default:
-                                    regionName = "subsdk" + std::to_string(currCodeRegion - 2);
-                            }
-                        }
-
-                        currCodeRegion++;
-                    } else continue;
-
-                    regionsTable->addRow(TableRowType::BODY, regionName, "0x" + hlp::toHexString(region.addr) + " - 0x" + hlp::toHexString(region.addr + region.size));
-                }
-                titleInfoList->addView(regionsTable);
-                titleInfoList->addView(new ListItem(""));
-
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.running.tab"), titleInfoList);
-            }
-
-
-            // Cheats
-            {
-                List *cheatsList = new List();
-
-                cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.desc"), true));
-                cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.label.desc"), true));
-                cheatsList->addView(new Header(edz::LangEntry("edz.gui.main.cheats.header.cheats"), cheat::CheatManager::get().getCheats().size() == 0));
-
-                if (cheat::CheatManager::get().isCheatServiceAvailable()) {
-                    if (cheat::CheatManager::get().getCheats().size() > 0) {
-                        for (auto cheat : cheat::CheatManager::get().getCheats()) {
-                            ToggleListItem *cheatItem = new ToggleListItem(cheat->getName(), cheat->isEnabled(), "",
-                                edz::LangEntry("edz.widget.boolean.on"), edz::LangEntry("edz.widget.boolean.off"));
-
-                            cheatsList->addView(cheatItem);
-                        }
-                    } else {
-                        if (hlp::isInAppletMode())
-                            cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.no_cheats"), true));
-                        else
-                            cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.application_mode"), true));
-                    }
-                } 
-                else 
-                    cheatsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.cheats.error.dmnt_cht_missing"), true));
-
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.cheats.tab"), cheatsList);
-            }
-
-            // Settings
-            {
-                List *settingsList = new List();
-
-                settingsList->addView(new Header(edz::LangEntry("switchcheatsdb.name"), false));
-
-                InputListItem *emailItem = new InputListItem(edz::LangEntry("edz.gui.main.about.email"), "", edz::LangEntry("edz.gui.main.about.email.help"));
-                ListItem *passwordItem = new ListItem(edz::LangEntry("edz.gui.main.about.password"));
-                passwordItem->setClickListener([&](View *view) {
-                    hlp::openSwkbdForPassword([&](std::string text) {
-                        this->m_password = text;
-
-                        std::string itemText = "";
-                        for (u8 i = 0; i < text.length(); i++)
-                            itemText += "●";
-
-                        static_cast<ListItem*>(view)->setValue(itemText);
-                    }, edz::LangEntry("edz.gui.main.about.password"), edz::LangEntry("edz.gui.main.about.password.help"));
-                });
-
-                settingsList->addView(emailItem);
-                settingsList->addView(passwordItem);
-                
-                ListItem *loginButton = new ListItem(edz::LangEntry("edz.gui.main.about.login"));
-                settingsList->addView(loginButton);
-                settingsList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.switchcheatsdb"), true));
-                
-                settingsList->addView(new ListItemGroupSpacing(true));
-
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.settings.tab"), settingsList);
-            }
-
-
-            // About
-            {
-                List *aboutList = new List();
-
-                aboutList->addView(new Header(edz::LangEntry("edz.name") + " " VERSION_STRING + " "s + edz::LangEntry("edz.dev"), false));
-                aboutList->addView(new Label(LabelStyle::DESCRIPTION, edz::LangEntry("edz.gui.main.about.label.edz"), true));
-
-                rootFrame->addSeparator();
-                rootFrame->addTab(edz::LangEntry("edz.gui.main.about.tab"), aboutList);
-            }
-
-            return rootFrame;
-        }
-
-        void update() override {
-
-        }
+        brls::View* setupUI() override;
+        void update() override;
 
         private:
             std::string m_email, m_password;
-            List *m_titleList;
-            u16 m_titleListEntries;
-            enum class SortingStyle { LIST, GRID } m_sortingStyle;
 
-            void constructTitlePopup(save::Title *title) {
-                size_t iconSize = title->getIconSize();
-                u8 *iconBuffer = new u8[iconSize];
-                title->getIcon(iconBuffer, iconSize);
+            brls::LayerView *m_titleList = nullptr;
+            brls::List *m_runningTitleInfoList = nullptr;
+            brls::List *m_cheatsList = nullptr;
+            brls::LayerView *m_settingsList = nullptr;
+            brls::List *m_aboutList = nullptr;
 
-                TabFrame *rootFrame = new TabFrame();
-                rootFrame->addTab("Software Information", new Rectangle(nvgRGB(0xFF, 0x00, 0x00)));
-                rootFrame->addSeparator();
-                rootFrame->addTab("Save Management", new Rectangle(nvgRGB(0x00, 0xFF, 0x00)));
-                rootFrame->addTab("Save Editing", new Rectangle(nvgRGB(0x00, 0x00, 0xFF)));
+            void createTitlePopup(save::Title *title);
+            void createTitleListView(brls::List *list);
+            void createTitleGridView(brls::List *list);
 
-                PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "Ver. " + title->getVersionString(), title->getAuthor());
-
-                delete[] iconBuffer;
-            }
-
-            void constructTitleListView() {
-                for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles()) {
-                    ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
-                    
-                    size_t iconSize = title->getIconSize();
-                    u8 *iconBuffer = new u8[iconSize];
-                    title->getIcon(iconBuffer, iconSize);
-                    
-                    titleItem->setThumbnail(iconBuffer, iconSize);
-
-                    delete[] iconBuffer;
-                    
-                    titleItem->setClickListener([&](View *view) {
-                        constructTitlePopup(title.get());
-                    });
-
-
-                    this->m_titleList->addView(titleItem);
-                    this->m_titleListEntries++;
-                }
-
-                this->m_titleList->invalidate();
-            }
-
-            void constructTitleGridView() {
-                std::vector<element::HorizontalTitleList*> hLists;
-                u16 column = 0;
-                
-                for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles()) {                    
-                    if (column % 4 == 0)
-                        hLists.push_back(new element::HorizontalTitleList());
-                    
-                    size_t iconSize = title->getIconSize();
-                    u8 *iconBuffer = new u8[iconSize];
-                    title->getIcon(iconBuffer, iconSize);
-
-                    element::TitleButton *titleButton = new element::TitleButton(iconBuffer, iconSize, column % 4);
-
-                    titleButton->setClickListener([&](View *view) {
-                        constructTitlePopup(title.get());
-                    });
-
-                    hLists[hLists.size() - 1]->addView(titleButton);
-
-                    delete[] iconBuffer;
-
-
-                    column++;
-                }
-                
-                for (element::HorizontalTitleList*& hList : hLists) {
-                    this->m_titleList->addView(hList);
-                    this->m_titleListEntries++;
-                }
-
-                this->m_titleList->setSpacing(30);
-
-                this->m_titleList->invalidate();
-                
-            }
+            void createTitlesListTab(brls::LayerView *layerView);
+            void createRunningTitleInfoTab(brls::List *list);
+            void createCheatsTab(brls::List *list);
+            void createSettingsTab(brls::LayerView *layerView);
+            void createAboutTab(brls::List *list);
     };
 
 }

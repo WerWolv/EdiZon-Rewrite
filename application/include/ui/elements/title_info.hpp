@@ -31,18 +31,18 @@
 
 namespace edz::ui::element {
 
-    class TitleInfo : public View {
+    class TitleInfo : public brls::View {
     public:
         TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title, processid_t processID, buildid_t buildID);
         ~TitleInfo();
 
-        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
-        void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
-        View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
+        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
 
     private:
-        Table *m_table;
-        Image *m_image;
+        brls::Table *m_table;
+        brls::Image *m_image;
     };
 
 }

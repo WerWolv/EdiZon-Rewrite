@@ -30,23 +30,25 @@
 
 namespace edz::save::edit {
 
+    using ui::widget::Argument;
+
     class Script {
     public:
         Script(std::string path);
         virtual ~Script();
 
         virtual void setSaveData(u8 *buffer, size_t bufferSize) final;
-        virtual void addArgument(std::string argName, std::shared_ptr<ui::widget::Arg> arg) final;
+        virtual void addArgument(std::string argName, Argument arg) final;
         virtual void clearArguments() final;
 
 
-        virtual std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> getValue() = 0;
-        virtual EResult setValue(std::shared_ptr<ui::widget::Arg> value) = 0;
-        virtual std::tuple<EResult, std::vector<u8>> getModifiedSaveData() = 0;
+        virtual std::tuple<EResult, Argument> getValue() = 0;
+        virtual EResult setValue(Argument value) = 0;
+        virtual std::tuple<EResult, std::optional<std::vector<u8>>> getModifiedSaveData() = 0;
 
     protected:
         std::string m_scriptName;
-        std::map<std::string, std::shared_ptr<ui::widget::Arg>> m_arguments;
+        std::map<std::string, Argument> m_arguments;
 
         u8 *m_saveData;
         size_t m_saveSize;

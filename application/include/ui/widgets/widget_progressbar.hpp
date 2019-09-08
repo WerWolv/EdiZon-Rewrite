@@ -30,7 +30,7 @@ namespace edz::ui::widget {
         ~WidgetProgressbar();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
         u8 m_progress;

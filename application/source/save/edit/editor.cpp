@@ -100,7 +100,7 @@ namespace edz::save::edit {
             return ResultEdzEditorStoreFailed;
         }
 
-        Editor::s_currentSaveFile->write(&saveData[0], saveData.size());
+        Editor::s_currentSaveFile->write(&saveData.value()[0], saveData.value().size());
 
         return ResultSuccess;
     }

@@ -23,6 +23,8 @@
 
 namespace edz::ui::element {
 
+    using namespace brls;
+
     TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title, processid_t processID, buildid_t buildID) {
         this->m_image = new Image(buffer, bufferSize);
         this->m_image->setParent(this);

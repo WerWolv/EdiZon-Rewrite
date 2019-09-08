@@ -24,7 +24,36 @@
 #include <string>
 #include <vector>
 
+#define SET_CONFIG(cfg, value)  do { edz::hlp::ConfigManager::get().getConfig().cfg = value; \
+                                     edz::hlp::ConfigManager::get().store(); } while (false);
+
+#define GET_CONFIG(cfg)              edz::hlp::ConfigManager::get().getConfig().cfg
+
 namespace edz::hlp {
+
+    typedef struct {
+        struct {
+            std::string buildTime;
+            bool debugMode;
+        } Common;
+
+        struct {
+            std::string localCommitSha;
+            
+            bool loggedIn;
+            std::string switchcheatsdbEmail;
+            std::string switchcheatsdbApiToken;
+        } Update;
+
+        struct {
+            u8 titlesSortingStyle;
+            std::vector<std::string> saveFileRepos;
+        } Save;
+
+        struct {
+            std::vector<u32> favoriteColors;
+        } VC;
+    } config_t;
 
     class ConfigManager {
     public:
@@ -36,26 +65,6 @@ namespace edz::hlp {
 
         ConfigManager(ConfigManager const&) = delete;
         void operator=(ConfigManager const&) = delete;    
-
-        typedef struct {
-            struct common {
-                bool debugMode;
-            };
-
-            struct update {
-                std::string localCommitSha;
-                std::string switchcheatsdbEmail;
-                std::string switchcheatsdbApiToken;
-            };
-
-            struct save {
-                std::vector<std::string> saveFileRepos;
-            };
-
-            struct vc {
-                std::vector<u32> favoriteColors;
-            };
-        } config_t;
         
         config_t& getConfig();
 
@@ -63,9 +72,10 @@ namespace edz::hlp {
         void store();
 
     private:
-        ConfigManager();
-        ~ConfigManager();
+        ConfigManager() { }
+        ~ConfigManager() { }
 
+        config_t m_config;
     };
 
 }

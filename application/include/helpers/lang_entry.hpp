@@ -37,7 +37,6 @@ namespace edz {
         std::string operator+(std::string other) const;
         std::string operator+(LangEntry other) const;
 
-
     private:
         std::string m_unlocalizedString;
 
@@ -47,3 +46,4 @@ namespace edz {
 }
 
 std::string operator+(std::string left, edz::LangEntry right);
+std::string operator ""_lang (const char *unlocalizedString, size_t size);

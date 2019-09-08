@@ -19,7 +19,7 @@
 
 #include "ui/widgets/widget_string.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 namespace edz::ui::widget {
 
@@ -36,21 +36,21 @@ namespace edz::ui::widget {
         return WidgetType::STRING;
     }
 
-    View* WidgetString::getView() {
+    brls::View* WidgetString::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new ListItem(this->m_name, this->m_description);
-            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
+            this->m_widgetView = new brls::ListItem(this->m_name, this->m_description);
+            brls::ListItem *listItem = reinterpret_cast<brls::ListItem*>(this->m_widgetView);
             
             listItem->setValue(this->m_currValue);
 
-            listItem->setClickListener([&](View *view){
+            listItem->setClickListener([&](brls::View *view){
                 edz::hlp::openSwkbdForText([&](std::string str){
                     if (str.length() < this->m_minLength) return;
 
                     this->m_currValue = str;
                     listItem->setValue(this->m_currValue);
 
-                }, edz::LangEntry("edz.widget.string.title"), edz::LangEntry("edz.widget.string.subtitle"), this->m_maxLength, this->m_currValue);
+                }, "edz.widget.string.title"_lang, "edz.widget.string.subtitle"_lang, this->m_maxLength, this->m_currValue);
             });
         }
 

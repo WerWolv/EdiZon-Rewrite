@@ -41,16 +41,16 @@ namespace edz::save::edit {
         lua_pop(this->m_ctx, 1);
 
         if (luaL_loadfile(this->m_ctx, path.c_str()) != 0) {
-            error("Failed to load Lua script file");
+            Log::error("Failed to load Lua script file");
             return;
         }
 
         if (lua_pcall(this->m_ctx, 0, 0, 0)) {
-            error("Failed to execute Lua script's global scope: %s", lua_tostring(this->m_ctx, -1));
+            Log::error("Failed to execute Lua script's global scope: %s", lua_tostring(this->m_ctx, -1));
             return;
         }
 
-        info("Lua script successfully loaded!");
+        Log::info("Lua script successfully loaded!");
     }
 
     ScriptLua::~ScriptLua() {
@@ -59,65 +59,63 @@ namespace edz::save::edit {
     }
 
 
-    std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> ScriptLua::getValue() {
-        std::shared_ptr<ui::widget::Arg> out;
+    std::tuple<EResult, Argument> ScriptLua::getValue() {
+        Argument out;
 
         lua_getglobal(this->m_ctx, "getValue");
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
-            error("Lua script's getValue function failed: %s", lua_tostring(this->m_ctx, -1));
+            Log::error("Lua script's getValue function failed: %s", lua_tostring(this->m_ctx, -1));
             return { ResultEdzScriptRuntimeError, out };  // Return empty argument
         }
 
 
         if (lua_isinteger(this->m_ctx, -1))
-            out = ui::widget::Arg::create("value", lua_tointeger(this->m_ctx, -1));
+            out = static_cast<s128>(lua_tointeger(this->m_ctx, -1));
         else if (lua_isnumber(this->m_ctx, -1))
-            out = ui::widget::Arg::create("value", lua_tonumber(this->m_ctx, -1));
+            out = static_cast<double>(lua_tonumber(this->m_ctx, -1));
         else if (lua_isboolean(this->m_ctx, -1))
-            out = ui::widget::Arg::create("value", lua_toboolean(this->m_ctx, -1));
+            out = static_cast<bool>(lua_toboolean(this->m_ctx, -1));
         else if (lua_isstring(this->m_ctx, -1))
-            out = ui::widget::Arg::create("value", lua_tostring(this->m_ctx, -1));
-        else error("Invalid value returned from Lua script's getValue!");
+            out = std::string(lua_tostring(this->m_ctx, -1));
+        else Log::error("Invalid value returned from Lua script's getValue!");
 
         lua_pop(this->m_ctx, 1);
 
         return { ResultSuccess, out };
     }
 
-    EResult ScriptLua::setValue(std::shared_ptr<ui::widget::Arg> value) {
+    EResult ScriptLua::setValue(Argument value) {
         lua_getglobal(this->m_ctx, "setValue");
 
-        switch(value->type) {
-            case ui::widget::Arg::ArgumentType::INTEGER:
-                lua_pushinteger(this->m_ctx, value->intArg);
-                break;
-            case ui::widget::Arg::ArgumentType::FLOAT:
-                lua_pushnumber(this->m_ctx, value->floatArg);
-                break;
-            case ui::widget::Arg::ArgumentType::BOOLEAN:
-                lua_pushboolean(this->m_ctx, value->boolArg);
-                break;            
-            case ui::widget::Arg::ArgumentType::STRING:
-                lua_pushstring(this->m_ctx, value->stringArg.c_str());
-                break;
+        if (s128 *v = std::get_if<s128>(&value))
+            lua_pushinteger(this->m_ctx, *v);
+        else if (double *v = std::get_if<double>(&value))
+            lua_pushnumber(this->m_ctx, *v);
+        else if (bool *v = std::get_if<bool>(&value))
+            lua_pushboolean(this->m_ctx, *v);
+        else if (std::string *v = std::get_if<std::string>(&value))
+            lua_pushstring(this->m_ctx, v->c_str());
+        else {
+            Log::error("Invalid Argument type");
+            return ResultEdzScriptRuntimeError;
         }
 
         if (lua_pcall(this->m_ctx, 1, 0, 0)) {
-            error("Lua script's setValue function failed: %s", lua_tostring(this->m_ctx, -1));
+            Log::error("Lua script's setValue function failed: %s", lua_tostring(this->m_ctx, -1));
             return ResultEdzScriptRuntimeError;
         }
 
         return ResultSuccess;
     }
 
-    std::tuple<EResult, std::vector<u8>> ScriptLua::getModifiedSaveData() {
+    std::tuple<EResult, std::optional<std::vector<u8>>> ScriptLua::getModifiedSaveData() {
         std::vector<u8> out;
 
         lua_getglobal(this->m_ctx, "getModifiedSaveData");
 
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
-            error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
-            return { ResultEdzScriptRuntimeError, out }; // Return empty buffer
+            Log::error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
+            return { ResultEdzScriptRuntimeError, { } };
         }
 
         lua_pushnil(this->m_ctx);
@@ -149,27 +147,18 @@ namespace edz::save::edit {
     int ScriptLua::getArgument(lua_State *ctx) {
         std::string argName = std::string(lua_tostring(ctx, -1), lua_strlen(ctx, -1));
 
-        std::shared_ptr<ui::widget::Arg> arg = this->m_arguments.at(argName);
+        Argument& arg = this->m_arguments.at(argName);
 
-        if (arg == nullptr) {
-            lua_pushnil(ctx);
-            return 1;
-        }
-
-        switch(arg->type) {
-            case ui::widget::Arg::ArgumentType::INTEGER:
-                lua_pushinteger(ctx, arg->intArg);
-                break;
-            case ui::widget::Arg::ArgumentType::FLOAT:
-                lua_pushnumber(ctx, arg->floatArg);
-                break;
-            case ui::widget::Arg::ArgumentType::BOOLEAN:
-                lua_pushboolean(ctx, arg->boolArg);
-                break;            
-            case ui::widget::Arg::ArgumentType::STRING:
-                lua_pushstring(ctx, arg->stringArg.c_str());
-                break;
-        }
+        if (s128 *v = std::get_if<s128>(&arg))
+            lua_pushinteger(this->m_ctx, *v);
+        else if (double *v = std::get_if<double>(&arg))
+            lua_pushnumber(this->m_ctx, *v);
+        else if (bool *v = std::get_if<bool>(&arg))
+            lua_pushboolean(this->m_ctx, *v);
+        else if (std::string *v = std::get_if<std::string>(&arg))
+            lua_pushstring(this->m_ctx, v->c_str());
+        else
+            lua_pushnil(this->m_ctx);
 
         return 1;
     }

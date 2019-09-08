@@ -28,15 +28,14 @@ namespace edz::ui::widget {
 
     class WidgetList : public Widget {
     public:
-        WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments);
+        WidgetList(std::string name, std::vector<NamedArgument> entries);
         ~WidgetList();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
-        std::vector<std::string> m_displayStrings;
-        std::vector<std::shared_ptr<widget::Arg>> m_arguments;
+        std::vector<NamedArgument> m_entries;
 
         s16 m_currValue;
     };

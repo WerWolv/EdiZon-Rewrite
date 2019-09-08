@@ -66,6 +66,7 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
   2. Download and install devkitA64. It comes bundled with the [devkitPro](https://devkitpro.org) toolchain.
   3. Use the pacman package manager that comes with devkitPro to download and install libnx, the switch portlibs (`switch-portlibs`), the switch OpenGL libs (`switch-glfw`, `switch-mesa` and `switch-glm`).
   4. The rest of the compilation works using the `make` command. Type `make application` to build only EdiZon, `make sysmodule` to build only the companion sysmodule or just `make` to build everything.
+  5. If you want to use the debug utilities built into the makefile, you also need `python3` and `lftp` installed on your computer and [sys-ftpd](https://github.com/jakibaki/sys-ftpd) installed on your Switch.
 
 # Discord
 

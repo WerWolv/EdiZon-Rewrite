@@ -30,7 +30,7 @@ namespace edz::ui::widget {
         ~WidgetSlider();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
 

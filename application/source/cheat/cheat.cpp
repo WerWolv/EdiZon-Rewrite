@@ -26,7 +26,7 @@ namespace edz::cheat {
 
     /////// Cheat Type ///////
 
-    Cheat::Cheat(dmntcht::DmntCheatEntry cheatEntry) : m_name(cheatEntry.definition.readable_name), m_id(cheatEntry.cheat_id) {
+    Cheat::Cheat(dmntcht::CheatEntry cheatEntry) : m_name(cheatEntry.definition.readable_name), m_id(cheatEntry.cheat_id) {
 
     }
 
@@ -45,7 +45,7 @@ namespace edz::cheat {
     }
 
     bool Cheat::isEnabled() {
-        dmntcht::DmntCheatEntry cheatEntry;
+        dmntcht::CheatEntry cheatEntry;
 
         if (dmntcht::getCheatById(&cheatEntry, getID()).failed())
             return false;
@@ -56,7 +56,7 @@ namespace edz::cheat {
 
     /////// FrozenAddress Type ///////
 
-    FrozenAddress::FrozenAddress(dmntcht::DmntFrozenAddressEntry frozenAddressEntry) : m_frozenAddressEntry(frozenAddressEntry), m_frozen(true) {
+    FrozenAddress::FrozenAddress(dmntcht::FrozenAddressEntry frozenAddressEntry) : m_frozenAddressEntry(frozenAddressEntry), m_frozen(true) {
 
     }
 
@@ -132,40 +132,7 @@ namespace edz::cheat {
     CheatManager::CheatManager() {
         dmntcht::initialize();
 
-        // Get process metadata
-        if (dmntcht::getCheatProcessMetadata(&this->m_processMetadata).failed())
-            return;
-
-
-        // Get all loaded cheats
-        u64 cheatCnt = 0;
-        if (dmntcht::getCheatCount(&cheatCnt).failed())
-            return;
-
-        dmntcht::DmntCheatEntry cheatEntries[cheatCnt];
-
-        if (dmntcht::getCheats(cheatEntries, cheatCnt, 0, &cheatCnt).failed())
-            return;
-        
-        this->m_cheats.reserve(cheatCnt);
-        for (auto &cheatEntry : cheatEntries)
-            this->m_cheats.push_back(new Cheat(cheatEntry));
-
-
-        // Get all frozen addresses
-        u64 frozenAddressCnt = 0;
-        if (dmntcht::getFrozenAddressCount(&frozenAddressCnt).failed())
-            return;
-
-        dmntcht::DmntFrozenAddressEntry frozenAddressEntries[frozenAddressCnt];
-        
-        if (dmntcht::getFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt).failed())
-            return;
-
-        this->m_frozenAddresses.reserve(frozenAddressCnt);
-        for (auto &frozenAddressEntry : frozenAddressEntries)
-            this->m_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
-
+        CheatManager::reload();
     }   
 
     CheatManager::~CheatManager() {
@@ -214,6 +181,29 @@ namespace edz::cheat {
     }
 
 
+    std::pair<EResult, u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
+        u32 cheatID = 0;
+        EResult res;
+        
+        if ((res = dmntcht::addCheat(&cheatDefinition, enabled, &cheatID)).failed())
+            return { res, 0 };
+
+        if ((res = CheatManager::reload()).failed())
+            return { res, 0 };
+
+        return { res, cheatID };
+    }
+
+    EResult CheatManager::removeCheat(u32 cheatID) {
+        EResult res;
+
+        if ((res = dmntcht::removeCheat(cheatID)).failed())
+            return res;
+
+        return CheatManager::reload();
+    }
+
+
     std::vector<Cheat*>& CheatManager::getCheats() {
         return this->m_cheats;
     }
@@ -254,6 +244,57 @@ namespace edz::cheat {
 
     EResult CheatManager::writeMemory(addr_t address, const u8 *buffer, size_t bufferSize) {
         return dmntcht::writeCheatProcessMemory(address, buffer, bufferSize);
+    }
+
+
+    EResult CheatManager::reload() {
+        EResult res;
+
+        // Delete local cheats copy if there are any
+        for (auto &cheat : this->m_cheats)
+            delete cheat;
+        this->m_cheats.clear();
+
+        // Delete local frozen addresses copy if there are any
+        for (auto &frozenAddress : this->m_frozenAddresses)
+            delete frozenAddress;
+        this->m_frozenAddresses.clear();
+
+        // Get process metadata
+        if ((res = dmntcht::getCheatProcessMetadata(&this->m_processMetadata)).failed())
+            return res;
+
+
+        // Get all loaded cheats
+        u64 cheatCnt = 0;
+        if ((res = dmntcht::getCheatCount(&cheatCnt)).failed())
+            return res;
+
+        dmntcht::CheatEntry cheatEntries[cheatCnt];
+
+        if ((res = dmntcht::getCheats(cheatEntries, cheatCnt, 0, &cheatCnt)).failed())
+            return res;
+        
+        this->m_cheats.reserve(cheatCnt);
+        for (auto &cheatEntry : cheatEntries)
+            this->m_cheats.push_back(new Cheat(cheatEntry));
+
+
+        // Get all frozen addresses
+        u64 frozenAddressCnt = 0;
+        if ((res = dmntcht::getFrozenAddressCount(&frozenAddressCnt)).failed())
+            return res;
+
+        dmntcht::FrozenAddressEntry frozenAddressEntries[frozenAddressCnt];
+        
+        if ((res = dmntcht::getFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt)).failed())
+            return res;
+
+        this->m_frozenAddresses.reserve(frozenAddressCnt);
+        for (auto &frozenAddressEntry : frozenAddressEntries)
+            this->m_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
+
+        return res;
     }
 
 }

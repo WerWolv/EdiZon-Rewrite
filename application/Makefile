@@ -170,7 +170,7 @@ ifeq ($(strip $(NO_NACP)),)
 	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/EdiZon.nacp
 endif
 
-.PHONY: $(BUILD) clean all install
+.PHONY: $(BUILD) clean all install stacktrace
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(ROMFS)
@@ -188,6 +188,11 @@ clean:
 install: all
 	@echo " NXLNK" $(IP)
 	@nxlink -s $(OUTDIR)/EdiZon.nro -a $(IP)
+
+#---------------------------------------------------------------------------------
+stacktrace:
+	@echo " PY   " get_stacktrace.py $(OUTDIR)/EdiZon.elf $(IP) 5000
+	@python3 debug/get_stacktrace.py $(OUTDIR)/EdiZon.elf $(IP) 5000
 
 #---------------------------------------------------------------------------------
 else

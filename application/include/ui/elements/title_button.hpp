@@ -27,34 +27,34 @@
 
 namespace edz::ui::element {
 
-    class TitleButton : public View {
+    class TitleButton : public brls::View {
     public:
         TitleButton(unsigned char *buffer, size_t bufferSize, u8 column);
         ~TitleButton();
 
-        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
-        void layout(NVGcontext* vg, Style *style, FontStash *stash) override;
-        View* requestFocus(FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
+        brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
         bool onClick() override;
 
-        void setClickListener(EventListener listener);
+        void setClickListener(brls::EventListener listener);
 
         u8 getColumn();
     private:
-        Image *m_image;
+        brls::Image *m_image;
         u8 m_column;
 
-        EventListener m_clickListener = nullptr;
+        brls::EventListener m_clickListener = nullptr;
     };
 
-    class HorizontalTitleList : public BoxLayout {
+    class HorizontalTitleList : public brls::BoxLayout {
         public:
             HorizontalTitleList();
             ~HorizontalTitleList();
 
-            std::vector<BoxLayoutChild*> getChildren();
+            std::vector<brls::BoxLayoutChild*> getChildren();
             void addTitle(save::Title *title);
-            View* defaultFocus(View *oldFocus);
+            brls::View* defaultFocus(brls::View *oldFocus);
             
     };
 

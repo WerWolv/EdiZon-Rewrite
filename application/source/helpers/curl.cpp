@@ -79,7 +79,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -91,10 +91,10 @@ namespace edz::hlp {
         std::string response;
 
         struct curl_slist *headers = nullptr;
-        curl_slist_append(headers, "Cache-Control: no-cache");
-        curl_slist_append(headers, "Content-Type: application/json");
+        headers = curl_slist_append(headers, "Cache-Control: no-cache");
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        headers = curl_slist_append(headers, "Accept: application/json");
 
-        curl_easy_setopt(this->m_curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(this->m_curl, CURLOPT_URL, std::string(this->m_baseURL + path).c_str());
         curl_easy_setopt(this->m_curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_easy_setopt(this->m_curl, CURLOPT_POSTFIELDS, body.c_str());
@@ -105,11 +105,12 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_WRITEDATA, &response);
         curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
         curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_HTTPHEADER, headers);
 
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -140,7 +141,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, std::vector<u8>() };
         }
 
@@ -173,7 +174,7 @@ namespace edz::hlp {
         fclose(file);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return EResult(MODULE_EDIZON, 1);
         }
 
@@ -211,7 +212,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -254,7 +255,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            debug(curl_easy_strerror(result));
+            Log::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 

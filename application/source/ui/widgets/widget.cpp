@@ -30,7 +30,7 @@ namespace edz::ui::widget {
     }
 
 
-    void Widget::sendValueToScript(std::shared_ptr<widget::Arg> arg) {
+    void Widget::sendValueToScript(Argument arg) {
 
     }
 
@@ -38,7 +38,7 @@ namespace edz::ui::widget {
         this->m_description = description;
     }
 
-    void Widget::addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument) {
+    void Widget::addArgument(std::string argumentName, Argument argument) {
         this->m_arguments.insert({ argumentName, argument });
     }
 

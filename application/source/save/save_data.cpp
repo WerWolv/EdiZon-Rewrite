@@ -130,13 +130,13 @@ namespace edz::save {
     }
 
     edz::hlp::Folder SaveFileSystem::getSaveFolder() {
-        return edz::hlp::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":");
+        return edz::hlp::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":/");
     }
 
     void SaveFileSystem::commit() {
         if (!this->m_initialized) return;
 
-        fsdevCommitDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
+        fsdevCommitDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":/").c_str());
     }
 
 

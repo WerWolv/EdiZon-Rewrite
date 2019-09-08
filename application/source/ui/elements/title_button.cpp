@@ -21,6 +21,8 @@
 
 namespace edz::ui::element {
 
+    using namespace brls;
+
     TitleButton::TitleButton(unsigned char *buffer, size_t bufferSize, u8 column) : m_column(column) {
         this->m_image = new Image(buffer, bufferSize);
         this->m_image->setParent(this);

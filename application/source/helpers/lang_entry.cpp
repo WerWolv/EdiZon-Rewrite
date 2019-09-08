@@ -51,7 +51,9 @@ namespace edz {
     }
 
     std::string LangEntry::get() const {
-        return LangEntry::m_localizedStrings[this->m_unlocalizedString];
+        if (LangEntry::m_localizedStrings.find(this->m_unlocalizedString) != LangEntry::m_localizedStrings.end())
+            return LangEntry::m_localizedStrings[this->m_unlocalizedString];
+        else return this->m_unlocalizedString;
     }
 
     const char* LangEntry::c_str() const {
@@ -74,4 +76,8 @@ namespace edz {
 
 std::string operator+(std::string left, edz::LangEntry right) {
     return left + right.get();
+}
+
+std::string operator ""_lang (const char *unlocalizedString, size_t size) {
+    return edz::LangEntry(std::string(unlocalizedString, size)).get();
 }

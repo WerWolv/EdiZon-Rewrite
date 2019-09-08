@@ -20,7 +20,7 @@ sysmodule:
 	@mkdir ./application/romfs/sysmodule
 	@cp ./sysmodule/out/exefs.nsp ./application/romfs/sysmodule/exefs.nsp
 
-install:
+install: application
 	@$(MAKE) -C application install --no-print-directory
 
 clean:

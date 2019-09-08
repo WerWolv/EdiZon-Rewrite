@@ -21,6 +21,7 @@
 
 #include <edizon.hpp>
 #include <Borealis.hpp>
+#include "helpers/utils.hpp"
 
 namespace edz::ui {
 
@@ -29,7 +30,7 @@ namespace edz::ui {
         Gui() { }
         virtual ~Gui() { }
 
-        virtual View* setupUI() = 0;
+        virtual brls::View* setupUI() = 0;
 
         virtual void update() = 0;
 
@@ -41,14 +42,14 @@ namespace edz::ui {
 
         template<typename T, typename... Args>
         static void replaceWith(Args... args) {
-            Application::popView();
+            brls::Application::popView();
             
             if (Gui::s_currentGui != nullptr)
                 delete Gui::s_currentGui;
             
             Gui::s_currentGui = new T(args...);
 
-            Application::pushView(Gui::s_currentGui->setupUI());
+            brls::Application::pushView(Gui::s_currentGui->setupUI());
             Gui::s_guiStackSize++;
         }
 
@@ -59,7 +60,7 @@ namespace edz::ui {
             
             Gui::s_currentGui = new T(args...);
 
-            Application::pushView(Gui::s_currentGui->setupUI());
+            brls::Application::pushView(Gui::s_currentGui->setupUI());
             Gui::s_guiStackSize++;
         }
 
@@ -67,14 +68,14 @@ namespace edz::ui {
             if (s_guiStackSize <= 1)
                 return;
 
-            Application::popView();
+            brls::Application::popView();
             Gui::s_guiStackSize--;
         }
 
         template<typename... Args>
         static void fatal(std::string format, Args... args) {
-            Application::crash(hlp::formatString(format, args...));
-            while (Application::mainLoop());
+            brls::Application::crash(hlp::formatString(format, args...));
+            while (brls::Application::mainLoop());
         }
 
     private:

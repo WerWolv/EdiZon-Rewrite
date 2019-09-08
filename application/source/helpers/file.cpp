@@ -73,6 +73,10 @@ namespace edz::hlp {
             dstFolder.createDirectories();
 
             FILE *dst = fopen(path.c_str(), "w");
+            Log::debug(path.c_str());
+
+            if (dst == nullptr)
+                return *this;
 
             size_t size = 0;
             u64 offset = 0;
@@ -120,8 +124,17 @@ namespace edz::hlp {
 
             return readSize;
         }
+        
+        std::string File::read() {
+            size_t fileSize = this->size() + 1;
+            std::string content(fileSize, '\0');
 
-        s32 File::write(u8 *buffer, size_t bufferSize) {
+            read(reinterpret_cast<u8*>(&content[0]), fileSize);
+
+            return content;
+        }
+
+        s32 File::write(const u8 *buffer, size_t bufferSize) {
             size_t writeSize = 0;
 
             openFile();
@@ -130,6 +143,10 @@ namespace edz::hlp {
             closeFile();
 
             return writeSize;            
+        }
+
+        void File::write(std::string &buffer) {
+            write(reinterpret_cast<u8*>(&buffer[0]), buffer.size());
         }
 
 

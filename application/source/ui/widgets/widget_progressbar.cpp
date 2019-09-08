@@ -19,7 +19,7 @@
 
 #include "ui/widgets/widget_progressbar.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 namespace edz::ui::widget {
 
@@ -36,10 +36,10 @@ namespace edz::ui::widget {
         return WidgetType::PROGRESS_BAR;
     }
 
-    View* WidgetProgressbar::getView() {
+    brls::View* WidgetProgressbar::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new ProgressDisplay(PROGRESS_DISPLAY_STYLE_PERCENTAGE);
-            ProgressDisplay *progressBar = reinterpret_cast<ProgressDisplay*>(this->m_widgetView);
+            this->m_widgetView = new brls::ProgressDisplay(brls::ProgressDisplayFlags::PERCENTAGE);
+            brls::ProgressDisplay *progressBar = reinterpret_cast<brls::ProgressDisplay*>(this->m_widgetView);
             
             progressBar->setProgress(this->m_progress, 100);
         }

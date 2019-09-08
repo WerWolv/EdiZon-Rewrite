@@ -24,9 +24,11 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <variant>
 
-
-class View;
+namespace brls {
+    class View;
+}
 
 namespace edz::ui::widget {
 
@@ -40,53 +42,8 @@ namespace edz::ui::widget {
         COMMENT
     };
 
-
-
-    class Arg {
-    public:
-        template <typename T>
-        static std::shared_ptr<widget::Arg> create(std::string name, T value) {
-            std::shared_ptr<widget::Arg> ret = std::make_shared<Arg>();
-
-            if constexpr (std::is_integral<T>::value) {
-                ret->intArg = value;
-                ret->type = ArgumentType::INTEGER;
-            }
-            else if constexpr (std::is_floating_point<T>::value) {
-                ret->floatArg = value;
-                ret->type = ArgumentType::FLOAT;
-            }
-            else if constexpr (std::is_same<T, bool>::value) {
-                ret->boolArg = value;
-                ret->type = ArgumentType::BOOLEAN;
-            }
-            else if constexpr (std::is_same<T, std::string>::value) {
-                ret->stringArg = value;
-                ret->type = ArgumentType::STRING;
-            }
-
-            ret->name = name;
-
-            return ret;
-        }
-
-        enum class ArgumentType {
-            INVALID,
-            INTEGER,
-            FLOAT,
-            BOOLEAN,
-            STRING
-        };
-
-        s128 intArg = 0;
-        double floatArg = 0;
-        bool boolArg = false;
-        std::string stringArg;
-
-        ArgumentType type = ArgumentType::INVALID;
-        std::string name;
-    };
-
+    using Argument = std::variant<s128, double, bool, std::string>;
+    using NamedArgument = std::pair<std::string, Argument>;
 
     class Widget {
     public:
@@ -94,19 +51,19 @@ namespace edz::ui::widget {
         virtual ~Widget();
 
         virtual WidgetType getWidgetType() = 0;
-        virtual View* getView() = 0;
+        virtual brls::View* getView() = 0;
 
-        virtual void sendValueToScript(std::shared_ptr<widget::Arg> arg) final;
+        virtual void sendValueToScript(Argument arg) final;
 
         virtual void setDescription(std::string description) final;
-        virtual void addArgument(std::string argumentName, std::shared_ptr<widget::Arg> argument) final;
+        virtual void addArgument(std::string argumentName, Argument argument) final;
 
     protected:
         std::string m_name;
         std::string m_description;
-        std::map<std::string, std::shared_ptr<widget::Arg>> m_arguments;
+        std::map<std::string, Argument> m_arguments;
 
-        View *m_widgetView = nullptr;
+        brls::View *m_widgetView = nullptr;
     };
 
 }

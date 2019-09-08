@@ -61,17 +61,17 @@ namespace edz::hlp {
         swkbdConfigSetSubText(&config, subText.c_str());
         swkbdConfigSetInitialText(&config, initialText.c_str());
         swkbdConfigSetBlurBackground(&config, true);
-        swkbdConfigSetType(&config, SwkbdType_Normal);
+        swkbdConfigSetType(&config, SwkbdType_QWERTY);
         swkbdConfigSetStringLenMax(&config, maxStringLength);
         swkbdConfigSetStringLenMaxExt(&config, 1);
-        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
+        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
-        char buffer[0x100];
+        char buffer[0x100] = { 0 };
 
         if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
-            f(buffer);
-
             swkbdClose(&config);
+            f(std::string(buffer));
+
             return true;
         }
 
@@ -93,14 +93,13 @@ namespace edz::hlp {
         swkbdConfigSetType(&config, SwkbdType_Normal);
         swkbdConfigSetStringLenMax(&config, maxStringLength);
         swkbdConfigSetStringLenMaxExt(&config, 1);
-        swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
         char buffer[0x100];
 
         if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+            swkbdClose(&config);
             f(buffer);
 
-            swkbdClose(&config);
             return true;
         }
 
@@ -129,9 +128,9 @@ namespace edz::hlp {
         char buffer[0x100];
 
         if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+            swkbdClose(&config);
             f(buffer);
 
-            swkbdClose(&config);
             return true;
         }
 
@@ -141,8 +140,6 @@ namespace edz::hlp {
     }
 
     bool openPlayerSelect(std::function<void(save::Account*)> f) {
-        bool result = false;
-
         struct UserReturnData{
             u64 result;
             u128 userID;
@@ -168,11 +165,7 @@ namespace edz::hlp {
         appletHolderPushInData(&aph, &hast1);
         appletHolderStart(&aph);
 
-        if (appletHolderWaitInteractiveOut(&aph)) {
-            f(save::SaveFileSystem::getAllAccounts()[outdata.userID].get());
-
-            result = true;
-        }
+        while(appletHolderWaitInteractiveOut(&aph));        
 
         appletHolderJoin(&aph);
         appletHolderPopOutData(&aph, &ast);
@@ -182,7 +175,12 @@ namespace edz::hlp {
         appletStorageClose(&ast);
         appletStorageClose(&hast1);
 
-        return result;
+        if (outdata.userID != 0) {
+            f(save::SaveFileSystem::getAllAccounts()[outdata.userID].get());
+            return true;
+        }
+
+        return false;
     }
 
 

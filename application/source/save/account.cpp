@@ -71,7 +71,7 @@ namespace edz::save {
 
         std::string Account::getIDString() {
             std::stringstream sstream;
-            sstream << std::uppercase << std::setfill('0') << std::setw(sizeof(userid_t) * 2) << std::hex << static_cast<u64>(getID() >> 64) << static_cast<u64>(getID() & 0xFFFFFFFFFFFFFFFF);
+            sstream << std::uppercase << std::hex << static_cast<u64>(getID() >> 64) << static_cast<u64>(getID() & 0xFFFFFFFFFFFFFFFF);
 
             return sstream.str();
         }

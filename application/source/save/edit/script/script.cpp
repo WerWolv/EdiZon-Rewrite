@@ -42,7 +42,7 @@ namespace edz::save::edit {
         std::memcpy(this->m_saveData, buffer, bufferSize);
     }
 
-    void Script::addArgument(std::string argName, std::shared_ptr<ui::widget::Arg> arg) {
+    void Script::addArgument(std::string argName, Argument arg) {
         this->m_arguments.insert({ argName, arg });
     }
 

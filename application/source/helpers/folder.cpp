@@ -22,9 +22,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string>
 #include <cstring>
+#include "helpers/utils.hpp"
 
 namespace edz::hlp {
+
     Folder::Folder(std::string path) {
         this->m_dir = nullptr;
 
@@ -68,11 +71,11 @@ namespace edz::hlp {
                 continue;
 
             if (entry->d_type == DT_DIR) {
-                Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
-                folder.copyTo(newPath + folder.name());
+                Folder folder(hlp::formatString("%s/%s", this->m_path.c_str(), entry->d_name), entry->d_name);
+                folder.copyTo(hlp::formatString("%s/%s", newPath.c_str(), folder.name().c_str()));
             } else if (entry->d_type == DT_REG) {
-                File file(this->m_path + std::string(entry->d_name));
-                file.copyTo(newPath + file.name());
+                File file(hlp::formatString("%s/%s", this->m_path.c_str(), entry->d_name));
+                file.copyTo(hlp::formatString("%s/%s", newPath.c_str(), entry->d_name));
             }
         }
 
@@ -101,7 +104,7 @@ namespace edz::hlp {
             if (entry->d_type == DT_DIR) {
 
                 {
-                    Folder folder(this->m_path + entry->d_name + "/"s, entry->d_name);
+                    Folder folder(this->m_path + entry->d_name + ""s, entry->d_name);
                     res = folder.remove();
 
                     if (res.failed())
@@ -148,6 +151,7 @@ namespace edz::hlp {
         openDirectory();
 
         if (this->m_dir == nullptr) return files;
+        printf("Lol");
 
         while ((entry = readdir(this->m_dir)) != nullptr) {
             if(std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
@@ -194,6 +198,15 @@ namespace edz::hlp {
         closeDirectory();
     }
 
+    bool Folder::exists() {
+        DIR* dir = opendir(this->m_path.c_str());
+        
+        if (dir) {
+            closedir(dir);
+            return true;
+        } else return false;
+    }
+
 
     void Folder::openDirectory() {
         if (this->m_dir != nullptr) return;
@@ -212,4 +225,5 @@ namespace edz::hlp {
         closeDirectory();
         openDirectory();
     }
+
 }

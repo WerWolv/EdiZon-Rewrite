@@ -31,7 +31,7 @@ namespace edz::ui::widget {
         ~WidgetComment();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
         std::string m_comment;

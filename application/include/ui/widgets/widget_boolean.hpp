@@ -27,16 +27,16 @@ namespace edz::ui::widget {
 
     class WidgetBoolean : public Widget {
     public:
-        WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue);
+        WidgetBoolean(std::string name, Argument onValue, Argument offValue);
         ~WidgetBoolean();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
         bool m_state;
-        std::shared_ptr<widget::Arg> m_onValue;
-        std::shared_ptr<widget::Arg> m_offValue;
+        Argument m_onValue;
+        Argument m_offValue;
     };
 
 }

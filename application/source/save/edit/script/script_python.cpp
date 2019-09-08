@@ -72,12 +72,12 @@ namespace edz::save::edit {
         FILE *scriptFile = fopen(std::string(path).c_str(), "r");
 
         if (scriptFile == nullptr) {
-            error("Failed to load Python script file");
+            Log::error("Failed to load Python script file");
             return;
         }
 
         if(PyRun_SimpleFileEx(scriptFile, std::string(path).c_str(), true) != 0) {
-            error("Failed to execute Python script's global scope:");
+            Log::error("Failed to execute Python script's global scope:");
             PyErr_Print();
             printf("\n");
             fclose(scriptFile);
@@ -87,7 +87,7 @@ namespace edz::save::edit {
 
         fclose(scriptFile);
 
-        info("Python script successfully loaded!");
+        Log::info("Python script successfully loaded!");
     }
 
     ScriptPython::~ScriptPython() {
@@ -95,8 +95,8 @@ namespace edz::save::edit {
     }
 
 
-    std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> ScriptPython::getValue() {
-        std::shared_ptr<ui::widget::Arg> out;
+    std::tuple<EResult, Argument> ScriptPython::getValue() {
+        Argument out;
 
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "getValue");
         PyObject *result = PyObject_CallObject(func, nullptr);
@@ -105,7 +105,7 @@ namespace edz::save::edit {
             return { ResultEdzScriptRuntimeError, nullptr };
 
         if (PyErr_Occurred() != nullptr) {
-            error("Python script's getValue function failed:");
+            Log::error("Python script's getValue function failed:");
             PyErr_Print();
             printf("\n");
 
@@ -113,45 +113,40 @@ namespace edz::save::edit {
         }
 
         if (PyLong_Check(result))
-            out = ui::widget::Arg::create("value", PyLong_AsLong(result));
+            out = static_cast<s128>(PyLong_AsLong(result));
         else if (PyFloat_Check(result))
-            out = ui::widget::Arg::create("value", PyFloat_AsDouble(result));
+            out = static_cast<double>(PyFloat_AsDouble(result));
         else if (PyBool_Check(result))
-            out = ui::widget::Arg::create("value", PyObject_IsTrue(result));
+            out = static_cast<bool>(PyObject_IsTrue(result));
         else if (PyUnicode_Check(result))
-            out = ui::widget::Arg::create("value", PyUnicode_AsUnicode(result));
+            out = std::string(PyUnicode_AsUTF8(result));
         else {
-            error("Invalid value returned from Python script's getValue!");
+            Log::error("Invalid value returned from Python script's getValue!");
             return { ResultEdzScriptRuntimeError, nullptr };
         }
         
         return { ResultSuccess, out };
     }
 
-    EResult ScriptPython::setValue(std::shared_ptr<ui::widget::Arg> value) {
+    EResult ScriptPython::setValue(Argument value) {
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "setValue");
 
 
-        switch(value->type) {
-            case ui::widget::Arg::ArgumentType::INTEGER:
-                PyObject_CallObject(func, PyTuple_Pack(1, PyLong_FromLong(value->intArg)));
-                break;
-            case ui::widget::Arg::ArgumentType::FLOAT:
-                PyObject_CallObject(func, PyTuple_Pack(1, PyFloat_FromDouble(value->floatArg)));
-                break;
-            case ui::widget::Arg::ArgumentType::BOOLEAN:
-                PyObject_CallObject(func, PyTuple_Pack(1, PyBool_FromLong(value->boolArg)));
-                break;            
-            case ui::widget::Arg::ArgumentType::STRING:
-                PyObject_CallObject(func, PyTuple_Pack(1, PyUnicode_FromString(value->stringArg.c_str())));
-                break;
-            case ui::widget::Arg::ArgumentType::INVALID: [[fallthrough]]
-            default:
-                return ResultEdzScriptInvalidArgument;
+        if (s128 *v = std::get_if<s128>(&value))
+            PyObject_CallObject(func, PyTuple_Pack(1, PyLong_FromLong(*v)));
+        else if (double *v = std::get_if<double>(&value))
+            PyObject_CallObject(func, PyTuple_Pack(1, PyFloat_FromDouble(*v)));
+        else if (bool *v = std::get_if<bool>(&value))
+            PyObject_CallObject(func, PyTuple_Pack(1, PyBool_FromLong(*v)));
+        else if (std::string *v = std::get_if<std::string>(&value))
+            PyObject_CallObject(func, PyTuple_Pack(1, PyUnicode_FromStringAndSize(v->c_str(), v->length())));
+        else {
+            Log::error("Invalid Argument type");
+            return ResultEdzScriptInvalidArgument;
         }
 
         if (PyErr_Occurred() != nullptr) {
-            error("Python script's setValue function failed:");
+            Log::error("Python script's setValue function failed:");
             PyErr_Print();
             printf("\n");
 
@@ -161,19 +156,19 @@ namespace edz::save::edit {
         return ResultSuccess;
     }
 
-    std::tuple<EResult, std::vector<u8>> ScriptPython::getModifiedSaveData() {
+    std::tuple<EResult, std::optional<std::vector<u8>>> ScriptPython::getModifiedSaveData() {
         PyObject *func = PyObject_GetAttrString(this->m_ctx, "getModifiedSaveData");
         PyObject *result = PyObject_CallObject(func, nullptr);
 
         if (result == nullptr) 
-            return { ResultEdzScriptRuntimeError, std::vector<u8>() }; // Return empty buffer
+            return { ResultEdzScriptRuntimeError, { } };
 
         if (PyErr_Occurred() != nullptr) {
-            error("Python script's getModifiedSaveData function failed:");
+            Log::error("Python script's getModifiedSaveData function failed:");
             PyErr_Print();
             printf("\n");
 
-            return { ResultEdzScriptRuntimeError, std::vector<u8>() }; // Return empty buffer
+            return { ResultEdzScriptRuntimeError, { } };
         }
 
         size_t size = PyByteArray_Size(result);
@@ -187,24 +182,16 @@ namespace edz::save::edit {
         char *argName;
         PyArg_ParseTuple(args, "s", &argName);
 
-        std::shared_ptr<ui::widget::Arg> arg = this->m_arguments.at(argName);
+        Argument& arg = this->m_arguments.at(argName);
 
-        if (arg == nullptr) {
-            return nullptr;
-        }
-
-        switch(arg->type) {
-            case ui::widget::Arg::ArgumentType::INTEGER:
-                return PyLong_FromLong(arg->intArg);
-            case ui::widget::Arg::ArgumentType::FLOAT:
-                return PyFloat_FromDouble(arg->floatArg);
-            case ui::widget::Arg::ArgumentType::BOOLEAN:
-                return PyBool_FromLong(arg->boolArg);
-            case ui::widget::Arg::ArgumentType::STRING:
-                return PyUnicode_FromString(arg->stringArg.c_str());
-            case ui::widget::Arg::ArgumentType::INVALID:
-                return nullptr;
-        }
+        if (s128 *v = std::get_if<s128>(&arg))
+            return PyLong_FromLong(*v);
+        else if (double *v = std::get_if<double>(&arg))
+            return PyFloat_FromDouble(*v);
+        else if (bool *v = std::get_if<bool>(&arg))
+            return PyBool_FromLong(*v);
+        else if (std::string *v = std::get_if<std::string>(&arg))
+            return PyUnicode_FromStringAndSize(v->c_str(), v->length());
 
         return nullptr;
     }

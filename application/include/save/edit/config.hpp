@@ -30,7 +30,9 @@
 
 #include <nlohmann/json_fwd.hpp>
 
-class TabFrame;
+namespace brls {
+    class TabFrame;
+}
 
 namespace edz::save::edit {
 
@@ -56,7 +58,7 @@ namespace edz::save::edit {
         ~Config();
 
         EResult load();
-        void createUI(TabFrame *tabFrame);
+        void createUI(brls::TabFrame *tabFrame);
 
         std::string getAuthor();
         std::string getDescription();

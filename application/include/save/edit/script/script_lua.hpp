@@ -49,9 +49,9 @@ namespace edz::save::edit {
         ~ScriptLua();
 
 
-        std::tuple<EResult, std::shared_ptr<ui::widget::Arg>> getValue() override;
-        EResult setValue(std::shared_ptr<ui::widget::Arg> value) override;
-        std::tuple<EResult, std::vector<u8>> getModifiedSaveData() override;
+        std::tuple<EResult, Argument> getValue() override;
+        EResult setValue(Argument value) override;
+        std::tuple<EResult, std::optional<std::vector<u8>>> getModifiedSaveData() override;
 
     private:
         lua_State *m_ctx;

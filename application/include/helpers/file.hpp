@@ -46,7 +46,10 @@ namespace edz::hlp {
         bool exists();
 
         s32 read(u8 *buffer, size_t bufferSize);
-        s32 write(u8 *buffer, size_t bufferSize);
+        std::string read();
+
+        s32 write(const u8 *buffer, size_t bufferSize);
+        void write(std::string &buffer);
 
     private:
         FILE *m_file;

@@ -19,7 +19,7 @@
 
 #include "ui/widgets/widget_comment.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 namespace edz::ui::widget {
 
@@ -36,9 +36,9 @@ namespace edz::ui::widget {
         return WidgetType::COMMENT;
     }
 
-    View* WidgetComment::getView() {
+    brls::View* WidgetComment::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new Label(LabelStyle::REGULAR, this->m_comment, true);
+            this->m_widgetView = new brls::Label(brls::LabelStyle::REGULAR, this->m_comment, true);
         }
 
         return this->m_widgetView;

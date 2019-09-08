@@ -17,23 +17,17 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "edizon.hpp"
+#include <edizon.hpp>
 #include <Borealis.hpp>
-
-#include <vector>
-#include <functional>
+#include <curl/curl.h>
 
 #include <stdlib.h>
 
-#include "helpers/curl.hpp"
 #include "helpers/utils.hpp"
+#include "helpers/config_manager.hpp"
 
 #include "ui/gui.hpp"
 #include "ui/gui_main.hpp"
-
-#include "cheat/cheat.hpp"
-
-#include "api/switchcheatsdb_api.hpp"
 
 
 using namespace edz;
@@ -43,13 +37,14 @@ using namespace edz::ui;
 void exitServices();
 
 extern "C" {
-
+    u32 __nx_exception_ignoredebug = 1;
+    
     alignas(16) u8 __nx_exception_stack[0x1000];
     u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
 
     void __libnx_exception_handler(ThreadExceptionDump *ctx) {
         std::string errorDesc;
-        return;
+
         switch (ctx->error_desc) {
             case ThreadExceptionDesc_BadSVC:
                 errorDesc = "Bad SVC";
@@ -70,18 +65,16 @@ extern "C" {
                 errorDesc = "SIGTRAP";
                 break;
             case ThreadExceptionDesc_Other:
-                errorDesc = "Segmentation Fault " + hlp::toHexString(ctx->afsr0) + " " + hlp::toHexString(ctx->afsr1);
+                errorDesc = "Segmentation Fault";
                 break;
             default:
                 errorDesc = "Unknown Exception [ 0x" + hlp::toHexString<u16>(ctx->error_desc) + " ]";
                 break;
         }
 
-        printf(errorDesc.c_str());
-
         Gui::fatal("%s\n\n%s: %s\nPC: 0x%016lx",
-            edz::LangEntry("edz.fatal.exception").get().c_str(),
-            edz::LangEntry("edz.fatal.exception.reason").get().c_str(),
+            "A fatal exception occured!",
+            "Reason",
             errorDesc.c_str(),
             ctx->pc);
         
@@ -97,11 +90,11 @@ extern "C" {
 
 EResult initServices() {
     // UI (Borealis)
-    if (!Application::init(StyleEnum::ACCURATE))
+    if (!brls::Application::init(brls::StyleEnum::ACCURATE))
         return ResultEdzBorealisInitFailed;
 
-    setLogLevel(LogLevel::DEBUG);
-    Application::setCommonFooter(VERSION_STRING);
+    brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
+    brls::Application::setCommonFooter(VERSION_STRING);
 
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
@@ -118,8 +111,12 @@ EResult initServices() {
     TRY(pctlInitialize());
 
     // Overclock
-    TRY(pcvInitialize());
-    clkrstInitialize();     // Don't check here because this service is only available on 8.0.0+
+    if (hosversionBefore(8,0,0)) {
+        TRY(pcvInitialize());
+    }
+    else {
+        TRY(clkrstInitialize());
+    }
 
     // Language code setting querying
     TRY(setInitialize());
@@ -128,8 +125,6 @@ EResult initServices() {
     TRY(pmdmntInitialize());
     TRY(pmshellInitialize());
     TRY(pminfoInitialize());
-
-    TRY(splInitialize());
 
     // Controller LED
     TRY(hidsysInitialize());
@@ -171,16 +166,15 @@ void exitServices() {
     pmshellExit();
     pminfoExit();
     hidsysExit();
-    splExit();
 
-    Application::quit();
+    //brls::Application::quit();
 }
 
 int main(int argc, char* argv[]) {  
 
     // Try to initialize all services
     if (EResult res = initServices(); res.failed()) {
-        Gui::fatal(edz::LangEntry("edz.fatal.service.init") + res.getString());
+        Gui::fatal("edz.fatal.service.init"_lang + res.getString());
 
         exitServices();
         return -1;
@@ -188,7 +182,7 @@ int main(int argc, char* argv[]) {
 
     // Create folder structure
     if (EResult res = createFolderStructure(); res.failed()) {
-        Gui::fatal(edz::LangEntry("edz.fatal.folder_structure.init"));
+        Gui::fatal("edz.fatal.folder_structure.init"_lang);
 
         exitServices();
         return -2;
@@ -197,11 +191,14 @@ int main(int argc, char* argv[]) {
     // Clear the tmp folder
     hlp::clearTmpFolder(); 
 
+    // Load config file
+    //hlp::ConfigManager::get().load();
+
     // Set the startup Gui
     Gui::changeTo<GuiMain>();
 
     // Main loop for UI
-    while (Application::mainLoop())
+    while (brls::Application::mainLoop())
         Gui::tick();
     
     // Exit services

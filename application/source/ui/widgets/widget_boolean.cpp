@@ -19,11 +19,11 @@
 
 #include "ui/widgets/widget_boolean.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 namespace edz::ui::widget {
 
-    WidgetBoolean::WidgetBoolean(std::string name, std::shared_ptr<widget::Arg> onValue, std::shared_ptr<widget::Arg> offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
+    WidgetBoolean::WidgetBoolean(std::string name, Argument onValue, Argument offValue) : Widget(name), m_onValue(onValue), m_offValue(offValue) {
         this->m_state = false;
     }
 
@@ -36,16 +36,16 @@ namespace edz::ui::widget {
         return WidgetType::BOOLEAN;
     }
 
-    View* WidgetBoolean::getView() {
+    brls::View* WidgetBoolean::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new ListItem(this->m_name, this->m_description);
-            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
+            this->m_widgetView = new brls::ListItem(this->m_name, this->m_description);
+            brls::ListItem *listItem = reinterpret_cast<brls::ListItem*>(this->m_widgetView);
 
-            listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on") : edz::LangEntry("edz.widget.boolean.off"), !this->m_state);
+            listItem->setValue(this->m_state ? "edz.widget.boolean.on"_lang : "edz.widget.boolean.off"_lang, !this->m_state);
 
-            listItem->setClickListener([&](View *view){
+            listItem->setClickListener([&](brls::View *view){
                 this->m_state = !this->m_state;
-                listItem->setValue(this->m_state ? edz::LangEntry("edz.widget.boolean.on") : edz::LangEntry("edz.widget.boolean.off"), !this->m_state);
+                listItem->setValue(this->m_state ? "edz.widget.boolean.on"_lang : "edz.widget.boolean.off"_lang, !this->m_state);
             });
         }
 

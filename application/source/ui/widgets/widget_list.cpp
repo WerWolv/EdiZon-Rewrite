@@ -19,11 +19,11 @@
 
 #include "ui/widgets/widget_list.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 namespace edz::ui::widget {
 
-    WidgetList::WidgetList(std::string name, std::vector<std::string> displayStrings, std::vector<std::shared_ptr<widget::Arg>> arguments) : Widget(name), m_displayStrings(displayStrings), m_arguments(arguments) {
+    WidgetList::WidgetList(std::string name, std::vector<NamedArgument> entries) : Widget(name), m_entries(entries) {
         this->m_currValue = 0;
     }
 
@@ -36,19 +36,23 @@ namespace edz::ui::widget {
         return WidgetType::LIST;
     }
 
-    View* WidgetList::getView() {
+    brls::View* WidgetList::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new ListItem(this->m_name, this->m_description);
-            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
+            this->m_widgetView = new brls::ListItem(this->m_name, this->m_description);
+            brls::ListItem *listItem = reinterpret_cast<brls::ListItem*>(this->m_widgetView);
 
-            listItem->setValue(this->m_displayStrings[this->m_currValue]);
+            listItem->setValue(this->m_entries[this->m_currValue].first);
 
-            listItem->setClickListener([&](View *view){
-                Dropdown::open(this->m_name, this->m_displayStrings, [&](s32 selectedItem){
+            std::vector<std::string> displayStrings;
+            for (auto &[displayString, argument] : this->m_entries)
+                displayStrings.push_back(displayString);
+
+            listItem->setClickListener([&](brls::View *view){
+                brls::Dropdown::open(this->m_name, displayStrings, [&](s32 selectedItem){
                     if (selectedItem == -1) return;
 
                     this->m_currValue = selectedItem;
-                    listItem->setValue(this->m_displayStrings[selectedItem]);
+                    listItem->setValue(this->m_entries[this->m_currValue].first);
                 }, this->m_currValue);
             });
         }

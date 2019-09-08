@@ -24,6 +24,7 @@
 
 #include <fstream>
 #include <regex>
+#include <optional>
 
 #include "ui/widgets/widget_integer.hpp"
 #include "ui/widgets/widget_boolean.hpp"
@@ -34,27 +35,40 @@
 #include "ui/widgets/widget_comment.hpp"
 
 #include <nlohmann/json.hpp>
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 #define CONFIG_PATH EDIZON_BASE_DIR"/configs/"
 
 using json = nlohmann::json;
+using edz::ui::widget::Argument;
+using edz::ui::widget::NamedArgument;
 
 namespace edz::save::edit {
 
-    std::shared_ptr<ui::widget::Arg> jsonToArg(std::string argName, json::value_type jsonValue) {
-        std::shared_ptr<ui::widget::Arg> ret = nullptr;
-
+    NamedArgument jsonToArg(std::string argName, json::value_type jsonValue) {
         if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
-            ret = ui::widget::Arg::create(argName, jsonValue.get<s64>());
+            return std::make_pair(argName, static_cast<s128>(jsonValue.get<s64>()));
         else if (jsonValue.type() == json::value_t::number_float)
-            ret = ui::widget::Arg::create(argName, jsonValue.get<double>());
+            return std::make_pair(argName, jsonValue.get<double>());
         else if (jsonValue.type() == json::value_t::boolean)
-            ret = ui::widget::Arg::create(argName, jsonValue.get<bool>());
+            return std::make_pair(argName, jsonValue.get<bool>());
         else if (jsonValue.type() == json::value_t::string)
-            ret = ui::widget::Arg::create(argName, jsonValue.get<std::string>());
+            return std::make_pair(argName, jsonValue.get<std::string>());
 
-        return ret;
+        return std::make_pair(argName, s128());
+    }
+
+    Argument jsonToArg(json::value_type jsonValue) {
+        if (jsonValue.type() == json::value_t::number_integer || jsonValue.type() == json::value_t::number_unsigned)
+            return static_cast<s128>(jsonValue.get<s64>());
+        else if (jsonValue.type() == json::value_t::number_float)
+            return jsonValue.get<double>();
+        else if (jsonValue.type() == json::value_t::boolean)
+            return jsonValue.get<bool>();
+        else if (jsonValue.type() == json::value_t::string)
+            return jsonValue.get<std::string>();
+
+        return s128();
     }
     
     Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
@@ -205,14 +219,14 @@ namespace edz::save::edit {
                 widget = new ui::widget::WidgetInteger(itemDescription["name"], widgetDescription["minValue"], widgetDescription["maxValue"]);
             }
             else if (widgetDescription["type"] == "bool") {
-                std::shared_ptr<ui::widget::Arg> onValue, offValue;
+                Argument onValue, offValue;
 
                 if (widgetDescription["onValue"].type() != widgetDescription["offValue"].type()) continue;
 
                 // onValue and offValue type have to be equal here, only checking one
 
-                onValue = jsonToArg("onValue", widgetDescription["onValue"]);
-                offValue = jsonToArg("offValue", widgetDescription["offValue"]);
+                onValue = jsonToArg(widgetDescription["onValue"]);
+                offValue = jsonToArg(widgetDescription["offValue"]);
 
                 widget = new ui::widget::WidgetBoolean(itemDescription["name"], onValue, offValue);
 
@@ -227,14 +241,14 @@ namespace edz::save::edit {
             }
             else if (widgetDescription["type"] == "list") {
                 if (widgetDescription["keys"].type() != json::value_t::array || widgetDescription["values"].type() != json::value_t::array) continue;
+                if (widgetDescription["keys"].size() != widgetDescription["values"].size()) continue;
                 
-                std::vector<std::string> keys = widgetDescription["keys"];
-                std::vector<std::shared_ptr<ui::widget::Arg>> values;
+                std::vector<NamedArgument> entries;
 
-                for (auto value : widgetDescription["values"])
-                    values.push_back(jsonToArg("value", value));
+                for (u16 i = 0; i < widgetDescription["keys"].size(); i++)
+                    entries.push_back(jsonToArg(widgetDescription["keys"][i], widgetDescription["values"][i]));
                 
-                widget = new ui::widget::WidgetList(itemDescription["name"], keys, values);
+                widget = new ui::widget::WidgetList(itemDescription["name"], entries);
             }
             else if (widgetDescription["type"] == "slider") {
 
@@ -254,16 +268,16 @@ namespace edz::save::edit {
                     widget->setDescription(itemDescription["infoText"]);
                     
                 for (auto &[name, value] : widgetDescription["arguments"].items()) {
-                    std::shared_ptr<ui::widget::Arg> argument;
+                    Argument argument;
 
                     if (value.type() == json::value_t::number_integer || value.type() == json::value_t::number_unsigned)
-                        argument = ui::widget::Arg::create(name, value.get<s128>());
+                        argument = value.get<s128>();
                     else if (value.type() == json::value_t::number_float)
-                        argument = ui::widget::Arg::create(name, value.get<double>());
+                        argument = value.get<double>();
                     else if (value.type() == json::value_t::boolean)
-                        argument = ui::widget::Arg::create(name, value.get<bool>());
+                        argument = value.get<bool>();
                     else if (value.type() == json::value_t::string)
-                        argument = ui::widget::Arg::create(name, value.get<std::string>());
+                        argument =  value.get<std::string>();
                     else continue;
 
                     widget->addArgument(name, argument);
@@ -275,12 +289,12 @@ namespace edz::save::edit {
         }
     }
 
-    void Config::createUI(TabFrame *tabFrame) {
+    void Config::createUI(brls::TabFrame *tabFrame) {
         if (tabFrame == nullptr) return;
 
         for (auto &[fileNum, fileConfig] : this->m_fileConfigs) {
             for (auto &[categoryName, category] : fileConfig.categories) {
-                List *list = new List();
+                brls::List *list = new brls::List();
 
                 for (auto &widget : category.widgets)
                     list->addView(widget->getView());

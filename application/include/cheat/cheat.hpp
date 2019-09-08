@@ -29,7 +29,7 @@ namespace edz::cheat {
 
     class Cheat {
     public:
-        Cheat(edz::dmntcht::DmntCheatEntry cheatEntry);
+        Cheat(dmntcht::CheatEntry cheatEntry);
 
         std::string getName();
         u32 getID();
@@ -44,7 +44,7 @@ namespace edz::cheat {
 
     class FrozenAddress {
     public:
-        FrozenAddress(edz::dmntcht::DmntFrozenAddressEntry);
+        FrozenAddress(dmntcht::FrozenAddressEntry);
         FrozenAddress(addr_t address, u8 width, u64 value);
         FrozenAddress(addr_t address, u8 width);
 
@@ -57,7 +57,7 @@ namespace edz::cheat {
         bool isFrozen();
 
     private:
-        edz::dmntcht::DmntFrozenAddressEntry m_frozenAddressEntry;
+        dmntcht::FrozenAddressEntry m_frozenAddressEntry;
         bool m_frozen;
     };
 
@@ -82,6 +82,9 @@ namespace edz::cheat {
         processid_t getProcessID();
         buildid_t getBuildID();
 
+        std::pair<EResult, u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
+        EResult removeCheat(u32 cheatID);
+
         std::vector<Cheat*>& getCheats();
         std::vector<FrozenAddress*>& getFrozenAddresses();
 
@@ -91,6 +94,8 @@ namespace edz::cheat {
         EResult readMemory(addr_t address, u8 *buffer, size_t bufferSize);
         EResult writeMemory(addr_t address, const u8 *buffer, size_t bufferSize);
 
+        EResult reload();
+
     private:
         CheatManager();
         ~CheatManager();
@@ -98,7 +103,7 @@ namespace edz::cheat {
         std::vector<Cheat*> m_cheats;
         std::vector<FrozenAddress*> m_frozenAddresses;
 
-        edz::dmntcht::DmntCheatProcessMetadata m_processMetadata;
+        dmntcht::CheatProcessMetadata m_processMetadata;
     };
 
 } 

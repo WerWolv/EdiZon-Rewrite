@@ -19,7 +19,7 @@
 
 #include "ui/widgets/widget_integer.hpp"
 #include "helpers/utils.hpp"
-#include <Borealis.hpp>
+#include <borealis.hpp>
 #include <math.h>
 
 namespace edz::ui::widget {
@@ -37,21 +37,21 @@ namespace edz::ui::widget {
         return WidgetType::INTEGER;
     }
 
-    View* WidgetInteger::getView() {
+    brls::View* WidgetInteger::getView() {
         if (this->m_widgetView == nullptr) {
-            this->m_widgetView = new ListItem(this->m_name, this->m_description);
-            ListItem *listItem = reinterpret_cast<ListItem*>(this->m_widgetView);
+            this->m_widgetView = new brls::ListItem(this->m_name, this->m_description);
+            brls::ListItem *listItem = reinterpret_cast<brls::ListItem*>(this->m_widgetView);
 
             listItem->setValue(std::to_string(this->m_currValue));
 
-            listItem->setClickListener([&](View *view){
+            listItem->setClickListener([&](brls::View *view){
                 edz::hlp::openSwkbdForNumber([&](std::string str){
 
                     s64 newValue = std::stoll(str);
                     this->m_currValue = std::max(this->m_minValue, std::min(this->m_maxValue, newValue));
                     listItem->setValue(std::to_string(this->m_currValue));
 
-                }, edz::LangEntry("edz.widget.integer.title"), edz::LangEntry("edz.widget.integer.subtitle"), "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
+                }, "edz.widget.integer.title"_lang, "edz.widget.integer.subtitle"_lang, "-", "", std::floor(std::log10(this->m_maxValue)) + 1, std::to_string(this->m_currValue));
             });
             }
 

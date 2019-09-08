@@ -20,20 +20,22 @@
 #include "save/save_manager.hpp"
 #include "helpers/utils.hpp"
 #include "save/save_data.hpp"
+#include <errno.h>
+#include <string.h>
 
 namespace edz::save {
 
     EResult SaveManager::backup(Title *title, Account *account, std::string backupName) {
         hlp::Folder backupFolder(hlp::formatString("%s/%s %s/%s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str(), backupName.c_str()));
-        
+
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
 
         backupFolder.createDirectories();
 
         save::SaveFileSystem saveFS(title, account);
-        saveFS.getSaveFolder().copyTo(backupFolder.path());
 
+        saveFS.getSaveFolder().copyTo(backupFolder.path());
         return ResultSuccess;
     }
 

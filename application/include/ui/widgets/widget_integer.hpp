@@ -30,7 +30,7 @@ namespace edz::ui::widget {
         ~WidgetInteger();
 
         WidgetType getWidgetType() override;
-        View* getView() override;
+        brls::View* getView() override;
 
     private:
         s64 m_currValue;
