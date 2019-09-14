@@ -171,5 +171,14 @@ namespace edz::ovl {
             virtual inline const void *getCharRawBuf(u32 chr) { loadGlyphRender(chr); return getCharRawBuf(); }
     };
 
+    class LvglFont : public StbFont {
+    public:
+        static Result Initialize() { return StbFont::initialize(); }
+        static void Finalize() { StbFont::exit(); }
+
+        virtual const void *getCharRawBuf();
+        virtual inline const void *getCharRawBuf(u32 chr) { loadGlyphRender(chr); return getCharRawBuf(); }
+    };
+
 }
 

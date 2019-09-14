@@ -25,10 +25,15 @@
 #include "vc/vc_manager.hpp"
 #include "overlay/font.hpp"
 #include "overlay/screen.hpp"
+#include "overlay/gui.hpp"
+#include "overlay/gui_cheats.hpp"
 #include "helpers/results.hpp"
+#include "cheat/cheat.hpp"
 
 #include "comms/tcp.hpp"
 #include "comms/usb.hpp"
+
+#include <lvgl.h>
 
 #include <stdio.h>
 
@@ -116,6 +121,9 @@ extern "C" {
         if (res.failed())
             fatalSimple(edz::ResultEdzFontInitFailed);
 
+        edz::dmntcht::initialize();
+        edz::cheat::CheatManager::initialize();
+
         fsdevMountSdmc();
 
         if (edz::ovl::Screen::initialize().failed())
@@ -134,6 +142,7 @@ extern "C" {
         smExit();
         plExit();
         
+        edz::dmntcht::exit();
         edz::comms::tcp::TCPManager::exit();
         edz::comms::usb::USBManager::exit();
         edz::ovl::Screen::exit();
@@ -141,6 +150,7 @@ extern "C" {
 
 }
 
+static Event overlayComboEvent;
 
 static void netLoop(void *args) {
     while (true) {
@@ -169,11 +179,11 @@ static void hidLoop(void *args) {
         hidScanInput();
 
         controllerID = hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1;
-        hidJoystickRead(&joyStickPos[0], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
-        hidJoystickRead(&joyStickPos[1], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
+        hidJoystickRead(&joyStickPos[0], controllerID, HidControllerJoystick::JOYSTICK_LEFT);
+        hidJoystickRead(&joyStickPos[1], controllerID, HidControllerJoystick::JOYSTICK_RIGHT);
         hidTouchRead(&touchPos, 0);
-        kDown = hidKeysDown(CONTROLLER_HANDHELD);
-        kHeld = hidKeysHeld(CONTROLLER_HANDHELD);
+        kDown = hidKeysDown(controllerID);
+        kHeld = hidKeysHeld(controllerID);
 
         svcSleepThread(20E6); // Sleep 20ms
         //edz::vc::VirtualControllerManager::getInstance().process(kDown);
@@ -181,26 +191,44 @@ static void hidLoop(void *args) {
         if (kDown & KEY_MINUS)
             cheatOverlayVisible = !cheatOverlayVisible;
 
+        if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_PLUS)
+            eventFire(&overlayComboEvent);
+
     }
 } 
 
 static void ovlLoop(void *args) {
     //svcSleepThread(5E9); // Wait 5 seconds to make sure pl is ready
     edz::ovl::StbFont::initialize();
-    edz::ovl::StbFont *font = new edz::ovl::StbFont();
-    font->setFontSize(0, 32);
+    lv_init();
+
     edz::ovl::Screen *screen = new edz::ovl::Screen();
 
-    edz::ovl::rgba4444_t color(0, 0, 0, 0xF);
-
     while (true) {
-        screen->fill(color);
-        screen->drawText(font, 10, 50, edz::ovl::rgba4444_t(0xF, 0xF, 0xF, 0xF), "Hello World");
+        eventWait(&overlayComboEvent, U64_MAX);
+
+        edz::ovl::Gui *gui = new edz::ovl::GuiCheats(screen);
+
+        gui->createUI();
+
+        while (true) {
+            lv_tick_inc(1);
+            lv_task_handler();
+
+            gui->update();
+            
+            if (gui->shouldClose())
+                break;
+
+            svcSleepThread(1E6);
+        }
+
+        screen->clear();
         screen->flush();
+
+        delete gui;
     }
 
-    delete screen;
-    delete font;
     edz::ovl::StbFont::exit();
     
 }
@@ -210,15 +238,17 @@ int main(int argc, char* argv[]) {
 
     //edz::vc::VirtualControllerManager::getInstance().connectVC(0xFFFF00FF, 0xFFFFFFFF);
 
+    eventCreate(&overlayComboEvent, true);
+
     threadCreate(&netThread, netLoop, nullptr, 0x20500, 0x2C, -2);
     threadCreate(&usbThread, usbLoop, nullptr, 0x30000, 0x2C, -2);
     threadCreate(&hidThread, hidLoop, nullptr, 0x500, 0x2C, -2);
-    threadCreate(&ovlThread, ovlLoop, nullptr, 0x2000, 0x2C, -2);
+    threadCreate(&ovlThread, ovlLoop, nullptr, 0x30000, 0x2C, -2);
 
     threadStart(&netThread);
     threadStart(&usbThread);
-    //threadStart(&hidThread);
-    //threadStart(&ovlThread);
+    threadStart(&hidThread);
+    threadStart(&ovlThread);
 
     consoleDebugInit(debugDevice_SVC);
 

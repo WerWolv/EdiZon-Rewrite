@@ -213,5 +213,15 @@ namespace edz::ovl {
             getScale(), getScale(), getLastGlyph());
     }
 
+    const void *LvglFont::getCharRawBuf() {
+        unsigned int off = getCharWidth() * (getFontAscender() - getCharBitmapTop()), sz = getCharWidth() * getCharHeight();
+        u8 tmp[sz];
+        memcpy(tmp, StbFont::getCharRawBuf(), sz);
+        memcpy((u8 *)this->m_bitmap + off, tmp, sz);
+        memset(this->m_bitmap, 0, off);
+        
+        return this->m_bitmap;
+    }
+
 }
 

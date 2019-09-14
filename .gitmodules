@@ -16,3 +16,6 @@
 [submodule "sysmodule/libs/stb"]
 	path = sysmodule/libs/stb
 	url = https://github.com/nothings/stb
+[submodule "sysmodule/libs/lvgl/lvgl"]
+	path = sysmodule/libs/lvgl/lvgl
+	url = https://github.com/littlevgl/lvgl

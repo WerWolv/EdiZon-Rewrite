@@ -43,6 +43,6 @@
 #define TS_LAYER_X      (LAYER_X      * TS_WIDTH  / SCREEN_WIDTH)
 #define TS_LAYER_Y      (LAYER_Y      * TS_HEIGHT / SCREEN_HEIGHT)
 
-#define BPP sizeof(rgba4444_t)
+#define BPP sizeof(rgb565_t)
 
 #define DEFAULT_FONT_HEIGHT 16
