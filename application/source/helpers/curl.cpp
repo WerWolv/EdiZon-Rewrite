@@ -175,10 +175,10 @@ namespace edz::hlp {
 
         if (result != CURLE_OK) {
             Log::debug(curl_easy_strerror(result));
-            return EResult(MODULE_EDIZON, 1);
+            return ResultEdzCurlError;
         }
 
-        return EResult(0, 0);
+        return ResultSuccess;
     }
 
     std::pair<EResult, std::string> Curl::upload(std::string path, std::string fileName, std::vector<u8> &data) {

@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Java: Launch companion",
+            "request": "launch",
+            "mainClass": "net.werwolv.edizon.Main",
+            "args": "1337"
+        },
+        {
             "type": "electron",
             "request": "launch",
             "name": "Electron: Launch Companion app",

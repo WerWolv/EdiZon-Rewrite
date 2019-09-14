@@ -20,6 +20,7 @@
 #include <edizon.hpp>
 #include <Borealis.hpp>
 #include <curl/curl.h>
+#include <cxxabi.h>
 
 #include <stdlib.h>
 
@@ -37,10 +38,10 @@ using namespace edz::ui;
 void exitServices();
 
 extern "C" {
-    u32 __nx_exception_ignoredebug = 1;
-    
+   
     alignas(16) u8 __nx_exception_stack[0x1000];
     u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
+    void NORETURN __nx_exit(Result rc, LoaderReturnFn retaddr);
 
     void __libnx_exception_handler(ThreadExceptionDump *ctx) {
         std::string errorDesc;
@@ -72,17 +73,27 @@ extern "C" {
                 break;
         }
 
-        Gui::fatal("%s\n\n%s: %s\nPC: 0x%016lx",
+        Gui::fatal("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
             "A fatal exception occured!",
             "Reason",
             errorDesc.c_str(),
-            ctx->pc);
-        
-        exitServices();
+            ctx->pc.x - hlp::getHomebrewBaseAddress());
 
-        #if DEBUG_MODE_ENABLED
-            exit(-3);
-        #endif
+        brls::Application::quit();
+
+        u64 stackTrace[0x20] = { 0 };
+        size_t stackTraceSize = 0;
+        hlp::unwindStack(stackTrace, &stackTraceSize, 0x20, ctx->fp.x);
+
+        brls::Logger::error("== Stack trace ==");
+
+        for (u8 i = 0; i < stackTraceSize; i++)
+            brls::Logger::error("[%d] BASE + 0x%016lx", stackTraceSize - i, stackTrace[stackTraceSize - i] - hlp::getHomebrewBaseAddress());
+        
+
+        exitServices();
+        
+        __nx_exit(0, envGetExitFuncPtr());
     }
 
 
@@ -90,7 +101,7 @@ extern "C" {
 
 EResult initServices() {
     // UI (Borealis)
-    if (!brls::Application::init(brls::StyleEnum::ACCURATE))
+    if (!brls::Application::init())
         return ResultEdzBorealisInitFailed;
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
@@ -130,6 +141,9 @@ EResult initServices() {
     TRY(hidsysInitialize());
     TRY(hlp::controllerLEDInitialize());
 
+    TRY(dmntcht::initialize());
+    TRY(cheat::CheatManager::initialize());
+
     return ResultSuccess;
 }
 
@@ -166,8 +180,9 @@ void exitServices() {
     pmshellExit();
     pminfoExit();
     hidsysExit();
-
-    //brls::Application::quit();
+    dmntcht::exit();
+    cheat::CheatManager::exit();
+    brls::Application::quit();
 }
 
 int main(int argc, char* argv[]) {  
@@ -179,6 +194,8 @@ int main(int argc, char* argv[]) {
         exitServices();
         return -1;
     }
+
+    (*(u64*)16) = 8;
 
     // Create folder structure
     if (EResult res = createFolderStructure(); res.failed()) {
@@ -194,13 +211,20 @@ int main(int argc, char* argv[]) {
     // Load config file
     //hlp::ConfigManager::get().load();
 
+    printf("\033[0;33mWelcome to EdiZon\033[0m\n");
+
+
+    if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable())
+        cheat::CheatManager::forceAttach();
+
+
     // Set the startup Gui
     Gui::changeTo<GuiMain>();
 
     // Main loop for UI
     while (brls::Application::mainLoop())
         Gui::tick();
-    
+
     // Exit services
     exitServices();
 }

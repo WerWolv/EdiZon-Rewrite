@@ -18,6 +18,7 @@
  */
 
 #include "ui/elements/title_info.hpp"
+#include "cheat/cheat.hpp"
 
 #include "helpers/utils.hpp"
 
@@ -25,7 +26,7 @@ namespace edz::ui::element {
 
     using namespace brls;
 
-    TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title, processid_t processID, buildid_t buildID) {
+    TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title) {
         this->m_image = new Image(buffer, bufferSize);
         this->m_image->setParent(this);
         this->m_image->setImageScaleType(ImageScaleType::SCALE);
@@ -36,8 +37,8 @@ namespace edz::ui::element {
         this->m_table->addRow(TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
         this->m_table->addRow(TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
         this->m_table->addRow(TableRowType::BODY,   "TitleID",   title->getIDString());
-        this->m_table->addRow(TableRowType::BODY,   "ProcessID", std::to_string(processID));
-        this->m_table->addRow(TableRowType::BODY,   "BuildID",   hlp::toHexString(buildID));
+        this->m_table->addRow(TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
+        this->m_table->addRow(TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
     }
 
     TitleInfo::~TitleInfo() {

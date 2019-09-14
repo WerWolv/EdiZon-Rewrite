@@ -69,7 +69,9 @@
         "algorithm": "cpp",
         "iterator": "cpp",
         "random": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "dmntcht.h": "c"
     },
-    "python.pythonPath": "/bin/python3.8"
+    "python.pythonPath": "/bin/python3.8",
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

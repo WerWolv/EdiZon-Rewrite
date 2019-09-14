@@ -54,6 +54,7 @@ namespace edz::save {
             this->m_userIcon = new u8[this->m_userIconSize];
             if (EResult(accountProfileLoadImage(&profile, this->m_userIcon, this->m_userIconSize, &this->m_userIconSize)).failed()) {
                 delete[] this->m_userIcon;
+                this->m_userIcon = nullptr;
                 throw std::exception();
             }
 
@@ -61,6 +62,7 @@ namespace edz::save {
         }
 
         Account::~Account() {
+            if (this->m_userIcon != nullptr)
             delete[] this->m_userIcon;
         }
 

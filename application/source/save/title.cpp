@@ -55,7 +55,8 @@ namespace edz::save {
     }
 
     Title::~Title() {
-        delete[] this->m_titleIcon;
+        if (this->m_titleIcon != nullptr)
+            delete[] this->m_titleIcon;
     }
 
 

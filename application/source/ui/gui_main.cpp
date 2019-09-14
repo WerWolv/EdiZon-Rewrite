@@ -33,7 +33,7 @@ namespace edz::ui {
         res = webPageCreate(&config, url.c_str());
 
         if (res.succeeded()) {
-            res = webConfigSetWhitelist(&config, "^http*");
+            res = webConfigSetWhitelist(&config, "^.*");
             if (res.succeeded())
                 res = webConfigShow(&config, nullptr);
         }
@@ -91,18 +91,18 @@ namespace edz::ui {
             
             if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
                 if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "Enter a backup name"))
-                    save::SaveManager::get().backup(title, currUser, backupName);
+                    save::SaveManager::backup(title, currUser, backupName);
         });
 
         ListItem *restoreItem = new ListItem("Restore backup", "Restores a save file backup");
         restoreItem->setClickListener([=](View *view) {
-            auto [result, list] = save::SaveManager::get().getLocalBackupList(title);
+            auto [result, list] = save::SaveManager::getLocalBackupList(title);
 
             Dropdown::open("Select a backup to restore", list, [&](int selection) {
                 save::Account *currUser = nullptr;
                 if (selection != -1)
                     if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                        save::SaveManager::get().restore(title, currUser, list[selection]);
+                        save::SaveManager::restore(title, currUser, list[selection]);
             });
         });
 
@@ -221,7 +221,7 @@ namespace edz::ui {
         u8 *iconBuffer = new u8[iconSize];
         runningTitle->getIcon(iconBuffer, iconSize);
 
-        element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle, save::Title::getRunningProcessID(), cheat::CheatManager::get().getBuildID());
+        element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle);
 
         delete[] iconBuffer;
 
@@ -235,11 +235,12 @@ namespace edz::ui {
         u16 currCodeRegion = 0;
         u16 codeRegionCnt = 0;
 
-        for (MemoryInfo region : cheat::CheatManager::get().getMemoryRegions())
+        for (MemoryInfo region : cheat::CheatManager::getMemoryRegions())
             if (region.type == MemType_CodeStatic && region.perm == Perm_Rx)
                 codeRegionCnt++;
 
-        for (MemoryInfo region : cheat::CheatManager::get().getMemoryRegions()) {
+        auto memoryRegions = cheat::CheatManager::getMemoryRegions();
+        for (MemoryInfo region : memoryRegions) {
             std::string regionName = "";
 
             if (region.type == MemType_Heap && !foundHeap) {
@@ -257,11 +258,11 @@ namespace edz::ui {
                         case 1:
                             regionName = "main";
                             break;
-                        case 2:
-                            regionName = "sdk";
-                            break;
                         default:
-                            regionName = "subsdk" + std::to_string(currCodeRegion - 2);
+                            if (currCodeRegion == memoryRegions.size() - 1)
+                                regionName = "sdk";
+                            else
+                                regionName = "subsdk" + std::to_string(currCodeRegion - 1);
                     }
                 }
 
@@ -277,11 +278,11 @@ namespace edz::ui {
     void GuiMain::createCheatsTab(List *list) {
         list->addView(new Header("edz.gui.main.cheats.header.desc"_lang, true));
         list->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.cheats.label.desc"_lang, true));
-        list->addView(new Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::get().getCheats().size() == 0));
+        list->addView(new Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
-        if (cheat::CheatManager::get().isCheatServiceAvailable()) {
-            if (cheat::CheatManager::get().getCheats().size() > 0) {
-                for (auto cheat : cheat::CheatManager::get().getCheats()) {
+        if (cheat::CheatManager::isCheatServiceAvailable()) {
+            if (cheat::CheatManager::getCheats().size() > 0) {
+                for (auto cheat : cheat::CheatManager::getCheats()) {
                     ToggleListItem *cheatItem = new ToggleListItem(cheat->getName(), cheat->isEnabled(), "",
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
@@ -388,7 +389,7 @@ namespace edz::ui {
         patreonItem->setThumbnail("romfs:/assets/patreon_logo.png");
 
         if (hlp::isInApplicationMode()) {
-            scdbItem->setClickListener([](View *view){ openWebpage("https://switchcheatsdb.com/"); });
+            scdbItem->setClickListener([](View *view){ openWebpage("https://www.switchcheatsdb.com"); });
             patreonItem->setClickListener([](View *view){ openWebpage("https://patreon.com/werwolv_/"); });
         }
         
@@ -420,9 +421,7 @@ namespace edz::ui {
 
         rootFrame->addTab("edz.gui.main.titles.tab"_lang, this->m_titleList);
 
-        if (hlp::isTitleRunning() && cheat::CheatManager::get().isCheatServiceAvailable()) {
-            cheat::CheatManager::get().forceAttach();  
-
+        if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable()) {
             this->m_runningTitleInfoList = new List();
             createRunningTitleInfoTab(this->m_runningTitleInfoList);           
             rootFrame->addTab("edz.gui.main.running.tab"_lang, this->m_runningTitleInfoList);
