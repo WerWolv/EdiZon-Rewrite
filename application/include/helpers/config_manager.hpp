@@ -24,10 +24,10 @@
 #include <string>
 #include <vector>
 
-#define SET_CONFIG(cfg, value)  do { edz::hlp::ConfigManager::get().getConfig().cfg = value; \
-                                     edz::hlp::ConfigManager::get().store(); } while (false);
+#define SET_CONFIG(cfg, value)  do { edz::hlp::ConfigManager::getConfig().cfg = value; \
+                                     edz::hlp::ConfigManager::store(); } while (false);
 
-#define GET_CONFIG(cfg)              edz::hlp::ConfigManager::get().getConfig().cfg
+#define GET_CONFIG(cfg)              edz::hlp::ConfigManager::getConfig().cfg
 
 namespace edz::hlp {
 
@@ -56,26 +56,14 @@ namespace edz::hlp {
     } config_t;
 
     class ConfigManager {
-    public:
-        static ConfigManager& get() {
-            static ConfigManager instance;
-            
-            return instance;
-        }
+    public:       
+        static config_t& getConfig();
 
-        ConfigManager(ConfigManager const&) = delete;
-        void operator=(ConfigManager const&) = delete;    
-        
-        config_t& getConfig();
-
-        void load();
-        void store();
+        static void load();
+        static void store();
 
     private:
-        ConfigManager() { }
-        ~ConfigManager() { }
-
-        config_t m_config;
+        static inline config_t s_config;
     };
 
 }

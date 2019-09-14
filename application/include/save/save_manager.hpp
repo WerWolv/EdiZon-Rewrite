@@ -29,36 +29,24 @@ namespace edz::save {
 
     class SaveManager {
     public:
-        static SaveManager& get() {
-            static SaveManager instance;
-            
-            return instance;
-        }
-
-        SaveManager(SaveManager const&) = delete;
-        void operator=(SaveManager const&) = delete;
-
-
-        EResult backup(Title *title, Account *account, std::string backupName);
-        EResult restore(Title *title, Account *account, std::string backupName);
-
-        EResult swapSaveData(Title *title, Account *account, std::string backupName);
-        EResult swapSaveData(Title *title, Account *account1, Account *account2);
-        EResult duplicate(Title *title, Account *from, Account *to);
-
-        EResult upload(Title *title, Account *account);
-        EResult upload(Title *title, std::string backupName);
-
-        EResult download(Title *title, Account *account);
-        EResult download(Title *title, std::string backupName);
-
-        std::pair<EResult, std::vector<std::string>> getLocalBackupList(Title *title);
-        std::pair<EResult, std::vector<std::string>> getOnlineBackupList(Title *title);
-        std::pair<EResult, bool> areBackupsUpToDate(Title *title, Account *account);
+        static EResult backup(Title *title, Account *account, std::string backupName);
+        static EResult restore(Title *title, Account *account, std::string backupName);
+ 
+        static EResult swapSaveData(Title *title, Account *account, std::string backupName);
+        static EResult swapSaveData(Title *title, Account *account1, Account *account2);
+        static EResult duplicate(Title *title, Account *from, Account *to);
+ 
+        static EResult upload(Title *title, Account *account);
+        static EResult upload(Title *title, std::string backupName);
+ 
+        static EResult download(Title *title, Account *account);
+        static EResult download(Title *title, std::string backupName);
+ 
+        static std::pair<EResult, std::vector<std::string>> getLocalBackupList(Title *title);
+        static std::pair<EResult, std::vector<std::string>> getOnlineBackupList(Title *title);
+        static std::pair<EResult, bool> areBackupsUpToDate(Title *title, Account *account);
         
     private:
-        SaveManager() { }
-        ~SaveManager() { }
     };
 
 }
