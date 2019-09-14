@@ -73,7 +73,6 @@ namespace edz::hlp {
             dstFolder.createDirectories();
 
             FILE *dst = fopen(path.c_str(), "w");
-            Log::debug(path.c_str());
 
             if (dst == nullptr)
                 return *this;

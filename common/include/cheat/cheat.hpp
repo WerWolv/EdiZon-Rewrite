@@ -64,46 +64,37 @@ namespace edz::cheat {
 
     class CheatManager {
     public:
-        static CheatManager& get() {
-            static CheatManager instance;
-            
-            return instance;
-        }
+        static EResult initialize();
+        static void exit();
 
-        CheatManager(CheatManager const&) = delete;
-        void operator=(CheatManager const&) = delete;
+        static bool isCheatServiceAvailable();
 
-        bool isCheatServiceAvailable();
+        static bool forceAttach();
+        static bool hasCheatProcess();
 
-        bool forceAttach();
-        bool hasCheatProcess();
+        static titleid_t getTitleID();
+        static processid_t getProcessID();
+        static buildid_t getBuildID();
 
-        titleid_t getTitleID();
-        processid_t getProcessID();
-        buildid_t getBuildID();
+        static std::pair<EResult, u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
+        static EResult removeCheat(u32 cheatID);
 
-        std::pair<EResult, u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
-        EResult removeCheat(u32 cheatID);
+        static std::vector<Cheat*>& getCheats();
+        static std::vector<FrozenAddress*>& getFrozenAddresses();
 
-        std::vector<Cheat*>& getCheats();
-        std::vector<FrozenAddress*>& getFrozenAddresses();
+        static MemoryInfo queryMemory(addr_t address);
+        static std::vector<MemoryInfo> getMemoryRegions();
 
-        MemoryInfo queryMemory(addr_t address);
-        std::vector<MemoryInfo> getMemoryRegions();
+        static EResult readMemory(addr_t address, u8 *buffer, size_t bufferSize);
+        static EResult writeMemory(addr_t address, const u8 *buffer, size_t bufferSize);
 
-        EResult readMemory(addr_t address, u8 *buffer, size_t bufferSize);
-        EResult writeMemory(addr_t address, const u8 *buffer, size_t bufferSize);
-
-        EResult reload();
+        static EResult reload();
 
     private:
-        CheatManager();
-        ~CheatManager();
+        static inline std::vector<Cheat*> s_cheats;
+        static inline std::vector<FrozenAddress*> s_frozenAddresses;
 
-        std::vector<Cheat*> m_cheats;
-        std::vector<FrozenAddress*> m_frozenAddresses;
-
-        dmntcht::CheatProcessMetadata m_processMetadata;
+        static inline dmntcht::CheatProcessMetadata s_processMetadata;
     };
 
 } 

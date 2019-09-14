@@ -129,22 +129,18 @@ namespace edz::cheat {
 
     /////// FrozenAddress Type ///////
 
-    CheatManager::CheatManager() {
-        dmntcht::initialize();
-
-        CheatManager::reload();
+    EResult CheatManager::initialize() {
+        return CheatManager::reload();
     }   
 
-    CheatManager::~CheatManager() {
-        for (auto &cheat : this->m_cheats)
+    void CheatManager::exit() {
+        for (auto &cheat : CheatManager::s_cheats)
             delete cheat;
-        this->m_cheats.clear();
+        CheatManager::s_cheats.clear();
 
-        for (auto &frozenAddress : this->m_frozenAddresses)
+        for (auto &frozenAddress : CheatManager::s_frozenAddresses)
             delete frozenAddress;
-        this->m_frozenAddresses.clear();
-
-        dmntcht::exit();
+        CheatManager::s_frozenAddresses.clear();
     }
 
 
@@ -166,17 +162,17 @@ namespace edz::cheat {
 
 
     titleid_t CheatManager::getTitleID() {
-        return this->m_processMetadata.title_id;
+        return CheatManager::s_processMetadata.title_id;
     }
 
     processid_t CheatManager::getProcessID() {
-        return this->m_processMetadata.process_id;
+        return CheatManager::s_processMetadata.process_id;
     }
 
     buildid_t CheatManager::getBuildID() {
         buildid_t buildid = 0;
 
-        std::memcpy(&buildid, this->m_processMetadata.main_nso_build_id, sizeof(buildid_t));
+        std::memcpy(&buildid, CheatManager::s_processMetadata.main_nso_build_id, sizeof(buildid_t));
         return buildid;
     }
 
@@ -205,11 +201,11 @@ namespace edz::cheat {
 
 
     std::vector<Cheat*>& CheatManager::getCheats() {
-        return this->m_cheats;
+        return CheatManager::s_cheats;
     }
 
     std::vector<FrozenAddress*>& CheatManager::getFrozenAddresses() {
-        return this->m_frozenAddresses;
+        return CheatManager::s_frozenAddresses;
     }
 
 
@@ -250,18 +246,20 @@ namespace edz::cheat {
     EResult CheatManager::reload() {
         EResult res;
 
+        CheatManager::forceAttach();
+
         // Delete local cheats copy if there are any
-        for (auto &cheat : this->m_cheats)
+        for (auto &cheat : CheatManager::s_cheats)
             delete cheat;
-        this->m_cheats.clear();
+        CheatManager::s_cheats.clear();
 
         // Delete local frozen addresses copy if there are any
-        for (auto &frozenAddress : this->m_frozenAddresses)
+        for (auto &frozenAddress : CheatManager::s_frozenAddresses)
             delete frozenAddress;
-        this->m_frozenAddresses.clear();
+        CheatManager::s_frozenAddresses.clear();
 
         // Get process metadata
-        if ((res = dmntcht::getCheatProcessMetadata(&this->m_processMetadata)).failed())
+        if ((res = dmntcht::getCheatProcessMetadata(&CheatManager::s_processMetadata)).failed())
             return res;
 
 
@@ -275,9 +273,9 @@ namespace edz::cheat {
         if ((res = dmntcht::getCheats(cheatEntries, cheatCnt, 0, &cheatCnt)).failed())
             return res;
         
-        this->m_cheats.reserve(cheatCnt);
+        CheatManager::s_cheats.reserve(cheatCnt);
         for (auto &cheatEntry : cheatEntries)
-            this->m_cheats.push_back(new Cheat(cheatEntry));
+            CheatManager::s_cheats.push_back(new Cheat(cheatEntry));
 
 
         // Get all frozen addresses
@@ -290,9 +288,9 @@ namespace edz::cheat {
         if ((res = dmntcht::getFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt)).failed())
             return res;
 
-        this->m_frozenAddresses.reserve(frozenAddressCnt);
+        CheatManager::s_frozenAddresses.reserve(frozenAddressCnt);
         for (auto &frozenAddressEntry : frozenAddressEntries)
-            this->m_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
+            CheatManager::s_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
 
         return res;
     }

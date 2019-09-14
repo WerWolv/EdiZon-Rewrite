@@ -119,7 +119,7 @@ namespace edz::dmntcht {
         return rc;
     }
 
-    EResult getCheatProcessMetadata(DmntCheatProcessMetadata *out_metadata) {
+    EResult getCheatProcessMetadata(CheatProcessMetadata *out_metadata) {
         IpcCommand c;
         ipcInitialize(&c);
 
@@ -140,7 +140,7 @@ namespace edz::dmntcht {
             struct {
                 u64 magic;
                 u64 result;
-                DmntCheatProcessMetadata metadata;
+                CheatProcessMetadata metadata;
             } *resp;
 
             serviceIpcParse(&g_dmntchtService, &r, sizeof(*resp));
@@ -384,11 +384,11 @@ namespace edz::dmntcht {
         return _getCount(65200, out_count);
     }
 
-    EResult getCheats(DmntCheatEntry *buffer, u64 max_count, u64 offset, u64 *out_count) {
+    EResult getCheats(CheatEntry *buffer, u64 max_count, u64 offset, u64 *out_count) {
         return _getEntries(65201, buffer, sizeof(*buffer) * max_count, offset, out_count);
     }
 
-    EResult getCheatById(DmntCheatEntry *buffer, u32 cheat_id) {
+    EResult getCheatById(CheatEntry *buffer, u32 cheat_id) {
         IpcCommand c;
         ipcInitialize(&c);
         ipcAddRecvBuffer(&c, buffer, sizeof(*buffer), BufferType::BufferType_Normal);
@@ -457,7 +457,7 @@ namespace edz::dmntcht {
         return rc;
     }
 
-    EResult addCheat(DmntCheatDefinition *buffer, bool enabled, u32 *out_cheat_id) {
+    EResult addCheat(CheatDefinition *buffer, bool enabled, u32 *out_cheat_id) {
         IpcCommand c;
         ipcInitialize(&c);
         ipcAddSendBuffer(&c, buffer, sizeof(*buffer), BufferType::BufferType_Normal);
@@ -535,11 +535,11 @@ namespace edz::dmntcht {
         return _getCount(65300, out_count);
     }
 
-    EResult getFrozenAddresses(DmntFrozenAddressEntry *buffer, u64 max_count, u64 offset, u64 *out_count) {
+    EResult getFrozenAddresses(FrozenAddressEntry *buffer, u64 max_count, u64 offset, u64 *out_count) {
         return _getEntries(65301, buffer, sizeof(*buffer) * max_count, offset, out_count);
     }
 
-    EResult getFrozenAddress(DmntFrozenAddressEntry *out, u64 address) {
+    EResult getFrozenAddress(FrozenAddressEntry *out, u64 address) {
         IpcCommand c;
         ipcInitialize(&c);
 
@@ -562,7 +562,7 @@ namespace edz::dmntcht {
             struct {
                 u64 magic;
                 u64 result;
-                DmntFrozenAddressEntry entry;
+                FrozenAddressEntry entry;
             } *resp;
 
             serviceIpcParse(&g_dmntchtService, &r, sizeof(*resp));

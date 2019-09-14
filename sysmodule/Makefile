@@ -40,10 +40,10 @@ include $(TOPDIR)/../switch_rules
 TARGET			:=	$(notdir $(CURDIR))
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source libs/libstratosphere/source
+SOURCES_TOP		:=	source ../common/source libs/libstratosphere/source libs/lvgl/lvgl/src
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include libs/libstratosphere/include libs/stb
-
+INCLUDES		:=	include ../common/include libs/libstratosphere/include libs/stb libs/lvgl/include
+EXCLUDES		:=  dmntcht.c
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -Og -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
@@ -84,10 +84,10 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+CFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))))
+CPPFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp))))
+SFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))))
+BINFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*))))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C

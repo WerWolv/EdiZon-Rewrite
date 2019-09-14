@@ -23,9 +23,14 @@
 #include <ctime>
 #include <cstring>
 
+#ifndef __SYSMODULE__
+
 #include "save/title.hpp"
 #include "save/account.hpp"
 #include "save/save_data.hpp"
+
+#endif
+
 #include "helpers/file.hpp"
 #include "helpers/folder.hpp"
 
@@ -37,6 +42,7 @@ namespace edz::hlp {
     static u64 uniquePadIds[0x10];
     static size_t uniquePadCnt;
 
+#ifndef __SYSMODULE__
 
     bool openPctlPrompt(std::function<void()> f) {
         bool restricted = false;
@@ -183,6 +189,8 @@ namespace edz::hlp {
         return false;
     }
 
+#endif
+
 
     bool isTitleRunning() {
         u64 runningTitlePid = 0, edizonPid = 0;
@@ -195,6 +203,8 @@ namespace edz::hlp {
 
         return runningTitlePid > 0 && runningTitlePid != edizonPid;
     }
+
+#ifndef __SYSMODULE__
 
     bool isInApplicationMode() {
         u64 runningTitlePid = 0, edizonPid = 0;
@@ -211,6 +221,8 @@ namespace edz::hlp {
     bool isInAppletMode() {
         return !isInApplicationMode();
     }
+
+#endif
 
     bool isServiceRunning(const char *serviceName) {
         Handle handle;
@@ -250,8 +262,8 @@ namespace edz::hlp {
         return "";
     }
 
-    std::string getLFSCheatsPath(save::Title *title) {
-        return getLFSTitlesPath() + "/" + title->getIDString() + "/cheats";
+    std::string getLFSCheatsPath(titleid_t titleID) {
+        return getLFSTitlesPath() + "/" + hlp::toHexString(titleID) + "/cheats";
     }
 
 
@@ -325,6 +337,8 @@ namespace edz::hlp {
     }
 
 
+#ifndef __SYSMODULE__
+
     static constexpr titleid_t _edizonBackgroundServiceTitleId = 0x0100000000ED1204;
 
     EResult startBackgroundService(bool startOnBoot) {
@@ -375,6 +389,8 @@ namespace edz::hlp {
         return ResultSuccess;
     }
 
+#endif
+
     Folder createTmpFolder() {
         static const char charset[] =
         "0123456789"
@@ -407,6 +423,33 @@ namespace edz::hlp {
 
         tmpFolder.remove();
         tmpFolder.createDirectories();
+    }
+
+    u64 getHomebrewBaseAddress() {
+        u32 p;
+        MemoryInfo info;
+
+        // Find the memory region in which the function getHomebrewBaseAddress() is stored.
+        // The start of it will be the base address the homebrew was mapped to.
+        svcQueryMemory(&info, &p, (u64) &getHomebrewBaseAddress);
+
+        return info.addr;
+    }
+
+    void unwindStack(u64 *outStackTrace, size_t *outStackTraceSize, size_t maxStackTraceSize, u64 currFp) {
+        struct StackFrame{
+            u64 fp;     // Frame Pointer (Pointer to previous stack frame)
+            u64 lr;     // Link Register (Return address)
+        };
+
+        for (size_t i = 0; i < maxStackTraceSize; i++) {
+            if (currFp == 0 || currFp % sizeof(u64) != 0)
+                break;
+            
+            auto currTrace = reinterpret_cast<StackFrame*>(currFp); 
+            outStackTrace[(*outStackTraceSize)++] = currTrace->lr;
+            currFp = currTrace->fp;
+        }
     }
 
 }

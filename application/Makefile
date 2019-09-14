@@ -54,9 +54,9 @@ endif
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source libs/lua libs/zipper/zipper libs/zipper/minizip
+SOURCES_TOP		:=	source ../common/source libs/lua libs/zipper/zipper libs/zipper/minizip
 SOURCES			+=  $(filter-out $(EXT_INCLUDES),$(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null)))
-INCLUDES		:=	include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/zipper/zipper libs/zipper/minizip libs/quickjs
+INCLUDES		:=	include ../common/include libs/json/include libs/libpython/include libs/libpython/include/python libs/lua libs/mruby/include libs/zipper/zipper libs/zipper/minizip libs/quickjs
 EXT_INCLUDES	:=  libs/zipper/minizip/aes libs/lua/testes/libs
 EXCLUDE_FOLDERS := 
 EXCLUDES		:=	onelua.c lua.c iowin32.c minizip.c miniunz.c dirent.c 
@@ -186,8 +186,13 @@ clean:
 
 #---------------------------------------------------------------------------------
 install: all
+ifneq ($(strip $(IP)),)
 	@echo " NXLNK" $(IP)
 	@nxlink -s $(OUTDIR)/EdiZon.nro -a $(IP)
+else
+	@echo " NXLNK -Switch-"
+	@nxlink -s $(OUTDIR)/EdiZon.nro
+endif
 
 #---------------------------------------------------------------------------------
 stacktrace:

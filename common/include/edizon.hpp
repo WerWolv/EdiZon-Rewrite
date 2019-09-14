@@ -20,12 +20,16 @@
 #pragma once
 
 #include <switch.h>                 // libnx
-#include <borealis/logger.hpp>      // Borealis Logger
-using Log = brls::Logger;
+
+#ifndef __SYSMODULE__
+    #include <borealis/logger.hpp>      // Borealis Logger
+    using Log = brls::Logger;
+    
+    #include "helpers/lang_entry.hpp"   // Translation helper
+#endif
 
 #include "edz_types.hpp"            // Types associated with EdiZon
 
-#include "helpers/lang_entry.hpp"   // Translation helper
 #include "helpers/macros.hpp"       // Helper macros
 
 using namespace std::string_literals;   // String user defined literals
