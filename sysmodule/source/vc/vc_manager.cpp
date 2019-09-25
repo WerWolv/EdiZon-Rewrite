@@ -65,8 +65,8 @@ namespace edz::vc {
         
         deviceInfo.singleColorBody = bodyColor;
         deviceInfo.singleColorButtons = buttonColor;
-        deviceInfo.type = BIT(0);
-        deviceInfo.type2 = 0x00;
+        deviceInfo.deviceType = BIT(0);
+        deviceInfo.npadInterfaceType = 0x00;
 
         if (EResult(hiddbgAttachHdlsWorkBuffer()).failed())
             return ResultEdzAttachFailed;
@@ -75,7 +75,6 @@ namespace edz::vc {
             return ResultEdzAttachFailed;
 
         state.batteryCharge = 4;
-        state.powerConnected = true;
 
         hiddbgSetHdlsState(this->m_hldsHandle, &state);
 
