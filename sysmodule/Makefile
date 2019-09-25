@@ -49,15 +49,15 @@ EXCLUDES		:=  dmntcht.c
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -Og -ffunction-sections \
+CFLAGS	:=	-g0 -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS	:=	-g0 $(ARCH)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g0 $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lnx `freetype-config --libs`
 

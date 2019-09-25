@@ -11,15 +11,12 @@ namespace edz::ovl {
         last_x = 0;
         last_y = 0;
 
-        static lv_color_t buf_1[LV_HOR_RES_MAX * LV_VER_RES_MAX];
-        static lv_color_t buf_2[LV_HOR_RES_MAX * LV_VER_RES_MAX];
+        static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX][2];
 
         lv_disp_drv_init(&this->m_displayDriver);
-        lv_disp_buf_init(&this->m_displayBuffer, buf_1, buf_2, LV_HOR_RES_MAX * LV_VER_RES_MAX);
-        lv_anim_core_init();
+        lv_disp_buf_init(&this->m_displayBuffer, buf[0], buf[1], LV_HOR_RES_MAX * LV_VER_RES_MAX);
         this->m_displayDriver.flush_cb = Gui::lvglDisplayFlush;
         this->m_displayDriver.buffer = &this->m_displayBuffer;
-        this->m_displayDriver.antialiasing = true;
         this->m_displayDriver.hor_res = LV_HOR_RES_MAX;
         this->m_displayDriver.ver_res = LV_VER_RES_MAX;
         lv_disp_drv_register(&this->m_displayDriver);
@@ -28,8 +25,6 @@ namespace edz::ovl {
         this->m_inputDevice.type = LV_INDEV_TYPE_POINTER;
         this->m_inputDevice.read_cb = Gui::lvglTouchRead;
         lv_indev_drv_register(&this->m_inputDevice);
-
-        lv_theme_set_current(lv_theme_material_init(50, nullptr));
     }
 
     Gui::~Gui() {

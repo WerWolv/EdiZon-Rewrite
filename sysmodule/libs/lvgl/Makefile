@@ -25,15 +25,15 @@ INCLUDES	:=  include
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a+simd -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=local-exec
 
-CFLAGS	:=	-g -O2 -Wall -Werror -ffunction-sections -fdata-sections $(ARCH) $(BUILD_CFLAGS) \
+CFLAGS	:=	-g0 -O2 -Wall -Werror -ffunction-sections -fdata-sections $(ARCH) $(BUILD_CFLAGS) \
 				-Wno-unused-function
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS	:=	-g0 $(ARCH)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g0 $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lnx
 
