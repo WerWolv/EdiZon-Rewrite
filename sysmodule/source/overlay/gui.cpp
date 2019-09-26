@@ -40,7 +40,10 @@ namespace edz::ovl {
         
         for(u16 y = area->y1; y <= area->y2; y++) {
             for(u16 x = area->x1; x <= area->x2; x++) {
-                Gui::s_screen->setPixel(x, y, edz::ovl::makeColor<edz::ovl::rgba4444_t>(color->ch.red >> 4, color->ch.green >> 4, color->ch.blue >> 4));
+                if (color->ch.alpha > 0)
+                    Gui::s_screen->setPixel(x, y, edz::ovl::makeColor<edz::ovl::rgba4444_t>(color->ch.red >> 4, color->ch.green >> 4, color->ch.blue >> 4, color->ch.alpha >> 4));
+                else
+                    Gui::s_screen->setPixel(x, y, Gui::s_screen->getPixel(x, y));
                 color++;
             }
         }
@@ -56,8 +59,8 @@ namespace edz::ovl {
         if(data->state == LV_INDEV_STATE_PR) {
             touchPosition pos;
             hidTouchRead(&pos, 0);
-            last_x = pos.px;
-            last_y = ((pos.py) / 720.0) * 512;
+            last_x = ((pos.px) * 1280) / 1920;
+            last_y = ((pos.py) * LV_VER_RES_MAX) / TS_HEIGHT;
         }
     
         /*Set the coordinates (if released use the last pressed coordinates)*/

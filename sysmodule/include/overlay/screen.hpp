@@ -28,7 +28,6 @@
 
 #include "overlay/constants.hpp"
 #include "overlay/color.hpp"
-#include "overlay/font.hpp"
 
 #include "helpers/result.hpp"
 
@@ -85,7 +84,7 @@ namespace edz::ovl {
 
             inline u8 blendColor(u32 src, u32 dst, u8 alpha) {
                 u8 one_minus_alpha = static_cast<u8>(0xF) - alpha;
-                return (dst*alpha + src*one_minus_alpha) / static_cast<u8>(0xF);
+                return (dst*alpha + src*one_minus_alpha) / static_cast<float>(0xF);
             }
 
             inline void setPixelBlend(u32 off, u16 color) {
@@ -122,15 +121,7 @@ namespace edz::ovl {
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 *area);
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u8 *area);
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t *area);
-
-            void drawGlyph(s16 x, s16 y, rgba4444_t clr, u32 character, StbFont *font);
-
-            void drawText_(StbFont *font, s16 x, s16 y, rgba4444_t clr, const char* text, s32 max_width, const char* end_text);
-            void drawText(StbFont *font, s16 x, s16 y, rgba4444_t clr, const char* text);
-            void drawTextAligned(StbFont *font, s16 x, s16 y, rgba4444_t clr, const char* text, TextAlignment alignment);
-            void drawTextTruncate(StbFont *font, s16 x, s16 y, rgba4444_t clr, const char* text, u32 max_width, const char* end_text);
-            void getTextDimensions(StbFont *font, const char* text, u32* width_out, u32* height_out);
-
+            
             inline const u32 getPixelOffset(u32 x, u32 y) const {
                 // Swizzling pattern:
                 //    y8,y7,y6,y5,y4,y3,y2,y1,y0,x7,x6,x5,x4,x3,x2,x1,x0

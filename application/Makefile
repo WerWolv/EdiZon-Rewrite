@@ -87,7 +87,7 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 ASFLAGS		:=	-g $(ARCH)
 LDFLAGS		:=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS		:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lstdc++fs -lturbojpeg
+LIBS		:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lstdc++fs
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

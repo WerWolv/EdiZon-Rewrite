@@ -26,7 +26,7 @@ namespace edz::ui::element {
     TitleButton::TitleButton(unsigned char *buffer, size_t bufferSize, u8 column) : m_column(column) {
         this->m_image = new Image(buffer, bufferSize);
         this->m_image->setParent(this);
-        this->m_image->setImageScaleType(ImageScaleType::SCALE);
+        this->m_image->setScaleType(ImageScaleType::SCALE);
         this->m_image->invalidate();
     }
 

@@ -124,7 +124,7 @@ typedef int16_t lv_coord_t;
  *==================*/
 
 /*1: Enable the Animations */
-#define LV_USE_ANIMATION        0
+#define LV_USE_ANIMATION        1
 #if LV_USE_ANIMATION
 
 /*Declare the type of the user data of animations (can be e.g. `void *`, `int`, `struct`)*/

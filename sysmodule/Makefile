@@ -52,7 +52,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g0 -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -I$(PORTLIBS)/include/freetype2 
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
@@ -174,7 +174,7 @@ clean:
 install: all
 	@echo " LFTP " $@
 	@touch ./out/boot2.flag
-	@lftp -e "cd atmosphere;cd titles;mkdir 0100000000ED1204;cd 0100000000ED1204;mkdir flags;put ./out/exefs.nsp;cd flags; put ./out/boot2.flag;bye" $(IP)
+	@lftp -e "put -O /atmosphere/titles/0100000000ED1204 ./out/exefs.nsp;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

@@ -70,7 +70,8 @@
         "iterator": "cpp",
         "random": "cpp",
         "set": "cpp",
-        "dmntcht.h": "c"
+        "dmntcht.h": "c",
+        "styles.h": "c"
     },
     "python.pythonPath": "/bin/python3.8",
     "java.configuration.updateBuildConfiguration": "automatic"

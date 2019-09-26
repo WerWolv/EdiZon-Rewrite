@@ -22,7 +22,6 @@
 #include <lvgl.h>
 
 #include "overlay/screen.hpp"
-#include "overlay/font.hpp"
 
 namespace edz::ovl {
 

@@ -19,7 +19,8 @@ extern "C" {
 lv_style_t *get_bg_style();
 lv_style_t *get_list_style();
 lv_style_t *get_scrollbar_style();
-lv_style_t *get_button_released_style();
+lv_style_t *get_button_released_style_enabled();
+lv_style_t *get_button_released_style_disabled();
 lv_style_t *get_button_pressed_style();
 
 void set_styles_font(lv_font_t *font);

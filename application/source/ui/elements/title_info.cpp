@@ -29,7 +29,7 @@ namespace edz::ui::element {
     TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title) {
         this->m_image = new Image(buffer, bufferSize);
         this->m_image->setParent(this);
-        this->m_image->setImageScaleType(ImageScaleType::SCALE);
+        this->m_image->setScaleType(ImageScaleType::SCALE);
 
         this->m_table = new Table();
         this->m_table->setParent(this);

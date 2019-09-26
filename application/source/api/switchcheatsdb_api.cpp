@@ -59,19 +59,19 @@ namespace edz::api {
 
 
     std::pair<EResult, SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
-
+        return { ResultEdzNotYetImplemented, { 0 } };
     }
 
     std::pair<EResult, u32> SwitchCheatsDBAPI::getCheatCount() {
-
+        return { ResultEdzNotYetImplemented, 0 };
     }
 
     std::pair<EResult, SwitchCheatsDBAPI::save_file_t> SwitchCheatsDBAPI::getSaveFiles() {
-
+        return { ResultEdzNotYetImplemented, { 0 } };
     }
 
     EResult SwitchCheatsDBAPI::addSaveFile() {
-
+        return ResultEdzNotYetImplemented;
     }
 
 }
