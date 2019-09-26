@@ -19,7 +19,6 @@
 
 #pragma once
 
-#define TRY(x) { if (EResult res = x; ::edz::EResult(res).failed()) return res; }
+#define ER_TRY(x) { if (EResult res = x; ::edz::EResult(res).failed()) return res; }
 
 #define PRINT_DEBUG(x, ...) printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
-

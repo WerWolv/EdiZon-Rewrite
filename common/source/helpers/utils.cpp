@@ -317,7 +317,7 @@ namespace edz::hlp {
     }
 
     EResult controllerLEDInitialize() {
-        TRY(hidsysGetUniquePadsFromNpad(hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1, uniquePadIds, 2, &uniquePadCnt));
+        ER_TRY(hidsysGetUniquePadsFromNpad(hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1, uniquePadIds, 2, &uniquePadCnt));
 
         std::memset(&patternOn, 0x00, sizeof(HidsysNotificationLedPattern));
         std::memset(&patternOff, 0x00, sizeof(HidsysNotificationLedPattern));

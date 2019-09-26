@@ -112,37 +112,37 @@ EResult initServices() {
         return ResultEdzCurlInitFailed;
 
     // Title querying
-    TRY(ncmInitialize());
-    TRY(nsInitialize());
+    ER_TRY(ncmInitialize());
+    ER_TRY(nsInitialize());
 
     // Account querying
-    TRY(accountInitialize());
+    ER_TRY(accountInitialize());
 
     // Parential control lockdown
-    TRY(pctlInitialize());
+    ER_TRY(pctlInitialize());
 
     // Overclock
     if (hosversionBefore(8,0,0)) {
-        TRY(pcvInitialize());
+        ER_TRY(pcvInitialize());
     }
     else {
-        TRY(clkrstInitialize());
+        ER_TRY(clkrstInitialize());
     }
 
     // Language code setting querying
-    TRY(setInitialize());
+    ER_TRY(setInitialize());
 
     // Companion sysmodule launching
-    TRY(pmdmntInitialize());
-    TRY(pmshellInitialize());
-    TRY(pminfoInitialize());
+    ER_TRY(pmdmntInitialize());
+    ER_TRY(pmshellInitialize());
+    ER_TRY(pminfoInitialize());
 
     // Controller LED
-    TRY(hidsysInitialize());
-    TRY(hlp::controllerLEDInitialize());
+    ER_TRY(hidsysInitialize());
+    ER_TRY(hlp::controllerLEDInitialize());
 
-    TRY(dmntcht::initialize());
-    TRY(cheat::CheatManager::initialize());
+    ER_TRY(dmntcht::initialize());
+    ER_TRY(cheat::CheatManager::initialize());
 
     return ResultSuccess;
 }
@@ -161,7 +161,7 @@ EResult createFolderStructure() {
 
     for (auto path : paths) {
         hlp::Folder folder(path);
-        TRY(folder.createDirectories());
+        ER_TRY(folder.createDirectories());
     }
 
     return ResultSuccess;

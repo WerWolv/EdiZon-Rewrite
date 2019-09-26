@@ -174,10 +174,10 @@ EResult focusOverlay(bool focus) {
     pmdmntGetApplicationPid(&applicationAruid);
     appletGetAppletResourceUserIdOfCallerApplet(&edzAruid);
 
-    TRY(edz::hidsys::enableAppletToGetInput(!focus, qlaunchAruid));
-    TRY(edz::hidsys::enableAppletToGetInput(!focus, overlayAruid));
-    TRY(edz::hidsys::enableAppletToGetInput(!focus, applicationAruid));
-    TRY(edz::hidsys::enableAppletToGetInput(true,  edzAruid));
+    ER_TRY(edz::hidsys::enableAppletToGetInput(!focus, qlaunchAruid));
+    ER_TRY(edz::hidsys::enableAppletToGetInput(!focus, overlayAruid));
+    ER_TRY(edz::hidsys::enableAppletToGetInput(!focus, applicationAruid));
+    ER_TRY(edz::hidsys::enableAppletToGetInput(true,  edzAruid));
 
     return edz::ResultSuccess;
 }
