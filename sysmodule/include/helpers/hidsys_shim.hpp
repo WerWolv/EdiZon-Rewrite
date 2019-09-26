@@ -19,22 +19,10 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <edizon.hpp>
 
-#include "helpers/result.hpp"
-#include "helpers/results.hpp"
+namespace edz::hidsys {
 
-namespace edz {
-
-    using titleid_t = u64;
-    using userid_t = u128;
-
-    using processid_t = u64;
-    using buildid_t = u64;
-    using aruid_t = u64;
-
-    using addr_t = u64;
+    EResult enableAppletToGetInput(bool enable, aruid_t aruid);
 
 }

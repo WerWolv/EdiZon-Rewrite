@@ -47,8 +47,20 @@ namespace edz::ovl {
         edz::cheat::CheatManager::forceAttach();
         edz::cheat::CheatManager::reload();
 
-        for (auto cheat : edz::cheat::CheatManager::getCheats())
-            lv_list_add_btn(list, nullptr, cheat->getName().c_str());
+        for (auto cheat : edz::cheat::CheatManager::getCheats()) {
+            lv_obj_t *btn = lv_list_add_btn(list, nullptr, (cheat->isEnabled() ? "\xef\x80\x8c  " + cheat->getName() : "\xef\x80\x8d  " + cheat->getName()).c_str());
+            lv_btn_set_style(btn, LV_BTN_STYLE_REL, get_button_released_style_enabled());
+            lv_obj_set_user_data(btn, cheat);
+            lv_obj_set_event_cb(btn, [](lv_obj_t * obj, lv_event_t event){
+                edz::cheat::Cheat *cheat = reinterpret_cast<edz::cheat::Cheat*>(obj->user_data);
+                cheat->toggle();
+
+                lv_obj_t *label = lv_obj_get_child(obj, nullptr);
+                lv_label_set_text(label, (cheat->isEnabled() ? "\xef\x80\x8c  " + cheat->getName() : "\xef\x80\x8d  " + cheat->getName()).c_str());
+
+                lv_obj_invalidate(obj);
+            });
+        }
     }
 
     void GuiCheats::update() {

@@ -23,11 +23,11 @@
 
 #include "vc/edz_vc_service.hpp"
 #include "vc/vc_manager.hpp"
-#include "overlay/font.hpp"
 #include "overlay/screen.hpp"
 #include "overlay/gui.hpp"
 #include "overlay/gui_cheats.hpp"
 #include "helpers/results.hpp"
+#include "helpers/hidsys_shim.hpp"
 #include "cheat/cheat.hpp"
 
 #include "comms/tcp.hpp"
@@ -36,6 +36,11 @@
 #include <lvgl.h>
 
 #include <stdio.h>
+
+using namespace edz;
+
+constexpr sts::ncm::TitleId EdiZonSysTitleId = { 0x0100000000ED1204 };
+
 
 extern "C" {
 
@@ -97,6 +102,10 @@ extern "C" {
         if (res.failed())
             fatalSimple(res);
 
+        res = pmdmntInitialize();
+        if (res.failed())
+            fatalSimple(res);
+
         res = edz::comms::tcp::TCPManager::initialize();
         if (res.failed())
             fatalSimple(edz::ResultEdzTCPInitFailed);
@@ -106,6 +115,10 @@ extern "C" {
             fatalSimple(edz::ResultEdzUSBInitFailed);
 
         res = hidInitialize();
+        if (res.failed())
+            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+        res = hidsysInitialize();
         if (res.failed())
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
@@ -138,9 +151,12 @@ extern "C" {
         fsExit();
         timeExit();
         hidExit();
+        hidsysExit();
         hiddbgExit();
         smExit();
         plExit();
+
+        pmdmntExit();
         
         edz::dmntcht::exit();
         edz::comms::tcp::TCPManager::exit();
@@ -148,6 +164,22 @@ extern "C" {
         edz::ovl::Screen::exit();
     }
 
+}
+
+EResult focusOverlay(bool focus) {
+    aruid_t qlaunchAruid = 0, overlayAruid = 0, edzAruid = 0, applicationAruid = 0;
+
+    pmdmntGetTitlePid(&qlaunchAruid, (u64)sts::ncm::TitleId::AppletQlaunch);
+    pmdmntGetTitlePid(&overlayAruid, (u64)sts::ncm::TitleId::AppletOverlayDisp);
+    pmdmntGetApplicationPid(&applicationAruid);
+    appletGetAppletResourceUserIdOfCallerApplet(&edzAruid);
+
+    TRY(edz::hidsys::enableAppletToGetInput(!focus, qlaunchAruid));
+    TRY(edz::hidsys::enableAppletToGetInput(!focus, overlayAruid));
+    TRY(edz::hidsys::enableAppletToGetInput(!focus, applicationAruid));
+    TRY(edz::hidsys::enableAppletToGetInput(true,  edzAruid));
+
+    return edz::ResultSuccess;
 }
 
 static Event overlayComboEvent;
@@ -174,7 +206,7 @@ static void hidLoop(void *args) {
     u64 kHeld = 0;
     JoystickPosition joyStickPos[2] = { 0 };
     touchPosition touchPos = { 0 };
-
+    
     while (true) {
         hidScanInput();
 
@@ -198,15 +230,13 @@ static void hidLoop(void *args) {
 } 
 
 static void ovlLoop(void *args) {
-    //svcSleepThread(5E9); // Wait 5 seconds to make sure pl is ready
-    edz::ovl::StbFont::initialize();
     lv_init();
 
     edz::ovl::Screen *screen = new edz::ovl::Screen();
 
     while (true) {
         eventWait(&overlayComboEvent, U64_MAX);
-
+        focusOverlay(true);
         edz::ovl::Gui *gui = new edz::ovl::GuiCheats(screen);
 
         gui->createUI();
@@ -227,9 +257,9 @@ static void ovlLoop(void *args) {
         screen->flush();
 
         delete gui;
-    }
 
-    edz::ovl::StbFont::exit();
+        focusOverlay(false);
+    }
     
 }
 
