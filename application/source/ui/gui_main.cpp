@@ -333,21 +333,19 @@ namespace edz::ui {
 
         ListItem *loginButton = new ListItem("edz.gui.main.settings.login"_lang);
         loginButton->setClickListener([=](View *view) {
-            //api::SwitchCheatsDBAPI scdbApi;
+            api::SwitchCheatsDBAPI scdbApi;
 
-            //auto [result, token] = 
+            auto [result, token] = scdbApi.getToken(emailItem->getValue(), passwordItem->getValue());
 
             password = "";
-            //static_cast<ListItem*>(view)->setValue(""_lang;
 
-            //if (result != ResultSuccess) {
-                // TODO: Display error message
-            //    return;
-            // }
+            if (result != ResultSuccess) {
+                return;
+            }
 
             SET_CONFIG(Update.loggedIn, true);
             SET_CONFIG(Update.switchcheatsdbEmail, email);
-            SET_CONFIG(Update.switchcheatsdbApiToken, "SeeS");
+            SET_CONFIG(Update.switchcheatsdbApiToken, token);
 
             email = "";
 

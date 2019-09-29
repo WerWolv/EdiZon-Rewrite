@@ -59,11 +59,49 @@ namespace edz::api {
 
 
     std::pair<EResult, SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
-        return { ResultEdzNotYetImplemented, { 0 } };
+        SwitchCheatsDBAPI::cheat_response_t cheatResponse;
+
+        auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + "/" + hlp::toHexString(buildID));
+
+        if (result.failed())
+            return { ResultEdzAPIError, { 0 } };
+
+        try {
+            json responseJson = json::parse(response);
+            
+            cheatResponse.slug    = responseJson["slug"];
+            cheatResponse.name    = responseJson["name"];
+            cheatResponse.image   = responseJson["image"];
+            cheatResponse.titleID = responseJson["titleId"];
+
+            for (auto cheat : responseJson["cheats"])
+                cheatResponse.cheats.push_back({ cheat["id"], strtol(cheat["buildId"].get<std::string>().c_str(), nullptr, 16), cheat["content"], cheat["credits"] });
+
+        } catch (std::exception& e) {
+            printf("%s\n", response.c_str());
+            return { ResultEdzAPIError, { 0 } };
+        }
+
+        return { ResultSuccess, cheatResponse };
     }
 
     std::pair<EResult, u32> SwitchCheatsDBAPI::getCheatCount() {
-        return { ResultEdzNotYetImplemented, 0 };
+        u32 count;
+
+        auto [result, response] = this->m_curl.get("/cheats/count");
+
+        if (result.failed())
+            return { ResultEdzAPIError, 0 };
+
+        try {
+            json responseJson = json::parse(response);
+            count = responseJson["count"];
+        } catch (std::exception& e) {
+            printf("%s\n", response.c_str());
+            return { ResultEdzAPIError, 0 };
+        }
+
+        return { ResultSuccess, count };
     }
 
     std::pair<EResult, SwitchCheatsDBAPI::save_file_t> SwitchCheatsDBAPI::getSaveFiles() {
