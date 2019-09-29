@@ -44,6 +44,14 @@ namespace edz::cheat {
         return isEnabled();
     }
 
+    bool Cheat::setState(bool state) {
+        bool ret = state;
+        if (isEnabled() != state)
+            ret = this->toggle();
+        
+        return ret;
+    }
+
     bool Cheat::isEnabled() {
         dmntcht::CheatEntry cheatEntry;
 

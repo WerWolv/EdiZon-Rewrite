@@ -35,6 +35,7 @@ namespace edz::cheat {
         u32 getID();
 
         bool toggle();
+        bool setState(bool state);
         bool isEnabled();
 
     private:

@@ -283,8 +283,12 @@ namespace edz::ui {
         if (cheat::CheatManager::isCheatServiceAvailable()) {
             if (cheat::CheatManager::getCheats().size() > 0) {
                 for (auto cheat : cheat::CheatManager::getCheats()) {
-                    ToggleListItem *cheatItem = new ToggleListItem(cheat->getName(), cheat->isEnabled(), "",
+                    ToggleListItem *cheatItem = new ToggleListItem(hlp::limitStringLength(cheat->getName(), 60), cheat->isEnabled(), "",
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
+
+                    cheatItem->setClickListener([=](View *view){
+                        cheat->setState(static_cast<ToggleListItem*>(view)->getToggleState());
+                    });
 
                     list->addView(cheatItem);
                 }
