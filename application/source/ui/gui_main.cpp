@@ -57,7 +57,7 @@ namespace edz::ui {
                 save::Account *account = save::SaveFileSystem::getAllAccounts()[userid].get();
 
                 if (title->hasSaveFile(account)) {
-                    ListItem *userItem = new ListItem(account->getNickname(), "", account->getIDString());
+                    ListItem *userItem = new ListItem(account->getNickname(), "", hlp::formatString("Played for %d hours and %d minutes",  title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
                     
                     size_t iconBufferSize = account->getIconSize();
                     u8 *iconBuffer = new u8[iconBufferSize];
@@ -84,7 +84,7 @@ namespace edz::ui {
 
         List *saveManagement = new List();
         
-        ListItem *backupItem = new ListItem("Create backup", "Creates a save file backup");
+        ListItem *backupItem = new ListItem("Create backup", "", "Creates a save file backup");
         backupItem->setClickListener([=](View *view) {
             save::Account *currUser = nullptr;
             std::string backupName;
@@ -94,7 +94,7 @@ namespace edz::ui {
                     save::SaveManager::backup(title, currUser, backupName);
         });
 
-        ListItem *restoreItem = new ListItem("Restore backup", "Restores a save file backup");
+        ListItem *restoreItem = new ListItem("Restore backup", "", "Restores a save file backup");
         restoreItem->setClickListener([=](View *view) {
             auto [result, list] = save::SaveManager::getLocalBackupList(title);
 
@@ -187,13 +187,13 @@ namespace edz::ui {
         SelectListItem *sortingOptionGrid = new SelectListItem("edz.gui.main.titles.style"_lang, { "edz.gui.main.titles.style.list"_lang, "edz.gui.main.titles.style.grid"_lang });
         
         sortingOptionList->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection);
+            this->m_titleList->changeLayer(selection, true);
             SET_CONFIG(Save.titlesSortingStyle, selection);
             sortingOptionGrid->setSelectedValue(selection);
         });
 
         sortingOptionGrid->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection);
+            this->m_titleList->changeLayer(selection, true);
             SET_CONFIG(Save.titlesSortingStyle, selection);
             sortingOptionList->setSelectedValue(selection);
         });
@@ -389,12 +389,12 @@ namespace edz::ui {
         ListItem *scdbItem = new ListItem("switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
         ListItem *patreonItem = new ListItem("patreon.name"_lang, "", "https://patreon.com/werwolv_");
 
-        scdbItem->setThumbnail("romfs:/assets/scdb_logo.png");
-        patreonItem->setThumbnail("romfs:/assets/patreon_logo.png");
+        scdbItem->setThumbnail("romfs:/assets/icon_scdb.png");
+        patreonItem->setThumbnail("romfs:/assets/icon_patreon.png");
 
         if (hlp::isInApplicationMode()) {
             scdbItem->setClickListener([](View *view){ openWebpage("https://www.switchcheatsdb.com"); });
-            patreonItem->setClickListener([](View *view){ openWebpage("https://patreon.com/werwolv_/"); });
+            patreonItem->setClickListener([](View *view){ openWebpage("https://patreon.com/werwolv_"); });
         }
         
         list->addView(scdbItem);
@@ -407,11 +407,9 @@ namespace edz::ui {
         rootFrame->setTitle("edz.name"_lang);
         
         if (Application::getThemeVariant() == ThemeVariant::ThemeVariant_LIGHT)
-            rootFrame->setIcon("romfs:/assets/edz_icon_dark.png");
+            rootFrame->setIcon("romfs:/assets/icon_edz_dark.png");
         else
-            rootFrame->setIcon("romfs:/assets/edz_icon_light.png");
-
-        //rootFrame->addHeaderContent(new ListItem("Hello"));
+            rootFrame->setIcon("romfs:/assets/icon_edz_light.png");
 
         this->m_titleList = new LayerView();
         this->m_cheatsList = new List();

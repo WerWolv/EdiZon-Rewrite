@@ -223,5 +223,33 @@ namespace edz::save {
 
         return rc;
     }
+
+    time_t Title::getPlayTime(Account *account) {
+        PdmPlayStatistics playStatistics = { 0 };
+
+        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+
+        return playStatistics.playtimeMinutes * 60;
+    }
+
+    time_t Title::getFirstPlayTime(Account *account) {
+        PdmPlayStatistics playStatistics = { 0 };
+
+        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+
+        time_t time = pdmPlayTimestampToPosix(playStatistics.first_timestampUser);
+
+        return time;
+    }
+
+    time_t Title::getLastPlayTime(Account *account) {
+        PdmPlayStatistics playStatistics = { 0 };
+
+        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+
+        time_t time = pdmPlayTimestampToPosix(playStatistics.last_timestampUser);
+
+        return time;
+    }
     
 }

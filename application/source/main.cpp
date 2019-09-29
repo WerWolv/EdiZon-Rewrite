@@ -93,7 +93,7 @@ extern "C" {
 
         exitServices();
         
-        __nx_exit(0, envGetExitFuncPtr());
+        exit(0);
     }
 
 
@@ -141,6 +141,8 @@ EResult initServices() {
     ER_TRY(hidsysInitialize());
     ER_TRY(hlp::controllerLEDInitialize());
 
+    ER_TRY(pdmqryInitialize());
+
     ER_TRY(dmntcht::initialize());
     ER_TRY(cheat::CheatManager::initialize());
 
@@ -180,6 +182,7 @@ void exitServices() {
     pmshellExit();
     pminfoExit();
     hidsysExit();
+    pdmqryExit();
     dmntcht::exit();
     cheat::CheatManager::exit();
     brls::Application::quit();
@@ -194,8 +197,6 @@ int main(int argc, char* argv[]) {
         exitServices();
         return -1;
     }
-
-    (*(u64*)16) = 8;
 
     // Create folder structure
     if (EResult res = createFolderStructure(); res.failed()) {
@@ -212,7 +213,6 @@ int main(int argc, char* argv[]) {
     //hlp::ConfigManager::get().load();
 
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
-
 
     if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable())
         cheat::CheatManager::forceAttach();

@@ -57,6 +57,9 @@ namespace edz::save {
 
         EResult createSaveDataFileSystem(Account *account);
 
+        time_t getPlayTime(Account *account);
+        time_t getFirstPlayTime(Account *account);
+        time_t getLastPlayTime(Account *account);
 
     private:
         titleid_t m_titleID;

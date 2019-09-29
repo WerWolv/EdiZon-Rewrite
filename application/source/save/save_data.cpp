@@ -60,7 +60,7 @@ namespace edz::save {
         
 
         // Get all installed games
-        for (u32 i = 0; i < actualAppRecordCnt; i++) {
+        for (size_t i = 0; i < actualAppRecordCnt; i++) {
             try {
                 titles.insert({ appRecords[i].titleID, std::make_shared<Title>(appRecords[i].titleID, true) });
             } catch (std::exception& e) {
