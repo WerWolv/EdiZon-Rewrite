@@ -146,6 +146,13 @@ namespace edz::hlp {
     }
 
     bool openPlayerSelect(std::function<void(save::Account*)> f) {
+
+        // If there's only one Account present on the system, just use it without asking
+        if (save::SaveFileSystem::getAllAccounts().size() == 1) {
+            f(save::SaveFileSystem::getAllAccounts().begin()->second.get());
+            return true;
+        }
+
         struct UserReturnData{
             u64 result;
             u128 userID;
@@ -298,6 +305,15 @@ namespace edz::hlp {
         modString[maxLength - 0] = '\0';
 
         return std::string(modString);
+    }
+
+    std::string removeIllegalPathCharacters(std::string path) {
+        const static char illegalCharacters[] = ".,!\\/:?*\"<>|";
+
+        for (u16 i = 0; i < strlen(illegalCharacters); i++)
+            path.erase(std::remove(path.begin(), path.end(), illegalCharacters[i]), path.end());
+
+        return path;
     }
 
     void overclockSystem(bool enable) {

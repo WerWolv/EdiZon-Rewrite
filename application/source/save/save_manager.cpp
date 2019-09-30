@@ -22,11 +22,26 @@
 #include "save/save_data.hpp"
 #include <errno.h>
 #include <string.h>
+#include <regex>
 
 namespace edz::save {
 
     EResult SaveManager::backup(Title *title, Account *account, std::string backupName) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s/%s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str(), backupName.c_str()));
+
+        // Find a folder that matches the following name: <Any alpha numberical string> <TitleID>
+        std::regex regex = std::regex(".+ " + title->getIDString());
+        std::string backupFolderName;
+        for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
+            if (std::regex_match(folderName, regex)) {
+                backupFolderName = folderName;
+                break;
+            }
+        
+        // Set the default name to <Title Name> <TitleID>
+        if (backupFolderName == "")
+            backupFolderName = hlp::removeIllegalPathCharacters(title->getName()) + " " + title->getIDString();
+
+        hlp::Folder backupFolder(hlp::formatString("%s/%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str(), backupName.c_str()));
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
@@ -40,8 +55,18 @@ namespace edz::save {
     }
 
     EResult SaveManager::restore(Title *title, Account *account, std::string backupName) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s/%s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str(), backupName.c_str()));
-        
+
+        // Find a folder that matches the following name: <Any alpha numberical string> <TitleID>
+        std::regex regex = std::regex(".+ " + title->getIDString());
+        std::string backupFolderName;
+        for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
+            if (std::regex_match(folderName, regex)) {
+                backupFolderName = folderName;
+                break;
+            }
+
+        hlp::Folder backupFolder(hlp::formatString("%s/%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str(), backupName.c_str()));
+
         if (!backupFolder.exists())
             return ResultEdzSaveNoSuchBackup;
 
@@ -142,7 +167,19 @@ namespace edz::save {
     
 
     std::pair<EResult, std::vector<std::string>> SaveManager::getLocalBackupList(Title *title) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str()));
+        std::regex regex = std::regex(".+ " + title->getIDString());
+        std::string backupFolderName;
+        for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
+            if (std::regex_match(folderName, regex)) {
+                backupFolderName = folderName;
+                break;
+            }
+
+        // Set the default name to <Title Name> <TitleID>
+        if (backupFolderName == "")
+            backupFolderName = hlp::removeIllegalPathCharacters(title->getName()) + " " + title->getIDString();
+
+        hlp::Folder backupFolder(hlp::formatString("%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str()));
 
         std::vector<std::string> folders;
 

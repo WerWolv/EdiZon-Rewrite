@@ -110,6 +110,9 @@ namespace edz::hlp {
     /* Returns the truncated string that was passed in. Truncated strings end with ... */
     std::string limitStringLength(std::string string, size_t maxLength);
 
+    /* Removes all illegal characters from a path */
+    std::string removeIllegalPathCharacters(std::string path);
+
 
     /* Returns the current time as a string */
     std::string getCurrentTimeString();

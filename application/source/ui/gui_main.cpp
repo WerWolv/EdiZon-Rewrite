@@ -82,7 +82,7 @@ namespace edz::ui {
             softwareInfoList->addView(createSaveFSItem);
         }
 
-        List *saveManagement = new List();
+        List *saveManagementList = new List();
         
         ListItem *backupItem = new ListItem("Create backup", "", "Creates a save file backup");
         backupItem->setClickListener([=](View *view) {
@@ -98,21 +98,22 @@ namespace edz::ui {
         restoreItem->setClickListener([=](View *view) {
             auto [result, list] = save::SaveManager::getLocalBackupList(title);
 
-            Dropdown::open("Select a backup to restore", list, [&](int selection) {
-                save::Account *currUser = nullptr;
+            Dropdown::open("Select a backup to restore", list, [=](int selection) {
                 if (selection != -1)
-                    if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                        save::SaveManager::restore(title, currUser, list[selection]);
+                    hlp::openPlayerSelect([=](save::Account *account) { 
+                        save::SaveManager::restore(title, account, list[selection]);
+                    });
             });
         });
 
-        saveManagement->addView(new Header("Basic operations", false));
-        saveManagement->addView(backupItem);
-        saveManagement->addView(restoreItem);
+        saveManagementList->addView(new Header("Basic operations", false));
+        saveManagementList->addView(backupItem);
+        saveManagementList->addView(restoreItem);
+
 
         rootFrame->addTab("Software Information", softwareInfoList);
         rootFrame->addSeparator();
-        rootFrame->addTab("Save Management", saveManagement);
+        rootFrame->addTab("Save Management", saveManagementList);
         rootFrame->addTab("Save Editing", new Rectangle(nvgRGB(0x00, 0x00, 0xFF)));
 
         PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "Ver. " + title->getVersionString(), title->getAuthor());
