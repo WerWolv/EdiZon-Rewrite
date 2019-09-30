@@ -75,7 +75,7 @@ namespace edz::api {
             cheatResponse.titleID = responseJson["titleId"];
 
             for (auto cheat : responseJson["cheats"])
-                cheatResponse.cheats.push_back({ cheat["id"], strtol(cheat["buildId"].get<std::string>().c_str(), nullptr, 16), cheat["content"], cheat["credits"] });
+                cheatResponse.cheats.push_back({ cheat["id"], static_cast<buildid_t>(strtol(cheat["buildId"].get<std::string>().c_str(), nullptr, 16)), cheat["content"], cheat["credits"] });
 
         } catch (std::exception& e) {
             printf("%s\n", response.c_str());
