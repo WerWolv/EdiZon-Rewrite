@@ -99,6 +99,8 @@ namespace edz::ui::element {
         delete[] iconBuffer;
     }
 
+
+    // TODO: Fix focus not being able to exit the TitleList sideways
     View* HorizontalTitleList::defaultFocus(View *oldFocus) {
         TitleButton *oldTitleButton = dynamic_cast<TitleButton*>(oldFocus);
         
