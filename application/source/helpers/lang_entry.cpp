@@ -46,8 +46,11 @@ namespace edz {
 
             initialized = true;
         }
-
-        LangEntry::m_localizedStrings.insert({ unlocalizedString, json[unlocalizedString] });
+        
+        if (json.find(unlocalizedString) == json.end())
+            LangEntry::m_localizedStrings.insert({ unlocalizedString, unlocalizedString });
+        else
+            LangEntry::m_localizedStrings.insert({ unlocalizedString, json[unlocalizedString] });
     }
 
     std::string LangEntry::get() const {
