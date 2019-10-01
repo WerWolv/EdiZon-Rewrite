@@ -100,6 +100,12 @@ namespace edz::save {
         return ResultSuccess;
     }
 
+    EResult SaveManager::remove(Title *title, Account *account) {
+        save::SaveFileSystem saveFS(title, account);
+
+        return saveFS.getSaveFolder().remove();
+    }
+
     EResult SaveManager::swapSaveData(Title *title, Account *account1, Account *account2) {
         hlp::Folder backupFolder(hlp::formatString("%s/%s %s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str()));
         hlp::Folder tmpFolder = hlp::createTmpFolder();

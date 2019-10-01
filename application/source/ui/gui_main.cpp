@@ -20,6 +20,8 @@
 #include "ui/gui_main.hpp"
 
 #include "helpers/config_manager.hpp"
+#include "save/edit/config.hpp"
+#include "save/edit/editor.hpp"
 #include "api/switchcheatsdb_api.hpp"
 
 namespace edz::ui {
@@ -50,14 +52,14 @@ namespace edz::ui {
 
         List *softwareInfoList = new List();
 
-        softwareInfoList->addView(new Header("Save Data", false));
+        softwareInfoList->addView(new Header("edz.gui.popup.information.header"_lang, false));
         
         if (title->hasSaveFile()) {
             for (userid_t userid : title->getUserIDs()) {
                 save::Account *account = save::SaveFileSystem::getAllAccounts()[userid].get();
 
                 if (title->hasSaveFile(account)) {
-                    ListItem *userItem = new ListItem(account->getNickname(), "", hlp::formatString("Played for %d hours and %d minutes",  title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
+                    ListItem *userItem = new ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang,  title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
                     
                     size_t iconBufferSize = account->getIconSize();
                     u8 *iconBuffer = new u8[iconBufferSize];
@@ -71,34 +73,35 @@ namespace edz::ui {
             }
         }
         else {
-            ListItem *createSaveFSItem = new ListItem("Create Save Filesystem");
+            ListItem *createSaveFSItem = new ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
             createSaveFSItem->setClickListener([&](View *view) {
                 hlp::openPlayerSelect([&](save::Account *account) {
                     title->createSaveDataFileSystem(account);
+                    Application::popView();
                 });
             });
 
-            softwareInfoList->addView(new Label(LabelStyle::DESCRIPTION, "No save files found. To create a save file system for any account, use the option bellow."));
+            softwareInfoList->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.popup.error.nosavefs"_lang));
             softwareInfoList->addView(createSaveFSItem);
         }
 
         List *saveManagementList = new List();
         
-        ListItem *backupItem = new ListItem("Create backup", "", "Creates a save file backup");
+        ListItem *backupItem = new ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
         backupItem->setClickListener([=](View *view) {
             save::Account *currUser = nullptr;
             std::string backupName;
             
             if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "Enter a backup name"))
+                if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
                     save::SaveManager::backup(title, currUser, backupName);
         });
 
-        ListItem *restoreItem = new ListItem("Restore backup", "", "Restores a save file backup");
+        ListItem *restoreItem = new ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
         restoreItem->setClickListener([=](View *view) {
             auto [result, list] = save::SaveManager::getLocalBackupList(title);
 
-            Dropdown::open("Select a backup to restore", list, [=](int selection) {
+            Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [=](int selection) {
                 if (selection != -1)
                     hlp::openPlayerSelect([=](save::Account *account) { 
                         save::SaveManager::restore(title, account, list[selection]);
@@ -106,17 +109,30 @@ namespace edz::ui {
             });
         });
 
-        saveManagementList->addView(new Header("Basic operations", false));
+        ListItem *deleteItem = new ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
+        backupItem->setClickListener([=](View *view) {
+            save::Account *currUser = nullptr;
+            
+            if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
+                save::SaveManager::remove(title, currUser);
+        });
+
+        saveManagementList->addView(new Header("edz.gui.popup.management.header.basic"_lang, false));
         saveManagementList->addView(backupItem);
         saveManagementList->addView(restoreItem);
+        saveManagementList->addView(new Header("edz.gui.popup.management.header.advanced"_lang, false));
+        saveManagementList->addView(deleteItem);
 
+        List *saveEditingList = new List();
 
-        rootFrame->addTab("Software Information", softwareInfoList);
+        saveEditingList->addView(new Label(brls::LabelStyle::DESCRIPTION, "", true));
+
+        rootFrame->addTab("edz.gui.popup.information.tab"_lang, softwareInfoList);
         rootFrame->addSeparator();
-        rootFrame->addTab("Save Management", saveManagementList);
-        rootFrame->addTab("Save Editing", new Rectangle(nvgRGB(0x00, 0x00, 0xFF)));
+        rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
+        rootFrame->addTab("edz.gui.popup.editing.tab"_lang, saveEditingList);
 
-        PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "Ver. " + title->getVersionString(), title->getAuthor());
+        PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
 
         delete[] iconBuffer;
     }
@@ -189,13 +205,13 @@ namespace edz::ui {
         
         sortingOptionList->setListener([=](size_t selection) {
             this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesSortingStyle, selection);
+            SET_CONFIG(Save.titlesDisplayStyle, selection);
             sortingOptionGrid->setSelectedValue(selection);
         });
 
         sortingOptionGrid->setListener([=](size_t selection) {
             this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesSortingStyle, selection);
+            SET_CONFIG(Save.titlesDisplayStyle, selection);
             sortingOptionList->setSelectedValue(selection);
         });
         
@@ -246,24 +262,24 @@ namespace edz::ui {
 
             if (region.type == MemType_Heap && !foundHeap) {
                 foundHeap = true;
-                regionName = "heap";
+                regionName = "edz.gui.main.running.section.heap"_lang;
             } else if (region.type == MemType_CodeStatic && region.perm == Perm_Rx) {
                 if (currCodeRegion == 0 && codeRegionCnt == 1) {
-                    regionName = "main";
+                    regionName = "edz.gui.main.running.section.main"_lang;
                     continue;
                 } else {
                     switch (currCodeRegion) {
                         case 0:
-                            regionName = "rtld";
+                            regionName = "edz.gui.main.running.section.rtld"_lang;
                             break;
                         case 1:
-                            regionName = "main";
+                            regionName = "edz.gui.main.running.section.main"_lang;
                             break;
                         default:
                             if (currCodeRegion == memoryRegions.size() - 1)
-                                regionName = "sdk";
+                                regionName = "edz.gui.main.running.section.sdk"_lang;
                             else
-                                regionName = "subsdk" + std::to_string(currCodeRegion - 1);
+                                regionName = "edz.gui.main.running.section.subsdk"_lang + std::to_string(currCodeRegion - 1);
                     }
                 }
 
@@ -353,7 +369,7 @@ namespace edz::ui {
             layerView->changeLayer(1, true);
         });
 
-        loggedOutList->addView(new Header("switchcheatsdb.name"_lang, true));
+        loggedOutList->addView(new Header("edz.switchcheatsdb.name"_lang, true));
         loggedOutList->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.settings.not_logged_in"_lang, true));
         loggedOutList->addView(emailItem);
         loggedOutList->addView(passwordItem);
@@ -369,7 +385,7 @@ namespace edz::ui {
             layerView->changeLayer(0, true);
         });
 
-        loggedInList->addView(new Header("switchcheatsdb.name"_lang, true));
+        loggedInList->addView(new Header("edz.switchcheatsdb.name"_lang, true));
         loggedInList->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.settings.logged_in"_lang + GET_CONFIG(Update.switchcheatsdbEmail)));
         loggedInList->addView(logoutButton);
 
@@ -385,8 +401,8 @@ namespace edz::ui {
 
         list->addView(new Header("edz.gui.main.about.links"_lang, false));
         
-        ListItem *scdbItem = new ListItem("switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
-        ListItem *patreonItem = new ListItem("patreon.name"_lang, "", "https://patreon.com/werwolv_");
+        ListItem *scdbItem = new ListItem("edz.switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
+        ListItem *patreonItem = new ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv_");
 
         scdbItem->setThumbnail("romfs:/assets/icon_scdb.png");
         patreonItem->setThumbnail("romfs:/assets/icon_patreon.png");

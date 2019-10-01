@@ -31,6 +31,7 @@ namespace edz::save {
     public:
         static EResult backup(Title *title, Account *account, std::string backupName);
         static EResult restore(Title *title, Account *account, std::string backupName);
+        static EResult remove(Title *title, Account *account);
  
         static EResult swapSaveData(Title *title, Account *account, std::string backupName);
         static EResult swapSaveData(Title *title, Account *account1, Account *account2);
