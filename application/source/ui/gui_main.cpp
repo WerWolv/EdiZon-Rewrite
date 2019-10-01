@@ -228,7 +228,10 @@ namespace edz::ui {
 
         layerView->addLayer(listDisplayList);
         layerView->addLayer(gridDisplayList);
-        layerView->changeLayer(GET_CONFIG(Save.titlesSortingStyle), false);
+
+        layerView->changeLayer(GET_CONFIG(Save.titlesDisplayStyle), false);
+        sortingOptionList->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
+        sortingOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
     }
 
     void GuiMain::createRunningTitleInfoTab(List *list) {

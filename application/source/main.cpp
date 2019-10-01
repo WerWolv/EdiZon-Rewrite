@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
     hlp::clearTmpFolder(); 
 
     // Load config file
-    //hlp::ConfigManager::get().load();
+    hlp::ConfigManager::load();
 
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
 
