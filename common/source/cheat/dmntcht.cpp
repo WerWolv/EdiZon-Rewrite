@@ -30,17 +30,15 @@ namespace edz::dmntcht {
     EResult initialize(void) {
         atomicIncrement64(&g_refCnt);
 
-        if (serviceIsActive(&g_dmntchtService)) {
-            return 0;
-        }
+        if (serviceIsActive(&g_dmntchtService))
+            return ResultSuccess;
 
         return smGetService(&g_dmntchtService, "dmnt:cht");
     }
 
     void exit(void) {
-        if (atomicIncrement64(&g_refCnt) == 0)  {
+        if (atomicDecrement64(&g_refCnt) == 0)
             serviceClose(&g_dmntchtService);
-        }
     }
 
     Service* getServiceSession(void) {
