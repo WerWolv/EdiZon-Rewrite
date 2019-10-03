@@ -153,14 +153,24 @@ namespace edz::cheat {
 
 
     bool CheatManager::isCheatServiceAvailable() {
-        return hlp::isServiceRunning("dmnt:cht");
+        static s8 running = -1;
+        if (running == -1) 
+            running = hlp::isServiceRunning("dmnt:cht");
+
+        return !!running; 
     }
 
     bool CheatManager::forceAttach() {
+        if (CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         return dmntcht::forceOpenCheatProcess().succeeded();
     }
 
     bool CheatManager::hasCheatProcess() {
+        if (CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         bool hasCheatProcess;
 
         dmntcht::hasCheatProcess(&hasCheatProcess);
@@ -186,6 +196,9 @@ namespace edz::cheat {
 
 
     std::pair<EResult, u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
+        if (CheatManager::isCheatServiceAvailable())
+            return { ResultEdzCheatServiceNotAvailable, 0 };
+
         u32 cheatID = 0;
         EResult res;
         
@@ -199,6 +212,9 @@ namespace edz::cheat {
     }
 
     EResult CheatManager::removeCheat(u32 cheatID) {
+        if (CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         EResult res;
 
         if ((res = dmntcht::removeCheat(cheatID)).failed())
@@ -218,6 +234,9 @@ namespace edz::cheat {
 
 
     MemoryInfo CheatManager::queryMemory(addr_t address) {
+        if (CheatManager::isCheatServiceAvailable())
+            return { 0 };
+
         MemoryInfo memInfo = { 0 };
 
         dmntcht::queryCheatProcessMemory(&memInfo, address);
@@ -226,6 +245,9 @@ namespace edz::cheat {
     }
 
     std::vector<MemoryInfo> CheatManager::getMemoryRegions() {
+        if (CheatManager::isCheatServiceAvailable())
+            return { };
+
         MemoryInfo memInfo = { 0 };
         std::vector<MemoryInfo> memInfos;
 
@@ -243,15 +265,24 @@ namespace edz::cheat {
 
 
     EResult CheatManager::readMemory(addr_t address, u8 *buffer, size_t bufferSize) {
+        if (CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         return dmntcht::readCheatProcessMemory(address, buffer, bufferSize);
     }
 
     EResult CheatManager::writeMemory(addr_t address, const u8 *buffer, size_t bufferSize) {
+        if (CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         return dmntcht::writeCheatProcessMemory(address, buffer, bufferSize);
     }
 
 
     EResult CheatManager::reload() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return ResultEdzCheatServiceNotAvailable;
+
         EResult res;
 
         CheatManager::forceAttach();

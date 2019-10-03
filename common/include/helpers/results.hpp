@@ -59,6 +59,7 @@ namespace edz {
     constexpr Result ResultEdzSaveNoSuchBackup              = EDZHBRES(502);
 
     constexpr Result ResultEdzCheatParsingFailed            = EDZHBRES(601);
+    constexpr Result ResultEdzCheatServiceNotAvailable      = EDZHBRES(602);
 
 
     /* Sysmodule error codes */

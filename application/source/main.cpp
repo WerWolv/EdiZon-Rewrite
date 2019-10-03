@@ -143,8 +143,10 @@ EResult initServices() {
 
     ER_TRY(pdmqryInitialize());
 
-    ER_TRY(dmntcht::initialize());
-    ER_TRY(cheat::CheatManager::initialize());
+    if (cheat::CheatManager::isCheatServiceAvailable()) {
+        dmntcht::initialize();
+        cheat::CheatManager::initialize();
+    }
 
     return ResultSuccess;
 }
