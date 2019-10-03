@@ -23,6 +23,7 @@
 #include "save/edit/config.hpp"
 #include "save/edit/editor.hpp"
 #include "api/switchcheatsdb_api.hpp"
+#include "ui/elements/focusable_table.hpp"
 
 namespace edz::ui {
 
@@ -249,7 +250,7 @@ namespace edz::ui {
         list->addView(titleInfo);
         list->addView(new Header("edz.gui.main.running.memory"_lang, true));
 
-        Table *regionsTable = new Table();
+        edz::ui::element::FocusableTable *regionsTable = new edz::ui::element::FocusableTable();
 
         bool foundHeap = false;
         u16 currCodeRegion = 0;
@@ -292,7 +293,6 @@ namespace edz::ui {
             regionsTable->addRow(TableRowType::BODY, regionName, "0x" + hlp::toHexString(region.addr) + " - 0x" + hlp::toHexString(region.addr + region.size));
         }
         list->addView(regionsTable);
-        list->addView(new ListItem(""));
     }
 
     void GuiMain::createCheatsTab(List *list) {
@@ -423,7 +423,7 @@ namespace edz::ui {
     View* GuiMain::setupUI() {
         TabFrame *rootFrame = new TabFrame();
         rootFrame->setTitle("edz.name"_lang);
-        
+
         if (Application::getThemeVariant() == ThemeVariant::ThemeVariant_LIGHT)
             rootFrame->setIcon("romfs:/assets/icon_edz_dark.png");
         else

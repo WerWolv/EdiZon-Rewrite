@@ -29,23 +29,18 @@
 
 #include <memory>
 
+#include <borealis/theme.hpp>
+#include <nanovg.h>
+
 namespace edz::ui::element {
 
-    class TitleInfo : public brls::View {
+    class FocusableTable : public brls::Table {
     public:
-        TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title);
-        ~TitleInfo();
-
-        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
-        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
+        FocusableTable();
+        virtual ~FocusableTable();
         View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-    
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
 
-    private:
-    
-        brls::Table *m_table;
-        brls::Image *m_image;
+        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
     };
 
 }

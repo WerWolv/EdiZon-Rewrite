@@ -64,4 +64,8 @@ namespace edz::ui::element {
         return this;
     }
 
+    void TitleInfo::drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) {
+        // The view has to be focusable for scrolling to work but we don't want the highlight to be drawn
+    }
+
 }
