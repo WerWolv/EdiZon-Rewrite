@@ -38,13 +38,14 @@ namespace edz::ui {
         ~GuiMain() { }
 
         enum class DisplayStyle { LIST, CONDENSED, GRID };
-        enum class SortingStyle { ALPHABETICAL_NAME, ALPHABETICAL_AUTHOR, FIRST_PLAYED, LAST_PLAYED, PLAY_TIME, NUM_LAUNCHES };
+        enum class SortingStyle { TITLE_ID, ALPHABETICAL_NAME, ALPHABETICAL_AUTHOR, FIRST_PLAYED, LAST_PLAYED, PLAY_TIME, NUM_LAUNCHES };
 
         brls::View* setupUI() override;
         void update() override;
 
         private:
             std::string m_email, m_password;
+            bool m_reloadGui = false;
 
             brls::LayerView *m_titleList = nullptr;
             brls::List *m_runningTitleInfoList = nullptr;
@@ -52,11 +53,14 @@ namespace edz::ui {
             brls::LayerView *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
 
-            void createTitlePopup(save::Title *title);
-            void createTitleListView(brls::List *list);
-            void createTitleGridView(brls::List *list);
+            std::vector<std::shared_ptr<save::Title>> sortTitleList(std::map<titleid_t, std::shared_ptr<save::Title>>& titles, SortingStyle sorting);
 
-            void createTitlesListTab(brls::LayerView *layerView);
+            void createTitlePopup(save::Title *title);
+            void createTitleListView(brls::List *list, SortingStyle sorting);
+            void createTitleCondensedView(brls::List *list, SortingStyle sorting);
+            void createTitleGridView(brls::List *list, SortingStyle sorting);
+
+            void createTitlesListTab(brls::LayerView *layerView, SortingStyle sorting);
             void createSaveReposTab(brls::List *list);
             void createRunningTitleInfoTab(brls::List *list);
             void createCheatsTab(brls::List *list);

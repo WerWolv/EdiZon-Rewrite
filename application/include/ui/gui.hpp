@@ -36,40 +36,37 @@ namespace edz::ui {
 
 
         static void tick() {
-            if (Gui::s_currentGui != nullptr)
-                Gui::s_currentGui->update();
+            if (Gui::s_guiStack.back() != nullptr)
+                Gui::s_guiStack.back()->update();
         }
 
         template<typename T, typename... Args>
         static void replaceWith(Args... args) {
-            brls::Application::popView();
-            
-            if (Gui::s_currentGui != nullptr)
-                delete Gui::s_currentGui;
-            
-            Gui::s_currentGui = new T(args...);
+            Gui::goBack();
 
-            brls::Application::pushView(Gui::s_currentGui->setupUI());
-            Gui::s_guiStackSize++;
+            Gui *newGui = new T(args...);
+            
+            Gui::s_guiStack.push_back(newGui);
+
+            brls::Application::pushView(newGui->setupUI());
         }
 
         template<typename T, typename... Args>
         static void changeTo(Args... args) {
-            if (Gui::s_currentGui != nullptr)
-                delete Gui::s_currentGui;
-            
-            Gui::s_currentGui = new T(args...);
+            Gui *newGui = new T(args...);
 
-            brls::Application::pushView(Gui::s_currentGui->setupUI());
-            Gui::s_guiStackSize++;
+            Gui::s_guiStack.push_back(newGui);
+            brls::Application::pushView(newGui->setupUI());
         }
 
         static void goBack() {
-            if (s_guiStackSize <= 1)
+            if (Gui::s_guiStack.size() <= 1)
                 return;
 
+            delete Gui::s_guiStack.back();
+
             brls::Application::popView();
-            Gui::s_guiStackSize--;
+            Gui::s_guiStack.pop_back();
         }
 
         template<typename... Args>
@@ -79,8 +76,7 @@ namespace edz::ui {
         }
 
     private:
-        static inline Gui *s_currentGui = nullptr;
-        static inline u8 s_guiStackSize = 0;
+        static inline std::vector<Gui*> s_guiStack;
     };
 
 }

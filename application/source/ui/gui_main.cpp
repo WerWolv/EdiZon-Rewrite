@@ -57,16 +57,16 @@ namespace edz::ui {
 
         List *softwareInfoList = new List();
 
-        brls::ListItem *launchItem = new ListItem("Launch title", "", "Close EdiZon and launch this title");
+        brls::ListItem *launchItem = new ListItem("edz.gui.popup.information.launch.title"_lang, "", "edz.gui.popup.information.launch.subtitle"_lang);
         launchItem->setClickListener([title](View *view){
             AppletStorage s = { 0 };
             appletCreateStorage(&s, 0);
             appletRequestLaunchApplication(title->getID(), &s);
         });
 
-        softwareInfoList->addView(new Header("General", false));
+        softwareInfoList->addView(new Header("edz.gui.popup.information.header.general"_lang, false));
         softwareInfoList->addView(launchItem);
-        softwareInfoList->addView(new Header("edz.gui.popup.information.header"_lang, false));
+        softwareInfoList->addView(new Header("edz.gui.popup.information.header.save"_lang, false));
 
         
         
@@ -178,8 +178,69 @@ namespace edz::ui {
         delete[] iconBuffer;
     }
 
-    void GuiMain::createTitleListView(List *list) {
-        for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles()) {
+    std::vector<std::shared_ptr<save::Title>> GuiMain::sortTitleList(std::map<titleid_t, std::shared_ptr<save::Title>>& titles, SortingStyle sorting) {
+        std::vector<std::shared_ptr<save::Title>> titlesList;
+
+        for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles())
+            titlesList.push_back(title);
+
+        std::sort(titlesList.begin(), titlesList.end(), [sorting](std::shared_ptr<save::Title> l, std::shared_ptr<save::Title> r) {
+            u32 lLowestTime = 0, rLowestTime = 0;
+            u32 lLatestTime = 0, rLatestTime = 0;
+            u32 lHighestPlayTime = 0, rHighestPlayTime = 0;
+            u32 lLaunches = 0, rLaunches = 0;
+
+            switch (sorting) {
+                case SortingStyle::TITLE_ID:
+                    return l->getID() < r->getID();
+                case SortingStyle::ALPHABETICAL_NAME:
+                    return l->getName().compare(r->getName()) < 0;
+                case SortingStyle::ALPHABETICAL_AUTHOR:
+                    return l->getAuthor().compare(r->getAuthor()) < 0;
+                case SortingStyle::NUM_LAUNCHES:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        lLaunches += l->getLaunchCount(account.get());
+                        rLaunches += r->getLaunchCount(account.get());
+                    }
+
+                    return lLaunches < rLaunches;
+                case SortingStyle::FIRST_PLAYED:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        if (u32 lTime = l->getFirstPlayTime(account.get()); lTime < lLowestTime)
+                            lLowestTime = lTime;
+                        if (u32 rTime = r->getFirstPlayTime(account.get()); rTime < rLowestTime)
+                            rLowestTime = rTime;
+                    }
+
+                    return lLowestTime < rLowestTime;
+                case SortingStyle::LAST_PLAYED:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        if (u32 lTime = l->getLastPlayTime(account.get()); lTime > lLatestTime)
+                            lLatestTime = lTime;
+                        if (u32 rTime = r->getLastPlayTime(account.get()); rTime > rLatestTime)
+                            rLatestTime = rTime;
+                    }
+
+                    return lLatestTime > rLatestTime;
+                case SortingStyle::PLAY_TIME:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        lHighestPlayTime += l->getPlayTime(account.get());
+                        rHighestPlayTime += r->getPlayTime(account.get());
+                    }
+
+                    return lHighestPlayTime > rHighestPlayTime;
+            }
+
+            return true;
+        });
+
+        return titlesList;
+    }
+
+    void GuiMain::createTitleListView(List *list, SortingStyle sorting) {
+        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
+
+        for (auto &title : titlesList) {
             ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
             
             size_t iconSize = title->getIconSize();
@@ -201,11 +262,31 @@ namespace edz::ui {
         list->setSpacing(30);
     }
 
-    void GuiMain::createTitleGridView(List *list) {
+    void GuiMain::createTitleCondensedView(List *list, SortingStyle sorting) {
+        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
+
+        for (auto &title : titlesList) {
+            ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 35));
+            titleItem->setValue(title->getIDString(), true, false);
+                        
+            titleItem->setClickListener([&](View *view) {
+                createTitlePopup(title.get());
+            });
+
+
+            list->addView(titleItem);
+        }
+        
+        list->setSpacing(30);
+    }
+
+    void GuiMain::createTitleGridView(List *list, SortingStyle sorting) {
         std::vector<element::HorizontalTitleList*> hLists;
         u16 column = 0;
         
-        for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles()) {                    
+        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
+
+        for (auto &title : titlesList) {              
             if (column % 4 == 0)
                 hLists.push_back(new element::HorizontalTitleList());
             
@@ -237,42 +318,96 @@ namespace edz::ui {
         
     }
 
-    void GuiMain::createTitlesListTab(LayerView *layerView) {
+    void GuiMain::createTitlesListTab(LayerView *layerView, SortingStyle sorting) {
         List *listDisplayList = new List();
+        List *condensedDisplayList = new List();
         List *gridDisplayList = new List();
 
-        SelectListItem *sortingOptionList = new SelectListItem("edz.gui.main.titles.style"_lang, { "edz.gui.main.titles.style.list"_lang, "edz.gui.main.titles.style.grid"_lang });
-        SelectListItem *sortingOptionGrid = new SelectListItem("edz.gui.main.titles.style"_lang, { "edz.gui.main.titles.style.list"_lang, "edz.gui.main.titles.style.grid"_lang });
-        
-        sortingOptionList->setListener([=](size_t selection) {
+        std::vector<std::string> displayOptions = { "edz.gui.main.titles.style.list"_lang, 
+                                                    "edz.gui.main.titles.style.condensed"_lang,
+                                                    "edz.gui.main.titles.style.grid"_lang };
+        std::vector<std::string> sortingOptions = { "edz.gui.main.titles.sorting.titleid"_lang,
+                                                    "edz.gui.main.titles.sorting.alphaname"_lang,
+                                                    "edz.gui.main.titles.sorting.alphaauthor"_lang,
+                                                    "edz.gui.main.titles.sorting.firstplayed"_lang,
+                                                    "edz.gui.main.titles.sorting.lastplayed"_lang,
+                                                    "edz.gui.main.titles.sorting.playtime"_lang,
+                                                    "edz.gui.main.titles.sorting.numlaunches"_lang };
+
+        SelectListItem *displayOptionList = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
+        SelectListItem *displayOptionCondensed = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
+        SelectListItem *displayOptionGrid = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
+
+        SelectListItem *sortingOptionList = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
+        SelectListItem *sortingOptionCondensed = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
+        SelectListItem *sortingOptionGrid = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
+
+
+        displayOptionList->setListener([=](size_t selection) {
             this->m_titleList->changeLayer(selection, true);
             SET_CONFIG(Save.titlesDisplayStyle, selection);
-            sortingOptionGrid->setSelectedValue(selection);
+            displayOptionCondensed->setSelectedValue(selection);
+            displayOptionGrid->setSelectedValue(selection);
+        });
+
+        displayOptionCondensed->setListener([=](size_t selection) {
+            this->m_titleList->changeLayer(selection, true);
+            SET_CONFIG(Save.titlesDisplayStyle, selection);
+            displayOptionList->setSelectedValue(selection);
+            displayOptionGrid->setSelectedValue(selection);
+        });
+
+        displayOptionGrid->setListener([=](size_t selection) {
+            this->m_titleList->changeLayer(selection, true);
+            SET_CONFIG(Save.titlesDisplayStyle, selection);
+            displayOptionList->setSelectedValue(selection);
+            displayOptionCondensed->setSelectedValue(selection);
+        });
+
+
+        sortingOptionList->setListener([=](size_t selection) {
+            SET_CONFIG(Save.titlesSortingStyle, selection);
+        });
+
+        sortingOptionCondensed->setListener([=](size_t selection) {
+            SET_CONFIG(Save.titlesSortingStyle, selection);
         });
 
         sortingOptionGrid->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesDisplayStyle, selection);
-            sortingOptionList->setSelectedValue(selection);
+            SET_CONFIG(Save.titlesSortingStyle, selection);
         });
         
 
         listDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
+        listDisplayList->addView(displayOptionList);
         listDisplayList->addView(sortingOptionList);
         listDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
-        createTitleListView(listDisplayList);
+        GuiMain::createTitleListView(listDisplayList, sorting);
+
+        condensedDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
+        condensedDisplayList->addView(displayOptionCondensed);
+        condensedDisplayList->addView(sortingOptionCondensed);
+        condensedDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
+        GuiMain::createTitleCondensedView(condensedDisplayList, sorting);
 
         gridDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
+        gridDisplayList->addView(displayOptionGrid);
         gridDisplayList->addView(sortingOptionGrid);
         gridDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
-        createTitleGridView(gridDisplayList);
+        GuiMain::createTitleGridView(gridDisplayList, sorting);
 
         layerView->addLayer(listDisplayList);
+        layerView->addLayer(condensedDisplayList);
         layerView->addLayer(gridDisplayList);
 
         layerView->changeLayer(GET_CONFIG(Save.titlesDisplayStyle), false);
-        sortingOptionList->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
-        sortingOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
+        displayOptionList->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
+        displayOptionCondensed->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
+        displayOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
+
+        sortingOptionList->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
+        sortingOptionCondensed->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
+        sortingOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
     }
 
     void GuiMain::createSaveReposTab(brls::List *list) {
@@ -290,9 +425,8 @@ namespace edz::ui {
         element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle);
         delete[] iconBuffer;
 
-        brls::ListItem *cheatEngineItem = new brls::ListItem("Cheat Engine", "", "The cheat engine can be used to edit a titles memory on the fly or create cheats");
+        brls::ListItem *cheatEngineItem = new brls::ListItem("edz.gui.main.running.cheatengine.title"_lang, "", "edz.gui.main.running.cheatengine.subtitle"_lang);
         cheatEngineItem->setClickListener([](View *view){
-            
             Gui::changeTo<GuiCheatEngine>();
         });
 
@@ -465,8 +599,8 @@ namespace edz::ui {
         
         ListItem *scdbItem = new ListItem("edz.switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
         ListItem *patreonItem = new ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv_");
-        ListItem *guideItem = new ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net");
-        ListItem *docsItem = new ListItem("edz.gui.main.about.docs.title"_lang, "", "https://edizon.werwolv.net");
+        ListItem *guideItem = new ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net/guide");
+        ListItem *docsItem = new ListItem("edz.gui.main.about.docs.title"_lang, "", "https://edizon.werwolv.net/docs");
 
         scdbItem->setThumbnail("romfs:/assets/icon_scdb.png");
         patreonItem->setThumbnail("romfs:/assets/icon_patreon.png");
@@ -502,7 +636,8 @@ namespace edz::ui {
         this->m_settingsList = new LayerView();
         this->m_aboutList = new List();
 
-        createTitlesListTab(this->m_titleList);
+        createTitlesListTab(this->m_titleList, SortingStyle::TITLE_ID);
+
         createCheatsTab(this->m_cheatsList);
         createSettingsTab(this->m_settingsList);
         createAboutTab(this->m_aboutList);
@@ -524,7 +659,6 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-
     }
 
 }
