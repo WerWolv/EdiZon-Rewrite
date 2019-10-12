@@ -49,6 +49,7 @@ namespace edz::save {
         bool isRunning();
         static titleid_t getRunningTitleID();
         static processid_t getRunningProcessID();
+        static EResult getLastTitleForgroundImage(u8 *buffer);
 
         void getIcon(u8 *buffer, size_t size);
         size_t getIconSize();
@@ -60,6 +61,7 @@ namespace edz::save {
         time_t getPlayTime(Account *account);
         time_t getFirstPlayTime(Account *account);
         time_t getLastPlayTime(Account *account);
+        u32 getLaunchCount(Account *account);
 
     private:
         titleid_t m_titleID;

@@ -24,6 +24,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <turbojpeg.h>
+
 namespace edz::save {
 
     Title::Title(titleid_t titleID, bool isInstalled) : m_titleID(titleID), m_isInstalled(isInstalled) {
@@ -145,6 +147,15 @@ namespace edz::save {
         return runningProcessId;
     }
 
+    EResult Title::getLastTitleForgroundImage(u8 *buffer) {
+        bool flag = false;
+
+        ER_TRY(appletUpdateLastForegroundCaptureImage());
+        ER_TRY(appletGetLastApplicationCaptureImageEx(buffer, 1280 * 720 * 4, &flag));
+
+        return ResultSuccess;
+    }
+
 
     void Title::getIcon(u8 *buffer, size_t size) {
         std::memcpy(buffer, this->m_titleIcon, this->m_iconSize);
@@ -250,6 +261,14 @@ namespace edz::save {
         time_t time = pdmPlayTimestampToPosix(playStatistics.last_timestampUser);
 
         return time;
+    }
+
+    u32 Title::getLaunchCount(Account *account) {
+        PdmPlayStatistics playStatistics = { 0 };
+
+        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+
+        return playStatistics.totalLaunches;
     }
     
 }
