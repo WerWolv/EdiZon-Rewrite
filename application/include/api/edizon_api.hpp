@@ -47,11 +47,18 @@ namespace edz::api {
             u32 downloadCount;
         } release_info_t;
 
+        typedef struct {
+            std::string title;
+            std::string description;
+            std::string icon;
+        } notification_t;
+
         std::pair<EResult, std::vector<official_provider_t>> getOfficialProviders();
         std::pair<EResult, release_info_t> getReleaseInfo();
+        std::pair<EResult, std::vector<notification_t>> getNotifications();
 
     private:
-        edz::hlp::Curl curl;
+        edz::hlp::Curl m_curl;
     };
 
 }

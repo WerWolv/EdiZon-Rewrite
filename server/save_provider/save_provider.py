@@ -1,5 +1,4 @@
-from flask import Flask, escape, request, make_response, send_from_directory
-from gevent.pywsgi import WSGIServer
+import hug
 import os
 import io
 import json
@@ -21,26 +20,23 @@ SAVE_FILE_DIR = "saves"
 
 ###########################################################
 
-
-app = Flask(MOTD)
-
-@app.route("/", methods=["GET"])
+@hug.get("/", version=1)
 def base():
     return "EdiZon save file provider server"
 
-@app.route("/motd", methods=["GET"])
+@hug.get("/motd", version=1)
 def getMOTD():
     data = { "motd" : MOTD }
 
-    return sendResponse(data)
+    return data
 
-@app.route("/name", methods=["GET"])
+@hug.get("/name", version=1)
 def getServerName():
     data = { "name" : SERVER_NAME }
 
-    return sendResponse(data)
+    return data
 
-@app.route("/list", methods=["GET"])
+@hug.get("/list", version=1)
 def getSaveFileList():
     data = { "save_files" : [] }
 
@@ -48,36 +44,17 @@ def getSaveFileList():
         for file in files:
             data["save_files"].append( { "name" : file, "date" : datetime.datetime.fromtimestamp(os.path.getmtime(f"{root}/{file}")).strftime("%A, %m. %B %Y at %H:%M") })
 
-    return sendResponse(data)
+    return data
 
-@app.route("/get", methods=["GET"])
-def getFile():
-    fileName = request.args.get("file_name", "..")
+@hug.get("/get", version=1, output=hug.output_format.file)
+def getFile(fileName : str):
     if ".." in fileName or "/" in fileName or not os.path.exists(f"{SAVE_FILE_DIR}/{fileName}"):
         return "Please provide a valid file name"
     
-    return send_from_directory(SAVE_FILE_DIR, fileName, as_attachment=True)
+    return os.path.join(SAVE_FILE_DIR, fileName)
 
-@app.route("/icon", methods=["GET"])
+@hug.get("/icon", version=1, output=hug.output_format.file)
 def getIcon():
-    return send_from_directory(".", "icon.jpg", as_attachment=True)
+    return os.path.join(".", "icon.jpg")
 
-
-def sendResponse(data):
-    response = make_response(json.dumps(data))
-    response.mimetype = 'application/json'
-
-    return response
-
-
-if __name__ == "__main__":
-    print(f"Starting EdiZon save file provider server on Port {PORT}...\n")
-    print(f"{SERVER_NAME} : {MOTD}")
-
-    http_server = WSGIServer(('0.0.0.0', PORT), app)
-
-    if not os.path.exists(SAVE_FILE_DIR):
-        os.mkdir(SAVE_FILE_DIR)
-
-    print("Running!")
-    http_server.serve_forever()
+hug.API(__name__).http.serve(port=PORT)

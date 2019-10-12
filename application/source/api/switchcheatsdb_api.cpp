@@ -64,7 +64,7 @@ namespace edz::api {
         auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + "/" + hlp::toHexString(buildID));
 
         if (result.failed())
-            return { ResultEdzAPIError, { 0 } };
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
 
         try {
             json responseJson = json::parse(response);
@@ -79,7 +79,7 @@ namespace edz::api {
 
         } catch (std::exception& e) {
             printf("%s\n", response.c_str());
-            return { ResultEdzAPIError, { 0 } };
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 
         return { ResultSuccess, cheatResponse };
@@ -105,7 +105,7 @@ namespace edz::api {
     }
 
     std::pair<EResult, SwitchCheatsDBAPI::save_file_t> SwitchCheatsDBAPI::getSaveFiles() {
-        return { ResultEdzNotYetImplemented, { 0 } };
+        return { ResultEdzNotYetImplemented, EMPTY_RESPONSE };
     }
 
     EResult SwitchCheatsDBAPI::addSaveFile() {

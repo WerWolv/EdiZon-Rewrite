@@ -1,5 +1,9 @@
 {
     "notifications": [
-
+        {
+            "title" : "Test title",
+            "description" : "Test description",
+            "icon" : "information"
+        }
     ]
 }

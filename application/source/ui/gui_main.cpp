@@ -261,12 +261,20 @@ namespace edz::ui {
                 codeRegionCnt++;
 
         auto memoryRegions = cheat::CheatManager::getMemoryRegions();
+        size_t numCodeRegions = 0;
+
+        for (MemoryInfo region : memoryRegions)
+            if (region.type == MemType_CodeStatic && region.perm == Perm_Rx)
+                numCodeRegions++;
+
         for (MemoryInfo region : memoryRegions) {
             std::string regionName = "";
 
             if (region.type == MemType_Heap && !foundHeap) {
                 foundHeap = true;
                 regionName = "edz.gui.main.running.section.heap"_lang;
+            } else if (region.type == MemType_MappedMemory) {
+                regionName = "stack";
             } else if (region.type == MemType_CodeStatic && region.perm == Perm_Rx) {
                 if (currCodeRegion == 0 && codeRegionCnt == 1) {
                     regionName = "edz.gui.main.running.section.main"_lang;
@@ -280,10 +288,10 @@ namespace edz::ui {
                             regionName = "edz.gui.main.running.section.main"_lang;
                             break;
                         default:
-                            if (currCodeRegion == memoryRegions.size() - 1)
-                                regionName = "edz.gui.main.running.section.sdk"_lang;
+                            if (currCodeRegion < (numCodeRegions - 1))
+                                regionName = "edz.gui.main.running.section.subsdk"_lang + std::to_string(currCodeRegion - 2);
                             else
-                                regionName = "edz.gui.main.running.section.subsdk"_lang + std::to_string(currCodeRegion - 1);
+                                regionName = "edz.gui.main.running.section.sdk"_lang;
                     }
                 }
 
