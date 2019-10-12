@@ -37,8 +37,8 @@ namespace edz::ui {
         GuiMain() : Gui() { }
         ~GuiMain() { }
 
-        enum class DisplayStyle { LIST, GRID };
-        enum class SortingStyle { NAME, AUTHOR, LAST_PLAYED, PLAY_TIME };
+        enum class DisplayStyle { LIST, CONDENSED, GRID };
+        enum class SortingStyle { ALPHABETICAL_NAME, ALPHABETICAL_AUTHOR, FIRST_PLAYED, LAST_PLAYED, PLAY_TIME, NUM_LAUNCHES };
 
         brls::View* setupUI() override;
         void update() override;
@@ -57,6 +57,7 @@ namespace edz::ui {
             void createTitleGridView(brls::List *list);
 
             void createTitlesListTab(brls::LayerView *layerView);
+            void createSaveReposTab(brls::List *list);
             void createRunningTitleInfoTab(brls::List *list);
             void createCheatsTab(brls::List *list);
             void createSettingsTab(brls::LayerView *layerView);

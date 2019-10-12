@@ -20,7 +20,7 @@
 #pragma once
 
 #include <edizon.hpp>
-#include <Borealis.hpp>
+#include <borealis.hpp>
 #include "helpers/utils.hpp"
 
 namespace edz::ui {
