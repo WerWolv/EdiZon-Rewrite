@@ -22,13 +22,21 @@
 #include "save/title.hpp"
 #include "helpers/hidsys_shim.hpp"
 
+extern "C" {
+    u32 __nx_applet_exit_mode = 0;
+}
+
 namespace edz::ui {
 
     brls::View* GuiCheatEngine::setupUI() {
-        brls::ThumbnailFrame *rootFrame = new brls::ThumbnailFrame("Search");
+        brls::ThumbnailFrame *rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
 
-        rootFrame->setTitle("Cheat Engine");
+        rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
         rootFrame->getSidebar()->setSubtitle("Test");
+        rootFrame->setCancelListener([](brls::View *view) {
+            Gui::goBack();
+            return true;
+        });
 
         u8 *thumbnailBuffer = new u8[1280 * 720 * 4];
 
@@ -37,18 +45,11 @@ namespace edz::ui {
 
         delete[] thumbnailBuffer;
         
+
         brls::List *list = new brls::List();
+        
 
-        brls::ListItem *resumeItem = new brls::ListItem("Resume title");
-        resumeItem->setClickListener([](brls::View *view) {
-            AppletApplication a = { 0 };
-            appletOpenMainApplication(&a);
-            // TODO: Properly give back focus to qlaunch
-            appletApplicationRequestForApplicationToGetForeground(&a);
-        });
-
-        list->addView(resumeItem);
-        rootFrame->setContentView(list);
+        rootFrame->setContentView(new brls::Label(brls::LabelStyle::MEDIUM, "Hello", false));
 
         return rootFrame;
     }
