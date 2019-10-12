@@ -28,9 +28,9 @@
 
 #include "ui/widgets/widget.hpp"
 
-namespace edz::save::edit {
+using edz::ui::widget::Argument;
 
-    using ui::widget::Argument;
+namespace edz::save::edit {
 
     class Script {
     public:

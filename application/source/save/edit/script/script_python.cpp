@@ -161,14 +161,14 @@ namespace edz::save::edit {
         PyObject *result = PyObject_CallObject(func, nullptr);
 
         if (result == nullptr) 
-            return { ResultEdzScriptRuntimeError, { } };
+            return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
 
         if (PyErr_Occurred() != nullptr) {
             Log::error("Python script's getModifiedSaveData function failed:");
             PyErr_Print();
             printf("\n");
 
-            return { ResultEdzScriptRuntimeError, { } };
+            return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
         }
 
         size_t size = PyByteArray_Size(result);

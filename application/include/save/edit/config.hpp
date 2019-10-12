@@ -65,6 +65,9 @@ namespace edz::save::edit {
         ScriptLanguage getScriptLanguage();
         std::string getScript();
         bool isBeta();
+        std::vector<std::string> getSaveFilePaths();
+        void setScript(save::edit::Script *script);
+
     private:
         Title *m_title;
         Account *m_account;

@@ -115,7 +115,7 @@ namespace edz::save::edit {
 
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
             Log::error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
-            return { ResultEdzScriptRuntimeError, { } };
+            return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
         }
 
         lua_pushnil(this->m_ctx);

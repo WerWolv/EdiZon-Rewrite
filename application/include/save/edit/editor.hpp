@@ -36,8 +36,10 @@ namespace edz::save::edit {
         Editor(Editor const&) = delete;
         void operator=(Editor const&) = delete;
 
-        static std::tuple<EResult, Config*, Script*> load(Title *title, Account *account, std::string saveFilePath);
+        static std::pair<EResult, Config*> loadConfig(Title *title, Account *account);
+        static std::pair<EResult, Script*> loadScript(Title *title, Account *account, std::string saveFilePath);
         static EResult store();
+        static void cleanUp();
 
     private:
         Editor();

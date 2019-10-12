@@ -199,7 +199,7 @@ namespace edz::save::edit {
 
             for (auto &[fileName, file] : saveFileFolder.getFiles())
                 if (std::regex_match(fileName, std::regex(fileNameRegex)))
-                    fileConfig.saveFileNames.push_back(fileName);
+                    fileConfig.saveFileNames.push_back(path + "/" + fileName);
         }
 
         m_fileConfigs[fileNum] = fileConfig;
@@ -322,6 +322,23 @@ namespace edz::save::edit {
 
     bool Config::isBeta() {
         return this->m_isBeta;
+    }
+
+    std::vector<std::string> Config::getSaveFilePaths() {
+        std::vector<std::string> result;
+
+        for (auto &[num, fileConfig] : this->m_fileConfigs)
+            for (auto &path : fileConfig.saveFileNames)
+                result.push_back(path);
+
+        return result;
+    }
+
+    void Config::setScript(save::edit::Script *script) {
+        for (auto &[num, fileConfig] : this->m_fileConfigs)
+            for (auto &[name, category] : fileConfig.categories)
+                for (auto &widget : category.widgets)
+                    widget->setScript(script);
     }
 
 }

@@ -30,6 +30,10 @@ namespace brls {
     class View;
 }
 
+namespace edz::save::edit {
+    class Script;
+}
+
 namespace edz::ui::widget {
 
     enum class WidgetType {
@@ -58,12 +62,16 @@ namespace edz::ui::widget {
         virtual void setDescription(std::string description) final;
         virtual void addArgument(std::string argumentName, Argument argument) final;
 
+        virtual void setScript(edz::save::edit::Script *script) final;
+
     protected:
         std::string m_name;
         std::string m_description;
         std::map<std::string, Argument> m_arguments;
 
         brls::View *m_widgetView = nullptr;
+
+        edz::save::edit::Script *m_script;
     };
 
 }
