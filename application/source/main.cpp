@@ -141,31 +141,13 @@ EResult initServices() {
     ER_TRY(hidsysInitialize());
     ER_TRY(hlp::controllerLEDInitialize());
 
+    // Play tiem querying
     ER_TRY(pdmqryInitialize());
-
+    
+    // Atmosphere cheat service (Cheat toggling and memory editing)
     if (cheat::CheatManager::isCheatServiceAvailable()) {
         dmntcht::initialize();
         cheat::CheatManager::initialize();
-    }
-
-    return ResultSuccess;
-}
-
-EResult createFolderStructure() {
-    std::string paths[] = {
-        EDIZON_BACKUP_DIR,
-        EDIZON_BATCH_BACKUP_DIR,
-        EDIZON_COMMON_RESTORE_DIR,
-        EDIZON_CONFIGS_DIR,
-        EDIZON_SCRIPTS_DIR,
-        EDIZON_LIBS_DIR,
-        EDIZON_CHEATS_DIR,
-        EDIZON_TMP_DIR
-    };
-
-    for (auto path : paths) {
-        hlp::Folder folder(path);
-        ER_TRY(folder.createDirectories());
     }
 
     return ResultSuccess;
@@ -189,6 +171,27 @@ void exitServices() {
     cheat::CheatManager::exit();
     brls::Application::quit();
 }
+
+EResult createFolderStructure() {
+    std::string paths[] = {
+        EDIZON_BACKUP_DIR,
+        EDIZON_BATCH_BACKUP_DIR,
+        EDIZON_COMMON_RESTORE_DIR,
+        EDIZON_CONFIGS_DIR,
+        EDIZON_SCRIPTS_DIR,
+        EDIZON_LIBS_DIR,
+        EDIZON_CHEATS_DIR,
+        EDIZON_TMP_DIR
+    };
+
+    for (auto path : paths) {
+        hlp::Folder folder(path);
+        ER_TRY(folder.createDirectories());
+    }
+
+    return ResultSuccess;
+}
+
 
 int main(int argc, char* argv[]) {  
 
