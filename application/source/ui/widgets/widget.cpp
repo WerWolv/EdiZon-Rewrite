@@ -42,5 +42,9 @@ namespace edz::ui::widget {
         this->m_arguments.insert({ argumentName, argument });
     }
 
+    void Widget::setScript(save::edit::Script *script) {
+        this->m_script = script;
+    }
+
 
 }
