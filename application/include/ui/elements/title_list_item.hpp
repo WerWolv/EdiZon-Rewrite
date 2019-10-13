@@ -22,31 +22,23 @@
 #include <edizon.hpp>
 #include <borealis.hpp>
 
-#include <string>
-#include <vector>
+#include <memory>
 
 #include "save/title.hpp"
 
-#include <memory>
-
 namespace edz::ui::element {
 
-    class TitleInfo : public brls::View {
+    class TitleListItem : public brls::ListItem {
     public:
-        TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title);
-        TitleInfo(u8 *buffer, u16 width, u16 height, std::shared_ptr<save::Title> title);
-        ~TitleInfo();
+        TitleListItem(std::shared_ptr<save::Title> title, std::string label, std::string description = "", std::string subLabel = "")
+            : brls::ListItem(label, description, subLabel), m_title(title) {}
 
-        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
-        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-    
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        std::shared_ptr<save::Title> getTitle() {
+            return this->m_title;
+        }
 
     private:
-    
-        brls::Table *m_table;
-        brls::Image *m_image;
+        std::shared_ptr<save::Title> m_title;
     };
 
 }

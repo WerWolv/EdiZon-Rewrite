@@ -27,6 +27,9 @@
 #include "save/edit/editor.hpp"
 #include "api/switchcheatsdb_api.hpp"
 #include "ui/elements/focusable_table.hpp"
+#include "ui/elements/title_list_item.hpp"
+
+#include "ui/pages/page_login.hpp"
 
 namespace edz::ui {
 
@@ -178,17 +181,15 @@ namespace edz::ui {
         delete[] iconBuffer;
     }
 
-    std::vector<std::shared_ptr<save::Title>> GuiMain::sortTitleList(std::map<titleid_t, std::shared_ptr<save::Title>>& titles, SortingStyle sorting) {
-        std::vector<std::shared_ptr<save::Title>> titlesList;
-
-        for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles())
-            titlesList.push_back(title);
-
-        std::sort(titlesList.begin(), titlesList.end(), [sorting](std::shared_ptr<save::Title> l, std::shared_ptr<save::Title> r) {
+    void GuiMain::sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting) {
+        std::sort(list.begin(), list.end(), [sorting](brls::BoxLayoutChild* lItem, brls::BoxLayoutChild* rItem) {
             u32 lLowestTime = 0, rLowestTime = 0;
             u32 lLatestTime = 0, rLatestTime = 0;
             u32 lHighestPlayTime = 0, rHighestPlayTime = 0;
             u32 lLaunches = 0, rLaunches = 0;
+
+            std::shared_ptr<save::Title> l = static_cast<ui::element::TitleListItem*>(lItem->view)->getTitle();
+            std::shared_ptr<save::Title> r = static_cast<ui::element::TitleListItem*>(rItem->view)->getTitle();
 
             switch (sorting) {
                 case SortingStyle::TITLE_ID:
@@ -203,7 +204,7 @@ namespace edz::ui {
                         rLaunches += r->getLaunchCount(account.get());
                     }
 
-                    return lLaunches < rLaunches;
+                    return lLaunches > rLaunches;
                 case SortingStyle::FIRST_PLAYED:
                     for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
                         if (u32 lTime = l->getFirstPlayTime(account.get()); lTime < lLowestTime)
@@ -233,15 +234,11 @@ namespace edz::ui {
 
             return true;
         });
-
-        return titlesList;
     }
 
     void GuiMain::createTitleListView(List *list, SortingStyle sorting) {
-        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
-
-        for (auto &title : titlesList) {
-            ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
+        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {
+            brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
             
             size_t iconSize = title->getIconSize();
             u8 *iconBuffer = new u8[iconSize];
@@ -258,15 +255,14 @@ namespace edz::ui {
 
             list->addView(titleItem);
         }
-        
+
+        sortTitleList(list->getChildren(), sorting);
         list->setSpacing(30);
     }
 
     void GuiMain::createTitleCondensedView(List *list, SortingStyle sorting) {
-        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
-
-        for (auto &title : titlesList) {
-            ListItem *titleItem = new ListItem(hlp::limitStringLength(title->getName(), 35));
+        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {
+            brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 35));
             titleItem->setValue(title->getIDString(), true, false);
                         
             titleItem->setClickListener([&](View *view) {
@@ -277,6 +273,7 @@ namespace edz::ui {
             list->addView(titleItem);
         }
         
+        sortTitleList(list->getChildren(), sorting);
         list->setSpacing(30);
     }
 
@@ -284,9 +281,7 @@ namespace edz::ui {
         std::vector<element::HorizontalTitleList*> hLists;
         u16 column = 0;
         
-        std::vector<std::shared_ptr<save::Title>> titlesList = sortTitleList(save::SaveFileSystem::getAllTitles(), sorting);
-
-        for (auto &title : titlesList) {              
+        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {         
             if (column % 4 == 0)
                 hLists.push_back(new element::HorizontalTitleList());
             
@@ -321,79 +316,10 @@ namespace edz::ui {
     void GuiMain::createTitlesListTab(LayerView *layerView, SortingStyle sorting) {
         List *listDisplayList = new List();
         List *condensedDisplayList = new List();
-        List *gridDisplayList = new List();
+        List *gridDisplayList = new List();        
 
-        std::vector<std::string> displayOptions = { "edz.gui.main.titles.style.list"_lang, 
-                                                    "edz.gui.main.titles.style.condensed"_lang,
-                                                    "edz.gui.main.titles.style.grid"_lang };
-        std::vector<std::string> sortingOptions = { "edz.gui.main.titles.sorting.titleid"_lang,
-                                                    "edz.gui.main.titles.sorting.alphaname"_lang,
-                                                    "edz.gui.main.titles.sorting.alphaauthor"_lang,
-                                                    "edz.gui.main.titles.sorting.firstplayed"_lang,
-                                                    "edz.gui.main.titles.sorting.lastplayed"_lang,
-                                                    "edz.gui.main.titles.sorting.playtime"_lang,
-                                                    "edz.gui.main.titles.sorting.numlaunches"_lang };
-
-        SelectListItem *displayOptionList = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
-        SelectListItem *displayOptionCondensed = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
-        SelectListItem *displayOptionGrid = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
-
-        SelectListItem *sortingOptionList = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
-        SelectListItem *sortingOptionCondensed = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
-        SelectListItem *sortingOptionGrid = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
-
-
-        displayOptionList->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesDisplayStyle, selection);
-            displayOptionCondensed->setSelectedValue(selection);
-            displayOptionGrid->setSelectedValue(selection);
-        });
-
-        displayOptionCondensed->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesDisplayStyle, selection);
-            displayOptionList->setSelectedValue(selection);
-            displayOptionGrid->setSelectedValue(selection);
-        });
-
-        displayOptionGrid->setListener([=](size_t selection) {
-            this->m_titleList->changeLayer(selection, true);
-            SET_CONFIG(Save.titlesDisplayStyle, selection);
-            displayOptionList->setSelectedValue(selection);
-            displayOptionCondensed->setSelectedValue(selection);
-        });
-
-
-        sortingOptionList->setListener([=](size_t selection) {
-            SET_CONFIG(Save.titlesSortingStyle, selection);
-        });
-
-        sortingOptionCondensed->setListener([=](size_t selection) {
-            SET_CONFIG(Save.titlesSortingStyle, selection);
-        });
-
-        sortingOptionGrid->setListener([=](size_t selection) {
-            SET_CONFIG(Save.titlesSortingStyle, selection);
-        });
-        
-
-        listDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
-        listDisplayList->addView(displayOptionList);
-        listDisplayList->addView(sortingOptionList);
-        listDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
         GuiMain::createTitleListView(listDisplayList, sorting);
-
-        condensedDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
-        condensedDisplayList->addView(displayOptionCondensed);
-        condensedDisplayList->addView(sortingOptionCondensed);
-        condensedDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
         GuiMain::createTitleCondensedView(condensedDisplayList, sorting);
-
-        gridDisplayList->addView(new Header("edz.gui.main.titles.options"_lang, false));
-        gridDisplayList->addView(displayOptionGrid);
-        gridDisplayList->addView(sortingOptionGrid);
-        gridDisplayList->addView(new Header("edz.gui.main.titles.tab"_lang, false));
         GuiMain::createTitleGridView(gridDisplayList, sorting);
 
         layerView->addLayer(listDisplayList);
@@ -401,13 +327,6 @@ namespace edz::ui {
         layerView->addLayer(gridDisplayList);
 
         layerView->changeLayer(GET_CONFIG(Save.titlesDisplayStyle), false);
-        displayOptionList->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
-        displayOptionCondensed->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
-        displayOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesDisplayStyle));
-
-        sortingOptionList->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
-        sortingOptionCondensed->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
-        sortingOptionGrid->setSelectedValue(GET_CONFIG(Save.titlesSortingStyle));
     }
 
     void GuiMain::createSaveReposTab(brls::List *list) {
@@ -516,79 +435,71 @@ namespace edz::ui {
             list->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.dmnt_cht_missing"_lang, true));
     }
 
-    void GuiMain::createSettingsTab(LayerView *layerView) {
-        static std::string email, password;
+    void GuiMain::createSettingsTab(List *list) {
+        // Title Options
+        std::vector<std::string> displayOptions = { "edz.gui.main.titles.style.list"_lang, 
+                                                    "edz.gui.main.titles.style.condensed"_lang,
+                                                    "edz.gui.main.titles.style.grid"_lang };
+        std::vector<std::string> sortingOptions = { "edz.gui.main.titles.sorting.titleid"_lang,
+                                                    "edz.gui.main.titles.sorting.alphaname"_lang,
+                                                    "edz.gui.main.titles.sorting.alphaauthor"_lang,
+                                                    "edz.gui.main.titles.sorting.firstplayed"_lang,
+                                                    "edz.gui.main.titles.sorting.lastplayed"_lang,
+                                                    "edz.gui.main.titles.sorting.playtime"_lang,
+                                                    "edz.gui.main.titles.sorting.numlaunches"_lang };
 
-        List *loggedInList = new List();
-        List *loggedOutList = new List();       
+        SelectListItem *displayOptionsItem = new SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
+        SelectListItem *sortingOptionsItem = new SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
 
-        // Logged out State
-        ListItem *emailItem = new ListItem("edz.gui.main.settings.email"_lang);
-        emailItem->setClickListener([&](View *view) {
-            hlp::openSwkbdForText([&](std::string text) {
-                email = text;
-                static_cast<ListItem*>(view)->setValue(text);
-            }, "edz.gui.main.settings.email"_lang, "edz.gui.main.settings.email.help"_lang);
-        });
-        
-        ListItem *passwordItem = new ListItem("edz.gui.main.settings.password"_lang);
-        passwordItem->setClickListener([&](View *view) {
-            hlp::openSwkbdForPassword([&](std::string text) {
-                password = text;
-
-                std::string itemText = "";
-                for (u8 i = 0; i < text.length(); i++)
-                    itemText += "●";
-
-                static_cast<ListItem*>(view)->setValue(itemText);
-            }, "edz.gui.main.settings.password"_lang, "edz.gui.main.settings.password.help"_lang);
+        displayOptionsItem->setListener([=](size_t selection) {
+            this->m_titleList->changeLayer(selection, false);
+            SET_CONFIG(Save.titlesDisplayStyle, selection);
         });
 
-        ListItem *loginButton = new ListItem("edz.gui.main.settings.login"_lang);
-        loginButton->setClickListener([=](View *view) {
-            api::SwitchCheatsDBAPI scdbApi;
 
-            auto [result, token] = scdbApi.getToken(emailItem->getValue(), passwordItem->getValue());
+        sortingOptionsItem->setListener([=](size_t selection) {
+            SET_CONFIG(Save.titlesSortingStyle, selection);
+            this->m_reloadGui = true;
+        });
 
-            password = "";
+        displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesDisplayStyle)));
+        sortingOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesSortingStyle)));
 
-            if (result != ResultSuccess) {
-                return;
+
+        // SwitchCheatsDB Login
+        ListItem *scdbLoginItem = new ListItem("edz.gui.main.settings.account.title"_lang);
+        scdbLoginItem->setValue(GET_CONFIG(Update.loggedIn) ? GET_CONFIG(Update.switchcheatsdbEmail) : "Not logged in");
+        scdbLoginItem->setClickListener([=](View *view) { 
+            if (GET_CONFIG(Update.loggedIn)) {
+                brls::Dialog *dialog = new brls::Dialog("edz.gui.main.settings.dialog.logout"_lang);
+                dialog->addButton("edz.dialog.no"_lang, [=](View *view) {
+                    dialog->close();
+                });
+                dialog->addButton("edz.dialog.yes"_lang, [=](View *view) {
+                    SET_CONFIG(Update.loggedIn, false);
+                    SET_CONFIG(Update.switchcheatsdbEmail, "");
+                    SET_CONFIG(Update.switchcheatsdbApiToken, "");
+                    scdbLoginItem->setValue("edz.gui.main.settings.account.nologin"_lang);
+                    dialog->close();
+                });
+
+                dialog->open();
+            } else {
+                brls::AppletFrame *frame = new brls::AppletFrame(false, false);
+                frame->setContentView(new ui::page::PageLogin(scdbLoginItem));
+                frame->setTitle("edz.page.login.title"_lang);
+
+                brls::Application::pushView(frame);
             }
-
-            SET_CONFIG(Update.loggedIn, true);
-            SET_CONFIG(Update.switchcheatsdbEmail, email);
-            SET_CONFIG(Update.switchcheatsdbApiToken, token);
-
-            email = "";
-
-            layerView->changeLayer(1, true);
         });
 
-        loggedOutList->addView(new Header("edz.switchcheatsdb.name"_lang, true));
-        loggedOutList->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.settings.not_logged_in"_lang, true));
-        loggedOutList->addView(emailItem);
-        loggedOutList->addView(passwordItem);
-        loggedOutList->addView(loginButton);
 
-        // Logged in state
-        ListItem *logoutButton = new ListItem("edz.gui.main.settings.logout"_lang);
-        logoutButton->setClickListener([=](View *view) {
-            SET_CONFIG(Update.loggedIn, false);
-            SET_CONFIG(Update.switchcheatsdbEmail, "");
-            SET_CONFIG(Update.switchcheatsdbApiToken, "");
-            
-            layerView->changeLayer(0, true);
-        });
-
-        loggedInList->addView(new Header("edz.switchcheatsdb.name"_lang, true));
-        loggedInList->addView(new Label(LabelStyle::DESCRIPTION, "edz.gui.main.settings.logged_in"_lang + GET_CONFIG(Update.switchcheatsdbEmail)));
-        loggedInList->addView(logoutButton);
-
-
-        layerView->addLayer(loggedOutList);
-        layerView->addLayer(loggedInList);
-        layerView->changeLayer(GET_CONFIG(Update.loggedIn), false);
+        list->addView(new Header("edz.gui.main.settings.header.titleoptions"_lang));
+        list->addView(displayOptionsItem);
+        list->addView(sortingOptionsItem);
+        list->addView(new Header("edz.gui.main.settings.header.accountoptions"_lang));
+        list->addView(new Label(LabelStyle::MEDIUM, "edz.gui.main.settings.scdbinfo"_lang, true));
+        list->addView(scdbLoginItem);
     }
 
     void GuiMain::createAboutTab(List *list) {
@@ -598,28 +509,22 @@ namespace edz::ui {
         list->addView(new Header("edz.gui.main.about.links"_lang, false));
         
         ListItem *scdbItem = new ListItem("edz.switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
-        ListItem *patreonItem = new ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv_");
-        ListItem *guideItem = new ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net/guide");
-        ListItem *docsItem = new ListItem("edz.gui.main.about.docs.title"_lang, "", "https://edizon.werwolv.net/docs");
+        ListItem *patreonItem = new ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv");
+        ListItem *guideItem = new ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net");
 
         scdbItem->setThumbnail("romfs:/assets/icon_scdb.png");
         patreonItem->setThumbnail("romfs:/assets/icon_patreon.png");
         guideItem->setThumbnail("romfs:/assets/icon_guide.png");
-        docsItem->setThumbnail("romfs:/assets/icon_docs.png");
+
+        if (hlp::isInApplicationMode()) {
+            scdbItem->setClickListener([](View *view)    { openWebpage("https://www.switchcheatsdb.com"); });
+            patreonItem->setClickListener([](View *view) { openWebpage("https://patreon.com/werwolv");    });
+            guideItem->setClickListener([](View *view)   { openWebpage("http://edizon.werwolv.net");      });
+        }
 
         list->addView(scdbItem);
         list->addView(patreonItem);
-
-        if (hlp::isInApplicationMode()) {
-            scdbItem->setClickListener([](View *view)    { openWebpage("https://www.switchcheatsdb.com");                 });
-            patreonItem->setClickListener([](View *view) { openWebpage("https://patreon.com/werwolv_");                   });
-            guideItem->setClickListener([](View *view)   { openWebpage("http://werwolv.net/api/edizon/guide/index.html"); });
-            docsItem->setClickListener([](View *view)    { openWebpage("http://werwolv.net/api/edizon/docs/index.html");  });
-
-            list->addView(guideItem);
-            list->addView(docsItem);
-        }
-        
+        list->addView(guideItem);
     }
 
     View* GuiMain::setupUI() {
@@ -633,7 +538,7 @@ namespace edz::ui {
 
         this->m_titleList = new LayerView();
         this->m_cheatsList = new List();
-        this->m_settingsList = new LayerView();
+        this->m_settingsList = new List();
         this->m_aboutList = new List();
 
         createTitlesListTab(this->m_titleList, SortingStyle::TITLE_ID);
@@ -659,6 +564,12 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
+        if (this->m_reloadGui) {
+            this->m_reloadGui = false;
+
+            GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+            GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+        }
     }
 
 }

@@ -50,10 +50,10 @@ namespace edz::ui {
             brls::LayerView *m_titleList = nullptr;
             brls::List *m_runningTitleInfoList = nullptr;
             brls::List *m_cheatsList = nullptr;
-            brls::LayerView *m_settingsList = nullptr;
+            brls::List *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
 
-            std::vector<std::shared_ptr<save::Title>> sortTitleList(std::map<titleid_t, std::shared_ptr<save::Title>>& titles, SortingStyle sorting);
+            void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);
 
             void createTitlePopup(save::Title *title);
             void createTitleListView(brls::List *list, SortingStyle sorting);
@@ -64,7 +64,7 @@ namespace edz::ui {
             void createSaveReposTab(brls::List *list);
             void createRunningTitleInfoTab(brls::List *list);
             void createCheatsTab(brls::List *list);
-            void createSettingsTab(brls::LayerView *layerView);
+            void createSettingsTab(brls::List *list);
             void createAboutTab(brls::List *list);
     };
 

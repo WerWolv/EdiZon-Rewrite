@@ -22,25 +22,24 @@
 #include <edizon.hpp>
 #include <borealis.hpp>
 
-#include <string>
-#include <vector>
+namespace edz::ui::page {
 
-#include "save/title.hpp"
-
-#include <memory>
-
-#include <borealis/theme.hpp>
-#include <nanovg.h>
-
-namespace edz::ui::element {
-
-    class FocusableTable : public brls::Table {
+    class PageLogin : public brls::View {
     public:
-        FocusableTable();
-        virtual ~FocusableTable();
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+        PageLogin(brls::ListItem *loginItem);
+        ~PageLogin();
 
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
+        void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
+        brls::View* requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp = false) override;
+
+        bool onCancel() override;
+
+    private:
+        brls::ListItem *m_emailItem, *m_passwordItem;
+        brls::Button *m_loginBtn;
+
+        std::string m_email, m_password;
     };
 
 }

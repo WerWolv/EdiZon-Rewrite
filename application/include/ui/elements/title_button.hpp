@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <Borealis.hpp>
+#include <borealis.hpp>
 
 #include <string>
 #include <vector>
