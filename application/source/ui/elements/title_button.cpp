@@ -23,11 +23,17 @@ namespace edz::ui::element {
 
     using namespace brls;
 
-    TitleButton::TitleButton(unsigned char *buffer, size_t bufferSize, u8 column) : m_column(column) {
-        this->m_image = new Image(buffer, bufferSize);
+    TitleButton::TitleButton(save::Title *title, u8 column) : m_title(title), m_column(column) {
+        size_t iconSize = title->getIconSize();
+        u8 *iconBuffer = new u8[iconSize];
+        title->getIcon(iconBuffer, iconSize);
+
+        this->m_image = new Image(iconBuffer, iconSize);
         this->m_image->setParent(this);
         this->m_image->setScaleType(ImageScaleType::SCALE);
         this->m_image->invalidate();
+
+        delete[] iconBuffer;
     }
 
     TitleButton::~TitleButton() {
@@ -72,6 +78,14 @@ namespace edz::ui::element {
         return this->m_column;
     }
 
+    void TitleButton::setColumn(u8 column) {
+        this->m_column = column;
+    }
+
+    save::Title* TitleButton::getTitle() {
+        return this->m_title;
+    }
+
     HorizontalTitleList::HorizontalTitleList() : BoxLayout(BoxLayoutOrientation::HORIZONTAL, 0) {
         this->setHeight(150);
         this->setSpacing(30);
@@ -88,15 +102,9 @@ namespace edz::ui::element {
     }
 
     void HorizontalTitleList::addTitle(save::Title *title) {
-        size_t iconSize = title->getIconSize();
-        u8 *iconBuffer = new u8[iconSize];
-        title->getIcon(iconBuffer, iconSize);
-
-        TitleButton *titleButton = new TitleButton(iconBuffer, iconSize, this->children.size());
+        TitleButton *titleButton = new TitleButton(title, this->children.size());
 
         this->addView(titleButton);
-
-        delete[] iconBuffer;
     }
 
 

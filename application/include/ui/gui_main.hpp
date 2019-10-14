@@ -54,6 +54,7 @@ namespace edz::ui {
             brls::List *m_aboutList = nullptr;
 
             void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);
+            void sortTitleGrid(brls::List *list, SortingStyle sorting);
 
             void createTitlePopup(save::Title *title);
             void createTitleListView(brls::List *list, SortingStyle sorting);

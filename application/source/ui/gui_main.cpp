@@ -181,6 +181,82 @@ namespace edz::ui {
         delete[] iconBuffer;
     }
 
+    void GuiMain::sortTitleGrid(brls::List *list, SortingStyle sorting) {
+        std::vector<ui::element::TitleButton*> titleButtons;
+
+        for (brls::BoxLayoutChild *child : list->getChildren()) {
+            ui::element::HorizontalTitleList *hTitleList = static_cast<ui::element::HorizontalTitleList*>(child->view);
+
+            for (const auto& titleButton : hTitleList->getChildren())
+                titleButtons.push_back(static_cast<ui::element::TitleButton*>(titleButton->view));
+
+            hTitleList->clear(false);
+        }
+
+        std::sort(titleButtons.begin(), titleButtons.end(), [sorting](ui::element::TitleButton* lItem, ui::element::TitleButton* rItem) {
+            u32 lLowestTime = 0, rLowestTime = 0;
+            u32 lLatestTime = 0, rLatestTime = 0;
+            u32 lHighestPlayTime = 0, rHighestPlayTime = 0;
+            u32 lLaunches = 0, rLaunches = 0;
+
+            save::Title *l = lItem->getTitle();
+            save::Title *r = rItem->getTitle();
+
+            switch (sorting) {
+                case SortingStyle::TITLE_ID:
+                    return l->getID() < r->getID();
+                case SortingStyle::ALPHABETICAL_NAME:
+                    return l->getName().compare(r->getName()) < 0;
+                case SortingStyle::ALPHABETICAL_AUTHOR:
+                    return l->getAuthor().compare(r->getAuthor()) < 0;
+                case SortingStyle::NUM_LAUNCHES:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        lLaunches += l->getLaunchCount(account.get());
+                        rLaunches += r->getLaunchCount(account.get());
+                    }
+
+                    return lLaunches > rLaunches;
+                case SortingStyle::FIRST_PLAYED:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        if (u32 lTime = l->getFirstPlayTime(account.get()); lTime < lLowestTime)
+                            lLowestTime = lTime;
+                        if (u32 rTime = r->getFirstPlayTime(account.get()); rTime < rLowestTime)
+                            rLowestTime = rTime;
+                    }
+
+                    return lLowestTime < rLowestTime;
+                case SortingStyle::LAST_PLAYED:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        if (u32 lTime = l->getLastPlayTime(account.get()); lTime > lLatestTime)
+                            lLatestTime = lTime;
+                        if (u32 rTime = r->getLastPlayTime(account.get()); rTime > rLatestTime)
+                            rLatestTime = rTime;
+                    }
+
+                    return lLatestTime > rLatestTime;
+                case SortingStyle::PLAY_TIME:
+                    for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+                        lHighestPlayTime += l->getPlayTime(account.get());
+                        rHighestPlayTime += r->getPlayTime(account.get());
+                    }
+
+                    return lHighestPlayTime > rHighestPlayTime;
+            }
+
+            return true;
+        });
+
+        u16 index = 0;
+        for (ui::element::TitleButton* titleButton : titleButtons) {
+            titleButton->setColumn(index % 4);
+            static_cast<ui::element::HorizontalTitleList*>(list->getChild(index / 4))->addView(titleButton);
+            static_cast<ui::element::HorizontalTitleList*>(list->getChild(index / 4))->invalidate();
+            index++;
+        }
+
+        list->invalidate();
+    }
+
     void GuiMain::sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting) {
         std::sort(list.begin(), list.end(), [sorting](brls::BoxLayoutChild* lItem, brls::BoxLayoutChild* rItem) {
             u32 lLowestTime = 0, rLowestTime = 0;
@@ -285,20 +361,13 @@ namespace edz::ui {
             if (column % 4 == 0)
                 hLists.push_back(new element::HorizontalTitleList());
             
-            size_t iconSize = title->getIconSize();
-            u8 *iconBuffer = new u8[iconSize];
-            title->getIcon(iconBuffer, iconSize);
-
-            element::TitleButton *titleButton = new element::TitleButton(iconBuffer, iconSize, column % 4);
+            element::TitleButton *titleButton = new element::TitleButton(title.get(), column % 4);
 
             titleButton->setClickListener([&](View *view) {
                 createTitlePopup(title.get());
             });
 
             hLists[hLists.size() - 1]->addView(titleButton);
-
-            delete[] iconBuffer;
-
 
             column++;
         }
@@ -307,6 +376,7 @@ namespace edz::ui {
             list->addView(hList);
         }
 
+        GuiMain::sortTitleGrid(list, static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
         list->setSpacing(30);
 
         list->invalidate();
@@ -569,6 +639,7 @@ namespace edz::ui {
 
             GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
             GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+            GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
         }
     }
 

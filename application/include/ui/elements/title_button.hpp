@@ -29,7 +29,7 @@ namespace edz::ui::element {
 
     class TitleButton : public brls::View {
     public:
-        TitleButton(unsigned char *buffer, size_t bufferSize, u8 column);
+        TitleButton(save::Title *title, u8 column);
         ~TitleButton();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
@@ -39,8 +39,12 @@ namespace edz::ui::element {
 
         void setClickListener(brls::EventListener listener);
 
+        save::Title* getTitle();
+
         u8 getColumn();
+        void setColumn(u8 column);
     private:
+        save::Title *m_title;
         brls::Image *m_image;
         u8 m_column;
 
