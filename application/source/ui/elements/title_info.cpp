@@ -24,36 +24,34 @@
 
 namespace edz::ui::element {
 
-    using namespace brls;
-
     TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title) {
-        this->m_image = new Image(buffer, bufferSize);
+        this->m_image = new brls::Image(buffer, bufferSize);
         this->m_image->setParent(this);
-        this->m_image->setScaleType(ImageScaleType::FIT);      
+        this->m_image->setScaleType(brls::ImageScaleType::FIT);      
 
-        this->m_table = new Table();
+        this->m_table = new brls::Table();
         this->m_table->setParent(this);
-        this->m_table->addRow(TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
-        this->m_table->addRow(TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
-        this->m_table->addRow(TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
-        this->m_table->addRow(TableRowType::BODY,   "TitleID",   title->getIDString());
-        this->m_table->addRow(TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
-        this->m_table->addRow(TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
+        this->m_table->addRow(brls::TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
+        this->m_table->addRow(brls::TableRowType::BODY,   "TitleID",   title->getIDString());
+        this->m_table->addRow(brls::TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
+        this->m_table->addRow(brls::TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
     }
 
     TitleInfo::TitleInfo(u8 *buffer, u16 width, u16 height, std::shared_ptr<save::Title> title) {
-        this->m_image = new Image(buffer, width, height);
+        this->m_image = new brls::Image(buffer, width, height);
         this->m_image->setParent(this);
-        this->m_image->setScaleType(ImageScaleType::FIT);
+        this->m_image->setScaleType(brls::ImageScaleType::FIT);
 
-        this->m_table = new Table();
+        this->m_table = new brls::Table();
         this->m_table->setParent(this);
-        this->m_table->addRow(TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
-        this->m_table->addRow(TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
-        this->m_table->addRow(TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
-        this->m_table->addRow(TableRowType::BODY,   "TitleID",   title->getIDString());
-        this->m_table->addRow(TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
-        this->m_table->addRow(TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
+        this->m_table->addRow(brls::TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
+        this->m_table->addRow(brls::TableRowType::BODY,   "TitleID",   title->getIDString());
+        this->m_table->addRow(brls::TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
+        this->m_table->addRow(brls::TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
     }
 
     TitleInfo::~TitleInfo() {
@@ -62,12 +60,12 @@ namespace edz::ui::element {
     }
 
 
-    void TitleInfo::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) {
+    void TitleInfo::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
         this->m_image->frame(ctx);
         this->m_table->frame(ctx);
     }
 
-    void TitleInfo::layout(NVGcontext* vg, Style *style, FontStash *stash) {
+    void TitleInfo::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {
         this->height = 320;
         this->m_image->setBoundaries(this->getX() + 32, this->getY() + 32, 150, 150);
         this->m_image->invalidate();
@@ -75,7 +73,7 @@ namespace edz::ui::element {
         this->m_table->invalidate();
     }
 
-    View* TitleInfo::requestFocus(FocusDirection direction, View *oldFocus, bool fromUp) {        
+    brls::View* TitleInfo::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
         return this;
     }
 

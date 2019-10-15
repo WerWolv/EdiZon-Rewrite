@@ -48,6 +48,7 @@ namespace edz::ui {
             bool m_reloadGui = false;
 
             brls::LayerView *m_titleList = nullptr;
+            brls::List *m_saveReposList = nullptr;
             brls::List *m_runningTitleInfoList = nullptr;
             brls::List *m_cheatsList = nullptr;
             brls::List *m_settingsList = nullptr;

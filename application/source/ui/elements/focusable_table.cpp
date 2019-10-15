@@ -24,8 +24,6 @@
 
 namespace edz::ui::element {
 
-    using namespace brls;
-
     FocusableTable::FocusableTable() : Table() {
 
     }
@@ -33,7 +31,7 @@ namespace edz::ui::element {
     FocusableTable::~FocusableTable() {
     }
 
-    View* FocusableTable::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
+    brls::View* FocusableTable::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
         return this;
     }
 

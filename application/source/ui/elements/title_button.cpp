@@ -21,16 +21,14 @@
 
 namespace edz::ui::element {
 
-    using namespace brls;
-
     TitleButton::TitleButton(save::Title *title, u8 column) : m_title(title), m_column(column) {
         size_t iconSize = title->getIconSize();
         u8 *iconBuffer = new u8[iconSize];
         title->getIcon(iconBuffer, iconSize);
 
-        this->m_image = new Image(iconBuffer, iconSize);
+        this->m_image = new brls::Image(iconBuffer, iconSize);
         this->m_image->setParent(this);
-        this->m_image->setScaleType(ImageScaleType::SCALE);
+        this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
 
         delete[] iconBuffer;
@@ -41,7 +39,7 @@ namespace edz::ui::element {
     }
 
 
-    void TitleButton::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) {
+    void TitleButton::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
         View *baseView = this->getParent()->getParent();
 
         nvgSave(vg);
@@ -50,7 +48,7 @@ namespace edz::ui::element {
         nvgRestore(vg);
     }
 
-    void TitleButton::layout(NVGcontext* vg, Style *style, FontStash *stash) {
+    void TitleButton::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {
         this->width = 150;
         this->height = 150;
 
@@ -58,7 +56,7 @@ namespace edz::ui::element {
         this->m_image->invalidate();
     }
 
-    View* TitleButton::requestFocus(FocusDirection direction, View *oldFocus, bool fromUp) {   
+    brls::View* TitleButton::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {   
         return this;
     }
 
@@ -70,7 +68,7 @@ namespace edz::ui::element {
         return this->m_clickListener != nullptr;
     }
 
-    void TitleButton::setClickListener(EventListener listener) {
+    void TitleButton::setClickListener(brls::EventListener listener) {
         this->m_clickListener = listener;
     }
 
@@ -86,7 +84,7 @@ namespace edz::ui::element {
         return this->m_title;
     }
 
-    HorizontalTitleList::HorizontalTitleList() : BoxLayout(BoxLayoutOrientation::HORIZONTAL, 0) {
+    HorizontalTitleList::HorizontalTitleList() : BoxLayout(brls::BoxLayoutOrientation::HORIZONTAL, 0) {
         this->setHeight(150);
         this->setSpacing(30);
         this->setMargins(0, 0, 0, 0);
@@ -97,7 +95,7 @@ namespace edz::ui::element {
     }
 
 
-    std::vector<BoxLayoutChild*> HorizontalTitleList::getChildren() {
+    std::vector<brls::BoxLayoutChild*> HorizontalTitleList::getChildren() {
         return this->children;
     }
 
@@ -109,7 +107,7 @@ namespace edz::ui::element {
 
 
     // TODO: Fix focus not being able to exit the TitleList sideways
-    View* HorizontalTitleList::defaultFocus(View *oldFocus) {
+    brls::View* HorizontalTitleList::defaultFocus(brls::View *oldFocus) {
         TitleButton *oldTitleButton = dynamic_cast<TitleButton*>(oldFocus);
         
         if (oldTitleButton != nullptr) {
