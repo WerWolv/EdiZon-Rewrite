@@ -73,7 +73,9 @@ SPACE     	:= $(null) $(null)
 
 DEFINES 	+= -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 
-CFLAGS		:=	-g -Wall -Wno-reorder -Wno-incompatible-pointer-types -Og -ffunction-sections \
+CFLAGS		:= $(COMMONFLAGS) -Wno-incompatible-pointer-types
+
+COMMONFLAGS :=	-g -Wall -Wno-reorder -Og -ffunction-sections \
 				$(ARCH) $(DEFINES) 				 \
 				-DWINDOW_NAME=\"EdiZon\"		 \
 				-DVERSION_MAJOR=${VERSION_MAJOR} \
@@ -82,7 +84,7 @@ CFLAGS		:=	-g -Wall -Wno-reorder -Wno-incompatible-pointer-types -Og -ffunction-
 				-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\" \
 				$(INCLUDE) $(EXT_INCLUDE) -D__SWITCH__
 
-CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
+CXXFLAGS	:= $(COMMONFLAGS) -frtti -fexceptions -std=gnu++17
 
 ASFLAGS		:=	-g $(ARCH)
 LDFLAGS		:=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
