@@ -26,6 +26,8 @@ namespace edz::hlp {
 
     Curl::Curl(std::string baseURL) : m_baseURL(baseURL) {
         this->m_curl = curl_easy_init();
+
+        this->m_progressCallback = [](u8 x){ return false; };
     }
 
     Curl::~Curl() {
@@ -46,10 +48,8 @@ namespace edz::hlp {
         size_t newDataSize = size * nmemb;
         std::vector<u8> *mem = (std::vector<u8>*)userp;
         size_t currDataSize = mem->size();
-        
         mem->resize(currDataSize + newDataSize);
         std::memcpy(&(*mem)[currDataSize], contents, newDataSize);
-        
         return newDataSize;
     }
 
@@ -59,12 +59,16 @@ namespace edz::hlp {
         return curl->getProgressCallback()((static_cast<double>(ulnow) / static_cast<double>(ultotal)) * 100);
     }
 
-    std::pair<EResult, std::string> Curl::get(std::string path) {
+    std::pair<EResult, std::string> Curl::get(std::string path, std::map<std::string, std::string> extraHeaders) {
         CURLcode result;
         std::string response;
 
         struct curl_slist *headers = nullptr;
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
+
+        if (extraHeaders.size() > 0)
+            for (auto &[key, value] : extraHeaders)
+                headers = curl_slist_append(headers, (key + ": " + value).c_str());
 
         curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(this->m_curl, CURLOPT_URL, std::string(this->m_baseURL + path).c_str());
@@ -79,7 +83,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -110,7 +114,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -141,7 +145,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, std::vector<u8>() };
         }
 
@@ -174,7 +178,7 @@ namespace edz::hlp {
         fclose(file);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return ResultEdzCurlError;
         }
 
@@ -212,7 +216,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 
@@ -255,7 +259,7 @@ namespace edz::hlp {
         result = curl_easy_perform(this->m_curl);
 
         if (result != CURLE_OK) {
-            Log::debug(curl_easy_strerror(result));
+            Logger::debug(curl_easy_strerror(result));
             return { ResultEdzCurlError, "" };
         }
 

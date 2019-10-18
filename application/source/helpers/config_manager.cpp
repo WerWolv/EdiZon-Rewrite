@@ -50,7 +50,7 @@ namespace edz::hlp {
 
             j.at("vc").at("favoriteColors").get_to(ConfigManager::s_config.VC.favoriteColors);
         } catch (std::exception &e) {
-            Log::info("Config file not found. Creating...");
+            Logger::info("Config file not found. Creating...");
             store();
         }
 

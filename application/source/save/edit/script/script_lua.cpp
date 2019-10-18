@@ -41,16 +41,16 @@ namespace edz::save::edit {
         lua_pop(this->m_ctx, 1);
 
         if (luaL_loadfile(this->m_ctx, path.c_str()) != 0) {
-            Log::error("Failed to load Lua script file");
+            Logger::error("Failed to load Lua script file");
             return;
         }
 
         if (lua_pcall(this->m_ctx, 0, 0, 0)) {
-            Log::error("Failed to execute Lua script's global scope: %s", lua_tostring(this->m_ctx, -1));
+            Logger::error("Failed to execute Lua script's global scope: %s", lua_tostring(this->m_ctx, -1));
             return;
         }
 
-        Log::info("Lua script successfully loaded!");
+        Logger::info("Lua script successfully loaded!");
     }
 
     ScriptLua::~ScriptLua() {
@@ -64,8 +64,8 @@ namespace edz::save::edit {
 
         lua_getglobal(this->m_ctx, "getValue");
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
-            Log::error("Lua script's getValue function failed: %s", lua_tostring(this->m_ctx, -1));
-            return { ResultEdzScriptRuntimeError, out };  // Return empty argument
+            Logger::error("Lua script's getValue function failed: %s", lua_tostring(this->m_ctx, -1));
+            return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
         }
 
 
@@ -77,7 +77,7 @@ namespace edz::save::edit {
             out = static_cast<bool>(lua_toboolean(this->m_ctx, -1));
         else if (lua_isstring(this->m_ctx, -1))
             out = std::string(lua_tostring(this->m_ctx, -1));
-        else Log::error("Invalid value returned from Lua script's getValue!");
+        else Logger::error("Invalid value returned from Lua script's getValue!");
 
         lua_pop(this->m_ctx, 1);
 
@@ -96,12 +96,12 @@ namespace edz::save::edit {
         else if (std::string *v = std::get_if<std::string>(&value))
             lua_pushstring(this->m_ctx, v->c_str());
         else {
-            Log::error("Invalid Argument type");
+            Logger::error("Invalid Argument type");
             return ResultEdzScriptRuntimeError;
         }
 
         if (lua_pcall(this->m_ctx, 1, 0, 0)) {
-            Log::error("Lua script's setValue function failed: %s", lua_tostring(this->m_ctx, -1));
+            Logger::error("Lua script's setValue function failed: %s", lua_tostring(this->m_ctx, -1));
             return ResultEdzScriptRuntimeError;
         }
 
@@ -114,7 +114,7 @@ namespace edz::save::edit {
         lua_getglobal(this->m_ctx, "getModifiedSaveData");
 
         if (lua_pcall(this->m_ctx, 0, 1, 0)) {
-            Log::error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
+            Logger::error("Lua script's getModifiedSaveData function failed: %s", lua_tostring(this->m_ctx, -1));
             return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
         }
 

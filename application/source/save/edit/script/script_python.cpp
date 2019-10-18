@@ -72,12 +72,12 @@ namespace edz::save::edit {
         FILE *scriptFile = fopen(std::string(path).c_str(), "r");
 
         if (scriptFile == nullptr) {
-            Log::error("Failed to load Python script file");
+            Logger::error("Failed to load Python script file");
             return;
         }
 
         if(PyRun_SimpleFileEx(scriptFile, std::string(path).c_str(), true) != 0) {
-            Log::error("Failed to execute Python script's global scope:");
+            Logger::error("Failed to execute Python script's global scope:");
             PyErr_Print();
             printf("\n");
             fclose(scriptFile);
@@ -87,7 +87,7 @@ namespace edz::save::edit {
 
         fclose(scriptFile);
 
-        Log::info("Python script successfully loaded!");
+        Logger::info("Python script successfully loaded!");
     }
 
     ScriptPython::~ScriptPython() {
@@ -105,7 +105,7 @@ namespace edz::save::edit {
             return { ResultEdzScriptRuntimeError, nullptr };
 
         if (PyErr_Occurred() != nullptr) {
-            Log::error("Python script's getValue function failed:");
+            Logger::error("Python script's getValue function failed:");
             PyErr_Print();
             printf("\n");
 
@@ -121,7 +121,7 @@ namespace edz::save::edit {
         else if (PyUnicode_Check(result))
             out = std::string(PyUnicode_AsUTF8(result));
         else {
-            Log::error("Invalid value returned from Python script's getValue!");
+            Logger::error("Invalid value returned from Python script's getValue!");
             return { ResultEdzScriptRuntimeError, nullptr };
         }
         
@@ -141,12 +141,12 @@ namespace edz::save::edit {
         else if (std::string *v = std::get_if<std::string>(&value))
             PyObject_CallObject(func, PyTuple_Pack(1, PyUnicode_FromStringAndSize(v->c_str(), v->length())));
         else {
-            Log::error("Invalid Argument type");
+            Logger::error("Invalid Argument type");
             return ResultEdzScriptInvalidArgument;
         }
 
         if (PyErr_Occurred() != nullptr) {
-            Log::error("Python script's setValue function failed:");
+            Logger::error("Python script's setValue function failed:");
             PyErr_Print();
             printf("\n");
 
@@ -164,7 +164,7 @@ namespace edz::save::edit {
             return { ResultEdzScriptRuntimeError, EMPTY_RESPONSE };
 
         if (PyErr_Occurred() != nullptr) {
-            Log::error("Python script's getModifiedSaveData function failed:");
+            Logger::error("Python script's getModifiedSaveData function failed:");
             PyErr_Print();
             printf("\n");
 
