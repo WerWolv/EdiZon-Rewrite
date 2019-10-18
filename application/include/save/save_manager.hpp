@@ -29,25 +29,33 @@ namespace edz::save {
 
     class SaveManager {
     public:
-        static EResult backup(Title *title, Account *account, std::string backupName);
-        static EResult restore(Title *title, Account *account, std::string backupName);
+        typedef struct {
+            u32 magic;  // EDZN -> 0x4E5A4445
+            titleid_t titleID;
+            userid_t userID;
+            time_t creationDate;
+        } PACKED backup_header_t;
+
+        static EResult backup(Title *title, Account *account, std::string backupName, std::string basePath = "");
+        static EResult restore(Title *title, Account *account, std::string backupName, std::string basePath = "");
         static EResult remove(Title *title, Account *account);
  
         static EResult swapSaveData(Title *title, Account *account, std::string backupName);
         static EResult swapSaveData(Title *title, Account *account1, Account *account2);
         static EResult duplicate(Title *title, Account *from, Account *to);
  
-        static EResult upload(Title *title, Account *account);
+        static EResult upload(Title *title, Account *account, std::string backupName);
         static EResult upload(Title *title, std::string backupName);
  
-        static EResult download(Title *title, Account *account);
-        static EResult download(Title *title, std::string backupName);
+        static EResult download(Title *title, Account *account, std::string url);
+        static EResult download(Title *title, std::string localName, std::string url);
  
         static std::pair<EResult, std::vector<std::string>> getLocalBackupList(Title *title);
-        static std::pair<EResult, std::vector<std::string>> getOnlineBackupList(Title *title);
+        static std::pair<EResult, std::map<std::string, std::string>> getOnlineBackupList(Title *title);
         static std::pair<EResult, bool> areBackupsUpToDate(Title *title, Account *account);
         
     private:
+        static std::string getBackupFolderName(Title *title);
     };
 
 }

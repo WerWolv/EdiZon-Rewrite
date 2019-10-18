@@ -23,7 +23,7 @@
 
 #ifndef __SYSMODULE__
     #include <borealis/logger.hpp>      // Borealis Logger
-    using Log = brls::Logger;
+    using Logger = brls::Logger;
     
     #include "helpers/lang_entry.hpp"   // Translation helper
 #endif
@@ -47,6 +47,8 @@ using namespace std::string_literals;   // String user defined literals
     #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
     #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
 
+#define BACKUP_FILE_EXTENSION           ".edz"
+
 /* Whether the splash screen should be displayed on launch */
 #define SPLASH_ENABLED              true
 
@@ -57,6 +59,8 @@ using namespace std::string_literals;   // String user defined literals
 /* Web API URLs */
 #define EDIZON_API_URL              "http://api.edizon.werwolv.net/" EDIZON_API_VERSION 
 #define SWITCHCHEATSDB_API_URL      "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
+#define ANONFILE_API_URL            "https://api.anonfile.com"
 
 /* Debugging */
 #define DEBUG_MODE_ENABLED          true
+

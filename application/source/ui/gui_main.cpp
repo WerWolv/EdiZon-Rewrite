@@ -29,8 +29,9 @@
 #include "ui/elements/title_list_item.hpp"
 #include "ui/pages/page_login.hpp"
 
-#include "api/switchcheatsdb_api.hpp"
 #include "api/edizon_api.hpp"
+#include "api/save_repo_api.hpp"
+#include "api/switchcheatsdb_api.hpp"
 
 namespace edz::ui {
 
@@ -178,6 +179,41 @@ namespace edz::ui {
         brls::PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
 
         delete[] iconBuffer;
+    }
+
+    EResult GuiMain::createSaveRepoPopup(std::string saveRepoUrl) {
+        api::SaveRepoAPI saveRepoApi(saveRepoUrl);
+        std::string name, motd;
+        std::vector<u8> icon;
+        std::vector<api::SaveRepoAPI::save_file_t> saveFiles;
+    
+        if (auto [result, _name] = saveRepoApi.getName(); result.succeeded())
+            name = _name;
+        else return result;
+
+        if (auto [result, _motd] = saveRepoApi.getMOTD(); result.succeeded())
+            motd = _motd;
+        else return result;
+
+        if (auto [result, _icon] = saveRepoApi.getIcon(); result.succeeded())
+            icon = _icon;
+        else return result;
+
+        if (auto [result, _saveFiles] = saveRepoApi.listFiles(); result.succeeded())
+            saveFiles = _saveFiles;
+        else return result;
+
+        brls::AppletFrame *rootFrame = new brls::AppletFrame(false, false);
+        brls::List *list = new brls::List();
+
+        for (auto saveFile : saveFiles)
+            list->addView(new brls::ListItem(saveFile.name, "", saveFile.date));
+
+        rootFrame->setContentView(list);
+
+        brls::PopupFrame::open(name, &icon[0], icon.size(), rootFrame, motd);
+
+        return ResultSuccess;
     }
 
     bool GuiMain::handleSorting(SortingStyle sorting, save::Title *l, save::Title *r) {
@@ -363,6 +399,7 @@ namespace edz::ui {
 
         for (auto provider : providers) {
             brls::ListItem *listItem = new brls::ListItem(provider.name + " by " + provider.owner, "", provider.description);
+            listItem->setClickListener([=](brls::View *view) { this->createSaveRepoPopup(provider.url); });
             list->addView(listItem);
         }
 
@@ -579,12 +616,14 @@ namespace edz::ui {
         this->m_aboutList = new brls::List();
 
         createTitlesListTab(this->m_titleList, SortingStyle::TITLE_ID);
+        createSaveReposTab(this->m_saveReposList);
 
         createCheatsTab(this->m_cheatsList);
         createSettingsTab(this->m_settingsList);
         createAboutTab(this->m_aboutList);
 
         rootFrame->addTab("edz.gui.main.titles.tab"_lang, this->m_titleList);
+        rootFrame->addTab("Save Repositories", this->m_saveReposList);
 
         if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable()) {
             this->m_runningTitleInfoList = new brls::List();

@@ -17,26 +17,26 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "api/edizon_api.hpp"
+#include "api/save_repo_api.hpp"
 #include <nlohmann/json.hpp>
 
 namespace edz::api {
 
     using json = nlohmann::json;
 
-    EdiZonAPI::EdiZonAPI() : m_curl(EDIZON_API_URL) {
+    SaveRepoAPI::SaveRepoAPI(std::string apiBase) : m_curl(apiBase) {
 
     }
 
-    EdiZonAPI::~EdiZonAPI() {
+    SaveRepoAPI::~SaveRepoAPI() {
 
     }
 
 
-    std::pair<EResult, std::vector<EdiZonAPI::official_provider_t>> EdiZonAPI::getOfficialProviders() {
-        std::vector<EdiZonAPI::official_provider_t> providers;
+    std::pair<EResult, std::string> SaveRepoAPI::getName() {
+        std::string name;
 
-        auto [result, response] = this->m_curl.get("/official_providers");
+        auto [result, response] = this->m_curl.get("/name");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -44,19 +44,18 @@ namespace edz::api {
         try {
             json responseJson = json::parse(response);
 
-            for (auto provider : responseJson["providers"])
-                providers.push_back({ provider["name"], provider["owner"], provider["description"], provider["url"] });
+            name = responseJson["name"];
         } catch (std::exception& e) {
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 
-        return { ResultSuccess, providers };
+        return { ResultSuccess, name };
     }
 
-    std::pair<EResult, EdiZonAPI::release_info_t> EdiZonAPI::getReleaseInfo() {
-        EdiZonAPI::release_info_t releaseInfo;
+    std::pair<EResult, std::string> SaveRepoAPI::getMOTD() {
+        std::string name;
 
-        auto [result, response] = this->m_curl.get("/release");
+        auto [result, response] = this->m_curl.get("/motd");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -64,18 +63,26 @@ namespace edz::api {
         try {
             json responseJson = json::parse(response);
 
-            releaseInfo = { responseJson["name"], responseJson["changelog"], responseJson["tag"], responseJson["date"], responseJson["download_count"] };
+            name = responseJson["motd"];
         } catch (std::exception& e) {
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 
-        return { ResultSuccess, releaseInfo };
+        return { ResultSuccess, name };
     }
 
-    std::pair<EResult, std::vector<EdiZonAPI::notification_t>> EdiZonAPI::getNotifications() {
-        std::vector<EdiZonAPI::notification_t> notifications;
+    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getIcon() {
+        return this->m_curl.download("/icon");
+    }
 
-        auto [result, response] = this->m_curl.get("/notifications");
+    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getFile(std::string file) {
+        return this->m_curl.download("/get?fileName=" + file);
+    }
+
+    std::pair<EResult, std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {
+        std::vector<SaveRepoAPI::save_file_t> saveFiles;
+
+        auto [result, response] = this->m_curl.get("/list");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -83,13 +90,13 @@ namespace edz::api {
         try {
             json responseJson = json::parse(response);
 
-            for (auto provider : responseJson["notifications"])
-                notifications.push_back({ provider["title"], provider["description"], provider["icon"] });
+            for (auto provider : responseJson["save_files"])
+                saveFiles.push_back({ provider["name"], provider["date"] });
         } catch (std::exception& e) {
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 
-        return { ResultSuccess, notifications };
+        return { ResultSuccess, saveFiles };
     }
 
 }

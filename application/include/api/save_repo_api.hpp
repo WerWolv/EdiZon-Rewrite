@@ -20,44 +20,31 @@
 #pragma once
 
 #include <edizon.hpp>
+#include "helpers/curl.hpp"
 
 #include <string>
-#include <fstream>
-#include <filesystem>
+#include <vector>
 
-namespace edz::hlp {
+namespace edz::api {
 
-    class File {
+    class SaveRepoAPI {
     public:
-        File();
-        File(std::string filePath);
-        File(const File &file);
-        ~File();
+        SaveRepoAPI(std::string apiBase);
+        ~SaveRepoAPI();
 
-        std::string name();
-        std::string path();
-        std::string parent();
+        typedef struct {
+            std::string name;
+            std::string date;
+        } save_file_t;
 
-        size_t size();
-
-        void remove();
-        File copyTo(std::string path);
-        void createDirectories();
-
-        bool exists();
-
-        s32 read(u8 *buffer, size_t bufferSize);
-        std::string read();
-
-        s32 write(const u8 *buffer, size_t bufferSize);
-        void write(std::string &buffer);
+        std::pair<EResult, std::string> getName();
+        std::pair<EResult, std::string> getMOTD();
+        std::pair<EResult, std::vector<u8>> getIcon();
+        std::pair<EResult, std::vector<u8>> getFile(std::string file);
+        std::pair<EResult, std::vector<save_file_t>> listFiles();
 
     private:
-        FILE *m_file;
-        std::string m_filePath;
-
-        void openFile();
-        void closeFile();
+        edz::hlp::Curl m_curl;
     };
 
 }

@@ -33,7 +33,7 @@ namespace edz::hlp {
         Curl(std::string baseURL);
         ~Curl();
 
-        std::pair<EResult, std::string> get(std::string path);
+        std::pair<EResult, std::string> get(std::string path, std::map<std::string, std::string> extraHeaders = { });
         std::pair<EResult, std::string> post(std::string path, std::string body);
 
         std::pair<EResult, std::vector<u8>> download(std::string path);

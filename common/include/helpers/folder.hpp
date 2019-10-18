@@ -32,6 +32,7 @@
 namespace edz::hlp {
     class Folder {
     public:
+        Folder();
         Folder(std::string path);
         Folder(std::string path, std::string folderName);
         ~Folder();

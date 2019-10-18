@@ -30,6 +30,7 @@ namespace edz::save {
         this->m_openFileSystemID = usedIDs++;
 
         if (fsdevMountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str(), this->m_saveFileSystem) == -1) {
+            fsdevUnmountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
             fsFsClose(&this->m_saveFileSystem);
             return;
         }
@@ -130,13 +131,13 @@ namespace edz::save {
     }
 
     edz::hlp::Folder SaveFileSystem::getSaveFolder() {
-        return edz::hlp::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":/");
+        return edz::hlp::Folder(SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":");
     }
 
     void SaveFileSystem::commit() {
         if (!this->m_initialized) return;
 
-        fsdevCommitDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID) + ":/").c_str());
+        fsdevCommitDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
     }
 
 
@@ -147,7 +148,7 @@ namespace edz::save {
         std::vector<FsSaveDataInfo> saveDataInfos;
 
         if (R_FAILED(fsOpenSaveDataIterator(&iter, FsSaveDataSpaceId_NandUser)))
-            return saveDataInfos;   // Return empty saveDataInfos array
+            return EMPTY_RESPONSE;
         
         EResult res;
         do {

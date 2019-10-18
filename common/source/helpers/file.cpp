@@ -23,13 +23,16 @@
 #include <helpers/folder.hpp>
 
 namespace edz::hlp {
-        File::File(std::string filePath) : m_filePath(filePath) {
-            this->m_file = nullptr;
+        File::File() : m_file(nullptr), m_filePath("") {
+
         }
 
-        File::File(const File &file) {
-            this->m_file = file.m_file;
-            this->m_filePath = file.m_filePath;
+        File::File(std::string filePath) : m_file(nullptr), m_filePath(filePath) {
+
+        }
+
+        File::File(const File &file) : m_file(file.m_file), m_filePath(file.m_filePath) {
+
         }
 
         File::~File() {
@@ -77,13 +80,14 @@ namespace edz::hlp {
             if (dst == nullptr)
                 return *this;
 
+
             size_t size = 0;
             u64 offset = 0;
-            u8 *buffer = new u8[0x50000];
+            u8 *buffer = new u8[0x5000];
 
             openFile();
 
-            while ((size = fread(buffer, 1, 0x50000, this->m_file)) > 0) {
+            while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
                 fwrite(buffer, 1, size, dst);
                 offset += size;
             }
@@ -117,8 +121,10 @@ namespace edz::hlp {
             size_t readSize = 0;
             
             openFile();
-            if (buffer != nullptr && bufferSize != 0)
+            if (buffer != nullptr && bufferSize != 0) {
+                rewind(this->m_file);
                 readSize = fread(buffer, 1, bufferSize, this->m_file);
+            }
             closeFile();
 
             return readSize;

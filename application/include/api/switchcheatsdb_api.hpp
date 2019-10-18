@@ -21,6 +21,8 @@
 
 #include <edizon.hpp>
 #include "helpers/curl.hpp"
+#include "save/title.hpp"
+#include "save/account.hpp"
 
 #include <string>
 #include <vector>
@@ -40,12 +42,11 @@ namespace edz::api {
         } cheat_t;
 
         typedef struct {
-            u32 id;
             std::string name;
             std::string creationDate;
             std::string url;
-            userid_t userID;
-            std::string userName;
+            titleid_t titleid;
+            buildid_t buildid;
         } save_file_t;
 
         typedef struct {
@@ -62,8 +63,9 @@ namespace edz::api {
         // Authenticated
         std::pair<EResult, cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
         std::pair<EResult, u32> getCheatCount();
-        std::pair<EResult, save_file_t> getSaveFiles();
-        EResult addSaveFile();
+        std::pair<EResult, std::vector<save_file_t>> getSaveFiles();
+        EResult addSaveFile(std::string backupName, std::string link, save::Title *title);
+
 
     private:
         edz::hlp::Curl m_curl;

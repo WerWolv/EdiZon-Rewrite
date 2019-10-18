@@ -18,73 +18,120 @@
  */
 
 #include "save/save_manager.hpp"
-#include "helpers/utils.hpp"
 #include "save/save_data.hpp"
+#include "helpers/utils.hpp"
+#include "api/anonfile_api.hpp"
+#include "api/switchcheatsdb_api.hpp"
+
 #include <errno.h>
 #include <string.h>
 #include <regex>
+#include <vector>
+#include <filesystem>
+
+#include "zipper.h"
+#include "unzipper.h"
 
 namespace edz::save {
 
-    EResult SaveManager::backup(Title *title, Account *account, std::string backupName) {
+    EResult SaveManager::backup(Title *title, Account *account, std::string backupName, std::string basePath) {
+        hlp::File backupFile;
 
-        // Find a folder that matches the following name: <Any alpha numberical string> <TitleID>
-        std::regex regex = std::regex(".+ " + title->getIDString());
-        std::string backupFolderName;
-        for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
-            if (std::regex_match(folderName, regex)) {
-                backupFolderName = folderName;
-                break;
-            }
-        
-        // Set the default name to <Title Name> <TitleID>
-        if (backupFolderName == "")
-            backupFolderName = hlp::removeIllegalPathCharacters(title->getName()) + " " + title->getIDString();
-
-        hlp::Folder backupFolder(hlp::formatString("%s/%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str(), backupName.c_str()));
+        if (basePath == "")
+            backupFile = hlp::File(hlp::formatString("%s/%s/%s.edz", EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str(), backupName.c_str()));
+        else
+            backupFile = hlp::File(hlp::formatString("%s/%s.edz", basePath.c_str(), backupName.c_str()));
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
 
-        backupFolder.createDirectories();
+        backupFile.createDirectories();
 
         save::SaveFileSystem saveFS(title, account);
+        hlp::Folder saveFSFolder = saveFS.getSaveFolder();
 
-        saveFS.getSaveFolder().copyTo(backupFolder.path());
+        // Strip away the leading save_#:/ so Zipper creates the zip file properly
+        size_t filePathOffset = 0;
+        if ((filePathOffset = saveFSFolder.path().find(':')) == std::string::npos)
+            return ResultEdzSaveNoSaveFS;
+        else
+            filePathOffset += 2; // Skip to after the first /
+
+        std::vector<u8> zipData;
+        zipper::Zipper zip(zipData);
+
+        // Zip all files and folders in the save FS
+        for (auto &it : std::filesystem::recursive_directory_iterator(saveFS.getSaveFolder().path())) {
+            if (!it.is_directory()) {
+                std::ifstream saveFsStream = std::ifstream(it.path());
+                zip.add(saveFsStream, &(it.path().c_str()[filePathOffset]), zipper::Zipper::Better);
+            }
+        }
+
+        zip.close();
+
+        backup_header_t header = { 0x4E5A4445, title->getID(), account->getID(), time(nullptr) };
+        std::vector<u8> backupData;
+
+        // Add a header to the backup file so EdiZon has some more information when downloading them from the internet
+        std::copy(reinterpret_cast<u8*>(&header), reinterpret_cast<u8*>(&header) + sizeof(backup_header_t), std::back_inserter(backupData));
+
+        // Add the zip data after the header. Zipper thows an exception if the vector passed in is not empty...
+        std::copy(zipData.begin(), zipData.end(), std::back_inserter(backupData));
+
+        backupFile.write(&backupData[0], backupData.size());
+
         return ResultSuccess;
     }
 
-    EResult SaveManager::restore(Title *title, Account *account, std::string backupName) {
+    EResult SaveManager::restore(Title *title, Account *account, std::string backupName, std::string basePath) {
+        hlp::File backupFile;
 
-        // Find a folder that matches the following name: <Any alpha numberical string> <TitleID>
-        std::regex regex = std::regex(".+ " + title->getIDString());
-        std::string backupFolderName;
-        for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
-            if (std::regex_match(folderName, regex)) {
-                backupFolderName = folderName;
-                break;
-            }
+        if (basePath == "")
+            backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str(), backupName.c_str()));
+        else
+            backupFile = hlp::File(hlp::formatString("%s/%s" BACKUP_FILE_EXTENSION, basePath.c_str(), backupName.c_str()));
 
-        hlp::Folder backupFolder(hlp::formatString("%s/%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str(), backupName.c_str()));
-
-        if (!backupFolder.exists())
+        if (!backupFile.exists())
             return ResultEdzSaveNoSuchBackup;
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
 
+
         save::SaveFileSystem saveFS(title, account);
-        saveFS.getSaveFolder().copyFrom(backupFolder.path());
+
+        // Zipper (and apparently most other zipping tools too) don't care at all about the extra header. So we can just unzip it
+        hlp::Folder tmpFolder = hlp::createTmpFolder();
+        zipper::Unzipper unzip(backupFile.path());
+        unzip.extract(tmpFolder.path());
+
+        saveFS.getSaveFolder().remove();
+        saveFS.commit();
+        
+        tmpFolder.copyTo(saveFS.getSaveFolder().path());
+
+        // Copy all files and folders manually to avoid copying the parent folder to the save FS 
+        for (auto [name, file] : tmpFolder.getFiles()) {
+            file.copyTo(saveFS.getSaveFolder().path() + name);
+            saveFS.commit();
+        }
+
+        for (auto [name, folder] : tmpFolder.getFolders()) {
+            folder.copyTo(saveFS.getSaveFolder().path() + name);
+            saveFS.commit();
+        }
+
+        tmpFolder.remove();
 
         return ResultSuccess;
     }
 
-
     EResult SaveManager::swapSaveData(Title *title, Account *account, std::string backupName) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s/%s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str(), backupName.c_str()));
-        hlp::Folder tmpFolder = hlp::createTmpFolder();
+        hlp::File backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str(), backupName.c_str()));
+        hlp::File tmpFile = hlp::File(hlp::createTmpFolder().path() + backupName);
 
-        if (!backupFolder.exists())
+        if (!backupFile.exists())
             return ResultEdzSaveNoSuchBackup;
 
         if (!title->hasSaveFile(account))
@@ -93,25 +140,18 @@ namespace edz::save {
         save::SaveFileSystem saveFS(title, account);
         hlp::Folder saveFolder = saveFS.getSaveFolder();
 
-        saveFolder.copyTo(tmpFolder.path());
-        backupFolder.copyTo(saveFolder.path());
-        tmpFolder.copyTo(backupFolder.path());
+        ER_TRY(SaveManager::backup(title, account, backupName, tmpFile.parent()));
+        ER_TRY(SaveManager::restore(title, account, backupName));
+
+        backupFile.remove();
+        tmpFile.copyTo(backupFile.path());
+        tmpFile.remove();
 
         return ResultSuccess;
     }
 
-    EResult SaveManager::remove(Title *title, Account *account) {
-        save::SaveFileSystem saveFS(title, account);
-
-        return saveFS.getSaveFolder().remove();
-    }
-
     EResult SaveManager::swapSaveData(Title *title, Account *account1, Account *account2) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str()));
         hlp::Folder tmpFolder = hlp::createTmpFolder();
-
-        if (!backupFolder.exists())
-            return ResultEdzSaveNoSuchBackup;
 
         if (!title->hasSaveFile(account1))
             return ResultEdzSaveNoSaveFS;
@@ -122,20 +162,51 @@ namespace edz::save {
         hlp::Folder saveFolder1 = saveFS1.getSaveFolder();
         hlp::Folder saveFolder2 = saveFS2.getSaveFolder();
         
-        saveFolder1.copyTo(tmpFolder.path());
-        saveFolder2.copyTo(saveFolder1.path());
-        tmpFolder.copyTo(saveFolder2.path());
+        // Copy save files from first account's save FS to a temporary folder
+        for (auto [name, file] : saveFolder1.getFiles())
+            file.copyTo(tmpFolder.path() + name);
+        for (auto [name, folder] : saveFolder1.getFolders())
+            folder.copyTo(tmpFolder.path() + name);
+
+        saveFolder1.remove();
+
+        // Copy save files from second account's save FS to first account's save FS
+        for (auto [name, file] : saveFolder2.getFiles()) {
+            file.copyTo(saveFolder1.path() + name);
+            saveFS1.commit();
+        }
+        for (auto [name, folder] : saveFolder2.getFolders()) {
+            folder.copyTo(saveFolder1.path() + name);
+            saveFS1.commit();
+        }
+
+        saveFolder2.remove();
+
+        // Copy save files from temporary folder to second account's save FS
+        for (auto [name, file] : tmpFolder.getFiles()) {
+            file.copyTo(saveFolder2.path() + name);
+            saveFS2.commit();
+        }
+        for (auto [name, folder] : tmpFolder.getFolders()) {
+            folder.copyTo(saveFolder2.path() + name);
+            saveFS2.commit();
+        }
+
+        tmpFolder.remove();
 
         return ResultSuccess;
     }
 
+    EResult SaveManager::remove(Title *title, Account *account) {
+        save::SaveFileSystem saveFS(title, account);
+
+        EResult res = saveFS.getSaveFolder().remove();
+        saveFS.commit();
+
+        return res;
+    }
+
     EResult SaveManager::duplicate(Title *title, Account *from, Account *to) {
-        hlp::Folder backupFolder(hlp::formatString("%s/%s %s", EDIZON_BACKUP_DIR, title->getIDString().c_str(), title->getName().c_str()));
-        hlp::Folder tmpFolder = hlp::createTmpFolder();
-
-        if (!backupFolder.exists())
-            return ResultEdzSaveNoSuchBackup;
-
         if (!title->hasSaveFile(from))
             return ResultEdzSaveNoSaveFS;
 
@@ -148,31 +219,109 @@ namespace edz::save {
         hlp::Folder saveFolderFrom = saveFSFrom.getSaveFolder();
         hlp::Folder saveFolderTo = saveFSTo.getSaveFolder();
 
-        saveFolderFrom.copyTo(saveFolderTo.path());
+        saveFolderTo.remove();
+        saveFSTo.commit();
+
+        for (auto [name, file] : saveFolderFrom.getFiles()) {
+            file.copyTo(saveFolderTo.path() + name);
+            saveFSTo.commit();
+        }
+        for (auto [name, folder] : saveFolderFrom.getFolders()) {
+            folder.copyTo(saveFolderTo.path() + name);
+            saveFSTo.commit();
+        }
 
         return ResultSuccess;
     }
 
 
-    EResult SaveManager::upload(Title *title, Account *account) {
-        return ResultEdzNotYetImplemented;
+    EResult SaveManager::upload(Title *title, Account *account, std::string backupName) {
+        api::AnonfileAPI anonfileApi;
+        hlp::File tmpFile = hlp::File(hlp::createTmpFolder().path() + backupName);
+
+        SaveManager::backup(title, account, backupName, tmpFile.parent());
+
+        auto [result, link] = anonfileApi.upload(tmpFile.path());
+        if (result.succeeded()) {
+            api::SwitchCheatsDBAPI switchCheatDBApi;
+            switchCheatDBApi.addSaveFile(backupName, link, title);
+        }
+
+        return result;
     }
 
     EResult SaveManager::upload(Title *title, std::string backupName) {
-        return ResultEdzNotYetImplemented;
+        api::AnonfileAPI anonfileApi;
+        hlp::File backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str(), backupName.c_str()));
+
+        auto [result, link] = anonfileApi.upload(backupFile.path());
+        if (result.succeeded()) {
+            api::SwitchCheatsDBAPI switchCheatDBApi;
+            switchCheatDBApi.addSaveFile(backupName, link, title);
+        }
+
+        return result;
     }
 
 
-    EResult SaveManager::download(Title *title, Account *account) {
-        return ResultEdzNotYetImplemented;
+    EResult SaveManager::download(Title *title, Account *account, std::string url) {
+        hlp::Curl curl(url);
+        hlp::File tmpFile(hlp::createTmpFolder().path() + "backup" BACKUP_FILE_EXTENSION);
+
+        if (curl.download("", tmpFile.path()).failed())
+            return ResultEdzAPIError;
+
+        ER_TRY(SaveManager::restore(title, account, "backup", tmpFile.parent()).failed());
+
+        tmpFile.remove();
+
+        return ResultSuccess;
     }
     
-    EResult SaveManager::download(Title *title, std::string backupName) {
-        return ResultEdzNotYetImplemented;
+    EResult SaveManager::download(Title *title, std::string localName, std::string url) {
+        hlp::Curl curl(url);
+        hlp::File backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str(), localName.c_str()));
+
+        return curl.download("", backupFile.path());
     }
     
 
     std::pair<EResult, std::vector<std::string>> SaveManager::getLocalBackupList(Title *title) {
+        std::regex regex = std::regex(".+ " + title->getIDString());
+
+        hlp::Folder backupFolder(hlp::formatString("%s/%s", EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str()));
+
+        std::vector<std::string> backupFiles;
+
+        for (auto &[fileName, file] : backupFolder.getFiles()) {
+            backupFiles.push_back(fileName.substr(0, fileName.size() - 4));
+        }
+
+        return { ResultSuccess, backupFiles }; 
+    }
+    
+    std::pair<EResult, std::map<std::string, std::string>> SaveManager::getOnlineBackupList(Title *title) {
+        api::SwitchCheatsDBAPI switchCheatsDBApi;
+        std::map<std::string, std::string> saveFileNames;
+
+        auto [result, saveFiles] = switchCheatsDBApi.getSaveFiles();
+
+        if (result.failed())
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
+
+        for (auto &saveFile : saveFiles)
+            saveFileNames.insert({ saveFile.name, saveFile.url });
+
+        return { ResultSuccess, saveFileNames };
+    }
+    
+    std::pair<EResult, bool> SaveManager::areBackupsUpToDate(Title *title, Account *account) {
+        return { ResultEdzNotYetImplemented, false };
+    }
+
+
+    std::string SaveManager::getBackupFolderName(Title *title) {
+        // Find a folder that matches the following name: <Any alpha numberical string> <TitleID>
         std::regex regex = std::regex(".+ " + title->getIDString());
         std::string backupFolderName;
         for (auto &[folderName, folder] : hlp::Folder(EDIZON_BACKUP_DIR).getFolders())
@@ -180,27 +329,12 @@ namespace edz::save {
                 backupFolderName = folderName;
                 break;
             }
-
+        
         // Set the default name to <Title Name> <TitleID>
         if (backupFolderName == "")
             backupFolderName = hlp::removeIllegalPathCharacters(title->getName()) + " " + title->getIDString();
 
-        hlp::Folder backupFolder(hlp::formatString("%s/%s", EDIZON_BACKUP_DIR, backupFolderName.c_str()));
-
-        std::vector<std::string> folders;
-
-        for (auto &[folderName, folder] : backupFolder.getFolders())
-            folders.push_back(folderName);
-
-        return { ResultSuccess, folders }; 
-    }
-    
-    std::pair<EResult, std::vector<std::string>> SaveManager::getOnlineBackupList(Title *title) {
-        return { ResultEdzNotYetImplemented, {} };
-    }
-    
-    std::pair<EResult, bool> SaveManager::areBackupsUpToDate(Title *title, Account *account) {
-        return { ResultEdzNotYetImplemented, false };
+        return backupFolderName;
     }
     
 

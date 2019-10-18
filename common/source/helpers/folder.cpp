@@ -28,17 +28,17 @@
 
 namespace edz::hlp {
 
-    Folder::Folder(std::string path) {
-        this->m_dir = nullptr;
+    Folder::Folder()  : m_dir(nullptr), m_path(""), m_folderName("") {
 
-        this->m_path = path;
+    }
 
+    Folder::Folder(std::string path) : m_dir(nullptr), m_path(path) {
         if (this->m_path.back() != '/')
             this->m_path += "/";
     }
 
-    Folder::Folder(std::string path, std::string folderName) : m_path(path), m_folderName(folderName) {
-        this->m_dir = nullptr;
+    Folder::Folder(std::string path, std::string folderName) : m_dir(nullptr), m_path(path), m_folderName(folderName) {
+
     }
 
     Folder::~Folder() {
@@ -151,14 +151,16 @@ namespace edz::hlp {
         openDirectory();
 
         if (this->m_dir == nullptr) return files;
-        printf("Lol");
 
         while ((entry = readdir(this->m_dir)) != nullptr) {
             if(std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
                 continue;
 
-            if (entry->d_type == DT_REG)
-                files.insert({ entry->d_name, File(this->m_path + "/" + std::string(entry->d_name)) });
+            if (entry->d_type == DT_REG) {
+                if (this->m_path.back() != '/')
+                    this->m_path += "/";
+                files.insert({ entry->d_name, File(this->m_path + std::string(entry->d_name)) });
+            }
         }
 
         closeDirectory();

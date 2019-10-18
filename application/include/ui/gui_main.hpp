@@ -63,6 +63,8 @@ namespace edz::ui {
             void createTitleCondensedView(brls::List *list, SortingStyle sorting);
             void createTitleGridView(brls::List *list, SortingStyle sorting);
 
+            EResult createSaveRepoPopup(std::string saveRepoUrl);
+
             void createTitlesListTab(brls::LayerView *layerView, SortingStyle sorting);
             void createSaveReposTab(brls::List *list);
             void createRunningTitleInfoTab(brls::List *list);
