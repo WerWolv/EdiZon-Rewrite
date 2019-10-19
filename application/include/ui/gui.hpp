@@ -21,6 +21,9 @@
 
 #include <edizon.hpp>
 #include <borealis.hpp>
+
+#include <future>
+
 #include "helpers/utils.hpp"
 
 namespace edz::ui {
@@ -36,6 +39,17 @@ namespace edz::ui {
 
 
         static void tick() {
+            u16 taskIndex = 0;
+            for (auto& [asyncTask, dialog] : Gui::s_asyncTasks) {
+                if (asyncTask.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready) {
+                    dialog->close();
+
+                    brls::Application::unblockInputs();
+                    Gui::s_asyncTasks.erase(Gui::s_asyncTasks.begin() + taskIndex);
+                }
+                taskIndex++;
+            }
+
             if (Gui::s_guiStack.back() != nullptr)
                 Gui::s_guiStack.back()->update();
         }
@@ -75,7 +89,28 @@ namespace edz::ui {
             while (brls::Application::mainLoop());
         }
 
+        static void runAsyncWithDialog(std::future<EResult> task, std::string dialogText) {
+            brls::Dialog *dialog = new brls::Dialog(dialogText);
+            Gui::s_asyncTasks.push_back({ std::move(task), dialog });
+
+            dialog->open();
+        }
+
+        static void runAsyncWithDialog(std::future<EResult> task, brls::View *dialogContent) {
+            brls::Dialog *dialog = new brls::Dialog(dialogContent);
+            Gui::s_asyncTasks.push_back({ std::move(task), dialog });
+
+            dialog->open();
+        }
+
     private:
+        typedef struct {
+            std::future<EResult> task;
+            brls::Dialog *dialog;
+        } asyncTask_t;
+
+        static inline std::vector<asyncTask_t> s_asyncTasks;
+
         static inline std::vector<Gui*> s_guiStack;
     };
 

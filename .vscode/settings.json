@@ -71,7 +71,8 @@
         "random": "cpp",
         "set": "cpp",
         "dmntcht.h": "c",
-        "styles.h": "c"
+        "styles.h": "c",
+        "future": "cpp"
     },
     "python.pythonPath": "/bin/python3.8",
     "java.configuration.updateBuildConfiguration": "automatic"

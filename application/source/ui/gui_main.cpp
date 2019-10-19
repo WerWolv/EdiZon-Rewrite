@@ -112,8 +112,9 @@ namespace edz::ui {
             std::string backupName;
             
             if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
-                    save::SaveManager::backup(title, currUser, backupName);
+                if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang)) {
+                    Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::backup, title, currUser, backupName, ""), "Creating a save data backup...");
+                }
         });
 
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
@@ -123,7 +124,7 @@ namespace edz::ui {
             brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [=](int selection) {
                 if (selection != -1)
                     hlp::openPlayerSelect([=](save::Account *account) { 
-                        save::SaveManager::restore(title, account, list[selection]);
+                        Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, title, account, list[selection], ""), "Restoring a save data backup...");
                     });
             });
         });
@@ -133,7 +134,7 @@ namespace edz::ui {
             save::Account *currUser = nullptr;
             
             if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                save::SaveManager::remove(title, currUser);
+                Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, title, currUser), "Deleting save data...");
         });
 
         brls::ListItem *editItem = new brls::ListItem("Edit Save File", "", "Edit your save file");
@@ -608,7 +609,7 @@ namespace edz::ui {
             rootFrame->setIcon("romfs:/assets/icon_edz_dark.png");
         else
             rootFrame->setIcon("romfs:/assets/icon_edz_light.png");
-
+        
         this->m_titleList = new brls::LayerView();
         this->m_saveReposList = new brls::List();
         this->m_cheatsList = new brls::List();
