@@ -44,7 +44,7 @@ namespace edz::ui::page {
             hlp::openSwkbdForText([&](std::string text) {
                 this->m_email = text;
                 static_cast<brls::ListItem*>(view)->setValue(text);
-            }, "edz.gui.main.settings.email"_lang, "edz.gui.main.settings.email.help"_lang);
+            }, "edz.page.login.email"_lang, "edz.page.login.email.help"_lang);
         });
         
         this->m_passwordItem->setClickListener([&](View *view) {
@@ -56,7 +56,7 @@ namespace edz::ui::page {
                     itemText += "●";
 
                 static_cast<brls::ListItem*>(view)->setValue(itemText);
-            }, "edz.gui.main.settings.password"_lang, "edz.gui.main.settings.password.help"_lang);
+            }, "edz.page.login.password"_lang, "edz.page.login.password.help"_lang);
         });
 
         this->m_loginBtn->setClickListener([=](View *view) {
