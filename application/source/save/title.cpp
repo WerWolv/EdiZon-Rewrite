@@ -24,7 +24,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include <turbojpeg.h>
+#include "save/save_data.hpp"
 
 namespace edz::save {
 
@@ -54,6 +54,13 @@ namespace edz::save {
         this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
         this->m_titleIcon = new u8[this->m_iconSize];
         std::memcpy(this->m_titleIcon, appControlData.icon, this->m_iconSize);
+
+        for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
+            PdmPlayStatistics playStatistics = { 0 };
+
+            pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+            this->m_playStatistics.insert({ userid, playStatistics });
+        }
     }
 
     Title::~Title() {
@@ -236,39 +243,19 @@ namespace edz::save {
     }
 
     time_t Title::getPlayTime(Account *account) {
-        PdmPlayStatistics playStatistics = { 0 };
-
-        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
-
-        return playStatistics.playtimeMinutes * 60;
+        return this->m_playStatistics[account->getID()].playtimeMinutes * 60;
     }
 
     time_t Title::getFirstPlayTime(Account *account) {
-        PdmPlayStatistics playStatistics = { 0 };
-
-        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
-
-        time_t time = pdmPlayTimestampToPosix(playStatistics.first_timestampUser);
-
-        return time;
+        return pdmPlayTimestampToPosix(this->m_playStatistics[account->getID()].first_timestampUser);
     }
 
     time_t Title::getLastPlayTime(Account *account) {
-        PdmPlayStatistics playStatistics = { 0 };
-
-        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
-
-        time_t time = pdmPlayTimestampToPosix(playStatistics.last_timestampUser);
-
-        return time;
+        return pdmPlayTimestampToPosix(this->m_playStatistics[account->getID()].last_timestampUser);
     }
 
     u32 Title::getLaunchCount(Account *account) {
-        PdmPlayStatistics playStatistics = { 0 };
-
-        pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
-
-        return playStatistics.totalLaunches;
+        return this->m_playStatistics[account->getID()].totalLaunches;
     }
     
 }

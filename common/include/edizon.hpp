@@ -48,19 +48,19 @@
     #define BACKUP_FILE_EXTENSION           ".edz"
 
     /* Whether the splash screen should be displayed on launch */
-    #define SPLASH_ENABLED              true
+    #define SPLASH_ENABLED                  true
 
     /* Current web API version */
-    #define EDIZON_API_VERSION          "v4"
-    #define SWITCHCHEATSDB_API_VERSION  "v1"
+    #define EDIZON_API_VERSION              "v4"
+    #define SWITCHCHEATSDB_API_VERSION      "v1"
 
     /* Web API URLs */
-    #define EDIZON_API_URL              "http://werwolv.net:1337/" EDIZON_API_VERSION 
-    #define SWITCHCHEATSDB_API_URL      "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
-    #define ANONFILE_API_URL            "https://api.anonfile.com"
+    #define EDIZON_API_URL                  "http://werwolv.net:1337/" EDIZON_API_VERSION 
+    #define SWITCHCHEATSDB_API_URL          "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
+    #define ANONFILE_API_URL                "https://api.anonfile.com"
 
     /* Debugging */
-    #define DEBUG_MODE_ENABLED          true
+    #define DEBUG_MODE_ENABLED              true
 
 #else               // EdiZon Sysmodule context
 

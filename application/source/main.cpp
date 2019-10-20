@@ -93,7 +93,7 @@ extern "C" {
 
         exitServices();
         
-        exit(0);
+        appletRequestExitToSelf();
     }
 
 

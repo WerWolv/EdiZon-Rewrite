@@ -67,6 +67,7 @@ namespace edz::save {
         titleid_t m_titleID;
         bool m_isInstalled;
         std::vector<userid_t> m_userIDs;
+        std::map<userid_t, PdmPlayStatistics> m_playStatistics;
 
         NacpStruct m_nacp;
         std::string m_titleName, m_titleAuthor, m_versionString;

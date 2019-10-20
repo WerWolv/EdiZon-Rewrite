@@ -80,12 +80,12 @@ namespace edz::ui {
                 if (title->hasSaveFile(account)) {
                     brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getLaunchCount(account), title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
                     
-                    size_t iconBufferSize = account->getIconSize();
-                    u8 *iconBuffer = new u8[iconBufferSize];
-                    account->getIcon(iconBuffer, iconBufferSize);
-                    userItem->setThumbnail(iconBuffer, iconBufferSize);
+                    size_t accountIconBufferSize = account->getIconSize();
+                    u8 *accountIconBuffer = new u8[accountIconBufferSize];
+                    account->getIcon(accountIconBuffer, accountIconBufferSize);
+                    userItem->setThumbnail(accountIconBuffer, accountIconBufferSize);
 
-                    delete[] iconBuffer;
+                    delete[] accountIconBuffer;
 
                     softwareInfoList->addView(userItem);
                 }
