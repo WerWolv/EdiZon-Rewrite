@@ -24,33 +24,23 @@
 
 namespace edz {
 
-    LangEntry::LangEntry(std::string unlocalizedString) : m_unlocalizedString(unlocalizedString) {
-        static nlohmann::json json;
-        static bool initialized = false;
+    LangEntry::LangEntry(std::string localizationKey) : m_unlocalizedString(localizationKey) {
+        if (this->m_localizedStrings.size() > 0) return;
 
-        if (LangEntry::m_localizedStrings.find(unlocalizedString) != LangEntry::m_localizedStrings.end()) return;
+        u64 languageCode;
+        setGetLanguageCode(&languageCode);
 
+        nlohmann::json json;
+        std::ifstream langFile("romfs:/lang/" + std::string(reinterpret_cast<char*>(&languageCode)) + ".json");
 
-        // On first call get current language code and load localization file
-        if (!initialized) {
-            u64 languageCode;
-            setGetLanguageCode(&languageCode);
-
-            std::ifstream langFile("romfs:/lang/" + std::string(reinterpret_cast<char*>(&languageCode)) + ".json");
-
-            // If no localization file for the selected language was found, default to en-US (American English)
-            if (!langFile.is_open())
-                langFile.open("romfs:/lang/en-US.json");
-            
-            langFile >> json;
-
-            initialized = true;
-        }
+        // If no localization file for the selected language was found, default to en-US (American English)
+        if (!langFile.is_open())
+            langFile.open("romfs:/lang/en-US.json");
         
-        if (json.find(unlocalizedString) == json.end())
-            LangEntry::m_localizedStrings.insert({ unlocalizedString, unlocalizedString });
-        else
-            LangEntry::m_localizedStrings.insert({ unlocalizedString, json[unlocalizedString] });
+        langFile >> json;
+
+        for (auto &[unlocalizedString, localizedString] : json.items())
+            LangEntry::m_localizedStrings.insert({ unlocalizedString, localizedString });
     }
 
     std::string LangEntry::get() const {
@@ -81,6 +71,6 @@ std::string operator+(std::string left, edz::LangEntry right) {
     return left + right.get();
 }
 
-std::string operator ""_lang (const char *unlocalizedString, size_t size) {
-    return edz::LangEntry(std::string(unlocalizedString, size)).get();
+std::string operator ""_lang (const char *localizationKey, size_t size) {
+    return edz::LangEntry(std::string(localizationKey, size)).get();
 }

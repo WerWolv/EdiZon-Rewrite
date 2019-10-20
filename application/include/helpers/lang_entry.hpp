@@ -28,7 +28,7 @@ namespace edz {
 
     class LangEntry {
     public:
-        LangEntry(std::string unlocalizedString);
+        LangEntry(std::string localizationKey);
 
         std::string get() const;
         const char* c_str() const;
@@ -46,4 +46,4 @@ namespace edz {
 }
 
 std::string operator+(std::string left, edz::LangEntry right);
-std::string operator ""_lang (const char *unlocalizedString, size_t size);
+std::string operator ""_lang (const char *localizationKey, size_t size);
