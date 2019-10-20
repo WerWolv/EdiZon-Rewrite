@@ -100,13 +100,6 @@ extern "C" {
 }
 
 EResult initServices() {
-    // UI (Borealis)
-    if (!brls::Application::init())
-        return ResultEdzBorealisInitFailed;
-
-    brls::Logger::setLogLevel(DEBUG_MODE_ENABLED ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
-    brls::Application::setCommonFooter(VERSION_STRING);
-
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
         return ResultEdzCurlInitFailed;
@@ -169,7 +162,6 @@ void exitServices() {
     pdmqryExit();
     dmntcht::exit();
     cheat::CheatManager::exit();
-    brls::Application::quit();
 }
 
 EResult createFolderStructure() {
@@ -194,6 +186,12 @@ EResult createFolderStructure() {
 
 
 int main(int argc, char* argv[]) {  
+    // Initialize Borealis (UI library)
+    if (!brls::Application::init())
+        return ResultEdzBorealisInitFailed;
+
+    brls::Logger::setLogLevel(DEBUG_MODE_ENABLED ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
+    brls::Application::setCommonFooter(VERSION_STRING);
 
     // Try to initialize all services
     if (EResult res = initServices(); res.failed()) {
@@ -232,4 +230,5 @@ int main(int argc, char* argv[]) {
 
     // Exit services
     exitServices();
+    brls::Application::quit();
 }
