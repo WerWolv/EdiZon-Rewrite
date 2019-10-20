@@ -104,7 +104,7 @@ EResult initServices() {
     if (!brls::Application::init())
         return ResultEdzBorealisInitFailed;
 
-    brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
+    brls::Logger::setLogLevel(DEBUG_MODE_ENABLED ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
     brls::Application::setCommonFooter(VERSION_STRING);
 
     // Curl
