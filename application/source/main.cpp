@@ -141,7 +141,7 @@ EResult initServices() {
     ER_TRY(hidsysInitialize());
     ER_TRY(hlp::controllerLEDInitialize());
 
-    // Play tiem querying
+    // Play time querying
     ER_TRY(pdmqryInitialize());
     
     // Atmosphere cheat service (Cheat toggling and memory editing)
