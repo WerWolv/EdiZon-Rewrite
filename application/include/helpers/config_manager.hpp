@@ -46,6 +46,7 @@ namespace edz::hlp {
         } Update;
 
         struct {
+            std::string langCode;
             u8 titlesDisplayStyle;
             u8 titlesSortingStyle;
             std::vector<std::string> saveFileRepos;

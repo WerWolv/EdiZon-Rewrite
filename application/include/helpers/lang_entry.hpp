@@ -37,10 +37,13 @@ namespace edz {
         std::string operator+(std::string other) const;
         std::string operator+(LangEntry other) const;
 
+        static std::map<std::string, std::string> getSupportedLanguages();
+        static void clearCache();
+
     private:
         std::string m_unlocalizedString;
 
-        static inline std::map<std::string, std::string> m_localizedStrings;
+        static inline std::map<std::string, std::string> s_localizedStrings;
     };
 
 }

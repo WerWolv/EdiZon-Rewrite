@@ -19,19 +19,27 @@
 
 #include "helpers/lang_entry.hpp"
 
+#include "helpers/file.hpp"
+#include "helpers/config_manager.hpp"
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 
 namespace edz {
 
     LangEntry::LangEntry(std::string localizationKey) : m_unlocalizedString(localizationKey) {
-        if (this->m_localizedStrings.size() > 0) return;
+        if (this->s_localizedStrings.size() > 0) return;
 
         u64 languageCode;
         setGetLanguageCode(&languageCode);
+        std::string overrideLanguage = GET_CONFIG(Save.langCode);
+
+        // If override language hasn't been set yet, assume operating system default
+        if (overrideLanguage == "")
+            SET_CONFIG(Save.langCode, "auto");
 
         nlohmann::json json;
-        std::ifstream langFile("romfs:/lang/" + std::string(reinterpret_cast<char*>(&languageCode)) + ".json");
+        std::ifstream langFile("romfs:/lang/" + (overrideLanguage == "auto" ? std::string(reinterpret_cast<char*>(&languageCode)) : overrideLanguage) + ".json");
 
         // If no localization file for the selected language was found, default to en-US (American English)
         if (!langFile.is_open())
@@ -40,12 +48,12 @@ namespace edz {
         langFile >> json;
 
         for (auto &[unlocalizedString, localizedString] : json.items())
-            LangEntry::m_localizedStrings.insert({ unlocalizedString, localizedString });
+            LangEntry::s_localizedStrings.insert({ unlocalizedString, localizedString });
     }
 
     std::string LangEntry::get() const {
-        if (LangEntry::m_localizedStrings.find(this->m_unlocalizedString) != LangEntry::m_localizedStrings.end())
-            return LangEntry::m_localizedStrings[this->m_unlocalizedString];
+        if (LangEntry::s_localizedStrings.find(this->m_unlocalizedString) != LangEntry::s_localizedStrings.end())
+            return LangEntry::s_localizedStrings[this->m_unlocalizedString];
         else return this->m_unlocalizedString;
     }
 
@@ -63,6 +71,25 @@ namespace edz {
 
     std::string LangEntry::operator+(LangEntry other) const {
         return get() + other.get();
+    }
+
+    std::map<std::string, std::string> LangEntry::getSupportedLanguages() {
+        std::map<std::string, std::string> languages;
+        std::ifstream languagesFile("romfs:/lang/languages.json");
+        nlohmann::json languagesJson;
+
+        languagesFile >> languagesJson;
+
+        for (auto &[langCode, langName] : languagesJson.items()) {
+            if (hlp::File("romfs:/lang/" + langCode + ".json").exists())
+                languages.insert({ langCode, langName });
+        }
+
+        return languages;
+    }
+
+    void LangEntry::clearCache() {
+        LangEntry::s_localizedStrings.clear();
     }
 
 }

@@ -44,6 +44,7 @@ namespace edz::hlp {
             j.at("update").at("switchcheatsdbEmail").get_to(ConfigManager::s_config.Update.switchcheatsdbEmail);
             j.at("update").at("switchcheatsdbApiToken").get_to(ConfigManager::s_config.Update.switchcheatsdbApiToken);
 
+            j.at("save").at("langCode").get_to(ConfigManager::s_config.Save.langCode);
             j.at("save").at("titlesDisplayStyle").get_to(ConfigManager::s_config.Save.titlesDisplayStyle);
             j.at("save").at("titlesSortingStyle").get_to(ConfigManager::s_config.Save.titlesSortingStyle);
             j.at("save").at("saveFileRepos").get_to(ConfigManager::s_config.Save.saveFileRepos);
@@ -66,7 +67,8 @@ namespace edz::hlp {
                                   { "loggedIn", ConfigManager::s_config.Update.loggedIn },
                                   { "switchcheatsdbEmail" , ConfigManager::s_config.Update.switchcheatsdbEmail },
                                   { "switchcheatsdbApiToken", ConfigManager::s_config.Update.switchcheatsdbApiToken } } },
-                    { "save",   { { "saveFileRepos", ConfigManager::s_config.Save.saveFileRepos },
+                    { "save",   { { "langCode", ConfigManager::s_config.Save.langCode },
+                                  { "saveFileRepos", ConfigManager::s_config.Save.saveFileRepos },
                                   { "titlesDisplayStyle", ConfigManager::s_config.Save.titlesDisplayStyle },
                                   { "titlesSortingStyle", ConfigManager::s_config.Save.titlesSortingStyle } } },
                     { "vc",     { { "favoriteColors", ConfigManager::s_config.VC.favoriteColors } } }

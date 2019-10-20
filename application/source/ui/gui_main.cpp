@@ -396,12 +396,19 @@ namespace edz::ui {
     void GuiMain::createSaveReposTab(brls::List *list) {
         api::EdiZonAPI edizonApi;
 
+        list->addView(new brls::Label(brls::LabelStyle::SMALL, "edz.gui.main.repos.label.desc"_lang, true));
+        list->addView(new brls::Header("edz.gui.main.repos.header.official"_lang));
+
         auto [result, providers] = edizonApi.getOfficialProviders();
 
-        for (auto provider : providers) {
-            brls::ListItem *listItem = new brls::ListItem(provider.name + " by " + provider.owner, "", provider.description);
-            listItem->setClickListener([=](brls::View *view) { this->createSaveRepoPopup(provider.url); });
-            list->addView(listItem);
+        if (providers.size() == 0)
+            list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.repos.label.norepos"_lang, true));
+        else {
+            for (auto provider : providers) {
+                brls::ListItem *listItem = new brls::ListItem(provider.name + "edz.by"_lang + provider.owner, "", provider.description);
+                listItem->setClickListener([=](brls::View *view) { this->createSaveRepoPopup(provider.url); });
+                list->addView(listItem);
+            }
         }
 
         list->invalidate();
@@ -510,20 +517,43 @@ namespace edz::ui {
     }
 
     void GuiMain::createSettingsTab(brls::List *list) {
-        // Title Options
-        std::vector<std::string> displayOptions = { "edz.gui.main.titles.style.list"_lang, 
-                                                    "edz.gui.main.titles.style.condensed"_lang,
-                                                    "edz.gui.main.titles.style.grid"_lang };
-        std::vector<std::string> sortingOptions = { "edz.gui.main.titles.sorting.titleid"_lang,
-                                                    "edz.gui.main.titles.sorting.alphaname"_lang,
-                                                    "edz.gui.main.titles.sorting.alphaauthor"_lang,
-                                                    "edz.gui.main.titles.sorting.firstplayed"_lang,
-                                                    "edz.gui.main.titles.sorting.lastplayed"_lang,
-                                                    "edz.gui.main.titles.sorting.playtime"_lang,
-                                                    "edz.gui.main.titles.sorting.numlaunches"_lang };
+        // General Options
+        std::vector<std::string> langCodes, langNames;
 
-        brls::SelectListItem *displayOptionsItem = new brls::SelectListItem("edz.gui.main.titles.style"_lang, displayOptions);
-        brls::SelectListItem *sortingOptionsItem = new brls::SelectListItem("edz.gui.main.titles.sorting"_lang, sortingOptions);
+        // Add default language option (Copies HOS settings)
+        langCodes.push_back("auto");
+        langNames.push_back("edz.gui.main.settings.language.default"_lang);
+
+        // Add all languages that have translations available
+        for (const auto &[code, name] : LangEntry::getSupportedLanguages()) {
+            langCodes.push_back(code);
+            langNames.push_back(name);
+        }
+
+        brls::SelectListItem *languageOptionItem = new brls::SelectListItem("edz.gui.main.settings.language"_lang, langNames);
+
+        languageOptionItem->setListener([=](size_t selection) {
+            SET_CONFIG(Save.langCode, langCodes[selection]);
+            this->m_changeLanguage = true;
+        });
+
+        if (auto currLanguageIndex = std::find(langCodes.begin(), langCodes.end(), GET_CONFIG(Save.langCode)); currLanguageIndex != langCodes.end())
+            languageOptionItem->setSelectedValue(currLanguageIndex - langCodes.begin());
+
+        // Title Options
+        auto displayOptions = { "edz.gui.main.settings.style.list"_lang, 
+                                "edz.gui.main.settings.style.condensed"_lang,
+                                "edz.gui.main.settings.style.grid"_lang };
+        auto sortingOptions = { "edz.gui.main.settings.sorting.titleid"_lang,
+                                "edz.gui.main.settings.sorting.alphaname"_lang,
+                                "edz.gui.main.settings.sorting.alphaauthor"_lang,
+                                "edz.gui.main.settings.sorting.firstplayed"_lang,
+                                "edz.gui.main.settings.sorting.lastplayed"_lang,
+                                "edz.gui.main.settings.sorting.playtime"_lang,
+                                "edz.gui.main.settings.sorting.numlaunches"_lang };
+
+        brls::SelectListItem *displayOptionsItem = new brls::SelectListItem("edz.gui.main.settings.style"_lang, displayOptions);
+        brls::SelectListItem *sortingOptionsItem = new brls::SelectListItem("edz.gui.main.settings.sorting"_lang, sortingOptions);
 
         displayOptionsItem->setListener([=](size_t selection) {
             this->m_titleList->changeLayer(selection, false);
@@ -533,7 +563,7 @@ namespace edz::ui {
 
         sortingOptionsItem->setListener([=](size_t selection) {
             SET_CONFIG(Save.titlesSortingStyle, selection);
-            this->m_reloadGui = true;
+            this->m_resortTitles = true;
         });
 
         displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesDisplayStyle)));
@@ -567,17 +597,20 @@ namespace edz::ui {
             }
         });
 
+        list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
+        list->addView(languageOptionItem);
 
         list->addView(new brls::Header("edz.gui.main.settings.header.titleoptions"_lang));
         list->addView(displayOptionsItem);
         list->addView(sortingOptionsItem);
+        
         list->addView(new brls::Header("edz.gui.main.settings.header.accountoptions"_lang));
         list->addView(new brls::Label(brls::LabelStyle::MEDIUM, "edz.gui.main.settings.scdbinfo"_lang, true));
         list->addView(scdbLoginItem);
     }
 
     void GuiMain::createAboutTab(brls::List *list) {
-        list->addView(new brls::Header("edz.name"_lang + " " VERSION_STRING " " + "edz.dev"_lang, true));
+        list->addView(new brls::Header("edz.name"_lang + " " VERSION_STRING + "edz.by"_lang + "edz.dev"_lang, true));
         list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.about.label.edz"_lang, true));
 
         list->addView(new brls::Header("edz.gui.main.about.links"_lang, false));
@@ -624,7 +657,7 @@ namespace edz::ui {
         createAboutTab(this->m_aboutList);
 
         rootFrame->addTab("edz.gui.main.titles.tab"_lang, this->m_titleList);
-        rootFrame->addTab("Save Repositories", this->m_saveReposList);
+        rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);
 
         if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable()) {
             this->m_runningTitleInfoList = new brls::List();
@@ -641,12 +674,25 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-        if (this->m_reloadGui) {
-            this->m_reloadGui = false;
+        if (this->m_resortTitles) {
+            this->m_resortTitles = false;
 
             GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
             GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
             GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+        }
+
+        if (this->m_changeLanguage) {            
+            // Wait till the dropdown menu has fully closed
+            static u8 delay = 0;
+            
+            if (delay++ > 5) {
+                this->m_changeLanguage = false;
+                delay = 0;
+
+                LangEntry::clearCache();
+                Gui::changeTo<GuiMain>();
+            }
         }
     }
 
