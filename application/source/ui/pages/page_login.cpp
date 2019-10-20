@@ -28,13 +28,17 @@
 namespace edz::ui::page {
 
     PageLogin::PageLogin(brls::ListItem *loginItem) {
+        this->m_label = new brls::Label(brls::LabelStyle::MEDIUM, "edz.page.login.hint"_lang, true);
         this->m_emailItem = new brls::ListItem("edz.page.login.email"_lang);
         this->m_passwordItem = new brls::ListItem("edz.page.login.password"_lang);
         this->m_loginBtn = new brls::Button(brls::ButtonStyle::PLAIN, "edz.page.login.login"_lang);
 
+        this->m_label->setParent(this);
         this->m_emailItem->setParent(this);
         this->m_passwordItem->setParent(this);
         this->m_loginBtn->setParent(this);
+
+        this->m_label->setHorizontalAlign(NVG_ALIGN_CENTER);
 
         this->m_emailItem->setClickListener([&](View *view) {
             hlp::openSwkbdForText([&](std::string text) {
@@ -81,12 +85,14 @@ namespace edz::ui::page {
     }
 
     PageLogin::~PageLogin() {
+        delete this->m_label;
         delete this->m_emailItem;
         delete this->m_passwordItem;
         delete this->m_loginBtn;
     }
 
     void PageLogin::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) {
+        this->m_label->frame(ctx);
         this->m_emailItem->frame(ctx);
         this->m_passwordItem->frame(ctx);
         this->m_loginBtn->frame(ctx);
@@ -112,10 +118,12 @@ namespace edz::ui::page {
     }
 
     void PageLogin::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {
+        this->m_label->setBoundaries((1280 / 2) - (1080 / 2), 175, 1080, this->m_label->getHeight());
         this->m_emailItem->setBoundaries((1280 / 2) - (700 / 2), 300, 700, style->List.Item.height);
         this->m_passwordItem->setBoundaries((1280 / 2) - (700 / 2), 400, 700, style->List.Item.height);
         this->m_loginBtn->setBoundaries((1280 / 2) - (300 / 2), 520, 300, style->List.Item.height);
 
+        this->m_label->invalidate();
         this->m_emailItem->invalidate();
         this->m_passwordItem->invalidate();
         this->m_loginBtn->invalidate();

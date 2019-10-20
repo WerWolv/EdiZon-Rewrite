@@ -58,6 +58,7 @@
     "edz.gui.main.about.guide.title"              : "EdiZon Guide and Documentation",
 
     "edz.page.login.title"         : "SwitchCheatsDB",
+    "edz.page.login.hint"          : "Enter your SwitchCheatsDB credentials to get access to automatic updates, cheat file downloading and save file uploading. To create an account, please visit https://switchcheatsdb.com",
     "edz.page.login.login"         : "Login",
     "edz.page.login.email"         : "Email",
     "edz.page.login.email.help"    : "Please enter your SwitchCheatsDB email address",
