@@ -7,7 +7,7 @@ import datetime
 ###################### SERVER CONFIG ######################
 
 # The port this server should run on
-PORT = 1337
+PORT = 1234
 
 # Server name
 SERVER_NAME = "EdiZon save file provider"

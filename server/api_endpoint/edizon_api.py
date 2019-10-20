@@ -22,7 +22,7 @@ fileUpdateMutex = threading.Lock()
 
 @hug.get('/', version=1)
 def base():
-    return "EdiZon save file provider server"
+    return "EdiZon API endpoint"
 
 # Returns a list of official save file provider servers
 @hug.get('/official_providers', version=1)
