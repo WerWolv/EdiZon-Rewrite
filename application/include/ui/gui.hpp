@@ -23,6 +23,8 @@
 #include <borealis.hpp>
 
 #include <future>
+#include <functional>
+#include <utility>
 
 #include "helpers/utils.hpp"
 
@@ -40,12 +42,25 @@ namespace edz::ui {
 
         static void tick() {
             u16 taskIndex = 0;
-            for (auto& [asyncTask, dialog] : Gui::s_asyncTasks) {
-                if (asyncTask.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready) {
+            for (auto& [asyncTask, dialog, timeout] : Gui::s_asyncTasks) {
+                if (asyncTask.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready && timeout == -1)
+                    timeout = 60;
+                else if (timeout == 0) {
                     dialog->close();
-
                     brls::Application::unblockInputs();
                     Gui::s_asyncTasks.erase(Gui::s_asyncTasks.begin() + taskIndex);
+                }
+                else if (timeout > 0)
+                    timeout--;
+
+                taskIndex++;
+            }
+
+            taskIndex = 0;
+            for (auto& [task, frameDelay] : Gui::s_syncTasks) {
+                if (frameDelay-- == 0) {
+                    task();
+                    Gui::s_syncTasks.erase(Gui::s_syncTasks.begin() + taskIndex);
                 }
                 taskIndex++;
             }
@@ -55,22 +70,26 @@ namespace edz::ui {
         }
 
         template<typename T, typename... Args>
-        static void replaceWith(Args... args) {
-            Gui::goBack();
-
-            Gui *newGui = new T(args...);
-            
-            Gui::s_guiStack.push_back(newGui);
-
-            brls::Application::pushView(newGui->setupUI());
-        }
-
-        template<typename T, typename... Args>
         static void changeTo(Args... args) {
             Gui *newGui = new T(args...);
 
             Gui::s_guiStack.push_back(newGui);
             brls::Application::pushView(newGui->setupUI());
+        }
+
+        template<typename T, typename... Args>
+        static void replaceWith(Args... args) {
+            brls::Application::blockInputs();
+            brls::Application::removeFocus();
+
+            brls::Application::popView();
+
+            Gui *newGui = new T(args...);
+
+            Gui::s_guiStack.push_back(newGui);
+            brls::Application::pushView(newGui->setupUI());
+
+            brls::Application::unblockInputs();
         }
 
         static void goBack() {
@@ -89,16 +108,20 @@ namespace edz::ui {
             while (brls::Application::mainLoop());
         }
 
+        static void runLater(std::function<void()> task, u32 frameDelay) {
+            Gui::s_syncTasks.push_back({ task, frameDelay });
+        }
+
         static void runAsyncWithDialog(std::future<EResult> task, std::string dialogText) {
             brls::Dialog *dialog = new brls::Dialog(dialogText);
-            Gui::s_asyncTasks.push_back({ std::move(task), dialog });
+            Gui::s_asyncTasks.push_back({ std::move(task), dialog, -1 });
 
             dialog->open();
         }
 
         static void runAsyncWithDialog(std::future<EResult> task, brls::View *dialogContent) {
             brls::Dialog *dialog = new brls::Dialog(dialogContent);
-            Gui::s_asyncTasks.push_back({ std::move(task), dialog });
+            Gui::s_asyncTasks.push_back({ std::move(task), dialog, -1 });
 
             dialog->open();
         }
@@ -107,10 +130,16 @@ namespace edz::ui {
         typedef struct {
             std::future<EResult> task;
             brls::Dialog *dialog;
+            s32 timeout;
         } asyncTask_t;
 
-        static inline std::vector<asyncTask_t> s_asyncTasks;
+        typedef struct {
+            std::function<void()> task;
+            u32 frameDelay;
+        } syncTask_t;
 
+        static inline std::vector<asyncTask_t> s_asyncTasks;
+        static inline std::vector<syncTask_t> s_syncTasks;
         static inline std::vector<Gui*> s_guiStack;
     };
 

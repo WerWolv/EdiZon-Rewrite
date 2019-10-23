@@ -45,7 +45,6 @@ namespace edz::ui {
 
         private:
             std::string m_email, m_password;
-            bool m_resortTitles = false;
             bool m_changeLanguage = false;
 
             brls::LayerView *m_titleList = nullptr;

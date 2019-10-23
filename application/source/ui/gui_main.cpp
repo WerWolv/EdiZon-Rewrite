@@ -72,7 +72,7 @@ namespace edz::ui {
         softwareInfoList->addView(new brls::Header("edz.gui.popup.information.header.save"_lang, false));
 
         
-        
+        // TODO: Fix new save FS not being detected by edizon
         if (title->hasSaveFile()) {
             for (userid_t userid : title->getUserIDs()) {
                 save::Account *account = save::SaveFileSystem::getAllAccounts()[userid].get();
@@ -93,14 +93,13 @@ namespace edz::ui {
         }
         else {
             brls::ListItem *createSaveFSItem = new brls::ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
-            createSaveFSItem->setClickListener([&](brls::View *view) {
-                hlp::openPlayerSelect([&](save::Account *account) {
+            createSaveFSItem->setClickListener([=](brls::View *view) {
+                hlp::openPlayerSelect([=](save::Account *account) {
                     title->createSaveDataFileSystem(account);
-                    brls::Application::popView();
                 });
             });
 
-            softwareInfoList->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.popup.error.nosavefs"_lang));
+            softwareInfoList->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.popup.error.nosavefs"_lang, true));
             softwareInfoList->addView(createSaveFSItem);
         }
 
@@ -131,13 +130,20 @@ namespace edz::ui {
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
         deleteItem->setClickListener([=](brls::View *view) {
-            save::Account *currUser = nullptr;
             
-            if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, title, currUser), "Deleting save data...");
+            brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
+            confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
+            confirmationDialog->addButton("Yes", [confirmationDialog, title](brls::View *view) {
+                hlp::openPlayerSelect([&](save::Account *account) {
+                    Gui::runLater([=]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, title, account), "Deleting save data..."); }, 1);
+                });
+                confirmationDialog->close();
+            });
+
+            confirmationDialog->open();
         });
 
-        brls::ListItem *editItem = new brls::ListItem("Edit Save File", "", "Edit your save file");
+        /*brls::ListItem *editItem = new brls::ListItem("Edit Save File", "", "Edit your save file");
         editItem->setClickListener([=](brls::View *view) {
             save::Account *currUser = nullptr;
             if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; })) {
@@ -159,23 +165,18 @@ namespace edz::ui {
                 }
 
             }
-        });
+        });*/
 
         saveManagementList->addView(new brls::Header("edz.gui.popup.management.header.basic"_lang, false));
         saveManagementList->addView(backupItem);
         saveManagementList->addView(restoreItem);
         saveManagementList->addView(new brls::Header("edz.gui.popup.management.header.advanced"_lang, false));
         saveManagementList->addView(deleteItem);
-        saveManagementList->addView(editItem);
-
-        brls::List *saveEditingList = new brls::List();
-
-        saveEditingList->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "", true));
+        //saveManagementList->addView(editItem);
 
         rootFrame->addTab("edz.gui.popup.information.tab"_lang, softwareInfoList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
-        rootFrame->addTab("edz.gui.popup.editing.tab"_lang, saveEditingList);
 
         brls::PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
 
@@ -534,7 +535,19 @@ namespace edz::ui {
 
         languageOptionItem->setListener([=](size_t selection) {
             SET_CONFIG(Save.langCode, langCodes[selection]);
-            this->m_changeLanguage = true;
+            
+            brls::Application::blockInputs();
+
+            Gui::runLater([]() {
+                LangEntry::clearCache();
+                brls::Application::removeFocus();
+                brls::Application::popView();
+            }, 10);
+
+            Gui::runLater([]() {
+                Gui::changeTo<GuiMain>();
+                brls::Application::unblockInputs();
+            }, 25);
         });
 
         if (auto currLanguageIndex = std::find(langCodes.begin(), langCodes.end(), GET_CONFIG(Save.langCode)); currLanguageIndex != langCodes.end())
@@ -563,7 +576,11 @@ namespace edz::ui {
 
         sortingOptionsItem->setListener([=](size_t selection) {
             SET_CONFIG(Save.titlesSortingStyle, selection);
-            this->m_resortTitles = true;
+            Gui::runLater([this]() { 
+                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+                GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+            }, 1);
         });
 
         displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesDisplayStyle)));
@@ -674,26 +691,7 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-        if (this->m_resortTitles) {
-            this->m_resortTitles = false;
-
-            GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
-            GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
-            GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
-        }
-
-        if (this->m_changeLanguage) {            
-            // Wait till the dropdown menu has fully closed
-            static u8 delay = 0;
-            
-            if (delay++ > 5) {
-                this->m_changeLanguage = false;
-                delay = 0;
-
-                LangEntry::clearCache();
-                Gui::changeTo<GuiMain>();
-            }
-        }
+        
     }
 
 }
