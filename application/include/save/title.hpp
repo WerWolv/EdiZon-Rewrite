@@ -30,7 +30,6 @@ namespace edz::save {
     class Title {
     public:
         Title(titleid_t titleID, bool isInstalled);
-        ~Title();
 
         void addUser(userid_t userID);
 
@@ -44,24 +43,23 @@ namespace edz::save {
 
         bool isInstalled();
         bool hasSaveFile();
-        bool hasSaveFile(Account *account);
+        bool hasSaveFile(std::unique_ptr<Account> &account);
 
         bool isRunning();
         static titleid_t getRunningTitleID();
         static processid_t getRunningProcessID();
         static EResult getLastTitleForgroundImage(u8 *buffer);
 
-        void getIcon(u8 *buffer, size_t size);
-        size_t getIconSize();
+        std::vector<u8>& getIcon();
 
         std::vector<userid_t> getUserIDs();
 
-        EResult createSaveDataFileSystem(Account *account);
+        EResult createSaveDataFileSystem(std::unique_ptr<Account> &account);
 
-        time_t getPlayTime(Account *account);
-        time_t getFirstPlayTime(Account *account);
-        time_t getLastPlayTime(Account *account);
-        u32 getLaunchCount(Account *account);
+        time_t getPlayTime(std::unique_ptr<Account> &account);
+        time_t getFirstPlayTime(std::unique_ptr<Account> &account);
+        time_t getLastPlayTime(std::unique_ptr<Account> &account);
+        u32 getLaunchCount(std::unique_ptr<Account> &account);
 
     private:
         titleid_t m_titleID;
@@ -72,8 +70,7 @@ namespace edz::save {
         NacpStruct m_nacp;
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;
-        u8 *m_titleIcon;
-        size_t m_iconSize;
+        std::vector<u8> m_icon;
 
         EResult _fsCreateSaveDataFileSystem(const FsSave* save, const FsSaveCreate* create);
     };

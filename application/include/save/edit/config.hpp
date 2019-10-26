@@ -54,7 +54,7 @@ namespace edz::save::edit {
 
     class Config {
     public:
-        Config(Title *title, Account *account);
+        Config(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
         ~Config();
 
         EResult load();
@@ -69,8 +69,8 @@ namespace edz::save::edit {
         void setScript(save::edit::Script *script);
 
     private:
-        Title *m_title;
-        Account *m_account;
+        std::unique_ptr<Title> &m_title;
+        std::unique_ptr<Account> &m_account;
 
         std::string m_author;
         std::string m_description;

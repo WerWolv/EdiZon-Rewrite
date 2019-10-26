@@ -71,7 +71,7 @@ namespace edz::save::edit {
         return s128();
     }
     
-    Config::Config(Title *title, Account *account) : m_title(title), m_account(account) {
+    Config::Config(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) : m_title(title), m_account(account) {
 
     }
 

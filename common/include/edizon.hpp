@@ -23,8 +23,12 @@
 #include "edz_types.hpp"            // Types associated with EdiZon
 #include "helpers/macros.hpp"       // Helper macros
 
+#include <memory>
 
 #ifndef __SYSMODULE__                           // EdiZon Homebrew context
+
+    #include <chrono>
+    using namespace std::literals::chrono_literals;
 
     #include <borealis/logger.hpp>              // Borealis Logger
     using Logger = brls::Logger;

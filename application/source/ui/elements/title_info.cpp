@@ -24,25 +24,10 @@
 
 namespace edz::ui::element {
 
-    TitleInfo::TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title) {
-        this->m_image = new brls::Image(buffer, bufferSize);
+    TitleInfo::TitleInfo(std::vector<u8> &buffer, std::unique_ptr<save::Title> &title) {
+        this->m_image = new brls::Image(buffer);
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::FIT);      
-
-        this->m_table = new brls::Table();
-        this->m_table->setParent(this);
-        this->m_table->addRow(brls::TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
-        this->m_table->addRow(brls::TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
-        this->m_table->addRow(brls::TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
-        this->m_table->addRow(brls::TableRowType::BODY,   "TitleID",   title->getIDString());
-        this->m_table->addRow(brls::TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
-        this->m_table->addRow(brls::TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
-    }
-
-    TitleInfo::TitleInfo(u8 *buffer, u16 width, u16 height, std::shared_ptr<save::Title> title) {
-        this->m_image = new brls::Image(buffer, width, height);
-        this->m_image->setParent(this);
-        this->m_image->setScaleType(brls::ImageScaleType::FIT);
 
         this->m_table = new brls::Table();
         this->m_table->setParent(this);

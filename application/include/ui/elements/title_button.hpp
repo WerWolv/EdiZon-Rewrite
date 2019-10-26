@@ -24,12 +24,13 @@
 #include <string>
 #include <vector>
 #include <save/title.hpp>
+#include <memory>
 
 namespace edz::ui::element {
 
     class TitleButton : public brls::View {
     public:
-        TitleButton(save::Title *title, u8 column);
+        TitleButton(std::unique_ptr<save::Title> &title, u8 column);
         ~TitleButton();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
@@ -39,12 +40,12 @@ namespace edz::ui::element {
 
         void setClickListener(brls::EventListener listener);
 
-        save::Title* getTitle();
+        std::unique_ptr<save::Title>& getTitle();
 
         u8 getColumn();
         void setColumn(u8 column);
     private:
-        save::Title *m_title;
+        std::unique_ptr<save::Title> &m_title;
         brls::Image *m_image;
         u8 m_column;
 
@@ -57,7 +58,7 @@ namespace edz::ui::element {
             ~HorizontalTitleList();
 
             std::vector<brls::BoxLayoutChild*> getChildren();
-            void addTitle(save::Title *title);
+            void addTitle(std::unique_ptr<save::Title> &title);
             brls::View* defaultFocus(brls::View *oldFocus);
             
     };

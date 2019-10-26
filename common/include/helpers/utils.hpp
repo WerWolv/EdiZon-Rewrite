@@ -49,7 +49,7 @@ namespace edz::hlp {
     bool openSwkbdForNumber(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", std::string leftButton = "", std::string rightButton = "", u8 maxStringLength = 32, std::string initialText = "");
     
     /* Opens the Player Select applet to select a user */
-    bool openPlayerSelect(std::function<void(save::Account*)> f);
+    bool openPlayerSelect(std::function<void(std::unique_ptr<save::Account>&)> f);
     
 #endif
 
@@ -153,5 +153,7 @@ namespace edz::hlp {
 
     /* Parses the Stack starting at the current Frame Pointer and returns a stack trace */
     void unwindStack(u64 *outStackTrace, size_t *outStackTraceSize, size_t maxStackTraceSize, u64 currFp);
+
+    std::string removeInvalidCharacters(std::string in);
 
 }

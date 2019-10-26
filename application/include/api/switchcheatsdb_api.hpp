@@ -64,7 +64,7 @@ namespace edz::api {
         std::pair<EResult, cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
         std::pair<EResult, u32> getCheatCount();
         std::pair<EResult, std::vector<save_file_t>> getSaveFiles();
-        EResult addSaveFile(std::string backupName, std::string link, save::Title *title);
+        EResult addSaveFile(std::string backupName, std::string link, std::unique_ptr<save::Title> &title);
 
 
     private:

@@ -36,26 +36,26 @@ namespace edz::save {
             time_t creationDate;
         } PACKED backup_header_t;
 
-        static EResult backup(Title *title, Account *account, std::string backupName, std::string basePath = "");
-        static EResult restore(Title *title, Account *account, std::string backupName, std::string basePath = "");
-        static EResult remove(Title *title, Account *account);
+        static EResult backup(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath = "");
+        static EResult restore(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath = "");
+        static EResult remove(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
  
-        static EResult swapSaveData(Title *title, Account *account, std::string backupName);
-        static EResult swapSaveData(Title *title, Account *account1, Account *account2);
-        static EResult duplicate(Title *title, Account *from, Account *to);
+        static EResult swapSaveData(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName);
+        static EResult swapSaveData(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account1, std::unique_ptr<Account> &account2);
+        static EResult duplicate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &from, std::unique_ptr<Account> &to);
  
-        static EResult upload(Title *title, Account *account, std::string backupName);
-        static EResult upload(Title *title, std::string backupName);
+        static EResult upload(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName);
+        static EResult upload(std::unique_ptr<Title> &title, std::string backupName);
  
-        static EResult download(Title *title, Account *account, std::string url);
-        static EResult download(Title *title, std::string localName, std::string url);
+        static EResult download(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string url);
+        static EResult download(std::unique_ptr<Title> &title, std::string localName, std::string url);
  
-        static std::pair<EResult, std::vector<std::string>> getLocalBackupList(Title *title);
-        static std::pair<EResult, std::map<std::string, std::string>> getOnlineBackupList(Title *title);
-        static std::pair<EResult, bool> areBackupsUpToDate(Title *title, Account *account);
+        static std::pair<EResult, std::vector<std::string>> getLocalBackupList(std::unique_ptr<Title> &title);
+        static std::pair<EResult, std::map<std::string, std::string>> getOnlineBackupList(std::unique_ptr<Title> &title);
+        static std::pair<EResult, bool> areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
         
     private:
-        static std::string getBackupFolderName(Title *title);
+        static std::string getBackupFolderName(std::unique_ptr<Title> &title);
     };
 
 }

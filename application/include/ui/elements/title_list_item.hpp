@@ -30,15 +30,15 @@ namespace edz::ui::element {
 
     class TitleListItem : public brls::ListItem {
     public:
-        TitleListItem(std::shared_ptr<save::Title> title, std::string label, std::string description = "", std::string subLabel = "")
+        TitleListItem(std::unique_ptr<save::Title>& title, std::string label, std::string description = "", std::string subLabel = "")
             : brls::ListItem(label, description, subLabel), m_title(title) {}
 
-        std::shared_ptr<save::Title> getTitle() {
+        std::unique_ptr<save::Title>& getTitle() {
             return this->m_title;
         }
 
     private:
-        std::shared_ptr<save::Title> m_title;
+        std::unique_ptr<save::Title>& m_title;
     };
 
 }

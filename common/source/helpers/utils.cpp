@@ -145,11 +145,11 @@ namespace edz::hlp {
         return false;
     }
 
-    bool openPlayerSelect(std::function<void(save::Account*)> f) {
+    bool openPlayerSelect(std::function<void(std::unique_ptr<save::Account>&)> f) {
 
         // If there's only one Account present on the system, just use it without asking
         if (save::SaveFileSystem::getAllAccounts().size() == 1) {
-            f(save::SaveFileSystem::getAllAccounts().begin()->second.get());
+            f(save::SaveFileSystem::getAllAccounts().begin()->second);
             return true;
         }
 
@@ -188,8 +188,8 @@ namespace edz::hlp {
         appletStorageClose(&ast);
         appletStorageClose(&hast1);
 
-        if (outdata.userID != 0) {
-            f(save::SaveFileSystem::getAllAccounts()[outdata.userID].get());
+        if (outdata.result == 0) {
+            f(save::SaveFileSystem::getAllAccounts()[outdata.userID]);
             return true;
         }
 
@@ -466,6 +466,20 @@ namespace edz::hlp {
             outStackTrace[(*outStackTraceSize)++] = currTrace->lr;
             currFp = currTrace->fp;
         }
+    }
+
+    std::string removeInvalidCharacters(std::string in) {
+        std::string out;
+
+        std::copy_if(in.begin(), in.end(), std::back_inserter(out), [](char c) {
+            if (c < ' ' || c > '~')
+                return false;
+            else if (c == '/' || c == '\\' || c == ':')
+                return false;
+            else return true;
+        });
+
+        return out;
     }
 
 }

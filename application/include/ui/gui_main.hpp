@@ -54,11 +54,11 @@ namespace edz::ui {
             brls::List *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
 
-            bool handleSorting(SortingStyle sorting, save::Title *l, save::Title *r);
+            bool handleSorting(SortingStyle sorting, std::unique_ptr<save::Title> &l, std::unique_ptr<save::Title> &r);
             void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);
             void sortTitleGrid(brls::List *list, SortingStyle sorting);
 
-            void createTitlePopup(save::Title *title);
+            void createTitlePopup(std::unique_ptr<save::Title> &title);
             void createTitleListView(brls::List *list, SortingStyle sorting);
             void createTitleCondensedView(brls::List *list, SortingStyle sorting);
             void createTitleGridView(brls::List *list, SortingStyle sorting);

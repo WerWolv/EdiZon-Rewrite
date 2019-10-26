@@ -57,6 +57,7 @@ namespace edz {
 
     constexpr Result ResultEdzSaveNoSaveFS                  = EDZHBRES(501);
     constexpr Result ResultEdzSaveNoSuchBackup              = EDZHBRES(502);
+    constexpr Result ResultEdzSaveInvalidArgument           = EDZHBRES(503);
 
     constexpr Result ResultEdzCheatParsingFailed            = EDZHBRES(601);
     constexpr Result ResultEdzCheatServiceNotAvailable      = EDZHBRES(602);

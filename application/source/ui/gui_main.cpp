@@ -51,17 +51,13 @@ namespace edz::ui {
         return res;
     }
 
-    void GuiMain::createTitlePopup(save::Title *title) {
-        size_t iconSize = title->getIconSize();
-        u8 *iconBuffer = new u8[iconSize];
-        title->getIcon(iconBuffer, iconSize);
-
+    void GuiMain::createTitlePopup(std::unique_ptr<save::Title> &title) {
         brls::TabFrame *rootFrame = new brls::TabFrame();
 
         brls::List *softwareInfoList = new brls::List();
 
         brls::ListItem *launchItem = new brls::ListItem("edz.gui.popup.information.launch.title"_lang, "", "edz.gui.popup.information.launch.subtitle"_lang);
-        launchItem->setClickListener([title](brls::View *view){
+        launchItem->setClickListener([&title](brls::View *view){
             AppletStorage s = { 0 };
             appletCreateStorage(&s, 0);
             appletRequestLaunchApplication(title->getID(), &s);
@@ -75,17 +71,11 @@ namespace edz::ui {
         // TODO: Fix new save FS not being detected by edizon
         if (title->hasSaveFile()) {
             for (userid_t userid : title->getUserIDs()) {
-                save::Account *account = save::SaveFileSystem::getAllAccounts()[userid].get();
+                auto &account = save::SaveFileSystem::getAllAccounts()[userid];
 
                 if (title->hasSaveFile(account)) {
                     brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getLaunchCount(account), title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
-                    
-                    size_t accountIconBufferSize = account->getIconSize();
-                    u8 *accountIconBuffer = new u8[accountIconBufferSize];
-                    account->getIcon(accountIconBuffer, accountIconBufferSize);
-                    userItem->setThumbnail(accountIconBuffer, accountIconBufferSize);
-
-                    delete[] accountIconBuffer;
+                    userItem->setThumbnail(account->getIcon());
 
                     softwareInfoList->addView(userItem);
                 }
@@ -93,8 +83,8 @@ namespace edz::ui {
         }
         else {
             brls::ListItem *createSaveFSItem = new brls::ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
-            createSaveFSItem->setClickListener([=](brls::View *view) {
-                hlp::openPlayerSelect([=](save::Account *account) {
+            createSaveFSItem->setClickListener([&title](brls::View *view) {
+                hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                     title->createSaveDataFileSystem(account);
                 });
             });
@@ -106,36 +96,35 @@ namespace edz::ui {
         brls::List *saveManagementList = new brls::List();
         
         brls::ListItem *backupItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
-        backupItem->setClickListener([=](brls::View *view) {
-            save::Account *currUser = nullptr;
-            std::string backupName;
+        backupItem->setClickListener([&title](brls::View *view) {
             
-            if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; }))
-                if (hlp::openSwkbdForText([&](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang)) {
-                    Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::backup, title, currUser, backupName, ""), "Creating a save data backup...");
-                }
+            hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
+                std::string backupName;
+                if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
+                    Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::backup, std::ref(title), std::ref(account), backupName, ""), "Creating a save data backup...");
+             });
         });
 
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
-        restoreItem->setClickListener([=](brls::View *view) {
-            auto [result, list] = save::SaveManager::getLocalBackupList(title);
+        restoreItem->setClickListener([&title](brls::View *view) {
+            auto list = save::SaveManager::getLocalBackupList(title).second;
 
-            brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [=](int selection) {
+            brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [&title, list](int selection) {
                 if (selection != -1)
-                    hlp::openPlayerSelect([=](save::Account *account) { 
-                        Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, title, account, list[selection], ""), "Restoring a save data backup...");
+                    hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
+                        Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, std::ref(title), std::ref(account), list[selection], ""), "Restoring a save data backup...");
                     });
             });
         });
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
-        deleteItem->setClickListener([=](brls::View *view) {
+        deleteItem->setClickListener([&title](brls::View *view) {
             
             brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
             confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
-            confirmationDialog->addButton("Yes", [confirmationDialog, title](brls::View *view) {
-                hlp::openPlayerSelect([&](save::Account *account) {
-                    Gui::runLater([=]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, title, account), "Deleting save data..."); }, 1);
+            confirmationDialog->addButton("Yes", [confirmationDialog, &title](brls::View *view) {
+                hlp::openPlayerSelect([&](std::unique_ptr<save::Account> &account) {
+                    Gui::runLater([&]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, std::ref(title), std::ref(account)), "Deleting save data..."); }, 1);
                 });
                 confirmationDialog->close();
             });
@@ -178,9 +167,7 @@ namespace edz::ui {
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
 
-        brls::PopupFrame::open(title->getName(), iconBuffer, iconSize, rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
-
-        delete[] iconBuffer;
+        brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
 
     EResult GuiMain::createSaveRepoPopup(std::string saveRepoUrl) {
@@ -218,7 +205,7 @@ namespace edz::ui {
         return ResultSuccess;
     }
 
-    bool GuiMain::handleSorting(SortingStyle sorting, save::Title *l, save::Title *r) {
+    bool GuiMain::handleSorting(SortingStyle sorting, std::unique_ptr<save::Title> &l, std::unique_ptr<save::Title> &r) {
         u32 lLowestTime = 0, rLowestTime = 0;
         u32 lLatestTime = 0, rLatestTime = 0;
         u32 lHighestPlayTime = 0, rHighestPlayTime = 0;
@@ -233,33 +220,33 @@ namespace edz::ui {
                 return l->getAuthor().compare(r->getAuthor()) < 0;
             case SortingStyle::NUM_LAUNCHES:
                 for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
-                    lLaunches += l->getLaunchCount(account.get());
-                    rLaunches += r->getLaunchCount(account.get());
+                    lLaunches += l->getLaunchCount(account);
+                    rLaunches += r->getLaunchCount(account);
                 }
 
                 return lLaunches > rLaunches;
             case SortingStyle::FIRST_PLAYED:
                 for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
-                    if (u32 lTime = l->getFirstPlayTime(account.get()); lTime < lLowestTime)
+                    if (u32 lTime = l->getFirstPlayTime(account); lTime < lLowestTime)
                         lLowestTime = lTime;
-                    if (u32 rTime = r->getFirstPlayTime(account.get()); rTime < rLowestTime)
+                    if (u32 rTime = r->getFirstPlayTime(account); rTime < rLowestTime)
                         rLowestTime = rTime;
                 }
 
                 return lLowestTime < rLowestTime;
             case SortingStyle::LAST_PLAYED:
                 for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
-                    if (u32 lTime = l->getLastPlayTime(account.get()); lTime > lLatestTime)
+                    if (u32 lTime = l->getLastPlayTime(account); lTime > lLatestTime)
                         lLatestTime = lTime;
-                    if (u32 rTime = r->getLastPlayTime(account.get()); rTime > rLatestTime)
+                    if (u32 rTime = r->getLastPlayTime(account); rTime > rLatestTime)
                         rLatestTime = rTime;
                 }
 
                 return lLatestTime > rLatestTime;
             case SortingStyle::PLAY_TIME:
                 for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
-                    lHighestPlayTime += l->getPlayTime(account.get());
-                    rHighestPlayTime += r->getPlayTime(account.get());
+                    lHighestPlayTime += l->getPlayTime(account);
+                    rHighestPlayTime += r->getPlayTime(account);
                 }
 
                 return lHighestPlayTime > rHighestPlayTime;
@@ -281,8 +268,8 @@ namespace edz::ui {
         }
 
         std::sort(titleButtons.begin(), titleButtons.end(), [sorting, this](ui::element::TitleButton* lItem, ui::element::TitleButton* rItem) {
-            save::Title *l = lItem->getTitle();
-            save::Title *r = rItem->getTitle();
+            auto &l = lItem->getTitle();
+            auto &r = rItem->getTitle();
 
             return this->handleSorting(sorting, l, r);
         });
@@ -300,8 +287,8 @@ namespace edz::ui {
 
     void GuiMain::sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting) {
         std::sort(list.begin(), list.end(), [sorting, this](brls::BoxLayoutChild* lItem, brls::BoxLayoutChild* rItem) {
-            save::Title *l = static_cast<ui::element::TitleListItem*>(lItem->view)->getTitle().get();
-            save::Title *r = static_cast<ui::element::TitleListItem*>(rItem->view)->getTitle().get();
+            auto &l = static_cast<ui::element::TitleListItem*>(lItem->view)->getTitle();
+            auto &r = static_cast<ui::element::TitleListItem*>(rItem->view)->getTitle();
 
             return this->handleSorting(sorting, l, r);
         });
@@ -310,17 +297,10 @@ namespace edz::ui {
     void GuiMain::createTitleListView(brls::List *list, SortingStyle sorting) {
         for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
-            
-            size_t iconSize = title->getIconSize();
-            u8 *iconBuffer = new u8[iconSize];
-            title->getIcon(iconBuffer, iconSize);
-            
-            titleItem->setThumbnail(iconBuffer, iconSize);
-
-            delete[] iconBuffer;
-            
-            titleItem->setClickListener([&](brls::View *view) {
-                createTitlePopup(title.get());
+                        
+            titleItem->setThumbnail(title->getIcon());            
+            titleItem->setClickListener([this](brls::View *view) {
+                createTitlePopup(static_cast< ui::element::TitleListItem*>(view)->getTitle());
             });
 
 
@@ -336,8 +316,8 @@ namespace edz::ui {
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 35));
             titleItem->setValue(title->getIDString(), true, false);
                         
-            titleItem->setClickListener([&](brls::View *view) {
-                createTitlePopup(title.get());
+            titleItem->setClickListener([this](brls::View *view) {
+                createTitlePopup(static_cast<ui::element::TitleListItem*>(view)->getTitle());
             });
 
 
@@ -356,10 +336,10 @@ namespace edz::ui {
             if (column % 4 == 0)
                 hLists.push_back(new element::HorizontalTitleList());
             
-            element::TitleButton *titleButton = new element::TitleButton(title.get(), column % 4);
+            element::TitleButton *titleButton = new element::TitleButton(title, column % 4);
 
-            titleButton->setClickListener([&](brls::View *view) {
-                createTitlePopup(title.get());
+            titleButton->setClickListener([this](brls::View *view) {
+                createTitlePopup(static_cast<ui::element::TitleListItem*>(view)->getTitle());
             });
 
             hLists[hLists.size() - 1]->addView(titleButton);
@@ -416,15 +396,9 @@ namespace edz::ui {
     }
 
     void GuiMain::createRunningTitleInfoTab(brls::List *list) {
-        std::shared_ptr<save::Title> runningTitle = save::SaveFileSystem::getAllTitles()[save::Title::getRunningTitleID()];
+        auto &runningTitle = save::SaveFileSystem::getAllTitles()[save::Title::getRunningTitleID()];
                 
-        size_t iconSize = runningTitle->getIconSize();
-        u8 *iconBuffer = new u8[iconSize];
-
-        runningTitle->getIcon(iconBuffer, iconSize);
-
-        element::TitleInfo *titleInfo = new element::TitleInfo(iconBuffer, iconSize, runningTitle);
-        delete[] iconBuffer;
+        element::TitleInfo *titleInfo = new element::TitleInfo(runningTitle->getIcon(), runningTitle);
 
         brls::ListItem *cheatEngineItem = new brls::ListItem("edz.gui.main.running.cheatengine.title"_lang, "", "edz.gui.main.running.cheatengine.subtitle"_lang);
         cheatEngineItem->setClickListener([](brls::View *view){
@@ -636,9 +610,9 @@ namespace edz::ui {
         brls::ListItem *patreonItem = new brls::ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv");
         brls::ListItem *guideItem = new brls::ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net");
 
-        scdbItem->setThumbnail("romfs:/assets/icon_scdb.png");
-        patreonItem->setThumbnail("romfs:/assets/icon_patreon.png");
-        guideItem->setThumbnail("romfs:/assets/icon_guide.png");
+        scdbItem->setThumbnail("romfs:/assets/about/icon_scdb.png");
+        patreonItem->setThumbnail("romfs:/assets/about/icon_patreon.png");
+        guideItem->setThumbnail("romfs:/assets/about/icon_guide.png");
 
         if (hlp::isInApplicationMode()) {
             scdbItem->setClickListener([](brls::View *view)    { openWebpage("https://www.switchcheatsdb.com"); });
@@ -666,15 +640,13 @@ namespace edz::ui {
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
 
-        createTitlesListTab(this->m_titleList, SortingStyle::TITLE_ID);
-        createSaveReposTab(this->m_saveReposList);
-
+        createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
         createCheatsTab(this->m_cheatsList);
+        createSaveReposTab(this->m_saveReposList);
         createSettingsTab(this->m_settingsList);
         createAboutTab(this->m_aboutList);
 
         rootFrame->addTab("edz.gui.main.titles.tab"_lang, this->m_titleList);
-        rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);
 
         if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable()) {
             this->m_runningTitleInfoList = new brls::List();
@@ -683,6 +655,7 @@ namespace edz::ui {
         }
 
         rootFrame->addTab("edz.gui.main.cheats.tab"_lang, this->m_cheatsList);
+        rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);
         rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.main.about.tab"_lang, this->m_aboutList);
@@ -691,7 +664,7 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-        
-    }
+
+    }   
 
 }

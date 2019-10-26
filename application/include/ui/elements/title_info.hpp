@@ -33,8 +33,7 @@ namespace edz::ui::element {
 
     class TitleInfo : public brls::View {
     public:
-        TitleInfo(u8 *buffer, size_t bufferSize, std::shared_ptr<save::Title> title);
-        TitleInfo(u8 *buffer, u16 width, u16 height, std::shared_ptr<save::Title> title);
+        TitleInfo(std::vector<u8> &buffer, std::unique_ptr<save::Title>& title);
         ~TitleInfo();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;

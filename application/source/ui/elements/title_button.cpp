@@ -21,17 +21,11 @@
 
 namespace edz::ui::element {
 
-    TitleButton::TitleButton(save::Title *title, u8 column) : m_title(title), m_column(column) {
-        size_t iconSize = title->getIconSize();
-        u8 *iconBuffer = new u8[iconSize];
-        title->getIcon(iconBuffer, iconSize);
-
-        this->m_image = new brls::Image(iconBuffer, iconSize);
+    TitleButton::TitleButton(std::unique_ptr<save::Title> &title, u8 column) : m_title(title), m_column(column) {
+        this->m_image = new brls::Image(title->getIcon());
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
-
-        delete[] iconBuffer;
     }
 
     TitleButton::~TitleButton() {
@@ -80,7 +74,7 @@ namespace edz::ui::element {
         this->m_column = column;
     }
 
-    save::Title* TitleButton::getTitle() {
+    std::unique_ptr<save::Title>& TitleButton::getTitle() {
         return this->m_title;
     }
 
@@ -99,7 +93,7 @@ namespace edz::ui::element {
         return this->children;
     }
 
-    void HorizontalTitleList::addTitle(save::Title *title) {
+    void HorizontalTitleList::addTitle(std::unique_ptr<save::Title> &title) {
         TitleButton *titleButton = new TitleButton(title, this->children.size());
 
         this->addView(titleButton);

@@ -31,29 +31,25 @@ namespace edz::save {
     Title::Title(titleid_t titleID, bool isInstalled) : m_titleID(titleID), m_isInstalled(isInstalled) {
         NsApplicationControlData appControlData;
         size_t appControlDataSize = 0;
-        NsApplicationContentMetaStatus appContentMetaStatus;
         NacpLanguageEntry *languageEntry = nullptr;
 
         std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
         
         if (EResult(nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
-            throw std::exception();
+            throw std::runtime_error("Failed to load language data from title");
             
-        if (EResult(nsListApplicationContentMetaStatus(titleID, 0, &appContentMetaStatus, sizeof(NsApplicationContentMetaStatus), nullptr)))
-            throw std::exception();
-
         if (EResult(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry)))
-            throw std::exception();
+            throw std::runtime_error("Failed to load icon data from title");
 
         this->m_titleName = std::string(languageEntry->name);
         this->m_titleAuthor = std::string(languageEntry->author);
         this->m_versionString = std::string(appControlData.nacp.version);
-        this->m_version = appContentMetaStatus.title_version;
+        
         std::memcpy(&this->m_nacp, &appControlData.nacp, sizeof(NacpStruct));
 
-        this->m_iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
-        this->m_titleIcon = new u8[this->m_iconSize];
-        std::memcpy(this->m_titleIcon, appControlData.icon, this->m_iconSize);
+        size_t iconSize = appControlDataSize - sizeof(NsApplicationControlData::nacp);
+        this->m_icon.reserve(iconSize);
+        std::copy(appControlData.icon, appControlData.icon + iconSize, std::back_inserter(this->m_icon));
 
         for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
             PdmPlayStatistics playStatistics = { 0 };
@@ -61,11 +57,6 @@ namespace edz::save {
             pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
             this->m_playStatistics.insert({ userid, playStatistics });
         }
-    }
-
-    Title::~Title() {
-        if (this->m_titleIcon != nullptr)
-            delete[] this->m_titleIcon;
     }
 
 
@@ -105,7 +96,7 @@ namespace edz::save {
         return this->getUserIDs().size() > 0;
     }
 
-    bool Title::hasSaveFile(Account *account) {
+    bool Title::hasSaveFile(std::unique_ptr<Account> &account) {
         if (!hasSaveFile())
             return false;
 
@@ -164,12 +155,8 @@ namespace edz::save {
     }
 
 
-    void Title::getIcon(u8 *buffer, size_t size) {
-        std::memcpy(buffer, this->m_titleIcon, this->m_iconSize);
-    }
-
-    size_t Title::getIconSize() {
-        return this->m_iconSize;
+    std::vector<u8>& Title::getIcon() {
+        return this->m_icon;
     }
 
     std::vector<userid_t> Title::getUserIDs() {
@@ -181,7 +168,7 @@ namespace edz::save {
     }
 
 
-    EResult Title::createSaveDataFileSystem(Account *account) {
+    EResult Title::createSaveDataFileSystem(std::unique_ptr<Account> &account) {
         FsSave save;
         save.titleID = this->getID();
         save.userID = account->getID();
@@ -242,19 +229,19 @@ namespace edz::save {
         return rc;
     }
 
-    time_t Title::getPlayTime(Account *account) {
+    time_t Title::getPlayTime(std::unique_ptr<Account> &account) {
         return this->m_playStatistics[account->getID()].playtimeMinutes * 60;
     }
 
-    time_t Title::getFirstPlayTime(Account *account) {
+    time_t Title::getFirstPlayTime(std::unique_ptr<Account> &account) {
         return pdmPlayTimestampToPosix(this->m_playStatistics[account->getID()].first_timestampUser);
     }
 
-    time_t Title::getLastPlayTime(Account *account) {
+    time_t Title::getLastPlayTime(std::unique_ptr<Account> &account) {
         return pdmPlayTimestampToPosix(this->m_playStatistics[account->getID()].last_timestampUser);
     }
 
-    u32 Title::getLaunchCount(Account *account) {
+    u32 Title::getLaunchCount(std::unique_ptr<Account> &account) {
         return this->m_playStatistics[account->getID()].totalLaunches;
     }
     

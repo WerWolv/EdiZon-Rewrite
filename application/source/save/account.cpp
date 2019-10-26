@@ -32,8 +32,6 @@ namespace edz::save {
 
             // If account doesn't existing anymore, use default properties
             if (!exists) {
-                this->m_userIcon = nullptr;
-                this->m_userIconSize = 0;
                 this->m_nickname = "< Unknown User >";
 
                 return;
@@ -45,25 +43,19 @@ namespace edz::save {
             if (EResult(accountProfileGet(&profile, &userData, &profileBase)).failed())
                 throw std::exception();
 
-            if (EResult(accountProfileGetImageSize(&profile, &this->m_userIconSize)).failed())
+            size_t iconSize = 0;
+            if (EResult(accountProfileGetImageSize(&profile, &iconSize)).failed())
                 throw std::exception();
 
 
             this->m_nickname = std::string(profileBase.username);
 
-            this->m_userIcon = new u8[this->m_userIconSize];
-            if (EResult(accountProfileLoadImage(&profile, this->m_userIcon, this->m_userIconSize, &this->m_userIconSize)).failed()) {
-                delete[] this->m_userIcon;
-                this->m_userIcon = nullptr;
+            this->m_icon.reserve(iconSize);
+            if (EResult(accountProfileLoadImage(&profile, &this->m_icon[0], iconSize, &iconSize)).failed()) {
                 throw std::exception();
             }
 
             accountProfileClose(&profile);
-        }
-
-        Account::~Account() {
-            if (this->m_userIcon != nullptr)
-            delete[] this->m_userIcon;
         }
 
 
@@ -82,14 +74,9 @@ namespace edz::save {
             return this->m_nickname;
         }
 
-        void Account::getIcon(u8 *buffer, size_t bufferSize) {
-            std::memcpy(buffer, this->m_userIcon, bufferSize);
+        std::vector<u8>& Account::getIcon() {
+            return this->m_icon;
         }
-
-        size_t Account::getIconSize() {
-            return this->m_userIconSize;
-        }
-
 
         bool Account::exists() {
             return this->m_exists;

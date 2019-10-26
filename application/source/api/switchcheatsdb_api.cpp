@@ -122,7 +122,7 @@ namespace edz::api {
         return { ResultSuccess, saveFiles };
     }
 
-    EResult SwitchCheatsDBAPI::addSaveFile(std::string backupName, std::string link, save::Title *title) {
+    EResult SwitchCheatsDBAPI::addSaveFile(std::string backupName, std::string link, std::unique_ptr<save::Title> &title) {
         json body;
         body["name"] = backupName;
         body["path"] = link;

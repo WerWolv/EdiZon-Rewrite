@@ -33,11 +33,11 @@ namespace edz::save {
 
     class SaveFileSystem {
     public:
-        SaveFileSystem(Title *title, Account *account);
+        SaveFileSystem(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
         ~SaveFileSystem();
 
-        static std::map<titleid_t, std::shared_ptr<Title>>& getAllTitles();
-        static std::map<userid_t, std::shared_ptr<Account>>& getAllAccounts();
+        static std::map<titleid_t, std::unique_ptr<Title>>& getAllTitles();
+        static std::map<userid_t, std::unique_ptr<Account>>& getAllAccounts();
 
         edz::hlp::Folder getSaveFolder();
         void commit();
