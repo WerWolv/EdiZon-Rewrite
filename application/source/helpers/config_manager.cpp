@@ -30,16 +30,19 @@ namespace edz::hlp {
     }
 
     void ConfigManager::load() {
+        std::lock_guard<std::mutex> lock(ConfigManager::s_mutex);
+
         json j;
 
         try {
-            std::ifstream file(EDIZON_BASE_DIR"/config.json");
+            std::ifstream file(EDIZON_BASE_DIR "/config.json");
             file >> j;
 
             j.at("common").at("buildTime").get_to(ConfigManager::s_config.Common.buildTime);
             j.at("common").at("debugMode").get_to(ConfigManager::s_config.Common.debugMode);
 
             j.at("update").at("localCommitSha").get_to(ConfigManager::s_config.Update.localCommitSha);
+            j.at("update").at("notificationDates").get_to(ConfigManager::s_config.Update.notificationDates);
             j.at("update").at("loggedIn").get_to(ConfigManager::s_config.Update.loggedIn);
             j.at("update").at("switchcheatsdbEmail").get_to(ConfigManager::s_config.Update.switchcheatsdbEmail);
             j.at("update").at("switchcheatsdbApiToken").get_to(ConfigManager::s_config.Update.switchcheatsdbApiToken);
@@ -61,9 +64,12 @@ namespace edz::hlp {
     }
 
     void ConfigManager::store() {
-       json j = {   { "common", { { "debugMode", ConfigManager::s_config.Common.debugMode },
+        std::lock_guard<std::mutex> lock(ConfigManager::s_mutex);
+
+        json j = {  { "common", { { "debugMode", ConfigManager::s_config.Common.debugMode },
                                   { "buildTime", __DATE__ " " __TIME__ } } },
                     { "update", { { "localCommitSha", ConfigManager::s_config.Update.localCommitSha },
+                                  { "notificationDates", ConfigManager::s_config.Update.notificationDates },
                                   { "loggedIn", ConfigManager::s_config.Update.loggedIn },
                                   { "switchcheatsdbEmail" , ConfigManager::s_config.Update.switchcheatsdbEmail },
                                   { "switchcheatsdbApiToken", ConfigManager::s_config.Update.switchcheatsdbApiToken } } },
@@ -74,7 +80,7 @@ namespace edz::hlp {
                     { "vc",     { { "favoriteColors", ConfigManager::s_config.VC.favoriteColors } } }
                 };  
 
-        std::ofstream file(EDIZON_BASE_DIR"/config.json");
+        std::ofstream file(EDIZON_BASE_DIR "/config.json");
         file << j;
     }
 

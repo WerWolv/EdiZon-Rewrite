@@ -78,9 +78,9 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
 
   - [devkitPro](https://devkitpro.org) for their amazing toolchain!
   - [SwitchBrew](https://switchbrew.org/) for the [Homebrew Launcher](https://github.com/switchbrew/nx-hbmenu) GUI and shared font code.
-  - [jakibaki](https://github.com/jakibaki) for his massive help with the implementation of RAM editing and sys-netcheat which was used as inspiration.
-  - [averne](https://github.com/averne) for his amazing research around overlay drawing and the implementation of the overlay drawing code
-  - [SciresM](https://github.com/SciresM) for the aarch64 hardware accelerated SHA256 code, libstratosphere, his implementation of the Atmosphère cheat engine and his support during development.
+  - [jakibaki](https://github.com/jakibaki) for the massive help with the implementation of RAM editing and sys-netcheat which was used as inspiration.
+  - [averne](https://github.com/averne) for their amazing research around overlay drawing and the implementation of the overlay drawing code
+  - [SciresM](https://github.com/SciresM) for the aarch64 hardware accelerated SHA256 code, libstratosphere, their implementation of the Atmosphère cheat engine and their support during development.
   - [onepiecefreak](https://github.com/onepiecefreak3) for generally being helpful during development
   - [Ac_K](https://github.com/AcK77) for help with the server side update scripts, the EdiZon save website and reverse engineering of IPC calls.
   - **kardch** for the beautiful current icon.
@@ -89,7 +89,7 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
 
   <br>
 
-  - [nlohmann](https://github.com/nlohmann) for his great json library.
+  - [nlohmann](https://github.com/nlohmann) for their great json library.
   - [Lua](https://www.lua.org/) for their scripting language.
   - [Python](https://www.python.org/) and [nx-python](https://github.com/nx-python) for their scripting language respectively their python port to the switch.
 

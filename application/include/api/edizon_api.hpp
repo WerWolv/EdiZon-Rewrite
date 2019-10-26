@@ -51,6 +51,7 @@ namespace edz::api {
             std::string title;
             std::string description;
             std::string icon;
+            time_t date;
         } notification_t;
 
         std::pair<EResult, std::vector<official_provider_t>> getOfficialProviders();

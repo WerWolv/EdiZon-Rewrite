@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 #define SET_CONFIG(cfg, value)  do { edz::hlp::ConfigManager::getConfig().cfg = value; \
                                      edz::hlp::ConfigManager::store(); } while (false);
@@ -40,6 +41,8 @@ namespace edz::hlp {
         struct {
             std::string localCommitSha;
             
+            std::vector<time_t> notificationDates;
+
             bool loggedIn;
             std::string switchcheatsdbEmail;
             std::string switchcheatsdbApiToken;
@@ -55,6 +58,10 @@ namespace edz::hlp {
         struct {
             std::vector<u32> favoriteColors;
         } VC;
+
+        struct {
+            u16 searchCount;
+        } CheatEngine;
     } config_t;
 
     class ConfigManager {
@@ -66,6 +73,8 @@ namespace edz::hlp {
 
     private:
         static inline config_t s_config;
+
+        static inline std::mutex s_mutex;
     };
 
 }

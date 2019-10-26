@@ -84,7 +84,7 @@ namespace edz::api {
             json responseJson = json::parse(response);
 
             for (auto provider : responseJson["notifications"])
-                notifications.push_back({ provider["title"], provider["description"], provider["icon"] });
+                notifications.push_back({ provider["title"], provider["description"], provider["icon"], provider["date"] });
         } catch (std::exception& e) {
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }

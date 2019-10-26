@@ -20,12 +20,14 @@
 #include <edizon.hpp>
 #include <Borealis.hpp>
 #include <curl/curl.h>
-#include <cxxabi.h>
-
+#include <fcntl.h>
 #include <stdlib.h>
+
+#include <thread>
 
 #include "helpers/utils.hpp"
 #include "helpers/config_manager.hpp"
+#include "helpers/background_tasks.hpp"
 
 #include "ui/gui.hpp"
 #include "ui/gui_main.hpp"
@@ -219,15 +221,16 @@ int main(int argc, char* argv[]) {
 
     if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable())
         cheat::CheatManager::forceAttach();
-
-
     // Set the startup Gui
     Gui::changeTo<GuiMain>();
 
-    // Main loop for UI
-    while (brls::Application::mainLoop())
-        Gui::tick();
+    // Start background tasks
+    hlp::BackgroundTasks backgroundTasks;
 
+    // Main loop for UI
+    while (brls::Application::mainLoop()) {
+        Gui::tick();
+    }
     // Exit services
     exitServices();
     brls::Application::quit();
