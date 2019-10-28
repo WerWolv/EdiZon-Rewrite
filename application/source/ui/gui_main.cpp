@@ -58,15 +58,12 @@ namespace edz::ui {
 
         brls::ListItem *launchItem = new brls::ListItem("edz.gui.popup.information.launch.title"_lang, "", "edz.gui.popup.information.launch.subtitle"_lang);
         launchItem->setClickListener([&title](brls::View *view){
-            AppletStorage s = { 0 };
-            appletCreateStorage(&s, 0);
-            appletRequestLaunchApplication(title->getID(), &s);
+            title->launch();
         });
 
         softwareInfoList->addView(new brls::Header("edz.gui.popup.information.header.general"_lang, false));
         softwareInfoList->addView(launchItem);
         softwareInfoList->addView(new brls::Header("edz.gui.popup.information.header.save"_lang, false));
-
         
         // TODO: Fix new save FS not being detected by edizon
         if (title->hasSaveFile()) {
@@ -94,15 +91,16 @@ namespace edz::ui {
         }
 
         brls::List *saveManagementList = new brls::List();
-        
+
         brls::ListItem *backupItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
         backupItem->setClickListener([&title](brls::View *view) {
-            
+
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
                 if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
                     Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::backup, std::ref(title), std::ref(account), backupName, ""), "Creating a save data backup...");
              });
+
         });
 
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
@@ -110,16 +108,19 @@ namespace edz::ui {
             auto list = save::SaveManager::getLocalBackupList(title).second;
 
             brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [&title, list](int selection) {
-                if (selection != -1)
+
+                if (selection != -1) {
                     hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
                         Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, std::ref(title), std::ref(account), list[selection], ""), "Restoring a save data backup...");
                     });
+                }
+                
             });
         });
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
         deleteItem->setClickListener([&title](brls::View *view) {
-            
+
             brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
             confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
             confirmationDialog->addButton("Yes", [confirmationDialog, &title](brls::View *view) {
@@ -295,12 +296,14 @@ namespace edz::ui {
     }
 
     void GuiMain::createTitleListView(brls::List *list, SortingStyle sorting) {
-        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {
+        for (auto &titlePair : save::SaveFileSystem::getAllTitles()) {
+            auto &title = titlePair.second;
+
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
                         
             titleItem->setThumbnail(title->getIcon());            
-            titleItem->setClickListener([this](brls::View *view) {
-                createTitlePopup(static_cast< ui::element::TitleListItem*>(view)->getTitle());
+            titleItem->setClickListener([&](brls::View *view) {
+                createTitlePopup(title);
             });
 
 
@@ -312,12 +315,14 @@ namespace edz::ui {
     }
 
     void GuiMain::createTitleCondensedView(brls::List *list, SortingStyle sorting) {
-        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {
+        for (auto &titlePair : save::SaveFileSystem::getAllTitles()) {
+            auto &title = titlePair.second;
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 35));
+            
             titleItem->setValue(title->getIDString(), true, false);
                         
-            titleItem->setClickListener([this](brls::View *view) {
-                createTitlePopup(static_cast<ui::element::TitleListItem*>(view)->getTitle());
+            titleItem->setClickListener([&](brls::View *view) {
+                createTitlePopup(title);
             });
 
 
@@ -332,14 +337,16 @@ namespace edz::ui {
         std::vector<element::HorizontalTitleList*> hLists;
         u16 column = 0;
         
-        for (auto &[titleid, title] : save::SaveFileSystem::getAllTitles()) {         
+        for (auto &titlePair : save::SaveFileSystem::getAllTitles()) {
+            auto &title = titlePair.second;
+
             if (column % 4 == 0)
                 hLists.push_back(new element::HorizontalTitleList());
             
             element::TitleButton *titleButton = new element::TitleButton(title, column % 4);
 
-            titleButton->setClickListener([this](brls::View *view) {
-                createTitlePopup(static_cast<ui::element::TitleListItem*>(view)->getTitle());
+            titleButton->setClickListener([&](brls::View *view) {
+                createTitlePopup(title);
             });
 
             hLists[hLists.size() - 1]->addView(titleButton);
@@ -396,7 +403,7 @@ namespace edz::ui {
     }
 
     void GuiMain::createRunningTitleInfoTab(brls::List *list) {
-        auto &runningTitle = save::SaveFileSystem::getAllTitles()[save::Title::getRunningTitleID()];
+        auto &runningTitle = save::Title::getRunningTitle();
                 
         element::TitleInfo *titleInfo = new element::TitleInfo(runningTitle->getIcon(), runningTitle);
 

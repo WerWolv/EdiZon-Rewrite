@@ -122,6 +122,7 @@ namespace edz::save {
         return this->getID() == runningTitleID;
     }
 
+
     titleid_t Title::getRunningTitleID() {
         static titleid_t runningTitleID = 0;
 
@@ -144,6 +145,11 @@ namespace edz::save {
 
         return runningProcessId;
     }
+
+    std::unique_ptr<Title>& Title::getRunningTitle() {
+        return SaveFileSystem::getAllTitles()[Title::getRunningTitleID()];
+    }
+
 
     EResult Title::getLastTitleForgroundImage(u8 *buffer) {
         bool flag = false;
@@ -185,6 +191,10 @@ namespace edz::save {
         saveCreate.saveDataSpaceId = FsSaveDataSpaceId_NandUser;
 
         return _fsCreateSaveDataFileSystem(&save, &saveCreate);
+    }
+
+    void Title::launch() {
+        appletRequestLaunchApplication(this->getID(), nullptr);
     }
 
 

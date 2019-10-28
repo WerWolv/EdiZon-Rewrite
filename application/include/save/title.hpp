@@ -48,6 +48,8 @@ namespace edz::save {
         bool isRunning();
         static titleid_t getRunningTitleID();
         static processid_t getRunningProcessID();
+        static std::unique_ptr<Title>& getRunningTitle();
+        
         static EResult getLastTitleForgroundImage(u8 *buffer);
 
         std::vector<u8>& getIcon();
@@ -55,6 +57,7 @@ namespace edz::save {
         std::vector<userid_t> getUserIDs();
 
         EResult createSaveDataFileSystem(std::unique_ptr<Account> &account);
+        void launch();
 
         time_t getPlayTime(std::unique_ptr<Account> &account);
         time_t getFirstPlayTime(std::unique_ptr<Account> &account);
