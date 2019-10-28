@@ -69,13 +69,11 @@ ROMFS			:=	romfs
 ARCH		:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 null      	:=
-SPACE     	:= $(null) $(null)
+SPACE     	:=  $(null) $(null)
 
-DEFINES 	+= -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
+DEFINES 	+=  -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 
-CFLAGS		:= $(COMMONFLAGS) -Wno-incompatible-pointer-types
-
-COMMONFLAGS :=	-g -Wall -Wno-reorder -Og -ffunction-sections \
+COMMONFLAGS	:=  -g -Wall -Og -ffunction-sections \
 				$(ARCH) $(DEFINES) 				 \
 				-DWINDOW_NAME=\"EdiZon\"		 \
 				-DVERSION_MAJOR=${VERSION_MAJOR} \
@@ -84,18 +82,20 @@ COMMONFLAGS :=	-g -Wall -Wno-reorder -Og -ffunction-sections \
 				-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\" \
 				$(INCLUDE) $(EXT_INCLUDE) -D__SWITCH__
 
-CXXFLAGS	:= $(COMMONFLAGS) -frtti -fexceptions -std=gnu++17
+CFLAGS		:=	$(COMMONFLAGS) -Wno-incompatible-pointer-types
+
+CXXFLAGS	:=  $(COMMONFLAGS) -Wno-reorder -frtti -fexceptions -std=gnu++17
 
 ASFLAGS		:=	-g $(ARCH)
 LDFLAGS		:=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS		:= -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lstdc++fs
+LIBS		:=  -lpython3.8m -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lnx -lz -lstdc++fs
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS		:= $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
+LIBDIRS		:=  $(PORTLIBS) $(LIBNX) $(BOREALIS_PATH) $(CURDIR)/libs/json $(CURDIR)/libs/libpython
 
 export BOREALIS_PATH := libs/borealis
 include $(TOPDIR)/$(BOREALIS_PATH)/library/borealis.mk
