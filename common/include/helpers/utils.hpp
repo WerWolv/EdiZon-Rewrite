@@ -25,6 +25,7 @@
 #include <functional>
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 #include "helpers/folder.hpp"
 
@@ -155,5 +156,9 @@ namespace edz::hlp {
     void unwindStack(u64 *outStackTrace, size_t *outStackTraceSize, size_t maxStackTraceSize, u64 currFp);
 
     std::string removeInvalidCharacters(std::string in);
+
+    userid_t accountUidToUserID(AccountUid accountUID);
+
+    AccountUid userIDToAccountUid(userid_t userID);
 
 }

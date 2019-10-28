@@ -72,7 +72,9 @@
         "set": "cpp",
         "dmntcht.h": "c",
         "styles.h": "c",
-        "future": "cpp"
+        "future": "cpp",
+        "zlib.h": "c",
+        "unistd.h": "c"
     },
     "python.pythonPath": "/bin/python3.8",
     "java.configuration.updateBuildConfiguration": "automatic"

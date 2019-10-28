@@ -25,6 +25,7 @@
 #include <iomanip>
 
 #include "save/save_data.hpp"
+#include "helpers/utils.hpp"
 
 namespace edz::save {
 
@@ -35,7 +36,7 @@ namespace edz::save {
 
         std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
         
-        if (EResult(nsGetApplicationControlData(1, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
+        if (EResult(nsGetApplicationControlData(NsApplicationControlSource_Storage, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
             throw std::runtime_error("Failed to load language data from title");
             
         if (EResult(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry)))
@@ -54,7 +55,7 @@ namespace edz::save {
         for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
             PdmPlayStatistics playStatistics = { 0 };
 
-            pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), account->getID(), &playStatistics);
+            pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), hlp::userIDToAccountUid(account->getID()), &playStatistics);
             this->m_playStatistics.insert({ userid, playStatistics });
         }
     }
@@ -114,9 +115,9 @@ namespace edz::save {
         // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
         if (runningTitleID == 0) {
             u64 pid = 0;
-
-            pmdmntGetApplicationPid(&pid);
-            pminfoGetTitleId(&runningTitleID, pid);
+            
+            pmdmntGetApplicationProcessId(&pid);
+            pminfoGetProgramId(&runningTitleID, pid);
         }
 
         return this->getID() == runningTitleID;
@@ -129,7 +130,7 @@ namespace edz::save {
         // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
         if (runningTitleID == 0) {
             processid_t pid = Title::getRunningProcessID();
-            pminfoGetTitleId(&runningTitleID, pid);
+            pminfoGetProgramId(&runningTitleID, pid);
         }
 
         return runningTitleID;
@@ -140,7 +141,7 @@ namespace edz::save {
 
         // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
         if (runningProcessId == 0)
-            pmdmntGetApplicationPid(&runningProcessId);
+            pmdmntGetApplicationProcessId(&runningProcessId);
         
 
         return runningProcessId;
@@ -177,7 +178,7 @@ namespace edz::save {
     EResult Title::createSaveDataFileSystem(std::unique_ptr<Account> &account) {
         FsSave save;
         save.titleID = this->getID();
-        save.userID = account->getID();
+        save.userID = hlp::userIDToAccountUid(account->getID());
         save.saveID = 0;
         save.rank = 0;
         save.index = 0;
@@ -199,44 +200,13 @@ namespace edz::save {
 
 
     EResult Title::_fsCreateSaveDataFileSystem(const FsSave* save, const FsSaveCreate* create) {
-        IpcCommand c;
-        Service *fsService = fsGetServiceSession();
-        ipcInitialize(&c);
-        
-        struct {
-            u64 magic;
-            u64 cmd_id;
+        const struct {
             FsSave save;
             FsSaveCreate create;
             struct { u32 unk_x0; u8 unk_x4; u8 pad[0xB]; } data;
-        } PACKED *raw;
+        } in = { *save, *create, { 0x40060, 0x01, 0} };
 
-        raw = static_cast<decltype(raw)>(serviceIpcPrepareHeader(fsService, &c, sizeof(*raw)));
-
-        raw->magic = SFCI_MAGIC;
-        raw->cmd_id = 22;
-        memcpy(&raw->save, save, sizeof(FsSave));
-        memcpy(&raw->create, create, sizeof(FsSaveCreate));
-
-        raw->data.unk_x0 = 0x40060;
-        raw->data.unk_x4 = 0x01;
-
-        Result rc = serviceIpcDispatch(fsService);
-
-        if (R_SUCCEEDED(rc)) {
-            IpcParsedCommand r;
-            struct {
-                u64 magic;
-                u64 result;
-            } *resp;
-
-            serviceIpcParse(fsService, &r, sizeof(*resp));
-            resp = static_cast<decltype(resp)>(r.Raw);
-
-            rc = resp->result;
-        }
-
-        return rc;
+        return serviceDispatchIn(fsGetServiceSession(), 22, in);
     }
 
     time_t Title::getPlayTime(std::unique_ptr<Account> &account) {

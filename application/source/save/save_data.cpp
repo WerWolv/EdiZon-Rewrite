@@ -18,22 +18,16 @@
  */
 
 #include "save/save_data.hpp"
+#include "helpers/utils.hpp"
 
 namespace edz::save {
 
     SaveFileSystem::SaveFileSystem(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
         static u16 usedIDs = 0;
 
-        if (R_FAILED(fsMount_SaveData(&this->m_saveFileSystem, title->getID(), account->getID())))
-            return;
-
         this->m_openFileSystemID = usedIDs++;
-
-        if (fsdevMountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str(), this->m_saveFileSystem) == -1) {
-            fsdevUnmountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
-            fsFsClose(&this->m_saveFileSystem);
+        if (EResult(fsdevMountSaveData((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str(), title->getID(), hlp::userIDToAccountUid(account->getID()))).failed())
             return;
-        }
 
         this->m_initialized = true;
     }
@@ -42,7 +36,6 @@ namespace edz::save {
         if (!this->m_initialized) return;
 
         fsdevUnmountDevice((SAVE_DEVICE"_" + std::to_string(this->m_openFileSystemID)).c_str());
-        fsFsClose(&this->m_saveFileSystem);
     }
 
     std::map<titleid_t, std::unique_ptr<Title>>& SaveFileSystem::getAllTitles() {
@@ -52,7 +45,7 @@ namespace edz::save {
             return titles;
 
         NsApplicationRecord *appRecords = new NsApplicationRecord[1024]; // Nobody's going to have more than 1024 games hopefully...
-        size_t actualAppRecordCnt = 0;
+        s32 actualAppRecordCnt = 0;
 
         if (EResult(nsListApplicationRecord(appRecords, 1024, 0, &actualAppRecordCnt)).failed()) {
             delete[] appRecords;
@@ -61,7 +54,7 @@ namespace edz::save {
         
 
         // Get all installed games
-        for (size_t i = 0; i < actualAppRecordCnt; i++) {
+        for (s32 i = 0; i < actualAppRecordCnt; i++) {
             try {
                 titles.insert({ appRecords[i].titleID, std::make_unique<Title>(appRecords[i].titleID, true) });
             } catch (std::runtime_error& e) {
@@ -83,7 +76,7 @@ namespace edz::save {
             }
 
             // Add what userIDs of all accounts that have a save file for this title
-            titles[titleID]->addUser(saveDataInfo.userID);
+            titles[titleID]->addUser(hlp::accountUidToUserID(saveDataInfo.userID));
         }
 
         delete[] appRecords;
@@ -98,25 +91,25 @@ namespace edz::save {
             return accounts;   
 
         s32 userCount;
-        size_t actualUserCount;
+        s32 actualUserCount;
         if (EResult(accountGetUserCount(&userCount)).failed())
             return accounts;    // Return empty accounts map on error
 
-        userid_t userIDs[userCount];
+        AccountUid userIDs[userCount];
         if (EResult(accountListAllUsers(userIDs, userCount, &actualUserCount)).failed())
             return accounts;    // Return empty accounts map on error
 
         // Get all existing accounts
-        for (userid_t userID : userIDs) {
+        for (AccountUid userID : userIDs) {
             try {
-                accounts.insert({userID, std::make_unique<Account>(userID, true) });
+                accounts.insert({ hlp::accountUidToUserID(userID), std::make_unique<Account>(hlp::accountUidToUserID(userID), true) });
             } catch (std::exception& e) {
                 continue;
             }
         }
 
         for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
-            userid_t &userID = saveDataInfo.userID;
+            userid_t userID = hlp::accountUidToUserID(saveDataInfo.userID);
 
             // Add accounts that don't exist on the system anymore but still have some save files stored
             if (accounts.find(userID) == accounts.end()) {
@@ -143,23 +136,23 @@ namespace edz::save {
 
 
     std::vector<FsSaveDataInfo> SaveFileSystem::getTitleSaveFileData() {
-        FsSaveDataIterator iter;
+        FsSaveDataInfoReader reader;
         FsSaveDataInfo saveDataInfo;
         size_t totalSaveEntries = 0;
         std::vector<FsSaveDataInfo> saveDataInfos;
 
-        if (R_FAILED(fsOpenSaveDataIterator(&iter, FsSaveDataSpaceId_NandUser)))
+        if (EResult(fsOpenSaveDataInfoReader(&reader, FsSaveDataSpaceId_NandUser)).failed())
             return EMPTY_RESPONSE;
         
         EResult res;
         do {
-            res = fsSaveDataIteratorRead(&iter, &saveDataInfo, 1, &totalSaveEntries);
+            res = fsSaveDataInfoReaderRead(&reader, &saveDataInfo, 1, &totalSaveEntries);
 
             if (saveDataInfo.saveDataType == FsSaveDataType_SaveData)
                 saveDataInfos.push_back(saveDataInfo);
         } while(res.succeeded() && totalSaveEntries > 0);
 
-        fsSaveDataIteratorClose(&iter);
+        fsSaveDataInfoReaderClose(&reader);
 
         return saveDataInfos;
     }

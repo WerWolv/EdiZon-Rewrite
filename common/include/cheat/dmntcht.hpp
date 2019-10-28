@@ -40,13 +40,13 @@ namespace edz::dmntcht {
 
     typedef struct {
         char readable_name[0x40];
-        u32 num_opcodes;
-        u32 opcodes[0x100];
+        uint32_t num_opcodes;
+        uint32_t opcodes[0x100];
     } CheatDefinition;
 
     typedef struct {
         bool enabled;
-        u32 cheat_id;
+        uint32_t cheat_id;
         CheatDefinition definition;
     } CheatEntry;
 

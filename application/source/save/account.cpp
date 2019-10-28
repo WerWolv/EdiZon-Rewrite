@@ -23,6 +23,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "helpers/utils.hpp"
+
 namespace edz::save {
 
         Account::Account(userid_t userID, bool exists) : m_userID(userID), m_exists(exists) {
@@ -37,18 +39,18 @@ namespace edz::save {
                 return;
             }
 
-            if (EResult(accountGetProfile(&profile, userID)).failed())
+            if (EResult(accountGetProfile(&profile, hlp::userIDToAccountUid(userID))).failed())
                 throw std::exception();
             
             if (EResult(accountProfileGet(&profile, &userData, &profileBase)).failed())
                 throw std::exception();
 
-            size_t iconSize = 0;
+            u32 iconSize = 0;
             if (EResult(accountProfileGetImageSize(&profile, &iconSize)).failed())
                 throw std::exception();
 
 
-            this->m_nickname = std::string(profileBase.username);
+            this->m_nickname = std::string(profileBase.nickname);
 
             this->m_icon.resize(iconSize);
             if (EResult(accountProfileLoadImage(&profile, &this->m_icon[0], iconSize, &iconSize)).failed()) {

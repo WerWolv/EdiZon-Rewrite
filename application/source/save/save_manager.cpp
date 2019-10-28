@@ -36,30 +36,30 @@ namespace edz::save {
 
     EResult SaveManager::backup(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath) {
         hlp::File backupFile;
-
+        Logger::debug("1");
         if (basePath == "")
             backupFile = hlp::File(hlp::formatString("%s/%s/%s.edz", EDIZON_BACKUP_DIR, hlp::removeInvalidCharacters(SaveManager::getBackupFolderName(title)).c_str(), backupName.c_str()));
         else
             backupFile = hlp::File(hlp::formatString("%s/%s.edz", basePath.c_str(), backupName.c_str()));
-
+        Logger::debug("2");
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
-
+        Logger::debug("3");
         backupFile.createDirectories();
-
+        Logger::debug("4");
         save::SaveFileSystem saveFS(title, account);
         hlp::Folder saveFSFolder = saveFS.getSaveFolder();
-
+        Logger::debug("5");
         // Strip away the leading save_#:/ so Zipper creates the zip file properly
         size_t filePathOffset = 0;
         if ((filePathOffset = saveFSFolder.path().find(':')) == std::string::npos)
             return ResultEdzSaveNoSaveFS;
         else
             filePathOffset += 2; // Skip to after the first /
-
+        Logger::debug("6");
         std::vector<u8> zipData;
         zipper::Zipper zip(zipData);
-
+        Logger::debug("7");
         // Zip all files and folders in the save FS
         for (auto &it : std::filesystem::recursive_directory_iterator(saveFS.getSaveFolder().path())) {
             if (!it.is_directory()) {
@@ -67,20 +67,21 @@ namespace edz::save {
                 zip.add(saveFsStream, &(it.path().c_str()[filePathOffset]), zipper::Zipper::Better);
             }
         }
+        Logger::debug("8");
 
         zip.close();
-
+        Logger::debug("9");
         backup_header_t header = { 0x4E5A4445, title->getID(), account->getID(), time(nullptr) };
         std::vector<u8> backupData;
-
+        Logger::debug("10");
         // Add a header to the backup file so EdiZon has some more information when downloading them from the internet
         std::copy(reinterpret_cast<u8*>(&header), reinterpret_cast<u8*>(&header) + sizeof(backup_header_t), std::back_inserter(backupData));
-
+        Logger::debug("11");
         // Add the zip data after the header. Zipper thows an exception if the vector passed in is not empty...
         std::copy(zipData.begin(), zipData.end(), std::back_inserter(backupData));
-
+        Logger::debug("12");
         backupFile.write(&backupData[0], backupData.size());
-
+        Logger::debug("13");
         return ResultSuccess;
     }
 

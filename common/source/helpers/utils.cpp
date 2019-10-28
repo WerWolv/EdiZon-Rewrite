@@ -40,7 +40,7 @@ namespace edz::hlp {
 
     static HidsysNotificationLedPattern patternOn, patternOff;
     static u64 uniquePadIds[0x10];
-    static size_t uniquePadCnt;
+    static s32 uniquePadCnt;
 
 #ifndef __SYSMODULE__
 
@@ -202,7 +202,7 @@ namespace edz::hlp {
     bool isTitleRunning() {
         u64 runningTitlePid = 0, edizonPid = 0;
 
-        if (EResult(pmdmntGetApplicationPid(&runningTitlePid)).failed())
+        if (EResult(pmdmntGetApplicationProcessId(&runningTitlePid)).failed())
             return false;
 
         if (EResult(svcGetProcessId(&edizonPid, CUR_PROCESS_HANDLE)).failed())
@@ -216,7 +216,7 @@ namespace edz::hlp {
     bool isInApplicationMode() {
         u64 runningTitlePid = 0, edizonPid = 0;
 
-        if (EResult(pmdmntGetApplicationPid(&runningTitlePid)).failed())
+        if (EResult(pmdmntGetApplicationProcessId(&runningTitlePid)).failed())
             return false;
 
         if (EResult(svcGetProcessId(&edizonPid, CUR_PROCESS_HANDLE)).failed())
@@ -233,12 +233,12 @@ namespace edz::hlp {
 
     bool isServiceRunning(const char *serviceName) {
         Handle handle;
-        bool running = R_FAILED(smRegisterService(&handle, serviceName, false, 1));
+        bool running = EResult(smRegisterService(&handle, smEncodeName(serviceName), false, 1));
 
         svcCloseHandle(handle);
 
         if (!running)
-            smUnregisterService(serviceName);
+            smUnregisterService(smEncodeName(serviceName));
 
         return running;
     }
@@ -355,12 +355,12 @@ namespace edz::hlp {
 
 #ifndef __SYSMODULE__
 
-    static constexpr titleid_t _edizonBackgroundServiceTitleId = 0x0100000000ED1204;
-
     EResult startBackgroundService(bool startOnBoot) {
         u64 pid = 0;
 
-        pmdmntGetTitlePid(&pid, _edizonBackgroundServiceTitleId);
+        NcmProgramLocation edizonLocation = { 0x0100000000ED1204, FsStorageId_None };
+
+        pmdmntGetProcessId(&pid, 0x0100000000ED1204);
         if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
 
         {
@@ -368,7 +368,7 @@ namespace edz::hlp {
             romfsSysmoduleFile.copyTo(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
         }
 
-        if (EResult(pmshellLaunchProcess(0, _edizonBackgroundServiceTitleId, FsStorageId_None, &pid)).failed()) {
+        if (EResult(pmshellLaunchProgram(0, &edizonLocation, &pid)).failed()) {
             File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").remove();
             return ResultEdzSysmoduleLaunchFailed;
         }
@@ -396,10 +396,10 @@ namespace edz::hlp {
             flagFile.remove();
         }
 
-        pmdmntGetTitlePid(&pid, _edizonBackgroundServiceTitleId);
+        pmdmntGetProcessId(&pid, 0x0100000000ED1204);
         if (pid == 0) return ResultEdzSysmoduleNotRunning;
 
-        if (EResult(pmshellTerminateProcessByProcessId(pid)).failed())
+        if (EResult(pmshellTerminateProcess(pid)).failed())
             return ResultEdzSysmoduleTerminationFailed;
         
         return ResultSuccess;
@@ -480,6 +480,17 @@ namespace edz::hlp {
         });
 
         return out;
+    }
+
+    userid_t accountUidToUserID(AccountUid accountUID) {
+        return *reinterpret_cast<userid_t*>(accountUID.uid);
+    }
+
+    AccountUid userIDToAccountUid(userid_t userID) {
+        AccountUid ret = { 0 };
+
+        std::memcpy(ret.uid, &userID, sizeof(userid_t));
+        return ret;
     }
 
 }

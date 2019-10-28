@@ -22,39 +22,12 @@
 namespace edz::hidsys {
 
     EResult enableAppletToGetInput(bool enable, aruid_t aruid) {  
-        IpcCommand c;
-        ipcInitialize(&c);
-
-        struct {
-            u64 magic;
-            u64 cmdid;
+        const struct {
             u8 permitInput;
             u64 appletResourceUserId;
-        } *raw;
+        } in = { enable != 0, aruid };
 
-        raw = static_cast<decltype(raw)>(serviceIpcPrepareHeader(hidsysGetServiceSession(), &c, sizeof(*raw)));
-
-        raw->magic = SFCI_MAGIC;
-        raw->cmdid = 503;
-        raw->permitInput = enable != 0;
-        raw->appletResourceUserId = aruid;
-
-        Result rc = serviceIpcDispatch(hidsysGetServiceSession());
-
-        if (R_SUCCEEDED(rc)) {
-            IpcParsedCommand r;
-            struct {
-                u64 magic;
-                u64 result;
-            } *resp;
-
-            serviceIpcParse(hidsysGetServiceSession(), &r, sizeof(*resp));
-            resp = static_cast<decltype(resp)>(r.Raw);
-
-            rc = resp->result;
-        }
-
-        return rc;
+        return serviceDispatchIn(hidsysGetServiceSession(), 503, in);
     }
 
 }
