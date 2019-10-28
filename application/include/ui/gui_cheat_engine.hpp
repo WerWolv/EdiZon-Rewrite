@@ -34,7 +34,11 @@ namespace edz::ui {
         void update() override;
 
     private:
+        brls::ThumbnailFrame *rootFrame;
+        brls::List *addressList;
 
+        void createAddressList(brls::List *list, std::vector<addr_t> addresses);
+        void setSearchCountText(u16 searchCount);
     };
 
 }
