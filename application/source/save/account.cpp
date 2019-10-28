@@ -50,7 +50,7 @@ namespace edz::save {
 
             this->m_nickname = std::string(profileBase.username);
 
-            this->m_icon.reserve(iconSize);
+            this->m_icon.resize(iconSize);
             if (EResult(accountProfileLoadImage(&profile, &this->m_icon[0], iconSize, &iconSize)).failed()) {
                 throw std::exception();
             }
