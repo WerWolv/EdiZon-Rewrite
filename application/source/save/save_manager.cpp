@@ -44,22 +44,22 @@ namespace edz::save {
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
-        Logger::error("1");
+
         backupFile.createDirectories();
-        Logger::error("2");
+
         save::SaveFileSystem saveFS(title, account);
         hlp::Folder saveFSFolder = saveFS.getSaveFolder();
-        Logger::error("3");
+
         // Strip away the leading save_#:/ so Zipper creates the zip file properly
         size_t filePathOffset = 0;
         if ((filePathOffset = saveFSFolder.path().find(':')) == std::string::npos)
             return ResultEdzSaveNoSaveFS;
         else
             filePathOffset += 2; // Skip to after the first /
-        Logger::error("4");
+
         std::vector<u8> zipData;
         zipper::Zipper zip(zipData);
-        Logger::error("5");
+
         // Zip all files and folders in the save FS
         for (auto &it : std::filesystem::recursive_directory_iterator(saveFS.getSaveFolder().path())) {
             if (!it.is_directory()) {
@@ -67,20 +67,20 @@ namespace edz::save {
                 zip.add(saveFsStream, &(it.path().c_str()[filePathOffset]), zipper::Zipper::Better);
             }
         }
-        Logger::error("6");
+
         zip.close();
-        Logger::error("7");
+
         backup_header_t header = { 0x4E5A4445, title->getID(), account->getID(), time(nullptr) };
         std::vector<u8> backupData;
-        Logger::error("8");
+
         // Add a header to the backup file so EdiZon has some more information when downloading them from the internet
         std::copy(reinterpret_cast<u8*>(&header), reinterpret_cast<u8*>(&header) + sizeof(backup_header_t), std::back_inserter(backupData));
-        Logger::error("9");
+
         // Add the zip data after the header. Zipper thows an exception if the vector passed in is not empty...
         std::copy(zipData.begin(), zipData.end(), std::back_inserter(backupData));
-        Logger::error("10");
+
         backupFile.write(&backupData[0], backupData.size());
-        Logger::error("11");
+
         return ResultSuccess;
     }
 
