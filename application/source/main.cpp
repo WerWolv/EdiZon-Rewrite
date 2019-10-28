@@ -22,6 +22,7 @@
 #include <curl/curl.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <malloc.h>
 
 #include <thread>
 
@@ -29,7 +30,10 @@
 #include "helpers/config_manager.hpp"
 #include "helpers/background_tasks.hpp"
 
+#include "cheat/cheat.hpp"
+
 #include "ui/gui.hpp"
+#include "ui/gui_splash.hpp"
 #include "ui/gui_main.hpp"
 
 
@@ -219,10 +223,12 @@ int main(int argc, char* argv[]) {
 
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
 
-    if (hlp::isTitleRunning() && cheat::CheatManager::isCheatServiceAvailable())
-        cheat::CheatManager::forceAttach();
     // Set the startup Gui
-    Gui::changeTo<GuiMain>();
+    #if SPLASH_ENABLED
+        Gui::changeTo<GuiSplash>();
+    #else
+        Gui::changeTo<GuiMain>();
+    #endif
 
     // Start background tasks
     hlp::BackgroundTasks backgroundTasks;
