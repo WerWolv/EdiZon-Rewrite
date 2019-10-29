@@ -20,12 +20,10 @@
 #include <edizon.hpp>
 #include <Borealis.hpp>
 #include <curl/curl.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <malloc.h>
 
 #include <thread>
 
+#include "helpers/debug_helpers.hpp"
 #include "helpers/utils.hpp"
 #include "helpers/config_manager.hpp"
 #include "helpers/background_tasks.hpp"
@@ -36,74 +34,7 @@
 #include "ui/gui_splash.hpp"
 #include "ui/gui_main.hpp"
 
-
 using namespace edz;
-using namespace edz::ui;
-
-
-void exitServices();
-
-extern "C" {
-   
-    alignas(16) u8 __nx_exception_stack[0x1000];
-    u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
-    void NORETURN __nx_exit(Result rc, LoaderReturnFn retaddr);
-
-    void __libnx_exception_handler(ThreadExceptionDump *ctx) {
-        std::string errorDesc;
-
-        switch (ctx->error_desc) {
-            case ThreadExceptionDesc_BadSVC:
-                errorDesc = "Bad SVC";
-                break;
-            case ThreadExceptionDesc_InstructionAbort:
-                errorDesc = "Instruction Abort";
-                break;
-            case ThreadExceptionDesc_MisalignedPC:
-                errorDesc = "Misaligned Program Counter";
-                break;
-            case ThreadExceptionDesc_MisalignedSP:
-                errorDesc = "Misaligned Stack Pointer";
-                break;
-            case ThreadExceptionDesc_SError:
-                errorDesc = "SError";
-                break;
-            case ThreadExceptionDesc_Trap:
-                errorDesc = "SIGTRAP";
-                break;
-            case ThreadExceptionDesc_Other:
-                errorDesc = "Segmentation Fault";
-                break;
-            default:
-                errorDesc = "Unknown Exception [ 0x" + hlp::toHexString<u16>(ctx->error_desc) + " ]";
-                break;
-        }
-
-        Gui::fatal("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
-            "A fatal exception occured!",
-            "Reason",
-            errorDesc.c_str(),
-            ctx->pc.x - hlp::getHomebrewBaseAddress());
-
-        brls::Application::quit();
-
-        u64 stackTrace[0x20] = { 0 };
-        size_t stackTraceSize = 0;
-        hlp::unwindStack(stackTrace, &stackTraceSize, 0x20, ctx->fp.x);
-
-        brls::Logger::error("== Stack trace ==");
-
-        for (u8 i = 0; i < stackTraceSize; i++)
-            brls::Logger::error("[%d] BASE + 0x%016lx", stackTraceSize - i, stackTrace[stackTraceSize - i] - hlp::getHomebrewBaseAddress());
-        
-
-        exitServices();
-        
-        appletRequestExitToSelf();
-    }
-
-
-}
 
 EResult initServices() {
     // Curl
@@ -115,6 +46,7 @@ EResult initServices() {
     ER_TRY(nsInitialize());
 
     // Account querying
+    accountSetServiceType(AccountServiceType_Administrator);
     ER_TRY(accountInitialize());
 
     // Parential control lockdown
@@ -196,12 +128,12 @@ int main(int argc, char* argv[]) {
     if (!brls::Application::init())
         return ResultEdzBorealisInitFailed;
 
-    brls::Logger::setLogLevel(DEBUG_MODE_ENABLED ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
+    brls::Logger::setLogLevel(VERBOSE_LOG_OUTPUT ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
     brls::Application::setCommonFooter(VERSION_STRING);
 
     // Try to initialize all services
     if (EResult res = initServices(); res.failed()) {
-        Gui::fatal("edz.fatal.service.init"_lang + res.getString());
+        ui::Gui::fatal("edz.fatal.service.init"_lang + res.getString());
 
         exitServices();
         return -1;
@@ -209,11 +141,14 @@ int main(int argc, char* argv[]) {
 
     // Create folder structure
     if (EResult res = createFolderStructure(); res.failed()) {
-        Gui::fatal("edz.fatal.folder_structure.init"_lang);
+        ui::Gui::fatal("edz.fatal.folder_structure.init"_lang);
 
         exitServices();
         return -2;
     }
+
+    // Redirects stdout and stderr to a log file if the compile time flag was set
+    stdioRedirectToFile();
 
     // Clear the tmp folder
     hlp::clearTmpFolder(); 
@@ -225,9 +160,9 @@ int main(int argc, char* argv[]) {
 
     // Set the startup Gui
     #if SPLASH_ENABLED
-        Gui::changeTo<GuiSplash>();
+        ui::Gui::changeTo<ui::GuiSplash>();
     #else
-        Gui::changeTo<GuiMain>();
+        Gui::changeTo<ui::GuiMain>();
     #endif
 
     // Start background tasks
@@ -235,9 +170,10 @@ int main(int argc, char* argv[]) {
 
     // Main loop for UI
     while (brls::Application::mainLoop()) {
-        Gui::tick();
+        ui::Gui::tick();
     }
-    // Exit services
+
     exitServices();
     brls::Application::quit();
+    stdioRedirectCleanup();
 }

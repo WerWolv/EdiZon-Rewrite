@@ -65,6 +65,12 @@
 
     /* Debugging */
     #define DEBUG_MODE_ENABLED              true
+    #if DEBUG_MODE_ENABLED
+        #define VERBOSE_LOG_OUTPUT              true        /* Enables more detailed log output. Might cause a lot of spam */
+        #define REDIRECT_LOG_TO_FILE            false       /* Redirects all log output to a file on the SD card */
+        #define LOG_ALLOCATION                  false       /* Overrides operator new and delete to log heap allocation and deallocation */
+        #define DISABLE_EXCEPTION_HANDLER       false
+    #endif
 
 #else               // EdiZon Sysmodule context
 
