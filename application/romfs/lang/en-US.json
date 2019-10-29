@@ -6,6 +6,7 @@
 
     "edz.switchcheatsdb.name" : "SwitchCheatsDB",
     "edz.patreon.name"        : "Patreon",
+    "edz.debugmode"           : "Debug Mode",
 
     "edz.widget.integer.title"      : "Enter a value",
     "edz.widget.integer.subtitle"   : "This will be the new value for this property.",

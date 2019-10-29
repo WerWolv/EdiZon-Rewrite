@@ -177,13 +177,14 @@ namespace edz::save {
 
     EResult Title::createSaveDataFileSystem(std::unique_ptr<Account> &account) {
         FsSave save;
+        FsSaveCreate saveCreate;
+
         save.titleID = this->getID();
         save.userID = hlp::userIDToAccountUid(account->getID());
         save.saveID = 0;
         save.rank = 0;
         save.index = 0;
 
-        FsSaveCreate saveCreate;
         saveCreate.size = this->m_nacp.userAccountSaveDataSize;
         saveCreate.journalSize = this->m_nacp.userAccountSaveDataJournalSize;
         saveCreate.blockSize = 0x4000;
@@ -191,7 +192,12 @@ namespace edz::save {
         saveCreate.flags = 0;
         saveCreate.saveDataSpaceId = FsSaveDataSpaceId_NandUser;
 
-        return _fsCreateSaveDataFileSystem(&save, &saveCreate);
+        if (EResult res = _fsCreateSaveDataFileSystem(&save, &saveCreate); res.failed())
+            return res;
+
+        this->addUser(account->getID());
+
+        return ResultSuccess;
     }
 
     void Title::launch() {

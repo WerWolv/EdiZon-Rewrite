@@ -37,6 +37,8 @@
 using namespace edz;
 
 EResult initServices() {
+    // Already initialized by Borealis but also used in EdiZon: romfs, sockets, pl and set:sys
+
     // Initialize Borealis (UI library)
     if (!brls::Application::init())
         return ResultEdzBorealisInitFailed;
@@ -89,6 +91,8 @@ EResult initServices() {
 }
 
 void exitServices() {
+    // Cleaned up by Borealis: romfs, sockets, pl and set:sys
+
     curl_global_cleanup();
     ncmExit();
     nsExit();
@@ -129,12 +133,7 @@ EResult createFolderStructure() {
 
 
 int main(int argc, char* argv[]) {  
-    // Initialize Borealis (UI library)
-    if (!brls::Application::init())
-        return ResultEdzBorealisInitFailed;
-
     brls::Logger::setLogLevel(VERBOSE_LOG_OUTPUT ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
-    brls::Application::setCommonFooter(VERSION_STRING);
 
     // Try to initialize all services
     if (EResult res = initServices(); res.failed()) {

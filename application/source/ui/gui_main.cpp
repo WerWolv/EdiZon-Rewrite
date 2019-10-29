@@ -94,7 +94,6 @@ namespace edz::ui {
 
         brls::ListItem *backupItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
         backupItem->setClickListener([&title](brls::View *view) {
-
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
                 if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
@@ -666,6 +665,10 @@ namespace edz::ui {
         rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.main.about.tab"_lang, this->m_aboutList);
+
+        #if DEBUG_MODE_ENABLED
+            rootFrame->setFooterText("edz.debugmode"_lang);
+        #endif
 
         return rootFrame;
     }
