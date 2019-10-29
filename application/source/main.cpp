@@ -37,6 +37,10 @@
 using namespace edz;
 
 EResult initServices() {
+    // Initialize Borealis (UI library)
+    if (!brls::Application::init())
+        return ResultEdzBorealisInitFailed;
+
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())
         return ResultEdzCurlInitFailed;
@@ -100,6 +104,7 @@ void exitServices() {
     pdmqryExit();
     dmntcht::exit();
     cheat::CheatManager::exit();
+    brls::Application::quit();
 }
 
 EResult createFolderStructure() {
@@ -174,6 +179,5 @@ int main(int argc, char* argv[]) {
     }
 
     exitServices();
-    brls::Application::quit();
     stdioRedirectCleanup();
 }
