@@ -29,6 +29,8 @@
 #include "save/account.hpp"
 #include "save/save_data.hpp"
 
+#include "helpers/config_manager.hpp"
+
 #endif
 
 #include "helpers/file.hpp"
@@ -44,16 +46,29 @@ namespace edz::hlp {
 
 #ifndef __SYSMODULE__
 
-    bool openPctlPrompt(std::function<void()> f) {
-        bool restricted = false;
-        pctlIsRestrictionEnabled(&restricted);
+    bool isPctlEnabled() {
+        bool enabled = false;
 
-        if (restricted)
+        if (EResult(pctlIsRestrictionEnabled(&enabled)).failed())
+            return false;
+
+        return enabled;
+    }
+
+    bool openPctlPrompt(std::function<void()> f, bool askAgain) {
+        static bool alreadyAnswered = false;
+
+        if (askAgain)
+            alreadyAnswered = false;
+
+        if (isPctlEnabled() && !alreadyAnswered && GET_CONFIG(Settings.pctlChecksEnabled))
             if (EResult(pctlauthShow(false)).failed())
                 return false;
         
         f();
 
+        alreadyAnswered = true;
+        
         return true;
     }
 

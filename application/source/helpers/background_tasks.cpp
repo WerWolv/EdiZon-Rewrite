@@ -56,7 +56,7 @@ namespace edz::hlp {
                     break;
 
                 for (auto &notification : notifications) {
-                    auto &notificationDates = GET_CONFIG(Update.notificationDates);
+                    auto &notificationDates = GET_CONFIG(Online.notificationDates);
                     if (std::find(notificationDates.begin(), notificationDates.end(), notification.date) == notificationDates.end()) {
                         notificationDates.push_back(notification.date);
                         ConfigManager::store();

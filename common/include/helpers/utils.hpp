@@ -37,8 +37,11 @@ namespace edz::save {
 namespace edz::hlp {
 
 #ifndef __SYSMODULE__
+    /* Has Parential Control been enabled */
+    bool isPctlEnabled();
+
     /* Opens the Parential Control applet and calls the callback function when the PIN was entered correctly */ 
-    bool openPctlPrompt(std::function<void()> f);
+    bool openPctlPrompt(std::function<void()> f, bool askAgain = false);
 
     /* Opens the Software Keyboard for text input */
     bool openSwkbdForText(std::function<void(std::string)> f, std::string headerText = "", std::string subText = "", u8 maxStringLength = 32, std::string initialText = "");

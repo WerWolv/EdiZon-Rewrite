@@ -105,16 +105,17 @@ namespace edz::ui {
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
         restoreItem->setClickListener([&title](brls::View *view) {
             auto list = save::SaveManager::getLocalBackupList(title).second;
+            if (hlp::openPctlPrompt([]{})) {
+                brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [&title, list](int selection) {
 
-            brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [&title, list](int selection) {
-
-                if (selection != -1) {
-                    hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
-                        Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, std::ref(title), std::ref(account), list[selection], ""), "Restoring a save data backup...");
-                    });
-                }
-                
-            });
+                    if (selection != -1) {
+                        hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
+                            Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, std::ref(title), std::ref(account), list[selection], ""), "Restoring a save data backup...");
+                        });
+                    }
+                    
+                });
+            }
         });
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
@@ -123,9 +124,11 @@ namespace edz::ui {
             brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
             confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
             confirmationDialog->addButton("Yes", [confirmationDialog, &title](brls::View *view) {
-                hlp::openPlayerSelect([&](std::unique_ptr<save::Account> &account) {
-                    Gui::runLater([&]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, std::ref(title), std::ref(account)), "Deleting save data..."); }, 1);
-                });
+                if (hlp::openPctlPrompt([]{})) {
+                    hlp::openPlayerSelect([&](std::unique_ptr<save::Account> &account) {
+                        Gui::runLater([&]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, std::ref(title), std::ref(account)), "Deleting save data..."); }, 1);
+                    });
+                }
                 confirmationDialog->close();
             });
 
@@ -357,7 +360,7 @@ namespace edz::ui {
             list->addView(hList);
         }
 
-        GuiMain::sortTitleGrid(list, static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+        GuiMain::sortTitleGrid(list, static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
         list->setSpacing(30);
 
         list->invalidate();
@@ -377,7 +380,7 @@ namespace edz::ui {
         layerView->addLayer(condensedDisplayList);
         layerView->addLayer(gridDisplayList);
 
-        layerView->changeLayer(GET_CONFIG(Save.titlesDisplayStyle), false);
+        layerView->changeLayer(GET_CONFIG(Settings.titlesDisplayStyle), false);
     }
 
     void GuiMain::createSaveReposTab(brls::List *list) {
@@ -514,7 +517,7 @@ namespace edz::ui {
         brls::SelectListItem *languageOptionItem = new brls::SelectListItem("edz.gui.main.settings.language"_lang, langNames);
 
         languageOptionItem->setListener([=](size_t selection) {
-            SET_CONFIG(Save.langCode, langCodes[selection]);
+            SET_CONFIG(Settings.langCode, langCodes[selection]);
             
             brls::Application::blockInputs();
 
@@ -530,8 +533,30 @@ namespace edz::ui {
             }, 25);
         });
 
-        if (auto currLanguageIndex = std::find(langCodes.begin(), langCodes.end(), GET_CONFIG(Save.langCode)); currLanguageIndex != langCodes.end())
+        if (auto currLanguageIndex = std::find(langCodes.begin(), langCodes.end(), GET_CONFIG(Settings.langCode)); currLanguageIndex != langCodes.end())
             languageOptionItem->setSelectedValue(currLanguageIndex - langCodes.begin());
+
+        brls::ToggleListItem *pctlOptionItem = nullptr;
+        
+        if (hlp::isPctlEnabled()) {
+            pctlOptionItem = new brls::ToggleListItem("Enable parential control checks", GET_CONFIG(Settings.pctlChecksEnabled), "Locks some destructive options like restoring or deleting save files behind the Parential Control PIN.", "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
+            pctlOptionItem->setClickListener([](brls::View *view) {
+                static bool rejected = false;
+
+                if (rejected) {
+                    rejected = false;
+                    return;
+                }
+
+                if (hlp::openPctlPrompt([]{})) {
+                    SET_CONFIG(Settings.pctlChecksEnabled, static_cast<brls::ToggleListItem*>(view)->getToggleState());
+                }
+                else {
+                    rejected = true;
+                    static_cast<brls::ToggleListItem*>(view)->onClick();
+                }
+            });
+        }
 
         // Title Options
         auto displayOptions = { "edz.gui.main.settings.style.list"_lang, 
@@ -550,36 +575,36 @@ namespace edz::ui {
 
         displayOptionsItem->setListener([=](size_t selection) {
             this->m_titleList->changeLayer(selection, false);
-            SET_CONFIG(Save.titlesDisplayStyle, selection);
+            SET_CONFIG(Settings.titlesDisplayStyle, selection);
         });
 
 
         sortingOptionsItem->setListener([=](size_t selection) {
-            SET_CONFIG(Save.titlesSortingStyle, selection);
+            SET_CONFIG(Settings.titlesSortingStyle, selection);
             Gui::runLater([this]() { 
-                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
-                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
-                GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+                GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
             }, 1);
         });
 
-        displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesDisplayStyle)));
-        sortingOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Save.titlesSortingStyle)));
+        displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Settings.titlesDisplayStyle)));
+        sortingOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Settings.titlesSortingStyle)));
 
 
         // SwitchCheatsDB Login
         brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang);
-        scdbLoginItem->setValue(GET_CONFIG(Update.loggedIn) ? GET_CONFIG(Update.switchcheatsdbEmail) : "Not logged in");
+        scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "Not logged in");
         scdbLoginItem->setClickListener([=](brls::View *view) { 
-            if (GET_CONFIG(Update.loggedIn)) {
+            if (GET_CONFIG(Online.loggedIn)) {
                 brls::Dialog *dialog = new brls::Dialog("edz.gui.main.settings.dialog.logout"_lang);
                 dialog->addButton("edz.dialog.no"_lang, [=](brls::View *view) {
                     dialog->close();
                 });
                 dialog->addButton("edz.dialog.yes"_lang, [=](brls::View *view) {
-                    SET_CONFIG(Update.loggedIn, false);
-                    SET_CONFIG(Update.switchcheatsdbEmail, "");
-                    SET_CONFIG(Update.switchcheatsdbApiToken, "");
+                    SET_CONFIG(Online.loggedIn, false);
+                    SET_CONFIG(Online.switchcheatsdbEmail, "");
+                    SET_CONFIG(Online.switchcheatsdbApiToken, "");
                     scdbLoginItem->setValue("edz.gui.main.settings.account.nologin"_lang);
                     dialog->close();
                 });
@@ -596,6 +621,7 @@ namespace edz::ui {
 
         list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
         list->addView(languageOptionItem);
+        list->addView(pctlOptionItem);
 
         list->addView(new brls::Header("edz.gui.main.settings.header.titleoptions"_lang));
         list->addView(displayOptionsItem);
@@ -646,7 +672,7 @@ namespace edz::ui {
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
 
-        createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Save.titlesSortingStyle)));
+        createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
         createCheatsTab(this->m_cheatsList);
         createSaveReposTab(this->m_saveReposList);
         createSettingsTab(this->m_settingsList);

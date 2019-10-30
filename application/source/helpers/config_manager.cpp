@@ -39,20 +39,20 @@ namespace edz::hlp {
             file >> j;
 
             j.at("common").at("buildTime").get_to(ConfigManager::s_config.Common.buildTime);
-            j.at("common").at("debugMode").get_to(ConfigManager::s_config.Common.debugMode);
 
-            j.at("update").at("localCommitSha").get_to(ConfigManager::s_config.Update.localCommitSha);
-            j.at("update").at("notificationDates").get_to(ConfigManager::s_config.Update.notificationDates);
-            j.at("update").at("loggedIn").get_to(ConfigManager::s_config.Update.loggedIn);
-            j.at("update").at("switchcheatsdbEmail").get_to(ConfigManager::s_config.Update.switchcheatsdbEmail);
-            j.at("update").at("switchcheatsdbApiToken").get_to(ConfigManager::s_config.Update.switchcheatsdbApiToken);
+            j.at("online").at("localCommitSha").get_to(ConfigManager::s_config.Online.localCommitSha);
+            j.at("online").at("notificationDates").get_to(ConfigManager::s_config.Online.notificationDates);
+            j.at("online").at("loggedIn").get_to(ConfigManager::s_config.Online.loggedIn);
+            j.at("online").at("switchcheatsdbEmail").get_to(ConfigManager::s_config.Online.switchcheatsdbEmail);
+            j.at("online").at("switchcheatsdbApiToken").get_to(ConfigManager::s_config.Online.switchcheatsdbApiToken);
 
-            j.at("save").at("langCode").get_to(ConfigManager::s_config.Save.langCode);
-            j.at("save").at("titlesDisplayStyle").get_to(ConfigManager::s_config.Save.titlesDisplayStyle);
-            j.at("save").at("titlesSortingStyle").get_to(ConfigManager::s_config.Save.titlesSortingStyle);
-            j.at("save").at("saveFileRepos").get_to(ConfigManager::s_config.Save.saveFileRepos);
+            j.at("settings").at("langCode").get_to(ConfigManager::s_config.Settings.langCode);
+            j.at("settings").at("pctlChecksEnabled").get_to(ConfigManager::s_config.Settings.pctlChecksEnabled);
+            j.at("settings").at("titlesDisplayStyle").get_to(ConfigManager::s_config.Settings.titlesDisplayStyle);
+            j.at("settings").at("titlesSortingStyle").get_to(ConfigManager::s_config.Settings.titlesSortingStyle);
+            j.at("settings").at("saveFileRepos").get_to(ConfigManager::s_config.Settings.saveFileRepos);
 
-            j.at("vc").at("favoriteColors").get_to(ConfigManager::s_config.VC.favoriteColors);
+            j.at("cheatEngine").at("searchCount").get_to(ConfigManager::s_config.CheatEngine.searchCount);
         } catch (std::exception &e) {
             Logger::info("Config file not found. Creating...");
             store();
@@ -66,18 +66,18 @@ namespace edz::hlp {
     void ConfigManager::store() {
         std::lock_guard<std::mutex> lock(ConfigManager::s_mutex);
 
-        json j = {  { "common", { { "debugMode", ConfigManager::s_config.Common.debugMode },
-                                  { "buildTime", __DATE__ " " __TIME__ } } },
-                    { "update", { { "localCommitSha", ConfigManager::s_config.Update.localCommitSha },
-                                  { "notificationDates", ConfigManager::s_config.Update.notificationDates },
-                                  { "loggedIn", ConfigManager::s_config.Update.loggedIn },
-                                  { "switchcheatsdbEmail" , ConfigManager::s_config.Update.switchcheatsdbEmail },
-                                  { "switchcheatsdbApiToken", ConfigManager::s_config.Update.switchcheatsdbApiToken } } },
-                    { "save",   { { "langCode", ConfigManager::s_config.Save.langCode },
-                                  { "saveFileRepos", ConfigManager::s_config.Save.saveFileRepos },
-                                  { "titlesDisplayStyle", ConfigManager::s_config.Save.titlesDisplayStyle },
-                                  { "titlesSortingStyle", ConfigManager::s_config.Save.titlesSortingStyle } } },
-                    { "vc",     { { "favoriteColors", ConfigManager::s_config.VC.favoriteColors } } }
+        json j = {  { "common",      { { "buildTime",               __DATE__ " " __TIME__                                   } } },
+                    { "online",      { { "localCommitSha",          ConfigManager::s_config.Online.localCommitSha           },
+                                       { "notificationDates",       ConfigManager::s_config.Online.notificationDates        },
+                                       { "loggedIn",                ConfigManager::s_config.Online.loggedIn                 },
+                                       { "switchcheatsdbEmail" ,    ConfigManager::s_config.Online.switchcheatsdbEmail      },
+                                       { "switchcheatsdbApiToken",  ConfigManager::s_config.Online.switchcheatsdbApiToken   } } },
+                    { "settings",    { { "langCode",                ConfigManager::s_config.Settings.langCode               },
+                                       { "saveFileRepos",           ConfigManager::s_config.Settings.saveFileRepos          },
+                                       { "titlesDisplayStyle",      ConfigManager::s_config.Settings.titlesDisplayStyle     },
+                                       { "titlesSortingStyle",      ConfigManager::s_config.Settings.titlesSortingStyle     },
+                                       { "pctlChecksEnabled",       ConfigManager::s_config.Settings.pctlChecksEnabled      } } },
+                    { "cheatEngine", { { "searchCount",             ConfigManager::s_config.CheatEngine.searchCount         } } }
                 };  
 
         std::ofstream file(EDIZON_BASE_DIR "/config.json");

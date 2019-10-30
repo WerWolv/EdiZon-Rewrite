@@ -74,9 +74,9 @@ namespace edz::ui::page {
                 return;
             }
 
-            SET_CONFIG(Update.loggedIn, true);
-            SET_CONFIG(Update.switchcheatsdbEmail, this->m_email);
-            SET_CONFIG(Update.switchcheatsdbApiToken, token);
+            SET_CONFIG(Online.loggedIn, true);
+            SET_CONFIG(Online.switchcheatsdbEmail, this->m_email);
+            SET_CONFIG(Online.switchcheatsdbApiToken, token);
 
             loginItem->setValue(this->m_email);
             brls::Application::popView();

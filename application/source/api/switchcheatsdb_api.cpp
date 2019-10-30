@@ -61,7 +61,7 @@ namespace edz::api {
     std::pair<EResult, SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
         SwitchCheatsDBAPI::cheat_response_t cheatResponse;
 
-        auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + "/" + hlp::toHexString(buildID), { {"X-API-TOKEN", GET_CONFIG(Update.switchcheatsdbApiToken)} });
+        auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + "/" + hlp::toHexString(buildID), { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -87,7 +87,7 @@ namespace edz::api {
     std::pair<EResult, u32> SwitchCheatsDBAPI::getCheatCount() {
         u32 count;
 
-        auto [result, response] = this->m_curl.get("/cheats/count", { {"X-API-TOKEN", GET_CONFIG(Update.switchcheatsdbApiToken)} });
+        auto [result, response] = this->m_curl.get("/cheats/count", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, 0 };
@@ -105,7 +105,7 @@ namespace edz::api {
     std::pair<EResult, std::vector<SwitchCheatsDBAPI::save_file_t>> SwitchCheatsDBAPI::getSaveFiles() {
         std::vector<SwitchCheatsDBAPI::save_file_t> saveFiles;
 
-        auto [result, response] = this->m_curl.get("/saves", { {"X-API-TOKEN", GET_CONFIG(Update.switchcheatsdbApiToken)} });
+        auto [result, response] = this->m_curl.get("/saves", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };

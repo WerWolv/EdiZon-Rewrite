@@ -35,33 +35,30 @@ namespace edz::hlp {
     typedef struct {
         struct {
             std::string buildTime;
-            bool debugMode;
         } Common;
 
         struct {
             std::string localCommitSha;
-            
             std::vector<time_t> notificationDates;
 
             bool loggedIn;
             std::string switchcheatsdbEmail;
             std::string switchcheatsdbApiToken;
-        } Update;
-
-        struct {
-            std::string langCode;
-            u8 titlesDisplayStyle;
-            u8 titlesSortingStyle;
-            std::vector<std::string> saveFileRepos;
-        } Save;
-
-        struct {
-            std::vector<u32> favoriteColors;
-        } VC;
+        } Online;
 
         struct {
             u16 searchCount;
         } CheatEngine;
+
+        struct {
+            std::string langCode;
+            bool pctlChecksEnabled;
+
+            u8 titlesDisplayStyle;
+            u8 titlesSortingStyle;
+
+            std::vector<std::string> saveFileRepos;
+        } Settings;
     } config_t;
 
     class ConfigManager {
