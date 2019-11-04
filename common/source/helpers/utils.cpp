@@ -246,6 +246,14 @@ namespace edz::hlp {
 
 #endif
 
+    bool isProgramRunning(titleid_t titleID) {
+        u64 pid = 0;
+        if (EResult(pmdmntGetProcessId(&pid, titleID)).failed())
+            return false;
+        
+        return pid != 0;
+    }
+
     bool isServiceRunning(const char *serviceName) {
         Handle handle;
         bool running = EResult(smRegisterService(&handle, smEncodeName(serviceName), false, 1));
@@ -370,53 +378,42 @@ namespace edz::hlp {
 
 #ifndef __SYSMODULE__
 
-    EResult startBackgroundService(bool startOnBoot) {
-        u64 pid = 0;
-
-        NcmProgramLocation edizonLocation = { 0x0100000000ED1204, FsStorageId_None };
-
-        pmdmntGetProcessId(&pid, 0x0100000000ED1204);
-        if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
-
-        {
-            File romfsSysmoduleFile("romfs:/sysmodule/exefs.nsp");
-            romfsSysmoduleFile.copyTo(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
-        }
-
-        if (EResult(pmshellLaunchProgram(0, &edizonLocation, &pid)).failed()) {
-            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").remove();
-            return ResultEdzSysmoduleLaunchFailed;
-        }
-
-        if (!startOnBoot)
-            File(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp").remove();
-        else {
-            // Create boot2.flag file to let the sysmodule get started on boot
-            File file(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag"); 
-            file.createDirectories();
-            file.write(nullptr, 0);
-        }
-
-        return ResultSuccess;
+    void enableAutostartOfBackgroundService() {
+        // Create boot2.flag file to let the sysmodule get started on boot
+        File file(getLFSTitlesPath() + "/01000000000ED150/flags/boot2.flag"); 
+        file.createDirectories();
+        file.write(nullptr, 0);
     }
 
-    EResult stopBackgroundService(bool startOnBoot) {
+    void disableAutostartOfBackgroundService() {
+        File(getLFSTitlesPath() + "/01000000000ED150/flags/boot2.flag").remove();
+    }
+
+    EResult startBackgroundService() {
+        EResult res = ResultSuccess;
         u64 pid = 0;
 
-        if (!startOnBoot) {
-            File sysmoduleFile(getLFSTitlesPath() + "/0100000000ED1204/exefs.nsp");
-            File flagFile(getLFSTitlesPath() + "/0100000000ED1204/flags/boot2.flag");
+        NcmProgramLocation edizonLocation = { 0x01000000000ED150, FsStorageId_None };
 
-            sysmoduleFile.remove();
-            flagFile.remove();
-        }
+        pmdmntGetProcessId(&pid, 0x01000000000ED150);
+        if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
+        
+        pid = 0;
+        if (EResult(pmshellLaunchProgram(0, &edizonLocation, &pid)).failed())
+            res = ResultEdzSysmoduleLaunchFailed;
 
-        pmdmntGetProcessId(&pid, 0x0100000000ED1204);
+        return res;
+    }
+
+    EResult stopBackgroundService() {
+        u64 pid = 0;
+
+        pmdmntGetProcessId(&pid, 0x01000000000ED150);
         if (pid == 0) return ResultEdzSysmoduleNotRunning;
 
         if (EResult(pmshellTerminateProcess(pid)).failed())
             return ResultEdzSysmoduleTerminationFailed;
-        
+
         return ResultSuccess;
     }
 
@@ -467,7 +464,7 @@ namespace edz::hlp {
         return info.addr;
     }
 
-    void unwindStack(u64 *outStackTrace, size_t *outStackTraceSize, size_t maxStackTraceSize, u64 currFp) {
+    void unwindStack(u64 *outStackTrace, s32 *outStackTraceSize, size_t maxStackTraceSize, u64 currFp) {
         struct StackFrame{
             u64 fp;     // Frame Pointer (Pointer to previous stack frame)
             u64 lr;     // Link Register (Return address)

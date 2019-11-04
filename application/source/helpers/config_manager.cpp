@@ -51,6 +51,7 @@ namespace edz::hlp {
             j.at("settings").at("titlesDisplayStyle").get_to(ConfigManager::s_config.Settings.titlesDisplayStyle);
             j.at("settings").at("titlesSortingStyle").get_to(ConfigManager::s_config.Settings.titlesSortingStyle);
             j.at("settings").at("saveFileRepos").get_to(ConfigManager::s_config.Settings.saveFileRepos);
+            j.at("settings").at("sysmoduleAutoStart").get_to(ConfigManager::s_config.Settings.sysmoduleAutoStart);
 
             j.at("cheatEngine").at("searchCount").get_to(ConfigManager::s_config.CheatEngine.searchCount);
         } catch (std::exception &e) {
@@ -76,7 +77,8 @@ namespace edz::hlp {
                                        { "saveFileRepos",           ConfigManager::s_config.Settings.saveFileRepos          },
                                        { "titlesDisplayStyle",      ConfigManager::s_config.Settings.titlesDisplayStyle     },
                                        { "titlesSortingStyle",      ConfigManager::s_config.Settings.titlesSortingStyle     },
-                                       { "pctlChecksEnabled",       ConfigManager::s_config.Settings.pctlChecksEnabled      } } },
+                                       { "pctlChecksEnabled",       ConfigManager::s_config.Settings.pctlChecksEnabled      },
+                                       { "sysmoduleAutoStart",      ConfigManager::s_config.Settings.sysmoduleAutoStart     } } },
                     { "cheatEngine", { { "searchCount",             ConfigManager::s_config.CheatEngine.searchCount         } } }
                 };  
 

@@ -34,20 +34,8 @@
     using Logger = brls::Logger;
     
     #include "helpers/lang_entry.hpp"           // Translation helper
-    using namespace std::string_literals;       // String user defined literals
 
     /* || EDIZON COMPILE TIME SETTINGS || */
-
-    /* The EdiZon paths on the SD card */
-    #define EDIZON_BASE_DIR                 "sdmc:/switch/EdiZon"
-        #define EDIZON_BACKUP_DIR               EDIZON_BASE_DIR "/backups"
-        #define EDIZON_BATCH_BACKUP_DIR         EDIZON_BASE_DIR "/batch_backups"
-        #define EDIZON_COMMON_RESTORE_DIR       EDIZON_BASE_DIR "/restore"
-        #define EDIZON_CONFIGS_DIR              EDIZON_BASE_DIR "/configs"
-        #define EDIZON_SCRIPTS_DIR              EDIZON_BASE_DIR "/scripts"
-        #define EDIZON_LIBS_DIR                 EDIZON_BASE_DIR "/scripts/libs"
-        #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
-        #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
 
     #define BACKUP_FILE_EXTENSION           ".edz"
 
@@ -74,5 +62,17 @@
 
 #else               // EdiZon Sysmodule context
 
+#endif              // EdiZon Homebrew and Sysmodule context
 
-#endif
+    /* The EdiZon paths on the SD card */
+    #define EDIZON_BASE_DIR                 "sdmc:/switch/EdiZon"
+        #define EDIZON_BACKUP_DIR               EDIZON_BASE_DIR "/backups"
+        #define EDIZON_BATCH_BACKUP_DIR         EDIZON_BASE_DIR "/batch_backups"
+        #define EDIZON_COMMON_RESTORE_DIR       EDIZON_BASE_DIR "/restore"
+        #define EDIZON_CONFIGS_DIR              EDIZON_BASE_DIR "/configs"
+        #define EDIZON_SCRIPTS_DIR              EDIZON_BASE_DIR "/scripts"
+        #define EDIZON_LIBS_DIR                 EDIZON_BASE_DIR "/scripts/libs"
+        #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
+        #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
+
+    using namespace std::string_literals;       // String user defined literals

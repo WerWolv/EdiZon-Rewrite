@@ -33,6 +33,7 @@ namespace edz {
     constexpr Result ResultEdzBorealisInitFailed            = EDZHBRES(1);
     constexpr Result ResultEdzCurlInitFailed                = EDZHBRES(2);
     constexpr Result ResultEdzNotYetImplemented             = EDZHBRES(3);
+    constexpr Result ResultEdzErrorDuringErrorHandling      = EDZHBRES(4);
 
     constexpr Result ResultEdzSysmoduleAlreadyRunning       = EDZHBRES(101);
     constexpr Result ResultEdzSysmoduleNotRunning           = EDZHBRES(102);
@@ -62,6 +63,8 @@ namespace edz {
     constexpr Result ResultEdzCheatParsingFailed            = EDZHBRES(601);
     constexpr Result ResultEdzCheatServiceNotAvailable      = EDZHBRES(602);
 
+    constexpr Result ResultEdzMemoryReadFailed              = EDZHBRES(701);
+    constexpr Result ResultEdzMemoryOverflow                = EDZHBRES(702);
 
     /* Sysmodule error codes */
     constexpr Result ResultEdzAlreadyRegistered              = EDZSYSRES(1);

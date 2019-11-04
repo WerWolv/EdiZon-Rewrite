@@ -472,7 +472,19 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        list->addView(new brls::Label(brls::LabelStyle::SMALL, "edz.gui.main.cheats.label.desc"_lang, true));
+        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.sysmodule"_lang, hlp::isProgramRunning(0x01000000000ED150), "edz.gui.main.cheats.sysmodule.desc"_lang);
+        this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
+            brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
+            
+            if (listItem->getToggleState())
+                hlp::startBackgroundService();
+            else
+                hlp::stopBackgroundService();
+
+            Gui::runLater([this] { this->m_sysmoduleRunningOption->setToggleState(hlp::isProgramRunning(0x01000000000ED150)); }, 5);
+        });
+
+        list->addView(this->m_sysmoduleRunningOption);
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
         if (cheat::CheatManager::isCheatServiceAvailable()) {
@@ -593,7 +605,7 @@ namespace edz::ui {
 
 
         // SwitchCheatsDB Login
-        brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang);
+        brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang, "edz.gui.main.settings.scdbinfo"_lang);
         scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "Not logged in");
         scdbLoginItem->setClickListener([=](brls::View *view) { 
             if (GET_CONFIG(Online.loggedIn)) {
@@ -619,6 +631,20 @@ namespace edz::ui {
             }
         });
 
+
+        // Sysmodule Options
+        brls::ListItem *sysmoduleAutoStartOption = new brls::ToggleListItem("edz.gui.main.settings.autostart"_lang, GET_CONFIG(Settings.sysmoduleAutoStart), "edz.gui.main.settings.autostart.desc"_lang);
+        sysmoduleAutoStartOption->setClickListener([](brls::View *view) {
+            brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
+            SET_CONFIG(Settings.sysmoduleAutoStart, listItem->getToggleState());
+            
+            if (listItem->getToggleState())
+                hlp::enableAutostartOfBackgroundService();
+            else
+                hlp::disableAutostartOfBackgroundService();
+        });
+
+
         list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
         list->addView(languageOptionItem);
         list->addView(pctlOptionItem);
@@ -628,8 +654,11 @@ namespace edz::ui {
         list->addView(sortingOptionsItem);
         
         list->addView(new brls::Header("edz.gui.main.settings.header.accountoptions"_lang));
-        list->addView(new brls::Label(brls::LabelStyle::MEDIUM, "edz.gui.main.settings.scdbinfo"_lang, true));
         list->addView(scdbLoginItem);
+
+        list->addView(new brls::Header("edz.gui.main.settings.header.sysmoduleoptions"_lang));
+        list->addView(sysmoduleAutoStartOption);
+
     }
 
     void GuiMain::createAboutTab(brls::List *list) {

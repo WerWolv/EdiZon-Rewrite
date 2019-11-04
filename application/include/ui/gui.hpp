@@ -46,7 +46,8 @@ namespace edz::ui {
                 if (asyncTask.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready && timeout == -1)
                     timeout = 60;
                 else if (timeout == 0) {
-                    dialog->close();
+                    if (dialog != nullptr)
+                        dialog->close();
                     brls::Application::unblockInputs();
                     Gui::s_asyncTasks.erase(Gui::s_asyncTasks.begin() + taskIndex);
                 }
@@ -76,22 +77,7 @@ namespace edz::ui {
             Gui::s_guiStack.push_back(newGui);
             brls::Application::pushView(newGui->setupUI());
         }
-
-        template<typename T, typename... Args>
-        static void replaceWith(Args... args) {
-            brls::Application::blockInputs();
-            brls::Application::removeFocus();
-
-            brls::Application::popView();
-
-            Gui *newGui = new T(args...);
-
-            Gui::s_guiStack.push_back(newGui);
-            brls::Application::pushView(newGui->setupUI());
-
-            brls::Application::unblockInputs();
-        }
-
+        
         static void goBack() {
             if (Gui::s_guiStack.size() <= 1)
                 return;
@@ -110,6 +96,10 @@ namespace edz::ui {
 
         static void runLater(std::function<void()> task, u32 frameDelay) {
             Gui::s_syncTasks.push_back({ task, frameDelay });
+        }
+
+        static void runAsync(std::future<EResult> task) {
+            Gui::s_asyncTasks.push_back({ std::move(task), nullptr, -1 });
         }
 
         static void runAsyncWithDialog(std::future<EResult> task, std::string dialogText) {

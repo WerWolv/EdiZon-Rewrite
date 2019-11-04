@@ -58,6 +58,8 @@ namespace edz::hlp {
             u8 titlesSortingStyle;
 
             std::vector<std::string> saveFileRepos;
+
+            bool sysmoduleAutoStart;
         } Settings;
     } config_t;
 

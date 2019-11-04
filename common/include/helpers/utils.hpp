@@ -63,6 +63,8 @@ namespace edz::hlp {
     /* Returns if a sysmodule running that has a specific service registered */
     bool isServiceRunning(const char *serviceName);
 
+    /* Returns if a process with a specific titleid is running */
+    bool isProgramRunning(titleid_t titleID);
 
     /* Returns if the user is running Atmosphere */
     bool isOnAMS();
@@ -138,10 +140,16 @@ namespace edz::hlp {
 #ifndef __SYSMODULE__
 
     /* Starts the EdiZon sysmodule */
-    EResult startBackgroundService(bool startOnBoot);
+    EResult startBackgroundService();
 
     /* Terminates the EdiZon sysmodule */
-    EResult stopBackgroundService(bool startOnBoot);
+    EResult stopBackgroundService();
+
+    /* Enables autostart for the edizon background service */
+    void enableAutostartOfBackgroundService();
+
+    /* Disables autostart for the edizon background service */
+    void disableAutostartOfBackgroundService();
 
 #endif
 
@@ -156,7 +164,7 @@ namespace edz::hlp {
     u64 getHomebrewBaseAddress();
 
     /* Parses the Stack starting at the current Frame Pointer and returns a stack trace */
-    void unwindStack(u64 *outStackTrace, size_t *outStackTraceSize, size_t maxStackTraceSize, u64 currFp);
+    void unwindStack(u64 *outStackTrace, s32 *outStackTraceSize, size_t maxStackTraceSize, u64 currFp);
 
     std::string removeInvalidCharacters(std::string in);
 

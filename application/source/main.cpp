@@ -160,13 +160,19 @@ int main(int argc, char* argv[]) {
     // Load config file
     hlp::ConfigManager::load();
 
+    // Unpack background service
+    {
+        hlp::File romfsSysmoduleFile("romfs:/sysmodule/exefs.nsp");
+        romfsSysmoduleFile.copyTo(hlp::getLFSTitlesPath() + "/01000000000ED150/exefs.nsp");
+    }
+
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
 
     // Set the startup Gui
     #if SPLASH_ENABLED
         ui::Gui::changeTo<ui::GuiSplash>();
     #else
-        Gui::changeTo<ui::GuiMain>();
+        ui::Gui::changeTo<ui::GuiMain>();
     #endif
 
     // Start background tasks

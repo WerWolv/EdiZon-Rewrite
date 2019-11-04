@@ -104,6 +104,21 @@
 
 #if !DISABLE_EXCEPTION_HANDLER
 
+static void printDebugInfo(ThreadExceptionDump *ctx) {
+    u64 stackTrace[0x20] = { 0 };
+    s32 stackTraceSize = 0;
+    edz::hlp::unwindStack(stackTrace, &stackTraceSize, 0x20, ctx->fp.x);
+
+    brls::Logger::error("[PC] BASE + 0x%016lx", ctx->pc.x - edz::hlp::getHomebrewBaseAddress());
+    brls::Logger::error("[LR] BASE + 0x%016lx", ctx->lr.x - edz::hlp::getHomebrewBaseAddress());
+    brls::Logger::error("[SP] BASE + 0x%016lx", ctx->sp.x - edz::hlp::getHomebrewBaseAddress());
+    brls::Logger::error("[FP] BASE + 0x%016lx", ctx->fp.x - edz::hlp::getHomebrewBaseAddress());
+    brls::Logger::error("== Begin stack trace ==");
+    for (s8 i = 0; i < stackTraceSize - 2; i++)
+        brls::Logger::error("[%d] BASE + 0x%016lx", stackTraceSize - i - 3, stackTrace[i] - edz::hlp::getHomebrewBaseAddress());
+    brls::Logger::error("== End stack trace ==");
+}
+
 extern "C" {
    
     alignas(16) u8 __nx_exception_stack[0x8000];
@@ -111,8 +126,37 @@ extern "C" {
     void NORETURN __nx_exit(Result rc, LoaderReturnFn retaddr);
 
     void __libnx_exception_handler(ThreadExceptionDump *ctx) {
-
         std::string errorDesc;
+        static bool alreadyCrashed = false;
+
+        if (alreadyCrashed) {
+            brls::Logger::error("Fatal exception thrown during exception handling. Closing immediately.");
+            printDebugInfo(ctx);
+
+            // Setup FatalCpuContext to pass on crash information to fatal
+            FatalCpuContext fatalCtx = { 0 };
+            for (u8 i = 0; i < 29; i++)
+                fatalCtx.aarch64_ctx.x[i] = ctx->cpu_gprs[i].x;
+
+            fatalCtx.aarch64_ctx.pc = ctx->pc.x;
+            fatalCtx.aarch64_ctx.lr = ctx->lr.x;
+            fatalCtx.aarch64_ctx.sp = ctx->sp.x;
+            fatalCtx.aarch64_ctx.fp = ctx->fp.x;
+            
+            fatalCtx.aarch64_ctx.start_address = edz::hlp::getHomebrewBaseAddress();
+            edz::hlp::unwindStack(fatalCtx.aarch64_ctx.stack_trace, reinterpret_cast<s32*>(&fatalCtx.aarch64_ctx.stack_trace_size), 32, ctx->fp.x);
+            fatalCtx.aarch64_ctx.afsr0 = ctx->afsr0;
+            fatalCtx.aarch64_ctx.afsr1 = ctx->afsr1;
+            fatalCtx.aarch64_ctx.esr = ctx->esr;
+            fatalCtx.aarch64_ctx.far = ctx->far.x;
+            fatalCtx.aarch64_ctx.register_set_flags = 0xFFFFFFFF;
+            fatalCtx.aarch64_ctx.pstate = ctx->pstate;
+            
+            fatalThrowWithContext(edz::ResultEdzErrorDuringErrorHandling, FatalPolicy_ErrorScreen, &fatalCtx);
+            return;
+        }
+
+        alreadyCrashed = true;
 
         switch (ctx->error_desc) {
             case ThreadExceptionDesc_BadSVC:
@@ -141,20 +185,14 @@ extern "C" {
                 break;
         }
 
+        brls::Application::removeFocus();
         edz::ui::Gui::fatal("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
             "A fatal exception occured!",
             "Reason",
             errorDesc.c_str(),
             ctx->pc.x - edz::hlp::getHomebrewBaseAddress());
 
-        u64 stackTrace[0x20] = { 0 };
-        size_t stackTraceSize = 0;
-        edz::hlp::unwindStack(stackTrace, &stackTraceSize, 0x20, ctx->fp.x);
-
-        brls::Logger::error("== Begin stack trace ==");
-        for (u8 i = 0; i < stackTraceSize - 2; i++)
-            brls::Logger::error("[%d] BASE + 0x%016lx", stackTraceSize - i - 3, stackTrace[i] - edz::hlp::getHomebrewBaseAddress());
-        brls::Logger::error("== End stack trace ==");
+        printDebugInfo(ctx);
 
         appletRequestExitToSelf();
     }
