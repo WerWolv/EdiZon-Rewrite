@@ -38,9 +38,10 @@ namespace edz::ovl {
     private:
         static inline Screen *s_screen = nullptr;
 
-        lv_disp_drv_t m_displayDriver = { 0 };
-        lv_disp_buf_t m_displayBuffer = { 0 };
-        lv_indev_drv_t m_inputDevice = { 0 };
+        static inline lv_disp_drv_t s_displayDriver = { 0 };
+        static inline lv_disp_buf_t s_displayBuffer = { 0 };
+        static inline lv_indev_drv_t s_inputDevice = { 0 };
+        static inline bool s_initialized = false;
 
         static void lvglDisplayFlush(lv_disp_drv_t *displayDriver, const lv_area_t *area, lv_color_t *color);
         static bool lvglTouchRead(_lv_indev_drv_t *indev, lv_indev_data_t *data);

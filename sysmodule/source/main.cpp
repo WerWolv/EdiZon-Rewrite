@@ -21,26 +21,28 @@
 
 #include <stratosphere.hpp>
 
-#include "vc/edz_vc_service.hpp"
-#include "vc/vc_manager.hpp"
 #include "overlay/screen.hpp"
 #include "overlay/gui.hpp"
 #include "overlay/gui_cheats.hpp"
 #include "helpers/results.hpp"
 #include "helpers/hidsys_shim.hpp"
+#include "helpers/utils.hpp"
 #include "cheat/cheat.hpp"
-
-#include "comms/tcp.hpp"
-#include "comms/usb.hpp"
 
 #include <lvgl.h>
 
 #include <stdio.h>
 
 using namespace edz;
+using namespace ams;
 
-constexpr sts::ncm::TitleId EdiZonSysTitleId = { 0x0100000000ED1204 };
+constexpr ams::ncm::ProgramId EdiZonSysProgramId = { 0x0100000000ED1204 };
 
+namespace ams::result {
+
+    bool CallFatalOnResultAssertion = false;
+
+}
 
 extern "C" {
 
@@ -79,60 +81,18 @@ extern "C" {
             }
         }
 
-        SocketInitConfig sockConf = {
-            .bsdsockets_version = 1,
-
-            .tcp_tx_buf_size = 0x800,
-            .tcp_rx_buf_size = 0x1000,
-            .tcp_tx_buf_max_size = 0x4000,
-            .tcp_rx_buf_max_size = 0x4000,
-
-            .udp_tx_buf_size = 0x2400,
-            .udp_rx_buf_size = 0xA500,
-
-            .sb_efficiency = 4,
-
-            .serialized_out_addrinfos_max_size = 0x1000,
-            .serialized_out_hostent_max_size = 0x200,
-            .bypass_nsd = false,
-            .dns_timeout = 0,
-        };
-
-        res = socketInitialize(&sockConf);
-        if (res.failed())
-            fatalSimple(res);
-
         res = pmdmntInitialize();
         if (res.failed())
-            fatalSimple(res);
-
-        res = edz::comms::tcp::TCPManager::initialize();
-        if (res.failed())
-            fatalSimple(edz::ResultEdzTCPInitFailed);
-
-        res = edz::comms::usb::USBManager::initialize();
-        if (res.failed())
-            fatalSimple(edz::ResultEdzUSBInitFailed);
+            fatalThrow(res);
 
         res = hidInitialize();
         if (res.failed())
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        res = hidsysInitialize();
-        if (res.failed())
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        res = hiddbgInitialize();
-        if (res.failed())
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
         res = fsInitialize();
         if (res.failed())
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
-        res = plInitialize();
-        if (res.failed())
-            fatalSimple(edz::ResultEdzFontInitFailed);
 
         edz::dmntcht::initialize();
         edz::cheat::CheatManager::initialize();
@@ -140,7 +100,7 @@ extern "C" {
         fsdevMountSdmc();
 
         if (edz::ovl::Screen::initialize().failed())
-            fatalSimple(edz::ResultEdzScreenInitFailed);
+            fatalThrow(edz::ResultEdzScreenInitFailed);
 
     }
 
@@ -151,16 +111,11 @@ extern "C" {
         fsExit();
         timeExit();
         hidExit();
-        hidsysExit();
-        hiddbgExit();
         smExit();
-        plExit();
 
         pmdmntExit();
         
         edz::dmntcht::exit();
-        edz::comms::tcp::TCPManager::exit();
-        edz::comms::usb::USBManager::exit();
         edz::ovl::Screen::exit();
     }
 
@@ -169,9 +124,9 @@ extern "C" {
 EResult focusOverlay(bool focus) {
     aruid_t qlaunchAruid = 0, overlayAruid = 0, edzAruid = 0, applicationAruid = 0;
 
-    pmdmntGetTitlePid(&qlaunchAruid, (u64)sts::ncm::TitleId::AppletQlaunch);
-    pmdmntGetTitlePid(&overlayAruid, (u64)sts::ncm::TitleId::AppletOverlayDisp);
-    pmdmntGetApplicationPid(&applicationAruid);
+    pmdmntGetProcessId(&qlaunchAruid, (u64)ams::ncm::ProgramId::AppletQlaunch);
+    pmdmntGetProcessId(&overlayAruid, (u64)ams::ncm::ProgramId::AppletOverlayDisp);
+    pmdmntGetApplicationProcessId(&applicationAruid);
     appletGetAppletResourceUserIdOfCallerApplet(&edzAruid);
 
     ER_TRY(edz::hidsys::enableAppletToGetInput(!focus, qlaunchAruid));
@@ -183,22 +138,6 @@ EResult focusOverlay(bool focus) {
 }
 
 static Event overlayComboEvent;
-
-static void netLoop(void *args) {
-    while (true) {
-        edz::comms::tcp::TCPManager::process();
-        svcSleepThread(1E6); // Sleep 1ms
-    }
-} 
-
-static void usbLoop(void *args) {
-    while (true) {
-        edz::comms::usb::USBManager::process();
-        svcSleepThread(1E6); // Sleep 1ms
-    }
-} 
-
-static bool cheatOverlayVisible = true;
 
 static void hidLoop(void *args) {
     HidControllerID controllerID = HidControllerID::CONTROLLER_UNKNOWN;
@@ -220,9 +159,6 @@ static void hidLoop(void *args) {
         svcSleepThread(20E6); // Sleep 20ms
         //edz::vc::VirtualControllerManager::getInstance().process(kDown);
 
-        if (kDown & KEY_MINUS)
-            cheatOverlayVisible = !cheatOverlayVisible;
-
         if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_PLUS)
             eventFire(&overlayComboEvent);
 
@@ -236,7 +172,9 @@ static void ovlLoop(void *args) {
 
     while (true) {
         eventWait(&overlayComboEvent, U64_MAX);
+        eventClear(&overlayComboEvent);
         focusOverlay(true);
+
         edz::ovl::Gui *gui = new edz::ovl::GuiCheats(screen);
 
         gui->createUI();
@@ -263,32 +201,21 @@ static void ovlLoop(void *args) {
     
 }
 
-int main(int argc, char* argv[]) {
-    Thread netThread, usbThread, hidThread, ovlThread;
 
-    //edz::vc::VirtualControllerManager::getInstance().connectVC(0xFFFF00FF, 0xFFFFFFFF);
+int main(int argc, char* argv[]) {
+    Thread hidThread, ovlThread;
 
     eventCreate(&overlayComboEvent, true);
 
-    threadCreate(&netThread, netLoop, nullptr, 0x20500, 0x2C, -2);
-    threadCreate(&usbThread, usbLoop, nullptr, 0x30000, 0x2C, -2);
-    threadCreate(&hidThread, hidLoop, nullptr, 0x500, 0x2C, -2);
-    threadCreate(&ovlThread, ovlLoop, nullptr, 0x30000, 0x2C, -2);
+    threadCreate(&hidThread, hidLoop, nullptr, nullptr, 0x500, 0x2C, -2);
+    threadCreate(&ovlThread, ovlLoop, nullptr, nullptr, 0x30000, 0x2C, -2);
 
-    threadStart(&netThread);
-    threadStart(&usbThread);
     threadStart(&hidThread);
     threadStart(&ovlThread);
 
-    consoleDebugInit(debugDevice_SVC);
 
-    while(true) {
-        svcSleepThread(10E9);
-    }
-    static auto serverManager = WaitableManager(1);
-    serverManager.AddWaitable(new ServiceServer<edz::vc::EdzVCService>("edz:vc", 1));
-    
-    serverManager.Process();
+    while (true)
+        svcSleepThread(1E9);
     
     return 0;
 }

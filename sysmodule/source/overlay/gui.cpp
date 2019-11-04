@@ -11,20 +11,25 @@ namespace edz::ovl {
         last_x = 0;
         last_y = 0;
 
+        if (Gui::s_initialized)
+            return;
+
         static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX][2];
 
-        lv_disp_drv_init(&this->m_displayDriver);
-        lv_disp_buf_init(&this->m_displayBuffer, buf[0], buf[1], LV_HOR_RES_MAX * LV_VER_RES_MAX);
-        this->m_displayDriver.flush_cb = Gui::lvglDisplayFlush;
-        this->m_displayDriver.buffer = &this->m_displayBuffer;
-        this->m_displayDriver.hor_res = LV_HOR_RES_MAX;
-        this->m_displayDriver.ver_res = LV_VER_RES_MAX;
-        lv_disp_drv_register(&this->m_displayDriver);
+        lv_disp_drv_init(&Gui::s_displayDriver);
+        lv_disp_buf_init(&Gui::s_displayBuffer, buf[0], buf[1], LV_HOR_RES_MAX * LV_VER_RES_MAX);
+        Gui::s_displayDriver.flush_cb = Gui::lvglDisplayFlush;
+        Gui::s_displayDriver.buffer = &Gui::s_displayBuffer;
+        Gui::s_displayDriver.hor_res = LV_HOR_RES_MAX;
+        Gui::s_displayDriver.ver_res = LV_VER_RES_MAX;
+        lv_disp_drv_register(&Gui::s_displayDriver);
 
-        lv_indev_drv_init(&this->m_inputDevice);
-        this->m_inputDevice.type = LV_INDEV_TYPE_POINTER;
-        this->m_inputDevice.read_cb = Gui::lvglTouchRead;
-        lv_indev_drv_register(&this->m_inputDevice);
+        lv_indev_drv_init(&Gui::s_inputDevice);
+        Gui::s_inputDevice.type = LV_INDEV_TYPE_POINTER;
+        Gui::s_inputDevice.read_cb = Gui::lvglTouchRead;
+        lv_indev_drv_register(&Gui::s_inputDevice);
+
+        Gui::s_initialized = true;
     }
 
     Gui::~Gui() {

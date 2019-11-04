@@ -21,6 +21,7 @@
 
 #include "overlay/gui.hpp"
 #include <thread>
+#include <vector>
 
 namespace edz::ovl {
 
@@ -31,6 +32,10 @@ namespace edz::ovl {
 
         void createUI() override;
         void update() override;
+
+    private:
+        lv_obj_t *m_title, *m_list;
+        lv_group_t *m_group;
     };
 
 }

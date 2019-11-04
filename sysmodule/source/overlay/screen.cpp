@@ -77,8 +77,8 @@ namespace edz::ovl {
         if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_FitToLayer)).failed())
             goto close_layer;
 
-        u64 layer_z; // s64 ?
-        if (EResult(res = viGetDisplayMaximumZ(&Screen::g_display, &layer_z)).succeeded() && (layer_z > 0)) {
+        s32 layer_z;
+        if (EResult(res = viGetZOrderCountMax(&Screen::g_display, &layer_z)).succeeded() && (layer_z > 0)) {
             if (EResult(res = viSetLayerZ(&this->m_layer, layer_z)).failed())
                 goto close_layer;
         }
@@ -108,7 +108,7 @@ namespace edz::ovl {
     fatal:
         exit();
 
-        fatalSimple(res);
+        fatalThrow(res);
     }
 
     Screen::~Screen() {

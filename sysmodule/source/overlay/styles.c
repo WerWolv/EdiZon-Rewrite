@@ -55,7 +55,7 @@ static lv_style_t button_released_style_en = {
     .body.shadow.type      = LV_SHADOW_FULL,
     .body.shadow.width     = 0,
     .text.opa              = LV_OPA_COVER,
-    .text.color            = LV_COLOR_MAKE(50, 255, 50),
+    .text.color            = COLOR_TXT_REL,
     .text.letter_space     = 1,
     .text.line_space       = 0,
 };
