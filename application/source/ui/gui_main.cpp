@@ -21,6 +21,7 @@
 #include "ui/gui_cheat_engine.hpp"
 
 #include <cstring>
+#include <algorithm>
 
 #include "helpers/config_manager.hpp"
 #include "save/edit/config.hpp"
@@ -90,6 +91,7 @@ namespace edz::ui {
             softwareInfoList->addView(createSaveFSItem);
         }
 
+
         brls::List *saveManagementList = new brls::List();
 
         brls::ListItem *backupItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
@@ -97,7 +99,7 @@ namespace edz::ui {
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
                 if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
-                    Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::backup, std::ref(title), std::ref(account), backupName, ""), "Creating a save data backup...");
+                    Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "Creating a save data backup...");
              });
 
         });
@@ -110,7 +112,7 @@ namespace edz::ui {
 
                     if (selection != -1) {
                         hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
-                            Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::restore, std::ref(title), std::ref(account), list[selection], ""), "Restoring a save data backup...");
+                            Gui::runAsyncWithDialog([&] { save::SaveManager::restore(title, account, list[selection]); }, "Restoring a save data backup...");
                         });
                     }
                     
@@ -126,7 +128,7 @@ namespace edz::ui {
             confirmationDialog->addButton("Yes", [confirmationDialog, &title](brls::View *view) {
                 if (hlp::openPctlPrompt([]{})) {
                     hlp::openPlayerSelect([&](std::unique_ptr<save::Account> &account) {
-                        Gui::runLater([&]() { Gui::runAsyncWithDialog(std::async(std::launch::async, save::SaveManager::remove, std::ref(title), std::ref(account)), "Deleting save data..."); }, 1);
+                        Gui::runLater([&]() { Gui::runAsyncWithDialog([&] { save::SaveManager::remove(title, account); }, "Deleting save data..."); }, 1);
                     });
                 }
                 confirmationDialog->close();
@@ -135,40 +137,37 @@ namespace edz::ui {
             confirmationDialog->open();
         });
 
-        /*brls::ListItem *editItem = new brls::ListItem("Edit Save File", "", "Edit your save file");
-        editItem->setClickListener([=](brls::View *view) {
-            save::Account *currUser = nullptr;
-            if (hlp::openPlayerSelect([&](save::Account *account) { currUser = account; })) {
-                auto [result, config] = save::edit::Editor::loadConfig(title, currUser);
 
-                if (result.succeeded()) {
-                    std::vector<std::string> saveFilePaths = config->getSaveFilePaths();
+        brls::List *cheatDownloadList = new brls::List();
+        
+        Gui::runAsync([=, &title]() {
+            api::SwitchCheatsDBAPI switchCheatsDBAPI;
 
-                    brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, saveFilePaths, [=](int selection) {
-                        if (selection != -1) {
-                            auto [result, script] = save::edit::Editor::loadScript(title, currUser, saveFilePaths[selection]);
-                            brls::TabFrame *editorFrame = new brls::TabFrame();
-                            config->setScript(script);
-                            config->createUI(editorFrame);
+            auto [result, response] = switchCheatsDBAPI.getCheats(title->getID());
 
-                            brls::Application::pushView(editorFrame);
-                        }                   
-                    });   
-                }
-
+            if (result.failed()) {
+                cheatDownloadList->addView(new brls::ListItem("No cheats available for this game"));
+                return;
             }
-        });*/
+
+            for (auto &cheat : response.cheats) {
+                size_t numberOfCheats = std::count(cheat.content.begin(), cheat.content.end(), '[');
+                
+                cheatDownloadList->addView(new brls::ListItem(hlp::formatString("Cheat collection containing %d cheats", numberOfCheats), "", hlp::formatString("Made by %s", cheat.credits.c_str())));
+            }
+        });
 
         saveManagementList->addView(new brls::Header("edz.gui.popup.management.header.basic"_lang, false));
         saveManagementList->addView(backupItem);
         saveManagementList->addView(restoreItem);
         saveManagementList->addView(new brls::Header("edz.gui.popup.management.header.advanced"_lang, false));
         saveManagementList->addView(deleteItem);
-        //saveManagementList->addView(editItem);
+
 
         rootFrame->addTab("edz.gui.popup.information.tab"_lang, softwareInfoList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
+        rootFrame->addTab("Cheats", cheatDownloadList);
 
         brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
@@ -481,7 +480,12 @@ namespace edz::ui {
             else
                 hlp::stopBackgroundService();
 
-            Gui::runLater([this] { this->m_sysmoduleRunningOption->setToggleState(hlp::isProgramRunning(0x01000000000ED150)); }, 5);
+            Gui::runLater([this] {
+                bool actuallyRunning = hlp::isProgramRunning(0x01000000000ED150);
+
+                if (actuallyRunning != this->m_sysmoduleRunningOption->getToggleState())
+                this->m_sysmoduleRunningOption->setToggleState(actuallyRunning);
+            }, 10);
         });
 
         list->addView(this->m_sysmoduleRunningOption);

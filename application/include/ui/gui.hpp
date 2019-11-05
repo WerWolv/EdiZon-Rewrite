@@ -98,27 +98,27 @@ namespace edz::ui {
             Gui::s_syncTasks.push_back({ task, frameDelay });
         }
 
-        static void runAsync(std::future<EResult> task) {
-            Gui::s_asyncTasks.push_back({ std::move(task), nullptr, -1 });
+        static void runAsync(std::function<void()> task) {
+            Gui::s_asyncTasks.push_back({ std::async(std::launch::async, task), nullptr, -1 });
         }
 
-        static void runAsyncWithDialog(std::future<EResult> task, std::string dialogText) {
+        static void runAsyncWithDialog(std::function<void()> task, std::string dialogText) {
             brls::Dialog *dialog = new brls::Dialog(dialogText);
-            Gui::s_asyncTasks.push_back({ std::move(task), dialog, -1 });
+            Gui::s_asyncTasks.push_back({ std::async(std::launch::async, task), dialog, -1 });
 
             dialog->open();
         }
 
-        static void runAsyncWithDialog(std::future<EResult> task, brls::View *dialogContent) {
+        static void runAsyncWithDialog(std::function<void()> task, brls::View *dialogContent) {
             brls::Dialog *dialog = new brls::Dialog(dialogContent);
-            Gui::s_asyncTasks.push_back({ std::move(task), dialog, -1 });
+            Gui::s_asyncTasks.push_back({ std::async(std::launch::async, task), dialog, -1 });
 
             dialog->open();
         }
 
     private:
         typedef struct {
-            std::future<EResult> task;
+            std::future<void> task;
             brls::Dialog *dialog;
             s32 timeout;
         } asyncTask_t;
