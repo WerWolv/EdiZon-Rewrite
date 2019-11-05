@@ -393,9 +393,9 @@ namespace edz::hlp {
         EResult res = ResultSuccess;
         u64 pid = 0;
 
-        NcmProgramLocation edizonLocation = { 0x01000000000ED150, FsStorageId_None };
+        NcmProgramLocation edizonLocation = { EDIZON_SYSMODULE_TITLEID, FsStorageId_None };
 
-        pmdmntGetProcessId(&pid, 0x01000000000ED150);
+        pmdmntGetProcessId(&pid, EDIZON_SYSMODULE_TITLEID);
         if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
         
         pid = 0;
@@ -408,7 +408,7 @@ namespace edz::hlp {
     EResult stopBackgroundService() {
         u64 pid = 0;
 
-        pmdmntGetProcessId(&pid, 0x01000000000ED150);
+        pmdmntGetProcessId(&pid, EDIZON_SYSMODULE_TITLEID);
         if (pid == 0) return ResultEdzSysmoduleNotRunning;
 
         if (EResult(pmshellTerminateProcess(pid)).failed())

@@ -43,6 +43,8 @@ namespace edz::ui {
         brls::View* setupUI() override;
         void update() override;
 
+        std::vector<brls::ToggleListItem*> g_cheatToggleListItems;
+
         private:
             std::string m_email, m_password;
             bool m_changeLanguage = false;

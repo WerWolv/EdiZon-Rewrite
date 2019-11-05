@@ -35,6 +35,7 @@ namespace edz::ovl {
 
     private:
         lv_obj_t *m_title, *m_list;
+        std::vector<lv_obj_t*> m_cheatToggleButtons;
     };
 
 }

@@ -60,10 +60,13 @@
         #define DISABLE_EXCEPTION_HANDLER       false
     #endif
 
+    /* TitleID of the bundled sysmodule */
+    #define EDIZON_SYSMODULE_TITLEID        0x01000000000ED150
+
 #else               // EdiZon Sysmodule context
 
 #endif              // EdiZon Homebrew and Sysmodule context
-
+    
     /* The EdiZon paths on the SD card */
     #define EDIZON_BASE_DIR                 "sdmc:/switch/EdiZon"
         #define EDIZON_BACKUP_DIR               EDIZON_BASE_DIR "/backups"

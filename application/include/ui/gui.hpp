@@ -68,6 +68,8 @@ namespace edz::ui {
 
             if (Gui::s_guiStack.back() != nullptr)
                 Gui::s_guiStack.back()->update();
+            
+            Gui::s_frames++;
         }
 
         template<typename T, typename... Args>
@@ -116,6 +118,10 @@ namespace edz::ui {
             dialog->open();
         }
 
+        static u64 getFrameCount() {
+            return Gui::s_frames;
+        }
+
     private:
         typedef struct {
             std::future<void> task;
@@ -131,6 +137,8 @@ namespace edz::ui {
         static inline std::vector<asyncTask_t> s_asyncTasks;
         static inline std::vector<syncTask_t> s_syncTasks;
         static inline std::vector<Gui*> s_guiStack;
+
+        static inline u64 s_frames = 0;
     };
 
 }

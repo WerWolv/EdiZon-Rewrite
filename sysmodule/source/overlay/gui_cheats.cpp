@@ -28,6 +28,7 @@ namespace edz::ovl {
     }
 
     GuiCheats::~GuiCheats() {
+        this->m_cheatToggleButtons.clear();
         lv_list_clean(this->m_list);
         lv_obj_del(this->m_list);
     }
@@ -45,14 +46,16 @@ namespace edz::ovl {
 
         for (auto cheat : edz::cheat::CheatManager::getCheats()) {
             lv_obj_t *btn = lv_list_add_btn(this->m_list, nullptr, (hlp::limitStringLength(cheat->getName(), 25)).c_str());
+            this->m_cheatToggleButtons.push_back(btn);
+
             lv_btn_set_toggle(btn, true);
             lv_obj_set_height(btn, 70);
 
-            if (cheat->isEnabled() == lv_btn_get_toggle(btn))
+            if (cheat->isEnabled() != lv_btn_get_state(btn))
                 lv_btn_toggle(btn);
 
             lv_obj_set_user_data(btn, cheat);
-            lv_obj_set_event_cb(btn, [](lv_obj_t * obj, lv_event_t event){
+            lv_obj_set_event_cb(btn, [](lv_obj_t * obj, lv_event_t event) {
                 if (event != LV_EVENT_CLICKED)
                     return;
 
@@ -63,7 +66,15 @@ namespace edz::ovl {
     }
 
     void GuiCheats::update() {
-
+        if (Gui::getFrameCount() % 20) {
+            u16 i = 0;
+            for (auto &cheatToggle : this->m_cheatToggleButtons) {
+                bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
+                lv_btn_state_t btnState = lv_btn_get_state(cheatToggle);
+                if (btnState != (isEnabled ? LV_BTN_STATE_REL : LV_BTN_STATE_TGL_REL) && (btnState == LV_BTN_STATE_REL || btnState == LV_BTN_STATE_TGL_REL))
+                    lv_btn_set_state(cheatToggle, isEnabled ? LV_BTN_STATE_TGL_REL : LV_BTN_STATE_REL);
+            }
+        }
     }
 
 }

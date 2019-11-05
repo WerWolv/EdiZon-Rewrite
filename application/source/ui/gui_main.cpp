@@ -471,7 +471,7 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.sysmodule"_lang, hlp::isProgramRunning(0x01000000000ED150), "edz.gui.main.cheats.sysmodule.desc"_lang);
+        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.sysmodule"_lang, hlp::isProgramRunning(EDIZON_SYSMODULE_TITLEID), "edz.gui.main.cheats.sysmodule.desc"_lang);
         this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
@@ -481,15 +481,19 @@ namespace edz::ui {
                 hlp::stopBackgroundService();
 
             Gui::runLater([this] {
-                bool actuallyRunning = hlp::isProgramRunning(0x01000000000ED150);
+                bool actuallyRunning = hlp::isProgramRunning(EDIZON_SYSMODULE_TITLEID);
 
                 if (actuallyRunning != this->m_sysmoduleRunningOption->getToggleState())
                 this->m_sysmoduleRunningOption->setToggleState(actuallyRunning);
             }, 10);
         });
 
+
         list->addView(this->m_sysmoduleRunningOption);
+        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "\uE016 You can open the menu at any time by pressing \uE0E4, \uE0EC and \uE105 simultaneously\n \n", true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
+
+        GuiMain::g_cheatToggleListItems.clear();
 
         if (cheat::CheatManager::isCheatServiceAvailable()) {
             if (cheat::CheatManager::getCheats().size() > 0) {
@@ -502,6 +506,7 @@ namespace edz::ui {
                     });
 
                     list->addView(cheatItem);
+                    GuiMain::g_cheatToggleListItems.push_back(cheatItem);
                 }
             } else {
                 if (!hlp::isTitleRunning())
@@ -733,7 +738,14 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-
+        if (Gui::getFrameCount() % 20) {
+            u16 i = 0;
+            for (auto &cheatToggle : GuiMain::g_cheatToggleListItems) {
+                bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
+                if (cheatToggle->getToggleState() != isEnabled)
+                    cheatToggle->setToggleState(isEnabled);
+            }
+        }
     }   
 
 }

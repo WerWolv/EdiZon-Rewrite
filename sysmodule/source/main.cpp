@@ -183,7 +183,7 @@ static void ovlLoop(void *args) {
             lv_tick_inc(1);
             lv_task_handler();
 
-            gui->update();
+            gui->tick();
             
             if (gui->shouldClose())
                 break;

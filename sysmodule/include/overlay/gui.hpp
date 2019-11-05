@@ -35,6 +35,15 @@ namespace edz::ovl {
         virtual void createUI() = 0;
         virtual void update() = 0;
 
+        void tick() {
+            Gui::s_frameCount++;
+            this->update();
+        }
+
+        static u64 getFrameCount() {
+            return Gui::s_frameCount;
+        }
+
     private:
         static inline Screen *s_screen = nullptr;
 
@@ -42,9 +51,11 @@ namespace edz::ovl {
         static inline lv_disp_buf_t s_displayBuffer = { 0 };
         static inline lv_indev_drv_t s_inputDevice = { 0 };
         static inline bool s_initialized = false;
+        static inline u64 s_frameCount = 0;
 
         static void lvglDisplayFlush(lv_disp_drv_t *displayDriver, const lv_area_t *area, lv_color_t *color);
         static bool lvglTouchRead(_lv_indev_drv_t *indev, lv_indev_data_t *data);
+
     };
 
 }
