@@ -35,7 +35,6 @@ namespace edz::ovl {
 
     private:
         lv_obj_t *m_title, *m_list;
-        lv_group_t *m_group;
     };
 
 }

@@ -159,7 +159,7 @@ static void hidLoop(void *args) {
         svcSleepThread(20E6); // Sleep 20ms
         //edz::vc::VirtualControllerManager::getInstance().process(kDown);
 
-        if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_PLUS)
+        if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_RSTICK)
             eventFire(&overlayComboEvent);
 
     }
