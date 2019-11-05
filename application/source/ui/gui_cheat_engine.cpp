@@ -22,33 +22,32 @@
 #include "helpers/config_manager.hpp"
 
 #include "save/title.hpp"
-#include "helpers/hidsys_shim.hpp"
 
 
 namespace edz::ui {
 
-    void GuiCheatEngine::createAddressList(brls::List *list, std::vector<addr_t> addresses) {
+    void GuiCheatEngine::createAddressList(std::vector<addr_t> addresses) {
         bool addressesFound = addresses.size() > 0;
         brls::Application::blockInputs();
 
-        if (list->isChildFocused())
+        if (this->m_addressList->isChildFocused())
             brls::Application::removeFocus();
 
-        list->clear();
+        this->m_addressList->clear();
 
         brls::ListItem *goBackItem = new brls::ListItem("Go back ingame");
         goBackItem->setClickListener([](brls::View *view) {
             save::Title::getRunningTitle()->launch();
         });
 
-        list->addView(goBackItem);
-        list->addView(new brls::Header("Addresses", !addressesFound));
+        this->m_addressList->addView(goBackItem);
+        this->m_addressList->addView(new brls::Header("Addresses", !addressesFound));
 
         if (addressesFound) {
             for (addr_t &address : addresses)
-                list->addView(new brls::IntegerInputListItem(hlp::formatString("[ HEAP + 0x%016lX ]", address), 0, "Enter a value"));
+                this->m_addressList->addView(new brls::IntegerInputListItem(hlp::formatString("[ HEAP + 0x%016lX ]", address), 0, "Enter a value"));
         } else {
-            list->addView(new brls::Label(brls::LabelStyle::MEDIUM, "No addresses found yet", true));
+            this->m_addressList->addView(new brls::Label(brls::LabelStyle::MEDIUM, "No addresses found yet", true));
         }
 
         setSearchCountText(GET_CONFIG(CheatEngine.searchCount));
@@ -59,23 +58,23 @@ namespace edz::ui {
     void GuiCheatEngine::setSearchCountText(u16 searchCount) {
         switch (searchCount) {
             case 0:
-                this->rootFrame->getSidebar()->setSubtitle("edz.gui.cheatengine.subtitle.nosearches"_lang);
+                this->m_rootFrame->getSidebar()->setSubtitle("edz.gui.cheatengine.subtitle.nosearches"_lang);
                 break;
             case 1:
-                this->rootFrame->getSidebar()->setSubtitle("edz.gui.cheatengine.subtitle.onesearch"_lang);
+                this->m_rootFrame->getSidebar()->setSubtitle("edz.gui.cheatengine.subtitle.onesearch"_lang);
                 break;
             default:
-                this->rootFrame->getSidebar()->setSubtitle(hlp::formatString("edz.gui.cheatengine.subtitle.moresearches"_lang, searchCount));
+                this->m_rootFrame->getSidebar()->setSubtitle(hlp::formatString("edz.gui.cheatengine.subtitle.moresearches"_lang, searchCount));
                 break;
         }
     }
 
     brls::View* GuiCheatEngine::setupUI() {
-        this->rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
+        this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
 
-        this->rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
+        this->m_rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
 
-        this->rootFrame->setCancelListener([](brls::View *view) {
+        this->m_rootFrame->setCancelListener([](brls::View *view) {
             Gui::goBack();
             return true;
         });
@@ -83,23 +82,47 @@ namespace edz::ui {
         std::vector<u8> thumbnailBuffer(1280 * 720 * 4);
 
         if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).succeeded())
-            this->rootFrame->getSidebar()->setThumbnail(&thumbnailBuffer[0], 1280, 720);
+            this->m_rootFrame->getSidebar()->setThumbnail(&thumbnailBuffer[0], 1280, 720);
         
-        this->rootFrame->getSidebar()->getButton()->setClickListener([](brls::View *view) {
-            brls::StagedAppletFrame *memoryEditor = new brls::StagedAppletFrame();
-            memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, ui::page::PageMemoryEditor::SettingType::SEARCH_TYPE));
-            memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, ui::page::PageMemoryEditor::SettingType::DATA_TYPE));
-            memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, ui::page::PageMemoryEditor::SettingType::MEMORY_REGION));
+        this->m_rootFrame->getSidebar()->getButton()->setClickListener([this](brls::View *view) {
+            brls::Dialog *searchTypeDialog = new brls::Dialog("Do you want to search for a known or unknown value?");
 
-            brls::Application::pushView(memoryEditor);
+            searchTypeDialog->addButton("Known Value", [this](brls::View *view) {
+                brls::StagedAppletFrame *memoryEditor = new brls::StagedAppletFrame();
+                memoryEditor->setTitle("edz.page.memoryeditor.searchtype.title"_lang);
+
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::SEARCH_TYPE));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::DATA_TYPE));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::MEMORY_REGION));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::VALUE_INPUT));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::LOADING));
+                
+                brls::Application::popView();
+                Gui::runLater([memoryEditor] { brls::Application::pushView(memoryEditor); }, 20);
+            });
+
+            searchTypeDialog->addButton("Unknown Value", [this](brls::View *view) {
+                brls::StagedAppletFrame *memoryEditor = new brls::StagedAppletFrame();
+                memoryEditor->setTitle("edz.page.memoryeditor.searchtype.title"_lang);
+
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::SEARCH_TYPE));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::DATA_TYPE));
+                memoryEditor->addStage(new ui::page::PageMemoryEditor(memoryEditor, this, ui::page::PageMemoryEditor::SettingType::MEMORY_REGION));
+
+                brls::Application::popView();
+                Gui::runLater([memoryEditor] { brls::Application::pushView(memoryEditor); }, 20);
+            });
+
+            searchTypeDialog->open();
+
         });
 
-        this->addressList = new brls::List();
-        createAddressList(this->addressList, { 1234, 0x1337, 0x555, 0xFFFFF });
+        this->m_addressList = new brls::List();
+        createAddressList({ });
 
-        this->rootFrame->setContentView(this->addressList);
+        this->m_rootFrame->setContentView(this->m_addressList);
 
-        return rootFrame;
+        return m_rootFrame;
     }
 
     void GuiCheatEngine::update() {

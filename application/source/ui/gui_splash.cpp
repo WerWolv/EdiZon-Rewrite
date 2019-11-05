@@ -24,13 +24,13 @@
 namespace edz::ui {
 
     brls::View* GuiSplash::setupUI() {
-        Gui::runLater([] { Gui::changeTo<GuiMain>(); }, 20);
+        Gui::runLater([this] { Gui::changeTo<GuiMain>(); }, 20);
 
         return new ui::page::PageSplash();
     }
 
     void GuiSplash::update() {
-        
+
     }
 
 }

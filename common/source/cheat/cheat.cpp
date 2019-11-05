@@ -264,14 +264,14 @@ namespace edz::cheat {
     }
 
 
-    EResult CheatManager::readMemory(addr_t address, u8 *buffer, size_t bufferSize) {
+    EResult CheatManager::readMemory(addr_t address, void *buffer, size_t bufferSize) {
         if (!CheatManager::isCheatServiceAvailable())
             return ResultEdzCheatServiceNotAvailable;
 
         return dmntcht::readCheatProcessMemory(address, buffer, bufferSize);
     }
 
-    EResult CheatManager::writeMemory(addr_t address, const u8 *buffer, size_t bufferSize) {
+    EResult CheatManager::writeMemory(addr_t address, const void *buffer, size_t bufferSize) {
         if (!CheatManager::isCheatServiceAvailable())
             return ResultEdzCheatServiceNotAvailable;
 

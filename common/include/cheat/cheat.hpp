@@ -86,8 +86,8 @@ namespace edz::cheat {
         static MemoryInfo queryMemory(addr_t address);
         static std::vector<MemoryInfo> getMemoryRegions();
 
-        static EResult readMemory(addr_t address, u8 *buffer, size_t bufferSize);
-        static EResult writeMemory(addr_t address, const u8 *buffer, size_t bufferSize);
+        static EResult readMemory(addr_t address, void *buffer, size_t bufferSize);
+        static EResult writeMemory(addr_t address, const void *buffer, size_t bufferSize);
 
         static EResult reload();
 

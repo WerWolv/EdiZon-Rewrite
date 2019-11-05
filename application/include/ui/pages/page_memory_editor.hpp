@@ -22,6 +22,12 @@
 #include <edizon.hpp>
 #include <borealis.hpp>
 
+#include "cheat/cheat_engine.hpp"
+
+namespace edz::ui {
+    class GuiCheatEngine;
+}
+
 namespace edz::ui::page {
 
     class PageMemoryEditor : public brls::View {
@@ -35,7 +41,7 @@ namespace edz::ui::page {
             LOADING
         };
 
-        PageMemoryEditor(brls::StagedAppletFrame *stageFrame, SettingType settingType);
+        PageMemoryEditor(brls::StagedAppletFrame *stageFrame, GuiCheatEngine *cheatEngineGui, SettingType settingType);
         virtual ~PageMemoryEditor();
 
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
@@ -46,12 +52,27 @@ namespace edz::ui::page {
 
     private:
         SettingType m_settingType = SettingType::DATA_TYPE;
+        GuiCheatEngine *m_cheatEngineGui = nullptr;
 
         brls::Button *m_confirmButton = nullptr;
         brls::Label *m_description = nullptr;
         brls::List *m_settingList = nullptr;
-        brls::ListItem *m_inputField = nullptr;
         brls::ProgressDisplay *m_progressBar = nullptr;
+
+        union {
+            u128 u;
+            s128 s;
+            long double f;
+        } m_searchValue;
+        
+        size_t m_valueSize;
+        cheat::DataType m_dataType;
+        cheat::CompareFunction m_compareFunc;
+        cheat::ReadFunction m_regionFunc;
+
+        u8 m_progress = 0;
+        
+        void createSelectionList(brls::List *list, std::vector<std::string> options, std::string description, std::function<void(u8)> selectCallback);
     };
 
 }

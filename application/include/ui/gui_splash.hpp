@@ -32,6 +32,9 @@ namespace edz::ui {
 
         brls::View* setupUI() override;
         void update() override;
+
+    private:
+        bool m_shouldClose = false;
     };
 
 }

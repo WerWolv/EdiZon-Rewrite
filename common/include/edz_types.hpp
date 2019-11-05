@@ -36,5 +36,6 @@ namespace edz {
     using aruid_t = u64;
 
     using addr_t = u64;
+    using offset_t = s64;
 
 }

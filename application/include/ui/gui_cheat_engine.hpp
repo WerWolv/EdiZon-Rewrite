@@ -33,12 +33,12 @@ namespace edz::ui {
         brls::View* setupUI() override;
         void update() override;
 
-    private:
-        brls::ThumbnailFrame *rootFrame;
-        brls::List *addressList;
-
-        void createAddressList(brls::List *list, std::vector<addr_t> addresses);
+        void createAddressList(std::vector<addr_t> addresses);
         void setSearchCountText(u16 searchCount);
+    private:
+        brls::ThumbnailFrame *m_rootFrame;
+        brls::List *m_addressList;
+
     };
 
 }
