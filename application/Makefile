@@ -172,7 +172,7 @@ ifeq ($(strip $(NO_NACP)),)
 	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/EdiZon.nacp
 endif
 
-.PHONY: $(BUILD) clean all install stacktrace
+.PHONY: $(BUILD) clean all install stacktrace  $(ROMFS)
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(ROMFS)
@@ -203,14 +203,14 @@ stacktrace:
 
 #---------------------------------------------------------------------------------
 else
-.PHONY:	all
+.PHONY:	all  $(ROMFS)
 
 DEPENDS	:=	$(OFILES:.o=.d)
 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all	:	$(OUTPUT).nro
+all	:	$(OUTPUT).nro $(ROMFS)
 
 $(OUTPUT).nro	:	$(OUTPUT).elf $(OUTPUT).nacp
 
