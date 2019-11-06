@@ -62,6 +62,7 @@ namespace edz::hlp {
                         ConfigManager::store();
                         
                         brls::Application::notify(notification.title);
+                        std::this_thread::sleep_for(5s);
                     }
                 }
             }
