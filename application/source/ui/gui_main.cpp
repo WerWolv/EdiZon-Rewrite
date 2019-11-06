@@ -28,6 +28,7 @@
 #include "save/edit/editor.hpp"
 #include "ui/elements/focusable_table.hpp"
 #include "ui/elements/title_list_item.hpp"
+#include "ui/elements/dummy_force_exit_view.hpp"
 #include "ui/pages/page_login.hpp"
 
 #include "api/edizon_api.hpp"
@@ -167,7 +168,9 @@ namespace edz::ui {
         rootFrame->addTab("edz.gui.popup.information.tab"_lang, softwareInfoList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
-        rootFrame->addTab("Cheats", cheatDownloadList);
+
+        if (GET_CONFIG(Online.loggedIn))
+            rootFrame->addTab("Cheats", cheatDownloadList);
 
         brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
@@ -693,6 +696,9 @@ namespace edz::ui {
         list->addView(scdbItem);
         list->addView(patreonItem);
         list->addView(guideItem);
+
+        // TODO: Replace this with something better. For now force closes EdiZon when this Gui gets poped
+        list->addView(new element::DummyForceExitView());
     }
 
     brls::View* GuiMain::setupUI() {
