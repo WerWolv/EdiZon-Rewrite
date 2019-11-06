@@ -60,13 +60,11 @@ namespace edz::api {
 
     std::pair<EResult, SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
         SwitchCheatsDBAPI::cheat_response_t cheatResponse;
-        Logger::debug("%s", ("/cheats/" + hlp::toHexString(titleID) + (buildID == 0 ? "" : "/" + hlp::toHexString(buildID))).c_str());
         auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + (buildID == 0 ? "" : "/" + hlp::toHexString(buildID)), { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
-        Logger::debug("%s", result.getString().c_str());
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
-        Logger::debug("1");
+
         try {
             json responseJson = json::parse(response);
             
@@ -77,8 +75,7 @@ namespace edz::api {
 
             u32 id = 0;
             for (auto cheat : responseJson["cheats"]) {
-                //                                                 Yes this is a typo --------V
-                cheatResponse.cheats.push_back({ id++, static_cast<buildid_t>(strtol(cheat["builid"].get<std::string>().c_str(), nullptr, 16)), cheat["content"], cheat["credits"] == nullptr ? "" : cheat["credits"].get<std::string>() });
+                cheatResponse.cheats.push_back({ id++, static_cast<buildid_t>(strtol(cheat["buildid"].get<std::string>().c_str(), nullptr, 16)), cheat["content"], cheat["credits"] == nullptr ? "" : cheat["credits"].get<std::string>() });
             }
 
         } catch (std::exception& e) {
