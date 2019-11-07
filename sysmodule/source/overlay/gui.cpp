@@ -11,9 +11,18 @@ namespace edz::ovl {
         last_x = 0;
         last_y = 0;
 
-        if (Gui::s_initialized)
-            return;
+        Gui::s_screen->clear();
 
+        Gui::s_introAnimationPlaying = true;
+        Gui::s_outroAnimationPlaying = false;
+        Gui::s_guiOpacity = 0.0F;
+    }
+
+    Gui::~Gui() {
+
+    }
+
+    void Gui::initialize() {
         static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX][2];
 
         lv_disp_drv_init(&Gui::s_displayDriver);
@@ -28,16 +37,10 @@ namespace edz::ovl {
         Gui::s_inputDevice.type = LV_INDEV_TYPE_POINTER;
         Gui::s_inputDevice.read_cb = Gui::lvglTouchRead;
         lv_indev_drv_register(&Gui::s_inputDevice);
-
-        Gui::s_initialized = true;
-    }
-
-    Gui::~Gui() {
-
     }
 
     bool Gui::shouldClose() {
-        return last_x > 256;
+        return Gui::s_guiOpacity <= 0.0 && !Gui::s_introAnimationPlaying;
     }
 
 
@@ -46,7 +49,7 @@ namespace edz::ovl {
         for(u16 y = area->y1; y <= area->y2; y++) {
             for(u16 x = area->x1; x <= area->x2; x++) {
                 if (color->ch.alpha > 0)
-                    Gui::s_screen->setPixel(x, y, edz::ovl::makeColor<edz::ovl::rgba4444_t>(color->ch.red >> 4, color->ch.green >> 4, color->ch.blue >> 4, color->ch.alpha >> 4));
+                    Gui::s_screen->setPixel(x, y, edz::ovl::makeColor<edz::ovl::rgba4444_t>(color->ch.red >> 4, color->ch.green >> 4, color->ch.blue >> 4, (color->ch.alpha >> 4) * Gui::s_guiOpacity));
                 else
                     Gui::s_screen->setPixel(x, y, Gui::s_screen->getPixel(x, y));
                 color++;
@@ -71,6 +74,9 @@ namespace edz::ovl {
         /*Set the coordinates (if released use the last pressed coordinates)*/
         data->point.x = last_x;
         data->point.y = last_y;
+
+        if (last_x > 256)
+            Gui::s_outroAnimationPlaying = true;
 
         return false; /*Return `false` because we are not buffering and no more data to read*/
     }

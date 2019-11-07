@@ -93,6 +93,20 @@ extern "C" {
         if (res.failed())
             fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
+        res = tsInitialize();
+        if (res.failed())
+            fatalThrow(res);
+
+        if (hosversionBefore(8,0,0)) {
+            res = pcvInitialize();
+            if (res.failed())
+                fatalThrow(res);
+        }
+        else {
+            res = clkrstInitialize();
+            if (res.failed())
+                fatalThrow(res);
+        }
 
         edz::dmntcht::initialize();
         edz::cheat::CheatManager::initialize();
@@ -112,6 +126,9 @@ extern "C" {
         timeExit();
         hidExit();
         smExit();
+        tsExit();
+        pcvExit();
+        clkrstExit();
 
         pmdmntExit();
         
@@ -159,7 +176,7 @@ static void hidLoop(void *args) {
         svcSleepThread(20E6); // Sleep 20ms
         //edz::vc::VirtualControllerManager::getInstance().process(kDown);
 
-        if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_RSTICK)
+        if ((kHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && kDown & KEY_RSTICK)// && hlp::isTitleRunning())
             eventFire(&overlayComboEvent);
 
     }
@@ -169,6 +186,7 @@ static void ovlLoop(void *args) {
     lv_init();
 
     edz::ovl::Screen *screen = new edz::ovl::Screen();
+    edz::ovl::Gui::initialize();
 
     while (true) {
         eventWait(&overlayComboEvent, U64_MAX);
@@ -197,8 +215,8 @@ static void ovlLoop(void *args) {
         delete gui;
 
         focusOverlay(false);
+        eventClear(&overlayComboEvent);
     }
-    
 }
 
 

@@ -74,7 +74,7 @@ namespace edz::ovl {
         if (EResult(res = viCreateLayer(&Screen::g_display, &this->m_layer)).failed())
             goto close_managed_layer;
 
-        if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_FitToLayer)).failed())
+        if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_PreserveAspectRatio)).failed())
             goto close_layer;
 
         s32 layer_z;
