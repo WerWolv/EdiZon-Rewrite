@@ -60,6 +60,7 @@ namespace edz::hlp {
             std::vector<std::string> saveFileRepos;
 
             bool sysmoduleAutoStart;
+            bool fennecMode;
         } Settings;
     } config_t;
 

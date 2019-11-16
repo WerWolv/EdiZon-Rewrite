@@ -29,6 +29,7 @@
 
 #include "ui/elements/title_info.hpp"
 #include "ui/elements/title_button.hpp"
+#include "ui/elements/dummy_force_exit_view.hpp"
 
 namespace edz::ui {
 
@@ -43,7 +44,7 @@ namespace edz::ui {
         brls::View* setupUI() override;
         void update() override;
 
-        std::vector<brls::ToggleListItem*> g_cheatToggleListItems;
+        std::vector<brls::ToggleListItem*> m_cheatToggleListItems;
 
         private:
             std::string m_email, m_password;
@@ -57,6 +58,8 @@ namespace edz::ui {
             brls::List *m_aboutList = nullptr;
 
             brls::ToggleListItem *m_sysmoduleRunningOption;
+
+            ui::element::DummyForceExitView *m_dummyForceExitView;
 
             bool handleSorting(SortingStyle sorting, std::unique_ptr<save::Title> &l, std::unique_ptr<save::Title> &r);
             void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);

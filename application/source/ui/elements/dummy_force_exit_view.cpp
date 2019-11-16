@@ -22,11 +22,14 @@
 namespace edz::ui::element {
 
     DummyForceExitView::DummyForceExitView() {
-
+        
     }
 
     DummyForceExitView::~DummyForceExitView() {
-        brls::Application::quit();
+        if (!this->m_exitDisabled) {
+            brls::Logger::debug("Pressed B in GuiMain. Exit...");
+            brls::Application::quit();
+        }
     }
 
     brls::View* DummyForceExitView::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
@@ -35,6 +38,10 @@ namespace edz::ui::element {
 
     void DummyForceExitView::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) {
 
+    }
+
+    void DummyForceExitView::disableExit() {
+        this->m_exitDisabled = true;
     }
 
 }

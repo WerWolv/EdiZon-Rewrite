@@ -111,8 +111,16 @@ namespace edz::cheat {
             return std::memcmp(l, r, size) == 0;
         }
 
-        bool notEquals(DataType dataType, size_t size, void* l, void* r) {
-            return std::memcmp(l, r, size) != 0;
+        bool greaterThan(DataType dataType, size_t size, void* l, void* r) {
+
+        }
+
+        bool lessThan(DataType dataType, size_t size, void* l, void* r) {
+            
+        }
+
+        bool between(DataType dataType, size_t size, void* l, void* r) {
+            
         }
 
     }

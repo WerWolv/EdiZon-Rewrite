@@ -57,17 +57,24 @@ namespace edz::ui {
                 taskIndex++;
             }
 
-            taskIndex = 0;
-            for (auto& [task, frameDelay] : Gui::s_syncTasks) {
-                if (frameDelay-- == 0) {
-                    task();
-                    Gui::s_syncTasks.erase(Gui::s_syncTasks.begin() + taskIndex);
+            if (Gui *currGui = Gui::s_guiStack.back(); currGui != nullptr) {
+                taskIndex = 0;
+                for (auto& [task, frameDelay] : currGui->m_syncTasks) {
+                    if (frameDelay-- == 0) {
+                        task();
+                        currGui->m_syncTasks.erase(currGui->m_syncTasks.begin() + taskIndex);
+                    }
+                    taskIndex++;
                 }
-                taskIndex++;
+
+                currGui->update();
+
+                for (auto& [task, period] : currGui->m_syncRepetitiveTasks) {
+                    if (Gui::s_frames % period)
+                        task();
+                }
             }
 
-            if (Gui::s_guiStack.back() != nullptr)
-                Gui::s_guiStack.back()->update();
             
             Gui::s_frames++;
         }
@@ -96,8 +103,8 @@ namespace edz::ui {
             while (brls::Application::mainLoop());
         }
 
-        static void runLater(std::function<void()> task, u32 frameDelay) {
-            Gui::s_syncTasks.push_back({ task, frameDelay });
+        void runLater(std::function<void()> task, u32 frameDelay) {
+            this->m_syncTasks.push_back({ task, frameDelay });
         }
 
         static void runAsync(std::function<void()> task) {
@@ -118,6 +125,10 @@ namespace edz::ui {
             dialog->open();
         }
 
+        void runRepetiviely(std::function<void()> task, u32 period) {
+            this->m_syncRepetitiveTasks.push_back({ task, period });
+        }
+
         static u64 getFrameCount() {
             return Gui::s_frames;
         }
@@ -135,7 +146,8 @@ namespace edz::ui {
         } syncTask_t;
 
         static inline std::vector<asyncTask_t> s_asyncTasks;
-        static inline std::vector<syncTask_t> s_syncTasks;
+        std::vector<syncTask_t> m_syncTasks;
+        std::vector<syncTask_t> m_syncRepetitiveTasks;
         static inline std::vector<Gui*> s_guiStack;
 
         static inline u64 s_frames = 0;

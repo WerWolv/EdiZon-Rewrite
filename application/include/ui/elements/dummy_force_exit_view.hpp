@@ -30,6 +30,11 @@ namespace edz::ui::element {
         virtual ~DummyForceExitView();
         View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx);
+
+        void disableExit();
+
+    private:
+        bool m_exitDisabled = false;
     };
 
 }

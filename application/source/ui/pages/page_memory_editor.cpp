@@ -152,9 +152,10 @@ namespace edz::ui::page {
                 }
                 break;
             case SettingType::LOADING:
-                this->m_progressBar = new brls::ProgressDisplay(brls::ProgressDisplayFlags::PERCENTAGE);
-                this->m_progressBar->setProgress(0, 100);
-                this->m_progressBar->setParent(this);
+                //this->m_progressBar = new brls::ProgressDisplay();
+                //this->m_progressBar->setProgress(0, 100);
+                //this->m_progressBar->setParent(this);
+                //this->m_progressBar->willAppear();
                 break;
             
         }
@@ -176,8 +177,8 @@ namespace edz::ui::page {
             delete this->m_settingList;
         if (this->m_description)
             delete this->m_description;
-        if (this->m_progressBar)
-            delete this->m_progressBar;
+        //if (this->m_progressBar)
+            //delete this->m_progressBar;
     }
 
     void PageMemoryEditor::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) {
@@ -188,8 +189,8 @@ namespace edz::ui::page {
         if (this->m_settingList)
             this->m_settingList->frame(ctx);
         if (this->m_progressBar) {
-            this->m_progressBar->setProgress(this->m_progress, 100);
-            this->m_progressBar->frame(ctx);
+            //this->m_progressBar->setProgress(this->m_progress, 100);
+            //this->m_progressBar->frame(ctx);
         }
     }
 

@@ -128,6 +128,9 @@ extern "C" {
     void __libnx_exception_handler(ThreadExceptionDump *ctx) {
         std::string errorDesc;
         static bool alreadyCrashed = false;
+        static ThreadExceptionDump ctxBackup;
+
+        appletUnlockExit();
 
         if (alreadyCrashed) {
             brls::Logger::error("Fatal exception thrown during exception handling. Closing immediately.");
@@ -136,27 +139,28 @@ extern "C" {
             // Setup FatalCpuContext to pass on crash information to fatal
             FatalCpuContext fatalCtx = { 0 };
             for (u8 i = 0; i < 29; i++)
-                fatalCtx.aarch64_ctx.x[i] = ctx->cpu_gprs[i].x;
+                fatalCtx.aarch64_ctx.x[i] = ctxBackup.cpu_gprs[i].x;
 
-            fatalCtx.aarch64_ctx.pc = ctx->pc.x;
-            fatalCtx.aarch64_ctx.lr = ctx->lr.x;
-            fatalCtx.aarch64_ctx.sp = ctx->sp.x;
-            fatalCtx.aarch64_ctx.fp = ctx->fp.x;
+            fatalCtx.aarch64_ctx.pc = ctxBackup.pc.x;
+            fatalCtx.aarch64_ctx.lr = ctxBackup.lr.x;
+            fatalCtx.aarch64_ctx.sp = ctxBackup.sp.x;
+            fatalCtx.aarch64_ctx.fp = ctxBackup.fp.x;
             
             fatalCtx.aarch64_ctx.start_address = edz::hlp::getHomebrewBaseAddress();
-            edz::hlp::unwindStack(fatalCtx.aarch64_ctx.stack_trace, reinterpret_cast<s32*>(&fatalCtx.aarch64_ctx.stack_trace_size), 32, ctx->fp.x);
-            fatalCtx.aarch64_ctx.afsr0 = ctx->afsr0;
-            fatalCtx.aarch64_ctx.afsr1 = ctx->afsr1;
-            fatalCtx.aarch64_ctx.esr = ctx->esr;
-            fatalCtx.aarch64_ctx.far = ctx->far.x;
+            edz::hlp::unwindStack(fatalCtx.aarch64_ctx.stack_trace, reinterpret_cast<s32*>(&fatalCtx.aarch64_ctx.stack_trace_size), 32, ctxBackup.fp.x);
+            fatalCtx.aarch64_ctx.afsr0 = ctxBackup.afsr0;
+            fatalCtx.aarch64_ctx.afsr1 = ctxBackup.afsr1;
+            fatalCtx.aarch64_ctx.esr = ctxBackup.esr;
+            fatalCtx.aarch64_ctx.far = ctxBackup.far.x;
             fatalCtx.aarch64_ctx.register_set_flags = 0xFFFFFFFF;
-            fatalCtx.aarch64_ctx.pstate = ctx->pstate;
+            fatalCtx.aarch64_ctx.pstate = ctxBackup.pstate;
             
             fatalThrowWithContext(edz::ResultEdzErrorDuringErrorHandling, FatalPolicy_ErrorScreen, &fatalCtx);
             return;
         }
 
         alreadyCrashed = true;
+        std::memcpy(&ctxBackup, ctx, sizeof(ThreadExceptionDump));
 
         switch (ctx->error_desc) {
             case ThreadExceptionDesc_BadSVC:

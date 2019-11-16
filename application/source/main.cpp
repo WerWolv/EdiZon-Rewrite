@@ -151,6 +151,9 @@ int main(int argc, char* argv[]) {
         return -2;
     }
 
+    // Make sure EdiZon cannot be forcefully closed (Homebutton / Close Application) without cleanup code being ran first 
+    appletLockExit();
+
     // Redirects stdout and stderr to a log file if the compile time flag was set
     stdioRedirectToFile();
 
@@ -179,10 +182,14 @@ int main(int argc, char* argv[]) {
     hlp::BackgroundTasks backgroundTasks;
 
     // Main loop for UI
-    while (brls::Application::mainLoop()) {
+    while (brls::Application::mainLoop() && appletMainLoop()) {
         ui::Gui::tick();
     }
 
-    exitServices();
+    // Cleanup after ourselves
+    exitServices(); 
     stdioRedirectCleanup();
+
+    // Cleanup has ran, EdiZon can now be exited normally
+    appletUnlockExit();
 }

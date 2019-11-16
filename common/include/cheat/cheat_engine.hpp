@@ -28,7 +28,8 @@ namespace edz::cheat {
     enum class DataType {
         UNSIGNED,
         SIGNED,
-        FLOATING_POINT
+        FLOATING_POINT,
+        STRING
     };
 
     constexpr offset_t REGION_SIZE = INT64_MAX;

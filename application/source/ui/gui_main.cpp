@@ -28,7 +28,6 @@
 #include "save/edit/editor.hpp"
 #include "ui/elements/focusable_table.hpp"
 #include "ui/elements/title_list_item.hpp"
-#include "ui/elements/dummy_force_exit_view.hpp"
 #include "ui/pages/page_login.hpp"
 
 #include "api/edizon_api.hpp"
@@ -122,13 +121,13 @@ namespace edz::ui {
         });
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
-        deleteItem->setClickListener([&title](brls::View *view) {
+        deleteItem->setClickListener([&title, this](brls::View *view) {
 
             brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
             confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
-            confirmationDialog->addButton("Yes", [confirmationDialog, &title](brls::View *view) {
-                if (hlp::openPctlPrompt([]{})) {
-                    hlp::openPlayerSelect([&](std::unique_ptr<save::Account> &account) {
+            confirmationDialog->addButton("Yes", [confirmationDialog, &title, this](brls::View *view) {
+                if (hlp::openPctlPrompt([this]{})) {
+                    hlp::openPlayerSelect([&, this](std::unique_ptr<save::Account> &account) {
                         Gui::runLater([&]() { Gui::runAsyncWithDialog([&] { save::SaveManager::remove(title, account); }, "Deleting save data..."); }, 1);
                     });
                 }
@@ -375,12 +374,15 @@ namespace edz::ui {
         brls::List *gridDisplayList = new brls::List();        
 
         GuiMain::createTitleListView(listDisplayList, sorting);
-        GuiMain::createTitleCondensedView(condensedDisplayList, sorting);
-        GuiMain::createTitleGridView(gridDisplayList, sorting);
-
         layerView->addLayer(listDisplayList);
+
+        GuiMain::createTitleCondensedView(condensedDisplayList, sorting);
         layerView->addLayer(condensedDisplayList);
-        layerView->addLayer(gridDisplayList);
+
+        if (!GET_CONFIG(Settings.fennecMode)) {
+            GuiMain::createTitleGridView(gridDisplayList, sorting);
+            layerView->addLayer(gridDisplayList);
+        }
 
         layerView->changeLayer(GET_CONFIG(Settings.titlesDisplayStyle), false);
     }
@@ -496,7 +498,7 @@ namespace edz::ui {
         list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "\uE016 You can open the menu at any time by pressing \uE0E4, \uE0EC and \uE105 simultaneously\n \n", true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
-        GuiMain::g_cheatToggleListItems.clear();
+        GuiMain::m_cheatToggleListItems.clear();
 
         if (cheat::CheatManager::isCheatServiceAvailable()) {
             if (cheat::CheatManager::getCheats().size() > 0) {
@@ -509,8 +511,17 @@ namespace edz::ui {
                     });
 
                     list->addView(cheatItem);
-                    GuiMain::g_cheatToggleListItems.push_back(cheatItem);
+                    GuiMain::m_cheatToggleListItems.push_back(cheatItem);
                 }
+                Gui::runRepetiviely([this] {
+                    u16 i = 0;
+                    for (auto &cheatToggle : GuiMain::m_cheatToggleListItems) {
+                        bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
+                        if (cheatToggle->getToggleState() != isEnabled)
+                            cheatToggle->setToggleState(isEnabled);
+                    }
+                }, 20);
+
             } else {
                 if (!hlp::isTitleRunning())
                     list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_title"_lang, true));
@@ -542,7 +553,8 @@ namespace edz::ui {
 
         languageOptionItem->setListener([=](size_t selection) {
             SET_CONFIG(Settings.langCode, langCodes[selection]);
-            
+            this->m_dummyForceExitView->disableExit();
+
             brls::Application::blockInputs();
 
             Gui::runLater([]() {
@@ -554,7 +566,7 @@ namespace edz::ui {
             Gui::runLater([]() {
                 Gui::changeTo<GuiMain>();
                 brls::Application::unblockInputs();
-            }, 25);
+            }, 40);
         });
 
         if (auto currLanguageIndex = std::find(langCodes.begin(), langCodes.end(), GET_CONFIG(Settings.langCode)); currLanguageIndex != langCodes.end())
@@ -583,16 +595,19 @@ namespace edz::ui {
         }
 
         // Title Options
-        auto displayOptions = { "edz.gui.main.settings.style.list"_lang, 
-                                "edz.gui.main.settings.style.condensed"_lang,
-                                "edz.gui.main.settings.style.grid"_lang };
-        auto sortingOptions = { "edz.gui.main.settings.sorting.titleid"_lang,
-                                "edz.gui.main.settings.sorting.alphaname"_lang,
-                                "edz.gui.main.settings.sorting.alphaauthor"_lang,
-                                "edz.gui.main.settings.sorting.firstplayed"_lang,
-                                "edz.gui.main.settings.sorting.lastplayed"_lang,
-                                "edz.gui.main.settings.sorting.playtime"_lang,
-                                "edz.gui.main.settings.sorting.numlaunches"_lang };
+        std::vector<std::string> displayOptions = { "edz.gui.main.settings.style.list"_lang, 
+                                                    "edz.gui.main.settings.style.condensed"_lang };
+                                
+        std::vector<std::string> sortingOptions = { "edz.gui.main.settings.sorting.titleid"_lang,
+                                                    "edz.gui.main.settings.sorting.alphaname"_lang,
+                                                    "edz.gui.main.settings.sorting.alphaauthor"_lang,
+                                                    "edz.gui.main.settings.sorting.firstplayed"_lang,
+                                                    "edz.gui.main.settings.sorting.lastplayed"_lang,
+                                                    "edz.gui.main.settings.sorting.playtime"_lang,
+                                                    "edz.gui.main.settings.sorting.numlaunches"_lang };
+
+        if (!GET_CONFIG(Settings.fennecMode))
+            displayOptions.push_back("edz.gui.main.settings.style.grid"_lang);
 
         brls::SelectListItem *displayOptionsItem = new brls::SelectListItem("edz.gui.main.settings.style"_lang, displayOptions);
         brls::SelectListItem *sortingOptionsItem = new brls::SelectListItem("edz.gui.main.settings.sorting"_lang, sortingOptions);
@@ -608,7 +623,9 @@ namespace edz::ui {
             Gui::runLater([this]() { 
                 GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
                 GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
-                GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+                
+                if (!GET_CONFIG(Settings.fennecMode))
+                    GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
             }, 1);
         });
 
@@ -698,7 +715,8 @@ namespace edz::ui {
         list->addView(guideItem);
 
         // TODO: Replace this with something better. For now force closes EdiZon when this Gui gets poped
-        list->addView(new element::DummyForceExitView());
+        this->m_dummyForceExitView = new element::DummyForceExitView();
+        list->addView(this->m_dummyForceExitView);
     }
 
     brls::View* GuiMain::setupUI() {
@@ -744,14 +762,7 @@ namespace edz::ui {
     }
 
     void GuiMain::update() {
-        if (Gui::getFrameCount() % 20) {
-            u16 i = 0;
-            for (auto &cheatToggle : GuiMain::g_cheatToggleListItems) {
-                bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
-                if (cheatToggle->getToggleState() != isEnabled)
-                    cheatToggle->setToggleState(isEnabled);
-            }
-        }
+
     }   
 
 }

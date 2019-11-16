@@ -77,5 +77,6 @@
         "unistd.h": "c"
     },
     "python.pythonPath": "/bin/python3.8",
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "C_Cpp.errorSquiggles": "Enabled"
 }
