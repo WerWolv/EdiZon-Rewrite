@@ -17,31 +17,33 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "services/edz_service.hpp"
 
-#include "overlay/gui.hpp"
-#include <thread>
-#include <vector>
+namespace edz::serv {
 
-namespace edz::ovl {
+    ams::Result EdzService::GetLogs(ams::sf::OutArray<int> outLogs, ams::sf::Out<u64> outCount) {
 
-    class GuiCheats : public Gui {
-    public:
-        GuiCheats();
-        ~GuiCheats();
+    }
 
-        void createUI() override;
-        void update() override;
+    ams::Result EdzService::SetOverlayKeyCombo(u64 modifierKeys, u64 activationKey) {
 
-    private:
-        lv_obj_t *m_titleLabel = nullptr;
-        lv_obj_t *m_noCheatsLabel = nullptr;
-        lv_obj_t *m_titleInfoLabel = nullptr;
-        lv_obj_t *m_cheatsList = nullptr;
-        lv_obj_t *m_footerLine = nullptr;
-        lv_obj_t *m_btnBack = nullptr;
+    }
 
-        std::vector<lv_obj_t*> m_cheatToggleButtons;
-    };
+    ams::Result EdzService::AddNote(ams::sf::InArray<char>, size_t size, u64 gameTitleId) {
+
+    }
+
+    ams::Result EdzService::ClearNotes() {
+
+    }
+
+
+    ams::Result EdzService::AttachVirtualController(u64 bodyColor, u64 buttonColor, u64 leftGripColor, u64 rightGripColor) {
+
+    }
+
+    ams::Result EdzService::DetachVirtualController() {
+
+    }
 
 }

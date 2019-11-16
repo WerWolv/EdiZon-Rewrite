@@ -20,7 +20,7 @@
 
 #include <switch.h>
 
-#include "overlay/vi_shim.hpp"
+#include "helpers/vi_shim.hpp"
 
 Result viDestroyManagedLayer(u64 layer_id) {
     Service *serv = viGetSession_IManagerDisplayService();

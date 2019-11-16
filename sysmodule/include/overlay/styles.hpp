@@ -17,9 +17,13 @@ namespace edz::ovl {
 
     #define BORDER_WIDTH 3
 
+    void setBackgroundStyle();
+    void setPageStyle(lv_obj_t *page);
     void setListStyle(lv_obj_t *list);
     void setLabelStyle(lv_obj_t *label);
     void setLabelTitleStyle(lv_obj_t *label);
     void setLineStyle(lv_obj_t *line);
+    void setButtonStyle(lv_obj_t *button);
 
+    void setGroupStyle(lv_group_t *group);
 }

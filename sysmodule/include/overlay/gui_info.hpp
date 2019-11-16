@@ -25,23 +25,23 @@
 
 namespace edz::ovl {
 
-    class GuiCheats : public Gui {
+    class GuiInfo : public Gui {
     public:
-        GuiCheats();
-        ~GuiCheats();
+        GuiInfo();
+        ~GuiInfo();
 
         void createUI() override;
         void update() override;
 
     private:
-        lv_obj_t *m_titleLabel = nullptr;
-        lv_obj_t *m_noCheatsLabel = nullptr;
-        lv_obj_t *m_titleInfoLabel = nullptr;
-        lv_obj_t *m_cheatsList = nullptr;
-        lv_obj_t *m_footerLine = nullptr;
-        lv_obj_t *m_btnBack = nullptr;
+        ClkrstSession m_cpuClkSession, m_gpuClkSession, m_memClkSession;
 
-        std::vector<lv_obj_t*> m_cheatToggleButtons;
+        lv_obj_t *m_titleLabel = nullptr;
+
+
+        lv_obj_t *m_infoLabels[6];
+
+        lv_obj_t *m_btnBack = nullptr;
     };
 
 }

@@ -60,7 +60,7 @@ namespace edz::ovl {
                   },
                   .padding               = { 0, 0, LV_DPI / 12, LV_DPI / 12, 0 },
         },     
-        .text = { .color                 = COLOR_TXT_DIS_PR,
+        .text = { .color                 = COLOR_TXT_DIS_REL,
                   .letter_space          = 1,
                   .line_space            = 0,
                   .opa                   = LV_OPA_COVER
@@ -108,7 +108,7 @@ namespace edz::ovl {
                   },
                   .padding               = { 0, 0, LV_DPI / 12, LV_DPI / 12, 0 },
         },     
-        .text = { .color                 = COLOR_TXT_EN_PR,
+        .text = { .color                 = COLOR_TXT_DIS_PR,
                   .letter_space          = 1,
                   .line_space            = 0,
                   .opa                   = LV_OPA_COVER
@@ -132,10 +132,58 @@ namespace edz::ovl {
                   },
                   .padding               = { 0, 0, LV_DPI / 12, LV_DPI / 12, 0 },
         },
-        .text = { .color                 = COLOR_TXT_EN_REL,
+        .text = { .color                 = COLOR_TXT_DIS_PR,
                   .letter_space          = 1,
                   .line_space            = 0,
                   .opa                   = LV_OPA_COVER
+        }
+    };
+
+        static lv_style_t s_btnDefaultPressedStyle = {
+        .glass                           = 0,
+        .body = { .main_color            = COLOR_BACKGROUND_PR,
+                  .grad_color            = COLOR_BACKGROUND_PR,
+                  .radius                = 0,
+                  .opa                   = LV_OPA_COVER,
+                  .border = { .color     = COLOR_BORDER_PR,
+                              .width     = BORDER_WIDTH,
+                              .part      = LV_BORDER_FULL,
+                              .opa       = LV_OPA_COVER
+                  },
+                  .shadow = { .color     = COLOR_BACKGROUND_PR,
+                              .width     = 0,
+                              .type      = LV_SHADOW_FULL,
+                  },
+                  .padding               = { 0, 0, LV_DPI / 12, LV_DPI / 12, 0 },
+        },     
+        .text = { .color                 = COLOR_TXT_DIS_PR,
+                  .letter_space          = 1,
+                  .line_space            = 0,
+                  .opa                   = LV_OPA_COVER
+        }
+    };
+
+    static lv_style_t s_btnDefaultReleasedStyle = {
+        .glass                           = 0,
+        .body = { .main_color            = COLOR_BACKGROUND_REL,
+                  .grad_color            = COLOR_BACKGROUND_REL,
+                  .radius                = 0,
+                  .opa                   = LV_OPA_COVER,
+                  .border = { .color     = COLOR_BORDER_REL,
+                              .width     = 1,
+                              .part      = LV_BORDER_FULL,
+                              .opa       = LV_OPA_COVER
+                  },
+                  .shadow = { .color     = COLOR_BACKGROUND_REL,
+                              .width     = 0,
+                              .type      = LV_SHADOW_FULL,
+                  },
+                  .padding               = { 0, 0, LV_DPI / 12, LV_DPI / 12, 0 },
+        },
+        .text = { .color                 = COLOR_TXT_DIS_REL,
+                  .letter_space          = 1,
+                  .line_space            = 0,
+                  .opa                   = LV_OPA_COVER,
         }
     };
 
@@ -160,18 +208,35 @@ namespace edz::ovl {
     static lv_style_t s_lineStyle = {
         .glass                           = 0,
         .line = { .color            = LV_COLOR_WHITE,
-                    .width              = 1,
-                    .opa = 0xFF
+                  .width              = 1,
+                  .opa = 0xFF
         }
     };
+
+    static lv_style_t s_groupHighlightStyle = {
+        .glass = 0,
+        .body = { 
+                    .main_color = COLOR_TRANSPARENT,
+                    .grad_color = COLOR_TRANSPARENT,
+                    .opa = LV_OPA_0
+        }
+    };
+    
+    void setPageStyle(lv_obj_t *page) {
+        lv_page_set_style(page, LV_PAGE_STYLE_BG, &s_bgStyle);
+        lv_page_set_style(page, LV_PAGE_STYLE_SB, &s_scrollbarStyle);
+        lv_page_set_style(page, LV_PAGE_STYLE_SCRL, &s_listStyle);
+    }
+
+    void setBackgroundStyle() {
+        lv_obj_set_style(lv_scr_act(), &s_bgStyle);
+    }
 
     void setListStyle(lv_obj_t *list) {
         s_btnPressedEnabledStyle.text.font = LV_FONT_DEFAULT;
         s_btnReleasedEnabledStyle.text.font = LV_FONT_DEFAULT;
         s_btnPressedDisabledStyle.text.font = LV_FONT_DEFAULT;
         s_btnReleasedDisabledStyle.text.font = LV_FONT_DEFAULT;
-
-        lv_obj_set_style(lv_scr_act(), &s_bgStyle);
 
         lv_list_set_style(list, LV_LIST_STYLE_BG,   &s_bgStyle);
         lv_list_set_style(list, LV_LIST_STYLE_SCRL, &s_listStyle);
@@ -195,5 +260,23 @@ namespace edz::ovl {
     void setLineStyle(lv_obj_t *line) {
         lv_line_set_style(line, LV_LINE_STYLE_MAIN, &s_lineStyle);
     }
+
+    void setButtonStyle(lv_obj_t *button) {
+        s_btnDefaultPressedStyle.text.font = LV_FONT_DEFAULT;
+        s_btnDefaultReleasedStyle.text.font = LV_FONT_DEFAULT;
+
+        lv_btn_set_style(button, LV_BTN_STYLE_PR, &s_btnDefaultPressedStyle);
+        lv_btn_set_style(button, LV_BTN_STYLE_REL, &s_btnDefaultReleasedStyle);
+    }
+
+    void groupStyleCallback(lv_group_t *group, lv_style_t *style) {
+        memcpy(style, &s_groupHighlightStyle, sizeof(lv_style_t));
+    }
+
+    void setGroupStyle(lv_group_t *group) {
+        lv_group_set_style_mod_cb(group, groupStyleCallback);
+        lv_group_set_style_mod_edit_cb(group, groupStyleCallback);
+    }
+
 
 }

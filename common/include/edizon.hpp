@@ -27,9 +27,6 @@
 
 #ifndef __SYSMODULE__                           // EdiZon Homebrew context
 
-    #include <chrono>
-    using namespace std::literals::chrono_literals;
-
     #include <borealis/logger.hpp>              // Borealis Logger
     using Logger = brls::Logger;
     
@@ -60,9 +57,6 @@
         #define DISABLE_EXCEPTION_HANDLER       false
     #endif
 
-    /* TitleID of the bundled sysmodule */
-    #define EDIZON_SYSMODULE_TITLEID        0x01000000000ED150
-
 #else               // EdiZon Sysmodule context
 
 #endif              // EdiZon Homebrew and Sysmodule context
@@ -77,5 +71,10 @@
         #define EDIZON_LIBS_DIR                 EDIZON_BASE_DIR "/scripts/libs"
         #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
         #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
-
+    
+    #include <chrono>
+    using namespace std::literals::chrono_literals;
     using namespace std::string_literals;       // String user defined literals
+
+    /* TitleID of the bundled sysmodule */
+    #define EDIZON_SYSMODULE_TITLEID        0x01000000000ED150

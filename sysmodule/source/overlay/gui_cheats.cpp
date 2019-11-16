@@ -18,15 +18,15 @@
  */
 
 #include "overlay/gui_cheats.hpp"
+#include "overlay/gui_main.hpp"
 #include "overlay/styles.hpp"
 #include "cheat/cheat.hpp"
 #include "helpers/utils.hpp"
 
 namespace edz::ovl {
     
-    GuiCheats::GuiCheats(Screen *screen) : Gui(screen) {
-        if (hosversionAtLeast(8,0,0))
-            clkrstOpenSession(&this->m_clkrstSession, PcvModuleId_CpuBus, 3);
+    GuiCheats::GuiCheats() {
+
     }
 
     GuiCheats::~GuiCheats() {
@@ -34,26 +34,28 @@ namespace edz::ovl {
         lv_obj_del(this->m_titleLabel);
         lv_list_clean(this->m_cheatsList);
         lv_obj_del(this->m_cheatsList);
-        lv_obj_del(this->m_titleInfoLabel);
-        lv_obj_del(this->m_cpuInfoLabel);
         lv_obj_del(this->m_footerLine);
+        lv_obj_del(this->m_btnBack);
+
+        if (this->m_titleInfoLabel != nullptr)
+            lv_obj_del(this->m_titleInfoLabel);
 
         if (this->m_noCheatsLabel != nullptr)
             lv_obj_del(this->m_noCheatsLabel);
 
-        if (hosversionAtLeast(8,0,0))
-            clkrstCloseSession(&this->m_clkrstSession);
     }
 
     void GuiCheats::createUI() {
+        setBackgroundStyle();
+        
         this->m_titleLabel = lv_label_create(lv_scr_act(), nullptr);
         lv_obj_set_pos(this->m_titleLabel, 10, 10);
-        lv_label_set_text(this->m_titleLabel, "EdiZon Quick menu");
+        lv_label_set_text(this->m_titleLabel, "Cheats");
         setLabelTitleStyle(this->m_titleLabel);
 
         this->m_cheatsList = lv_list_create(lv_scr_act(), nullptr);
         lv_obj_set_pos(this->m_cheatsList, 20, 100);
-        lv_obj_set_size(this->m_cheatsList, 216, 512 - 155);
+        lv_obj_set_size(this->m_cheatsList, 216, 512 - 160);
         setListStyle(this->m_cheatsList);
 
         {
@@ -64,18 +66,31 @@ namespace edz::ovl {
             setLineStyle(this->m_footerLine);
         }
 
-        this->m_cpuInfoLabel = lv_label_create(lv_scr_act(), nullptr);
-        lv_obj_set_pos(this->m_cpuInfoLabel, 100, 45);
-        setLabelStyle(this->m_cpuInfoLabel);
+        if (cheat::CheatManager::getProcessID() != 0) {
+            this->m_titleInfoLabel = lv_label_create(lv_scr_act(), nullptr);
+            lv_label_set_text(this->m_titleInfoLabel, ("TID: " + hlp::toHexString(cheat::CheatManager::getTitleID()) + " | BID: " + hlp::toHexString(cheat::CheatManager::getBuildID()) + " | PID: " + std::to_string(cheat::CheatManager::getProcessID()) + " |").c_str());
+            lv_obj_set_pos(this->m_titleInfoLabel, 0, 512 - 80);
+            lv_label_set_anim_speed(this->m_titleInfoLabel, 20);
+            setLabelStyle(this->m_titleInfoLabel);
+            lv_label_set_long_mode(this->m_titleInfoLabel, LV_LABEL_LONG_SROLL_CIRC);
+            lv_obj_set_width(this->m_titleInfoLabel, 256);
+            lv_obj_set_height(this->m_titleInfoLabel, 30);
+        }
 
-        this->m_titleInfoLabel = lv_label_create(lv_scr_act(), nullptr);
-        lv_label_set_text(this->m_titleInfoLabel, ("TID: " + hlp::toHexString(cheat::CheatManager::getTitleID()) + " | BID: " + hlp::toHexString(cheat::CheatManager::getBuildID()) + " | PID: " + std::to_string(cheat::CheatManager::getProcessID()) + " |").c_str());
-        lv_obj_set_pos(this->m_titleInfoLabel, 0, 512 - 35);
-        lv_label_set_anim_speed(this->m_titleInfoLabel, 20);
-        setLabelStyle(this->m_titleInfoLabel);
-        lv_label_set_long_mode(this->m_titleInfoLabel, LV_LABEL_LONG_SROLL_CIRC);
-        lv_obj_set_width(this->m_titleInfoLabel, 256);
-        lv_obj_set_height(this->m_titleInfoLabel, 30);
+        this->m_btnBack = lv_btn_create(lv_scr_act(), nullptr);
+
+        lv_obj_t *lblBack = lv_label_create(this->m_btnBack, nullptr);
+        setLabelStyle(lblBack);
+        lv_label_set_text(lblBack, "Back");
+        lv_obj_set_pos(this->m_btnBack, 50, 467);
+        lv_obj_set_size(this->m_btnBack, 156, 40);
+        setButtonStyle(this->m_btnBack);
+        lv_obj_set_event_cb(this->m_btnBack, [](lv_obj_t * obj, lv_event_t event) {
+            if (event != LV_EVENT_CLICKED)
+                return;
+
+            Gui::changeTo<GuiMain>();
+        });
 
         edz::cheat::CheatManager::forceAttach();
         edz::cheat::CheatManager::reload();
@@ -101,7 +116,7 @@ namespace edz::ovl {
 
                 lv_obj_set_user_data(btn, cheat);
                 lv_obj_set_event_cb(btn, [](lv_obj_t * obj, lv_event_t event) {
-                    if (event != LV_EVENT_CLICKED)
+                    if (event != LV_EVENT_RELEASED)
                         return;
 
                     reinterpret_cast<edz::cheat::Cheat*>(obj->user_data)->toggle();
@@ -109,6 +124,9 @@ namespace edz::ovl {
                 });
             }
         }
+
+        Gui::registerForButtonInput(this->m_cheatsList);
+        Gui::registerForButtonInput(this->m_btnBack);
     }
 
     void GuiCheats::update() {
@@ -119,18 +137,9 @@ namespace edz::ovl {
                 lv_btn_state_t btnState = lv_btn_get_state(cheatToggle);
                 if (btnState == LV_BTN_STATE_REL || btnState == LV_BTN_STATE_TGL_REL)
                     lv_btn_set_state(cheatToggle, isEnabled ? LV_BTN_STATE_TGL_REL : LV_BTN_STATE_REL);
+                else if (btnState == LV_BTN_STATE_PR || btnState == LV_BTN_STATE_TGL_PR)
+                    lv_btn_set_state(cheatToggle, isEnabled ? LV_BTN_STATE_TGL_PR : LV_BTN_STATE_PR);
             }
-
-            s32 temparature = 0;
-            u32 cpuClk = 0;
-            tsGetTemperatureMilliC(TsLocation_Internal, &temparature);
-
-            if (hosversionBefore(8,0,0))
-                pcvGetClockRate(PcvModule_CpuBus, &cpuClk);
-            else
-                clkrstGetClockRate(&this->m_clkrstSession, &cpuClk);
-
-            lv_label_set_text(this->m_cpuInfoLabel, hlp::formatString("%.1f'C | %dMHz", static_cast<float>(temparature) / 1'000.0F, cpuClk / 1'000'000).c_str());
         }
     }
 

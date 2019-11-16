@@ -25,7 +25,7 @@
 
 #include "overlay/constants.hpp"
 #include "overlay/color.hpp"
-#include "overlay/vi_shim.hpp"
+#include "helpers/vi_shim.hpp"
 
 #include "overlay/screen.hpp"
 
