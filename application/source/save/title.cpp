@@ -94,7 +94,11 @@ namespace edz::save {
     }
 
     bool Title::hasSaveFile() {
-        return this->getUserIDs().size() > 0;
+        return this->getUserIDs().size() > 0 || this->m_hasCommonSaveFile;
+    }
+
+    bool Title::hasCommonSaveFile() {
+        return this->m_hasCommonSaveFile;
     }
 
     bool Title::hasSaveFile(std::unique_ptr<Account> &account) {
@@ -174,23 +178,28 @@ namespace edz::save {
         this->m_userIDs.push_back(userID);
     }
 
+    void Title::setHasCommonSaveFile() {
+        this->m_hasCommonSaveFile = true;
+    }
 
-    EResult Title::createSaveDataFileSystem(std::unique_ptr<Account> &account) {
-        FsSave save;
-        FsSaveCreate saveCreate;
 
-        save.titleID = this->getID();
-        save.userID = hlp::userIDToAccountUid(account->getID());
-        save.saveID = 0;
-        save.rank = 0;
-        save.index = 0;
+    EResult Title::createSaveDataFileSystem(std::unique_ptr<Account> &account, FsSaveDataType saveDataType) {
+        FsSaveDataAttribute save;
+        FsSaveDataCreationInfo saveCreate;
 
-        saveCreate.size = this->m_nacp.userAccountSaveDataSize;
-        saveCreate.journalSize = this->m_nacp.userAccountSaveDataJournalSize;
-        saveCreate.blockSize = 0x4000;
-        saveCreate.ownerId = this->getID();
+        save.application_id = this->getID();
+        save.uid = hlp::userIDToAccountUid(account->getID());
+        save.system_save_data_id = 0;
+        save.save_data_rank = 0;
+        save.save_data_index = 0;
+        save.save_data_type = saveDataType;
+
+        saveCreate.available_size = this->m_nacp.userAccountSaveDataSize;
+        saveCreate.journal_size = this->m_nacp.userAccountSaveDataJournalSize;
+        saveCreate.save_data_size = 0;
+        saveCreate.owner_id = this->getID();
         saveCreate.flags = 0;
-        saveCreate.saveDataSpaceId = FsSaveDataSpaceId_NandUser;
+        saveCreate.save_data_space_id = FsSaveDataSpaceId_User;
 
         if (EResult res = _fsCreateSaveDataFileSystem(&save, &saveCreate); res.failed())
             return res;
@@ -205,10 +214,10 @@ namespace edz::save {
     }
 
 
-    EResult Title::_fsCreateSaveDataFileSystem(const FsSave* save, const FsSaveCreate* create) {
+    EResult Title::_fsCreateSaveDataFileSystem(const FsSaveDataAttribute* save, const FsSaveDataCreationInfo* create) {
         const struct {
-            FsSave save;
-            FsSaveCreate create;
+            FsSaveDataAttribute save;
+            FsSaveDataCreationInfo create;
             struct { u32 unk_x0; u8 unk_x4; u8 pad[0xB]; } data;
         } in = { *save, *create, { 0x40060, 0x01, 0} };
 

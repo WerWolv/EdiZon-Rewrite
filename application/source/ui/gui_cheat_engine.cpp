@@ -18,15 +18,18 @@
  */
 
 #include "ui/gui_cheat_engine.hpp"
-#include "ui/pages/page_memory_editor.hpp"
 #include "ui/elements/popup_list.hpp"
 #include "helpers/config_manager.hpp"
 
 #include "save/title.hpp"
 
+#include "cheat/cheat.hpp"
+
 #include <cmath>
 
 namespace edz::ui {
+
+
 
     void GuiCheatEngine::setSearchCountText(u16 searchCount) {
         switch (searchCount) {
@@ -53,18 +56,23 @@ namespace edz::ui {
         static std::vector<brls::SelectListItem*> scanTypeItems;
         brls::List *list = new brls::List();
         
-        auto foundAddresses = new brls::ListItem("Found Addresses");
+        this->m_foundAddresses = new brls::ListItem("Found Addresses");
 
         auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
-        auto valueTypeItem  = new brls::SelectListItem("Value Type", { "1 Byte", "2 Bytes", "4 Bytes", "8 Bytes", "Float", "Double", "String" });
-        auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN", "Everything" });
+        auto valueTypeItem  = new brls::SelectListItem("Value Type", { "1 Byte (Unsigned)", "1 Byte (Signed)", "2 Bytes (Unsigned)", "2 Bytes (Signed)", "4 Bytes (Unsigned)", "4 Bytes (Signed)", "8 Bytes (Unsigned)", "8 Bytes (Signed)", "Float", "Double", "String", "Array" });
+        auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN" });
         auto fastScan       = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
 
-        foundAddresses->setValue("0");
+        this->m_foundAddresses->setValue("0");
 
         scanTypeItems.push_back(scanTypeItem);
         scanTypeItem->setListener([this](s32 selection) {
-            //this->m_scanType = static_cast<ScanType>(selection);
+            switch (selection) {
+                case 0: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::EQUALS);       break;
+                case 1: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::GREATER_THAN); break;
+                case 2: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::LESS_THAN);    break;
+                case 3: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::BETWEEN);      break;
+            }
 
             switch (selection) {
                 case 0 ... 3: this->m_searchSettings->changeLayer(0, true);  break;
@@ -76,22 +84,33 @@ namespace edz::ui {
         });
 
         valueTypeItem->setListener([this](s32 selection) {
-            constexpr s8 valueSizes[] = { 1, 2, 4, 8, 4, 8, -1 };
-
-            /*switch (selection) {
-                case 0 ... 3: this->m_inputMenuType = InputMenuType::INTEGER; break;
-                case 4 ... 5: this->m_inputMenuType = InputMenuType::FLOAT;   break;
-                case 6:       this->m_inputMenuType = InputMenuType::STRING;  break;
-            }*/
-
-            this->m_valueSize = valueSizes[selection];
+            switch (selection) {
+                case 0:  this->m_value[0] = new cheat::types::Value<u8>(); break;
+                case 1:  this->m_value[0] = new cheat::types::Value<s8>(); break;
+                case 2:  this->m_value[0] = new cheat::types::Value<u16>(); break;
+                case 3:  this->m_value[0] = new cheat::types::Value<s16>(); break;
+                case 4:  this->m_value[0] = new cheat::types::Value<u32>(); break;
+                case 5:  this->m_value[0] = new cheat::types::Value<s32>(); break;
+                case 6:  this->m_value[0] = new cheat::types::Value<u64>(); break;
+                case 7:  this->m_value[0] = new cheat::types::Value<s64>(); break;
+                case 8:  this->m_value[0] = new cheat::types::Value<float>(); break;
+                case 9:  this->m_value[0] = new cheat::types::Value<double>(); break;
+                case 10: this->m_value[0] = new cheat::types::Value<cheat::types::ByteArray>(); break;
+                case 11: this->m_value[0] = new cheat::types::Value<cheat::types::ByteArray>(); break;
+            }
         });
 
         scanRegionItem->setListener([this](s32 selection) {
-            //this->m_scanRegion = static_cast<ScanRegion>(selection);
+            this->m_regions.clear();
+            for (const auto& memoryInfo : cheat::CheatManager::getMemoryRegions()) {
+                if ((selection == 0 || selection == 2) && memoryInfo.type == MemType_Heap)
+                    this->m_regions.push_back(cheat::types::Region(memoryInfo.addr, memoryInfo.size));
+                if ((selection == 1 || selection == 2) && memoryInfo.type == MemType_CodeMutable && (memoryInfo.perm & Perm_Rw) == Perm_Rw)
+                    this->m_regions.push_back(cheat::types::Region(memoryInfo.addr, memoryInfo.size));
+            }
         });
 
-        list->addView(foundAddresses);
+        list->addView(this->m_foundAddresses);
         list->addView(new brls::Header("Search Settings", false));
         list->addView(scanTypeItem);
         list->addView(valueTypeItem);
@@ -100,7 +119,7 @@ namespace edz::ui {
         if (knownValue) {
             auto valueItem = new brls::ListItem("Search Value");
             valueItem->setClickListener([=](brls::View *view) { 
-                //this->openInputMenu(this->m_dataType, this->m_scanType == ScanType::BETWEEN, this->m_valueSize, valueItem);
+                this->openInputMenu(this->m_dataType, false, this->m_valueSize, valueItem);
             });
             list->addView(valueItem);
         }
@@ -111,117 +130,58 @@ namespace edz::ui {
     }
 
     brls::List* GuiCheatEngine::createPointerSearchSettings() {
-        auto foundAddresses = new brls::ListItem("Found Addresses");
+        this->m_foundAddresses = new brls::ListItem("Found Addresses");
 
-        auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
-        auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN", "Everything" });
+        //auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
+        //auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN", "Everything" });
+        return nullptr;
     }
 
-    void GuiCheatEngine::openInputMenu(cheat::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem) {
-        ui::element::PopupList *dialog = new ui::element::PopupList("Cancel", "Apply", [](brls::View*) {
+    void GuiCheatEngine::openInputMenu(cheat::types::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem) {
+        brls::ListItem *upperLimitItem = nullptr, *lowerLimitItem = nullptr, *valueItem = nullptr;
+
+        ui::element::PopupList *dialog = new ui::element::PopupList("Cancel", "Apply", [=](brls::View*) {
+            if (range)
+                searchValueItem->setValue(lowerLimitItem->getValue() + " - " + upperLimitItem->getValue());
+            else
+                searchValueItem->setValue(valueItem->getValue());
             brls::Application::popView();
         }, [=](brls::View*) {
             brls::Application::popView();
         });
 
         if(range) {
-            auto upperLimit = new brls::ListItem("Upper Search Limit");
-            auto lowerLimit = new brls::ListItem("Lower Search Limit");
+            upperLimitItem = new brls::ListItem("Upper Search Limit");
+            lowerLimitItem = new brls::ListItem("Lower Search Limit");
 
-            upperLimit->setValue("0");
-            lowerLimit->setValue("0");
+            upperLimitItem->setValue("0");
+            lowerLimitItem->setValue("0");
 
-            upperLimit->setClickListener([=](brls::View *view) {
+            upperLimitItem->setClickListener([=](brls::View *view) {
                 hlp::openSwkbdForNumber([=](std::string numString) {
-
-                    if (this->m_value1 != nullptr)
-                        delete[] this->m_value1;
-                    this->m_value1 = new u8[valueSize];
-                    
-                    if (inputType == cheat::DataType::UNSIGNED || inputType == cheat::DataType::SIGNED) {
-                        s128 value = std::strtoll(numString.c_str(), nullptr, 10);
-                        std::memcpy(this->m_value1, &value, valueSize);
-
-                        if (value != 0)
-                            upperLimit->setValue(numString);
-                        else 
-                            upperLimit->setValue("0");
-                    } else if (inputType == cheat::DataType::FLOATING_POINT) {
-                        double value = std::strtod(numString.c_str(), nullptr);
-                        std::memcpy(this->m_value1, &value, valueSize);
-
-                        if (value != 0)
-                            upperLimit->setValue(std::to_string(value));
-                        else 
-                            upperLimit->setValue("0.0");
-                    }
-
-                }, "Enter Search Value", "Enter the value you want to search for", "-", inputType == cheat::DataType::FLOATING_POINT ? "." : "", std::ceil(std::log10(std::pow(2, valueSize))));
+                // TODO: Fix
+                }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, valueSize))));
             });
-            lowerLimit->setClickListener([=](brls::View *view) {
+            lowerLimitItem->setClickListener([=](brls::View *view) {
                 hlp::openSwkbdForNumber([=](std::string numString) {
-
-                    if (this->m_value2 != nullptr)
-                        delete[] this->m_value2;
-                    this->m_value2 = new u8[valueSize];
-                    
-                    if (inputType == cheat::DataType::UNSIGNED || inputType == cheat::DataType::SIGNED) {
-                        s128 value = std::strtoll(numString.c_str(), nullptr, 10);
-                        std::memcpy(this->m_value2, &value, valueSize);
-
-                        if (value != 0)
-                            lowerLimit->setValue(numString);
-                        else 
-                            lowerLimit->setValue("0");
-                    } else if (inputType == cheat::DataType::FLOATING_POINT) {
-                        double value = std::strtod(numString.c_str(), nullptr);
-                        std::memcpy(this->m_value2, &value, valueSize);
-
-                        if (value != 0)
-                            lowerLimit->setValue(std::to_string(value));
-                        else 
-                            lowerLimit->setValue("0.0");
-                    }
-
-                }, "Enter Search Value", "Enter the value you want to search for", "-", inputType == cheat::DataType::FLOATING_POINT ? "." : "", std::ceil(std::log10(std::pow(2, valueSize * 8))));
+                // TODO: Fix
+                }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, valueSize * 8))));
             });
 
-            dialog->addItem(upperLimit);
-            dialog->addItem(lowerLimit);
+            dialog->addItem(upperLimitItem);
+            dialog->addItem(lowerLimitItem);
 
         }
         else {
-            auto searchValue = new brls::ListItem("Search Value");
-            searchValue->setValue("0");
-            searchValue->setClickListener([=](brls::View *view) {
+            valueItem = new brls::ListItem("Search Value");
+            valueItem->setValue("0");
+            valueItem->setClickListener([=](brls::View *view) {
                 hlp::openSwkbdForNumber([=](std::string numString) {
-
-                    if (this->m_value1 != nullptr)
-                        delete[] this->m_value1;
-                    this->m_value1 = new u8[valueSize];
-                    
-                    if (inputType == cheat::DataType::UNSIGNED || inputType == cheat::DataType::SIGNED) {
-                        s128 value = std::strtoll(numString.c_str(), nullptr, 10);
-                        std::memcpy(this->m_value1, &value, valueSize);
-
-                        if (value != 0)
-                            searchValue->setValue(numString);
-                        else 
-                            searchValue->setValue("0");
-                    } else if (inputType == cheat::DataType::FLOATING_POINT) {
-                        double value = std::strtod(numString.c_str(), nullptr);
-                        std::memcpy(this->m_value1, &value, valueSize);
-
-                        if (value != 0)
-                            searchValue->setValue(std::to_string(value));
-                        else 
-                            searchValue->setValue("0.0");
-                    }
-
-                }, "Enter Search Value", "Enter the value you want to search for", "-", inputType == cheat::DataType::FLOATING_POINT ? "." : "", std::ceil(std::log10(std::pow(2, valueSize * 8))));
+                // TODO: Fix
+                }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, valueSize * 8))));
             });
 
-            dialog->addItem(searchValue);
+            dialog->addItem(valueItem);
         }
 
         dialog->open();
@@ -248,7 +208,49 @@ namespace edz::ui {
 
         this->m_rootFrame->setContentView(this->m_searchSettings);
         this->m_rootFrame->getSidebar()->getButton()->setClickListener([=](brls::View*) {
-            //cheat::CheatEngine::findPattern(this->m_value1, this->m_valueSize, )
+            Gui::runAsyncWithDialog([=] { 
+                appletSetMediaPlaybackState(true);
+
+                switch (this->m_dataType.getType()) {
+                    case cheat::types::DataType::U8:
+                        this->handleSearchOperation<u8>(this->m_regions, this->m_operation, std::any_cast<u8>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::U16:
+                        this->handleSearchOperation<u16>(this->m_regions, this->m_operation, std::any_cast<u16>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::U32:
+                        this->handleSearchOperation<u32>(this->m_regions, this->m_operation, std::any_cast<u32>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::U64:
+                        this->handleSearchOperation<u64>(this->m_regions, this->m_operation, std::any_cast<u64>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::S8:
+                        this->handleSearchOperation<s8>(this->m_regions, this->m_operation, std::any_cast<s8>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::S16:
+                        this->handleSearchOperation<s16>(this->m_regions, this->m_operation, std::any_cast<s16>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::S32:
+                        this->handleSearchOperation<s32>(this->m_regions, this->m_operation, std::any_cast<s32>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::S64:
+                        this->handleSearchOperation<s64>(this->m_regions, this->m_operation, std::any_cast<s64>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::FLOAT:
+                        this->handleSearchOperation<float>(this->m_regions, this->m_operation, std::any_cast<float>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::DOUBLE:
+                        this->handleSearchOperation<double>(this->m_regions, this->m_operation, std::any_cast<double>(this->m_value[0]));
+                        break;
+                    case cheat::types::DataType::ARRAY:
+                    case cheat::types::DataType::STRING:
+                        //this->handleSearchOperation<cheat::types::ByteArray>(this->m_regions, this->m_operation, std::any_cast<cheat::types::ByteArray>(this->m_value[0]));
+                        break;
+                }
+
+                appletSetMediaPlaybackState(false);
+            }, "Searching memory. This might take a while...");
+            
         });
 
         return m_rootFrame;

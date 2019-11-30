@@ -32,6 +32,7 @@ namespace edz::save {
         Title(titleid_t titleID, bool isInstalled);
 
         void addUser(userid_t userID);
+        void setHasCommonSaveFile();
 
         titleid_t getID();
         std::string getIDString();
@@ -44,6 +45,7 @@ namespace edz::save {
         bool isInstalled();
         bool hasSaveFile();
         bool hasSaveFile(std::unique_ptr<Account> &account);
+        bool hasCommonSaveFile();
 
         bool isRunning();
         static titleid_t getRunningTitleID();
@@ -56,7 +58,7 @@ namespace edz::save {
 
         std::vector<userid_t> getUserIDs();
 
-        EResult createSaveDataFileSystem(std::unique_ptr<Account> &account);
+        EResult createSaveDataFileSystem(std::unique_ptr<Account> &account, FsSaveDataType saveDataType);
         void launch();
 
         time_t getPlayTime(std::unique_ptr<Account> &account);
@@ -69,12 +71,13 @@ namespace edz::save {
         bool m_isInstalled;
         std::vector<userid_t> m_userIDs;
         std::map<userid_t, PdmPlayStatistics> m_playStatistics;
+        bool m_hasCommonSaveFile;
 
         NacpStruct m_nacp;
         std::string m_titleName, m_titleAuthor, m_versionString;
         u32 m_version;
         std::vector<u8> m_icon;
 
-        EResult _fsCreateSaveDataFileSystem(const FsSave* save, const FsSaveCreate* create);
+        EResult _fsCreateSaveDataFileSystem(const FsSaveDataAttribute* save, const FsSaveDataCreationInfo* create);
     };
 }

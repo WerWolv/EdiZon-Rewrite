@@ -54,6 +54,7 @@ namespace edz::ui {
             brls::List *m_saveReposList = nullptr;
             brls::List *m_runningTitleInfoList = nullptr;
             brls::List *m_cheatsList = nullptr;
+            brls::LayerView *m_playTimeStatsList = nullptr;
             brls::List *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
 
@@ -76,6 +77,7 @@ namespace edz::ui {
             void createSaveReposTab(brls::List *list);
             void createRunningTitleInfoTab(brls::List *list);
             void createCheatsTab(brls::List *list);
+            void createPlayTimeStatsTab(brls::LayerView *layerView);
             void createSettingsTab(brls::List *list);
             void createAboutTab(brls::List *list);
     };

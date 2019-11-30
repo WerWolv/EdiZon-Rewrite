@@ -191,7 +191,23 @@ namespace edz::cheat {
         buildid_t buildid = 0;
 
         std::memcpy(&buildid, CheatManager::s_processMetadata.main_nso_build_id, sizeof(buildid_t));
-        return buildid;
+        
+        return __builtin_bswap64(buildid);;
+    }
+
+
+    std::pair<EResult, std::string> CheatManager::getCheatFile() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return { ResultEdzCheatServiceNotAvailable, "" };
+        
+        std::string expectedFileName = hlp::toHexString(CheatManager::getBuildID()) + ".txt";
+
+        for (auto &[fileName, file] : hlp::Folder(EDIZON_CHEATS_DIR).getFiles()) {
+            if (strcasecmp(expectedFileName.c_str(), fileName.c_str()) == 0)
+                return { ResultSuccess, fileName };
+        }
+            
+        return { ResultEdzNotFound, "" }; 
     }
 
 

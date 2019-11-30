@@ -21,18 +21,22 @@
 
 #include <edizon.hpp>
 #include "cheat/dmntcht.hpp"
-#include <optional>
+#include <vector>
 
 namespace edz::cheat {
 
     enum class ParseResult {
-        NONE,
+        NONE                         = 0x00,
 
-        WARN_NAME_TOO_LONG,
+        WARN_NAME_TOO_LONG           = 0x01,
 
-        ERROR_TOO_MANY_OPCODES,
-        ERROR_SYNTAX_ERROR,
-        ERROR_CHEAT_EMPTY  
+        ERROR_TOO_MANY_OPCODES       = 0x81,
+        ERROR_SYNTAX_ERROR           = 0x82,
+        ERROR_CHEAT_EMPTY            = 0x84,
+        ERROR_TOO_MANY_CHEATS        = 0x88,
+        ERROR_MULTIPLE_MASTER_CHEATS = 0x90,
+        ERROR_INVALID_OPCODE         = 0xA0,
+        ERROR_NAME_NOT_TERMINATED    = 0xC0,
     };
 
     inline ParseResult operator|(ParseResult lhs, ParseResult rhs) {
@@ -52,8 +56,8 @@ namespace edz::cheat {
         CheatParser(CheatParser &) = delete;
         CheatParser& operator=(CheatParser &) = delete; 
 
-        static std::pair<EResult, std::optional<dmntcht::CheatDefinition>> parseString(std::string content);
-        static std::pair<EResult, std::optional<dmntcht::CheatDefinition>> parseFile(std::string filePath);
+        static std::pair<EResult, std::vector<dmntcht::CheatDefinition>> parseString(std::string content);
+        static std::pair<EResult, std::vector<dmntcht::CheatDefinition>> parseFile(std::string filePath);
 
         static std::pair<EResult, std::string> disassembleCheat(dmntcht::CheatDefinition cheatDef);
 
@@ -62,7 +66,7 @@ namespace edz::cheat {
         }
 
     private:
-        static enum ParseResult s_parseResults;
+        static inline enum ParseResult s_parseResults = ParseResult::NONE;
     };
 
 }

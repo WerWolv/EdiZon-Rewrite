@@ -295,7 +295,18 @@ namespace edz::hlp {
     std::string getLFSCheatsPath(titleid_t titleID) {
         return getLFSTitlesPath() + "/" + hlp::toHexString(titleID) + "/cheats";
     }
+    
 
+    std::string getCurrentDateTimeString() {
+        char buffer[0x20];
+
+        time_t unixTime = time(nullptr);
+        struct tm* time = localtime((const time_t*)&unixTime);
+
+        sprintf(buffer, "%0d%0d%0d_%02d%02d%02d", time->tm_year % 100, time->tm_mon, time->tm_mday, time->tm_hour, time->tm_min, time->tm_sec);
+
+        return std::string(buffer);
+    }
 
     std::string getCurrentTimeString() {
         char buffer[0x10];
@@ -393,7 +404,7 @@ namespace edz::hlp {
         EResult res = ResultSuccess;
         u64 pid = 0;
 
-        NcmProgramLocation edizonLocation = { EDIZON_SYSMODULE_TITLEID, FsStorageId_None };
+        NcmProgramLocation edizonLocation = { EDIZON_SYSMODULE_TITLEID, NcmStorageId_None };
 
         pmdmntGetProcessId(&pid, EDIZON_SYSMODULE_TITLEID);
         if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;

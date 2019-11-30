@@ -52,8 +52,7 @@ EResult initServices() {
     ER_TRY(nsInitialize());
 
     // Account querying
-    accountSetServiceType(AccountServiceType_Administrator);
-    ER_TRY(accountInitialize());
+    ER_TRY(accountInitialize(AccountServiceType_Administrator));
 
     // Parential control lockdown
     ER_TRY(pctlInitialize());

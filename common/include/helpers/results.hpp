@@ -34,6 +34,7 @@ namespace edz {
     constexpr Result ResultEdzCurlInitFailed                = EDZHBRES(2);
     constexpr Result ResultEdzNotYetImplemented             = EDZHBRES(3);
     constexpr Result ResultEdzErrorDuringErrorHandling      = EDZHBRES(4);
+    constexpr Result ResultEdzNotFound                      = EDZHBRES(5);
 
     constexpr Result ResultEdzSysmoduleAlreadyRunning       = EDZHBRES(101);
     constexpr Result ResultEdzSysmoduleNotRunning           = EDZHBRES(102);

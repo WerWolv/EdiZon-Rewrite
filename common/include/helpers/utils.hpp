@@ -119,6 +119,8 @@ namespace edz::hlp {
     /* Removes all illegal characters from a path */
     std::string removeIllegalPathCharacters(std::string path);
 
+    /* Returns the current date time as a string suitable for file names */
+    std::string getCurrentDateTimeString();
 
     /* Returns the current time as a string */
     std::string getCurrentTimeString();

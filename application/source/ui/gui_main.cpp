@@ -23,6 +23,9 @@
 #include <cstring>
 #include <algorithm>
 
+#include "cheat/cheat.hpp"
+#include "cheat/cheat_parser.hpp"
+
 #include "helpers/config_manager.hpp"
 #include "save/edit/config.hpp"
 #include "save/edit/editor.hpp"
@@ -72,18 +75,25 @@ namespace edz::ui {
                 auto &account = save::SaveFileSystem::getAllAccounts()[userid];
 
                 if (title->hasSaveFile(account)) {
-                    brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getLaunchCount(account), title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
+                    brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getLaunchCount(account)));
                     userItem->setThumbnail(account->getIcon());
 
                     softwareInfoList->addView(userItem);
                 }
+            }
+
+            if (title->hasCommonSaveFile()) {
+                brls::ListItem *userItem = new brls::ListItem("Common Save File", "", " ");
+                userItem->setThumbnail("romfs:/assets/info/icon_save_common.png");
+
+                softwareInfoList->addView(userItem);                
             }
         }
         else {
             brls::ListItem *createSaveFSItem = new brls::ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
             createSaveFSItem->setClickListener([&title](brls::View *view) {
                 hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
-                    title->createSaveDataFileSystem(account);
+                    //title->createSaveDataFileSystem(account, );
                 });
             });
 
@@ -98,7 +108,7 @@ namespace edz::ui {
         backupItem->setClickListener([&title](brls::View *view) {
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
-                if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang))
+                if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang, "", 32, hlp::getCurrentDateTimeString()))
                     Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "Creating a save data backup...");
              });
 
@@ -138,25 +148,6 @@ namespace edz::ui {
         });
 
 
-        brls::List *cheatDownloadList = new brls::List();
-        
-        Gui::runAsync([=, &title]() {
-            api::SwitchCheatsDBAPI switchCheatsDBAPI;
-
-            auto [result, response] = switchCheatsDBAPI.getCheats(title->getID());
-
-            if (result.failed()) {
-                cheatDownloadList->addView(new brls::ListItem("No cheats available for this game"));
-                return;
-            }
-
-            for (auto &cheat : response.cheats) {
-                size_t numberOfCheats = std::count(cheat.content.begin(), cheat.content.end(), '[');
-                
-                cheatDownloadList->addView(new brls::ListItem(hlp::formatString("Cheat collection containing %d cheats", numberOfCheats), "", hlp::formatString("Made by %s", cheat.credits.c_str())));
-            }
-        });
-
         saveManagementList->addView(new brls::Header("edz.gui.popup.management.header.basic"_lang, false));
         saveManagementList->addView(backupItem);
         saveManagementList->addView(restoreItem);
@@ -168,8 +159,28 @@ namespace edz::ui {
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
 
-        if (GET_CONFIG(Online.loggedIn))
+        if (GET_CONFIG(Online.loggedIn)) {
+            brls::List *cheatDownloadList = new brls::List();
+            
+            Gui::runAsync([=, &title]() {
+                api::SwitchCheatsDBAPI switchCheatsDBAPI;
+
+                auto [result, response] = switchCheatsDBAPI.getCheats(title->getID());
+
+                if (result.failed()) {
+                    cheatDownloadList->addView(new brls::ListItem("No cheats available for this game"));
+                    return;
+                }
+
+                for (auto &cheat : response.cheats) {
+                    size_t numberOfCheats = std::count(cheat.content.begin(), cheat.content.end(), '[');
+                    
+                    cheatDownloadList->addView(new brls::ListItem(hlp::formatString("Cheat collection containing %d cheats", numberOfCheats), "", hlp::formatString("Made by %s", cheat.credits.c_str())));
+                }
+            });
+
             rootFrame->addTab("Cheats", cheatDownloadList);
+        }
 
         brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
@@ -525,14 +536,75 @@ namespace edz::ui {
             } else {
                 if (!hlp::isTitleRunning())
                     list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_title"_lang, true));
-                else if (hlp::isInAppletMode())
-                    list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
+                else if (hlp::isInAppletMode()) {
+                    auto [result, cheatFileName] = cheat::CheatManager::getCheatFile();
+
+                    if (result.failed())
+                        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
+                    else {
+                        brls::ListItem *cheatFileSelectionItem = new brls::ListItem("Load Cheats", "Cheats have been found on your system but haven't been loaded yet. Click here to load them");
+                        
+                        cheatFileSelectionItem->setClickListener([this](brls::View *view) {
+                            auto [result, cheatDefs] = cheat::CheatParser::parseFile(EDIZON_CHEATS_DIR "/" + cheat::CheatManager::getCheatFile().second);
+
+                            if (result.succeeded()) {
+                                for (auto &cheatDef : cheatDefs)
+                                    cheat::CheatManager::addCheat(cheatDef, false);
+
+                                Gui::runLater([this] {
+                                    brls::Application::blockInputs();
+                                    brls::Application::removeFocus(this->m_cheatsList);
+
+                                    this->m_cheatsList->clear();
+                                    createCheatsTab(this->m_cheatsList);
+
+                                    brls::Application::requestFocus(this->m_cheatsList, brls::FocusDirection::NONE);
+                                    brls::Application::unblockInputs();
+                                }, 20);
+                            }                                
+                            else {
+                                ;//TODO: Display error
+                            }
+                        });
+                        
+                        list->addView(cheatFileSelectionItem);
+                    }
+                }
                 else
                     list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.application_mode"_lang, true));
             }
         } 
         else 
             list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.dmnt_cht_missing"_lang, true));
+    }
+
+    void GuiMain::createPlayTimeStatsTab(brls::LayerView *layerView) {
+        for (auto &[userID, user] : save::SaveFileSystem::getAllAccounts()) {
+            brls::List *list = new brls::List();
+
+
+            // , title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60)
+            auto &currUser = user;
+        
+            std::vector<save::Title*> titles;
+            for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles())
+                titles.push_back(title.get());
+
+            std::sort(titles.begin(), titles.end(), [&currUser](save::Title *l, save::Title *r) {
+                return l->getPlayTime(currUser) > r->getPlayTime(currUser);
+            });
+
+            for (auto &title : titles) {
+                brls::ListItem *statItem = new brls::ListItem(title->getName(), "", hlp::formatString("Played for %d hours and %d minutes", title->getPlayTime(currUser) / 3600, (title->getPlayTime(currUser) % 3600) / 60));
+                statItem->setThumbnail(title->getIcon());
+
+                list->addView(statItem);
+            }
+
+            layerView->addLayer(list);
+        }
+
+        layerView->changeLayer(0);
     }
 
     void GuiMain::createSettingsTab(brls::List *list) {
@@ -731,12 +803,14 @@ namespace edz::ui {
         this->m_titleList = new brls::LayerView();
         this->m_saveReposList = new brls::List();
         this->m_cheatsList = new brls::List();
+        this->m_playTimeStatsList = new brls::LayerView();
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
 
         createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
         createCheatsTab(this->m_cheatsList);
         createSaveReposTab(this->m_saveReposList);
+        //createPlayTimeStatsTab(this->m_playTimeStatsList);
         createSettingsTab(this->m_settingsList);
         createAboutTab(this->m_aboutList);
 
@@ -750,8 +824,9 @@ namespace edz::ui {
 
         rootFrame->addTab("edz.gui.main.cheats.tab"_lang, this->m_cheatsList);
         rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);
-        rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
+        //rootFrame->addTab("edz.gui.main.playtimestats.tab"_lang, this->m_playTimeStatsList);
         rootFrame->addSeparator();
+        rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
         rootFrame->addTab("edz.gui.main.about.tab"_lang, this->m_aboutList);
 
         #if DEBUG_MODE_ENABLED

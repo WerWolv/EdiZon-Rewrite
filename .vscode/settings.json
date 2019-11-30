@@ -74,7 +74,8 @@
         "styles.h": "c",
         "future": "cpp",
         "zlib.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "any": "cpp"
     },
     "python.pythonPath": "/bin/python3.8",
     "java.configuration.updateBuildConfiguration": "automatic",

@@ -77,6 +77,8 @@ namespace edz::cheat {
         static processid_t getProcessID();
         static buildid_t getBuildID();
 
+        static std::pair<EResult, std::string> getCheatFile();
+
         static std::pair<EResult, u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
         static EResult removeCheat(u32 cheatID);
 

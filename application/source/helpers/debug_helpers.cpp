@@ -156,7 +156,8 @@ extern "C" {
             fatalCtx.aarch64_ctx.pstate = ctxBackup.pstate;
             
             fatalThrowWithContext(edz::ResultEdzErrorDuringErrorHandling, FatalPolicy_ErrorScreen, &fatalCtx);
-            return;
+            while (true)
+                svcSleepThread(U64_MAX);
         }
 
         alreadyCrashed = true;

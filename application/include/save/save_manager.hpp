@@ -37,8 +37,11 @@ namespace edz::save {
         } PACKED backup_header_t;
 
         static EResult backup(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath = "");
+        static EResult backup(std::unique_ptr<Title> &title, std::string backupName, std::string basePath = "");
         static EResult restore(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath = "");
+        static EResult restore(std::unique_ptr<Title> &title, std::string backupName, std::string basePath = "");
         static EResult remove(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
+        static EResult remove(std::unique_ptr<Title> &title);
  
         static EResult swapSaveData(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName);
         static EResult swapSaveData(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account1, std::unique_ptr<Account> &account2);

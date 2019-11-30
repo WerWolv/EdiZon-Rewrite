@@ -24,66 +24,118 @@
 
 namespace edz::cheat {
 
-    std::pair<EResult, std::optional<dmntcht::CheatDefinition>> CheatParser::parseString(std::string content) {
+    std::pair<EResult, std::vector<dmntcht::CheatDefinition>> CheatParser::parseString(std::string s) {
         CheatParser::s_parseResults = ParseResult::NONE;
 
-        if (content.size() == 0) {
+        if (s.size() == 0) {
             CheatParser::s_parseResults |= ParseResult::ERROR_CHEAT_EMPTY;
             return { ResultEdzCheatParsingFailed, {} };
         }
 
-        dmntcht::CheatDefinition cheatDef = { 0 };
+        std::vector<dmntcht::CheatDefinition> cheatDefs;
+        dmntcht::CheatDefinition *currCheatDef = nullptr;
+        cheatDefs.push_back({ 0 }); // Master cheat
 
-        char* pos = &content[0];
-        while (pos < (&content[0] + content.size())) {
+        size_t i = 0;
+        size_t len = s.length() - 1;
+        while (i < len) {
+            if (std::isspace(static_cast<unsigned char>(s[i]))) {
+                /* Just ignore whitespace. */
+                i++;
+            } else if (s[i] == '[') {
+                /* Parse a readable cheat name. */
+                cheatDefs.push_back({ 0 });
+                currCheatDef = &cheatDefs.back();
 
-            // Parse cheat name
-            if (*pos == '[') {
-                if (cheatDef.num_opcodes != 0) break;
+                if (cheatDefs.size() >= 0x80) {
+                    CheatParser::s_parseResults |= ParseResult::ERROR_TOO_MANY_CHEATS;
+                    return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
+                }
 
-                pos++;
+                /* Extract name bounds. */
+                size_t j = i + 1;
+                while (s[j] != ']') {
+                    j++;
 
-                memset(&cheatDef, 0x00, sizeof(dmntcht::CheatDefinition));
-
-                for (uint32_t i = 0; i < content.size() && *pos != ']'; i++) {
-                    if (i < 0x3F)
-                        cheatDef.readable_name[i] = *pos;
-                    else
-                        CheatParser::s_parseResults |= ParseResult::WARN_NAME_TOO_LONG;
-                    pos++;
-
-                    if (*pos == '\n') {
-                        CheatParser::s_parseResults |= ParseResult::ERROR_SYNTAX_ERROR;
-                        return { ResultEdzCheatParsingFailed, {} };
+                    if (j >= len) {
+                        CheatParser::s_parseResults |= ParseResult::ERROR_NAME_NOT_TERMINATED;
+                        return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                     }
                 }
 
-                if (*pos == ']')
-                    pos++;
-            }
-            else if (isspace(*pos)) {
-                pos++;
-            }
-            else if (isxdigit(*pos)) {
-                if (cheatDef.num_opcodes >= 0x100) {
+                /* s[i+1:j] is cheat name. */
+                const size_t cheat_name_len = std::min(j - i - 1, sizeof(currCheatDef->readable_name));
+                std::memcpy(currCheatDef->readable_name, &s[i+1], cheat_name_len);
+                currCheatDef->readable_name[cheat_name_len] = 0;
+
+                if (j - i - 1 > 0x3F)
+                    CheatParser::s_parseResults |= ParseResult::WARN_NAME_TOO_LONG;
+
+                /* Skip onwards. */
+                i = j + 1;
+            } else if (s[i] == '{') {
+                /* We're parsing a master cheat. */
+                currCheatDef = &cheatDefs[0];
+
+                /* There can only be one master cheat. */
+                if (currCheatDef->num_opcodes > 0) {
+                    CheatParser::s_parseResults |= ParseResult::ERROR_MULTIPLE_MASTER_CHEATS;
+                    return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
+                }
+
+                /* Extract name bounds */
+                size_t j = i + 1;
+                while (s[j] != '}') {
+                    j++;
+                    if (j >= len) {
+                        CheatParser::s_parseResults |= ParseResult::ERROR_NAME_NOT_TERMINATED;
+                        return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
+                    }
+                }
+
+                /* s[i+1:j] is cheat name. */
+                const size_t cheat_name_len = std::min(j - i - 1, sizeof(currCheatDef->readable_name));
+                memcpy(currCheatDef->readable_name, &s[i+1], cheat_name_len);
+                currCheatDef->readable_name[cheat_name_len] = 0;
+
+                /* Skip onwards. */
+                i = j + 1;
+            } else if (std::isxdigit(static_cast<unsigned char>(s[i]))) {
+                /* Bounds check the opcode count. */
+                if (currCheatDef->num_opcodes >= std::size(currCheatDef->opcodes)) {
                     CheatParser::s_parseResults |= ParseResult::ERROR_TOO_MANY_OPCODES;
-                    return { ResultEdzCheatParsingFailed, {} };
+                    return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                 }
 
-                for (uint8_t i = 0; i < 8; i++)
-                    if (!isxdigit(*(pos + i))) {
-                        CheatParser::s_parseResults |= ParseResult::ERROR_SYNTAX_ERROR;
-                        return { ResultEdzCheatParsingFailed, {} };
-                    }
+                /* We're parsing an instruction, so validate it's 8 hex digits. */
+                for (size_t j = 1; j < 8; j++) {
+                    /* Validate 8 hex chars. */
 
-                cheatDef.opcodes[cheatDef.num_opcodes++] = strtoul(pos, &pos, 16);
+                    if (i + j >= len || !std::isxdigit(static_cast<unsigned char>(s[i+j]))) {
+                        CheatParser::s_parseResults |= ParseResult::ERROR_INVALID_OPCODE;
+                        return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
+                    }
+                }
+
+                /* Parse the new opcode. */
+                char hex_str[9] = {0};
+                std::memcpy(hex_str, &s[i], 8);
+                currCheatDef->opcodes[currCheatDef->num_opcodes++] = std::strtoul(hex_str, NULL, 16);
+
+                /* Skip onwards. */
+                i += 8;
+            } else {
+                /* Unexpected character encountered. */
+                printf("%x\n", s[i]);
+                CheatParser::s_parseResults |= ParseResult::ERROR_SYNTAX_ERROR;
+                return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
             }
         }
 
-        return { ResultSuccess, cheatDef };
+        return { ResultSuccess, cheatDefs };
     }
 
-    std::pair<EResult, std::optional<dmntcht::CheatDefinition>> CheatParser::parseFile(std::string filePath) {
+    std::pair<EResult, std::vector<dmntcht::CheatDefinition>> CheatParser::parseFile(std::string filePath) {
         hlp::File file(filePath);
 
         return CheatParser::parseString(file.read());

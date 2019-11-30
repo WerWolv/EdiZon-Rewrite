@@ -34,6 +34,7 @@ namespace edz::save {
     class SaveFileSystem {
     public:
         SaveFileSystem(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
+        SaveFileSystem(std::unique_ptr<Title> &title);
         ~SaveFileSystem();
 
         static std::map<titleid_t, std::unique_ptr<Title>>& getAllTitles();
@@ -44,6 +45,7 @@ namespace edz::save {
 
     private:
         static std::vector<FsSaveDataInfo> getTitleSaveFileData();
+        static std::vector<FsSaveDataInfo> getCommonSaveFileData();
 
         u16 m_openFileSystemID;
         bool m_initialized = false;

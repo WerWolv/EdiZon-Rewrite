@@ -39,6 +39,9 @@
     /* Whether the splash screen should be displayed on launch */
     #define SPLASH_ENABLED                  true
 
+    /* The buffer size used when searching a game's memory for values. Bigger values can increase speed but EdiZon might stop working in Applet mode */
+    #define MEMORY_SEARCH_BUFFER_SIZE       0x40000
+
     /* Current web API version */
     #define EDIZON_API_VERSION              "v4"
     #define SWITCHCHEATSDB_API_VERSION      "v1"
