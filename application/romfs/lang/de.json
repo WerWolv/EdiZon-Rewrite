@@ -89,7 +89,7 @@
     "edz.gui.popup.information.launch.title"            : "Applikation starten",
     "edz.gui.popup.information.launch.subtitle"         : "Schließe EdiZon und führe diese Applikation aus",
     "edz.gui.popup.information.header.save"             : "Speicherdaten",
-    "edz.gui.popup.information.playtime"                : "Gespielt %d mal",
+    "edz.gui.popup.information.playtime"                : "Gespielt für %d Stunden und %d Minuten",
     "edz.gui.popup.management.header.basic"             : "Einfache Operationen",                      
     "edz.gui.popup.management.header.advanced"          : "Erweiterte Operationen",
     "edz.gui.popup.management.backup.title"             : "Backup erstellen",

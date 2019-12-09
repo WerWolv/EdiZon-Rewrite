@@ -75,7 +75,7 @@ namespace edz::ui {
                 auto &account = save::SaveFileSystem::getAllAccounts()[userid];
 
                 if (title->hasSaveFile(account)) {
-                    brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getLaunchCount(account)));
+                    brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
                     userItem->setThumbnail(account->getIcon());
 
                     softwareInfoList->addView(userItem);
@@ -578,35 +578,6 @@ namespace edz::ui {
             list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.dmnt_cht_missing"_lang, true));
     }
 
-    void GuiMain::createPlayTimeStatsTab(brls::LayerView *layerView) {
-        for (auto &[userID, user] : save::SaveFileSystem::getAllAccounts()) {
-            brls::List *list = new brls::List();
-
-
-            // , title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60)
-            auto &currUser = user;
-        
-            std::vector<save::Title*> titles;
-            for (auto &[titleID, title] : save::SaveFileSystem::getAllTitles())
-                titles.push_back(title.get());
-
-            std::sort(titles.begin(), titles.end(), [&currUser](save::Title *l, save::Title *r) {
-                return l->getPlayTime(currUser) > r->getPlayTime(currUser);
-            });
-
-            for (auto &title : titles) {
-                brls::ListItem *statItem = new brls::ListItem(title->getName(), "", hlp::formatString("Played for %d hours and %d minutes", title->getPlayTime(currUser) / 3600, (title->getPlayTime(currUser) % 3600) / 60));
-                statItem->setThumbnail(title->getIcon());
-
-                list->addView(statItem);
-            }
-
-            layerView->addLayer(list);
-        }
-
-        layerView->changeLayer(0);
-    }
-
     void GuiMain::createSettingsTab(brls::List *list) {
         // General Options
         std::vector<std::string> langCodes, langNames;
@@ -810,7 +781,6 @@ namespace edz::ui {
         createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
         createCheatsTab(this->m_cheatsList);
         createSaveReposTab(this->m_saveReposList);
-        //createPlayTimeStatsTab(this->m_playTimeStatsList);
         createSettingsTab(this->m_settingsList);
         createAboutTab(this->m_aboutList);
 
@@ -824,7 +794,6 @@ namespace edz::ui {
 
         rootFrame->addTab("edz.gui.main.cheats.tab"_lang, this->m_cheatsList);
         rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);
-        //rootFrame->addTab("edz.gui.main.playtimestats.tab"_lang, this->m_playTimeStatsList);
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
         rootFrame->addTab("edz.gui.main.about.tab"_lang, this->m_aboutList);

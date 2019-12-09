@@ -132,7 +132,7 @@
     "edz.gui.popup.information.launch.title"            : "Launch title",
     "edz.gui.popup.information.launch.subtitle"         : "Close EdiZon and launch this title",
     "edz.gui.popup.information.header.save"             : "Save Data",
-    "edz.gui.popup.information.playtime"                : "Played %d times",
+    "edz.gui.popup.information.playtime"                : "Played for %d hours and %d minutes",
     "edz.gui.popup.management.header.basic"             : "Basic Operations",                      
     "edz.gui.popup.management.header.advanced"          : "Advanced Operations",
     "edz.gui.popup.management.backup.title"             : "Create backup",
