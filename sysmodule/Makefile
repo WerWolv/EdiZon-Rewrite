@@ -174,7 +174,7 @@ clean:
 install: all
 	@echo " LFTP " $@
 	@touch ./out/boot2.flag
-	@lftp -e "put -O /atmosphere/titles/01000000000ED150 ./out/exefs.nsp;bye" $(IP)
+	@lftp -e "put -O /atmosphere/contents/01000000000ED150 ./out/exefs.nsp;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

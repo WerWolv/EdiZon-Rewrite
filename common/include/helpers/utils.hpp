@@ -76,10 +76,10 @@ namespace edz::hlp {
     bool isOnSXOS();
 
 
-    /* Returns the /<CFW>/titles path based on what CFW the user is running*/
-    std::string getLFSTitlesPath();
+    /* Returns the /<CFW>/contents path based on what CFW the user is running*/
+    std::string getLFSContentsPath();
     
-    /* Returns the /<CFW>/titles/<titleid>/cheats path based on what CFW the user is running and the title provided */
+    /* Returns the /<CFW>/contents/<titleid>/cheats path based on what CFW the user is running and the title provided */
     std::string getLFSCheatsPath(titleid_t titleID);
 
 #ifndef __SYSMODULE__

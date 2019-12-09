@@ -279,21 +279,21 @@ namespace edz::hlp {
     }
 
 
-    std::string getLFSTitlesPath() {
+    std::string getLFSContentsPath() {
         if (isOnAMS())
-            return "sdmc:/atmosphere/titles";
+            return "sdmc:/atmosphere/contents";
         
         if (isOnRNX())
-            return "sdmc:/ReiNX/titles";
+            return "sdmc:/ReiNX/contents";
 
         if (isOnSXOS())
-            return "sdmc:/sxos/titles";
+            return "sdmc:/sxos/contents";
 
         return "";
     }
 
     std::string getLFSCheatsPath(titleid_t titleID) {
-        return getLFSTitlesPath() + "/" + hlp::toHexString(titleID) + "/cheats";
+        return getLFSContentsPath() + "/" + hlp::toHexString(titleID) + "/cheats";
     }
     
 
