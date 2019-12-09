@@ -21,6 +21,8 @@
 
 #include <edizon.hpp>
 
+#include <any>
+
 #include "ui/gui.hpp"
 #include "cheat/cheat_engine.hpp"
 
@@ -37,28 +39,14 @@ namespace edz::ui {
     private:
         brls::ThumbnailFrame *m_rootFrame;
         brls::LayerView *m_searchSettings;
+        brls::ListItem *m_foundAddresses;
 
-        enum class ScanType {
-            EXACT_VALUE,
-            GREATER_THAN,
-            LESS_THAN,
-            BETWEEN,
-            UNKNOWN_VALUE,
-            POINTER
-        };
+        cheat::types::DataType m_dataType = cheat::types::DataType::U8;
+        cheat::types::SearchOperation m_operation = cheat::types::SearchOperation::EQUALS;
+        std::vector<cheat::types::Region> m_regions;
 
-        enum class ScanRegion {
-            HEAP,
-            MAIN,
-            HEAP_AND_MAIN,
-            EVERYTHING
-        };
+        cheat::types::Value m_value[2];
 
-        cheat::DataType m_dataType = cheat::DataType::UNSIGNED;
-        cheat::CompareFunction m_scanType = cheat::cmp::equals;
-        cheat::ReadFunction m_scanRegion = cheat::region::readHeap;
-        size_t m_valueSize = 1;
-        u8 *m_value1 = nullptr, *m_value2 = nullptr;
         std::string m_valueString;
 
         void setSearchCountText(u16 searchCount);
@@ -67,8 +55,32 @@ namespace edz::ui {
         brls::List* createValueSearchSettings(bool knownValue);
         brls::List* createPointerSearchSettings();
 
+        void openInputMenu(cheat::types::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem);
 
-        void openInputMenu(cheat::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem);
+        static inline cheat::types::Value NOVALUE;
+        void handleSearchOperation(std::vector<cheat::types::Region>& regions, cheat::types::SearchOperation operation, cheat::types::Value &value1, cheat::types::Value &value2 = NOVALUE) {
+            printf("1\n");
+            switch (operation.getOperation()) {
+                case cheat::types::SearchOperation::EQUALS:
+                    printf("2\n");
+                    cheat::CheatEngine::findIn(regions, STRATEGY(==), value1, value2);
+                    printf("3\n");
+                    break;
+                case cheat::types::SearchOperation::GREATER_THAN:
+                    cheat::CheatEngine::findIn(regions, STRATEGY(>), value1, value2);
+                    break;
+                case cheat::types::SearchOperation::LESS_THAN:
+                    cheat::CheatEngine::findIn(regions, STRATEGY(<), value1, value2);
+                    break;
+                case cheat::types::SearchOperation::BETWEEN:
+                case cheat::types::SearchOperation::SAME:
+                case cheat::types::SearchOperation::DIFFERENT:
+                case cheat::types::SearchOperation::INCREASED:
+                case cheat::types::SearchOperation::DECREASED:
+                    break;
+            }
+            
+        }
 
     };
 

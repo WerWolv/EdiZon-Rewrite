@@ -67,6 +67,7 @@ namespace edz::ui {
 
         scanTypeItems.push_back(scanTypeItem);
         scanTypeItem->setListener([this](s32 selection) {
+            printf("Set operation: %d\n", selection);
             switch (selection) {
                 case 0: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::EQUALS);       break;
                 case 1: this->m_operation = cheat::types::SearchOperation(cheat::types::SearchOperation::GREATER_THAN); break;
@@ -84,20 +85,17 @@ namespace edz::ui {
         });
 
         valueTypeItem->setListener([this](s32 selection) {
-            switch (selection) {
-                case 0:  this->m_value[0] = new cheat::types::Value<u8>(); break;
-                case 1:  this->m_value[0] = new cheat::types::Value<s8>(); break;
-                case 2:  this->m_value[0] = new cheat::types::Value<u16>(); break;
-                case 3:  this->m_value[0] = new cheat::types::Value<s16>(); break;
-                case 4:  this->m_value[0] = new cheat::types::Value<u32>(); break;
-                case 5:  this->m_value[0] = new cheat::types::Value<s32>(); break;
-                case 6:  this->m_value[0] = new cheat::types::Value<u64>(); break;
-                case 7:  this->m_value[0] = new cheat::types::Value<s64>(); break;
-                case 8:  this->m_value[0] = new cheat::types::Value<float>(); break;
-                case 9:  this->m_value[0] = new cheat::types::Value<double>(); break;
-                case 10: this->m_value[0] = new cheat::types::Value<cheat::types::ByteArray>(); break;
-                case 11: this->m_value[0] = new cheat::types::Value<cheat::types::ByteArray>(); break;
-            }
+            constexpr cheat::types::DataType dataTypes[] = { cheat::types::DataType::U8, cheat::types::DataType::S8,
+                                                             cheat::types::DataType::U16, cheat::types::DataType::S16, 
+                                                             cheat::types::DataType::U32, cheat::types::DataType::S32, 
+                                                             cheat::types::DataType::U64, cheat::types::DataType::S64, 
+                                                             cheat::types::DataType::FLOAT, cheat::types::DataType::DOUBLE, 
+                                                             cheat::types::DataType::ARRAY, cheat::types::DataType::STRING };
+
+            if (selection < 0)
+                return;
+
+            this->m_dataType = dataTypes[selection];
         });
 
         scanRegionItem->setListener([this](s32 selection) {
@@ -118,8 +116,17 @@ namespace edz::ui {
 
         if (knownValue) {
             auto valueItem = new brls::ListItem("Search Value");
+            valueItem->setValue("0");
             valueItem->setClickListener([=](brls::View *view) { 
-                this->openInputMenu(this->m_dataType, false, this->m_valueSize, valueItem);
+                hlp::openSwkbdForNumber([=](std::string numString) {
+                    valueItem->setValue(numString);
+                    if (this->m_dataType.isSigned())
+                        this->m_value[0] = cheat::types::Value(strtoll(numString.c_str(), nullptr, 10), this->m_dataType.getType());
+                    else if (this->m_dataType.isFloatingPoint())
+                        this->m_value[0] = cheat::types::Value(strtod(numString.c_str(), nullptr), this->m_dataType.getType());
+                    else
+                        this->m_value[0] = cheat::types::Value(strtoull(numString.c_str(), nullptr, 10), this->m_dataType.getType());
+                }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, this->m_dataType.getSize() * 8))));
             });
             list->addView(valueItem);
         }
@@ -137,7 +144,7 @@ namespace edz::ui {
         return nullptr;
     }
 
-    void GuiCheatEngine::openInputMenu(cheat::types::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem) {
+    /*void GuiCheatEngine::openInputMenu(cheat::types::DataType inputType, bool range, size_t valueSize, brls::ListItem *searchValueItem) {
         brls::ListItem *upperLimitItem = nullptr, *lowerLimitItem = nullptr, *valueItem = nullptr;
 
         ui::element::PopupList *dialog = new ui::element::PopupList("Cancel", "Apply", [=](brls::View*) {
@@ -185,7 +192,7 @@ namespace edz::ui {
         }
 
         dialog->open();
-    }
+    }*/
 
     brls::View* GuiCheatEngine::setupUI() {
         this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
@@ -207,49 +214,16 @@ namespace edz::ui {
         createSearchSettings(this->m_searchSettings);
 
         this->m_rootFrame->setContentView(this->m_searchSettings);
-        this->m_rootFrame->getSidebar()->getButton()->setClickListener([=](brls::View*) {
-            Gui::runAsyncWithDialog([=] { 
-                appletSetMediaPlaybackState(true);
+        this->m_rootFrame->getSidebar()->getButton()->setClickListener([this](brls::View*) {
+            //Gui::runAsyncWithDialog([=] { 
+            appletSetMediaPlaybackState(true);
 
-                switch (this->m_dataType.getType()) {
-                    case cheat::types::DataType::U8:
-                        this->handleSearchOperation<u8>(this->m_regions, this->m_operation, std::any_cast<u8>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::U16:
-                        this->handleSearchOperation<u16>(this->m_regions, this->m_operation, std::any_cast<u16>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::U32:
-                        this->handleSearchOperation<u32>(this->m_regions, this->m_operation, std::any_cast<u32>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::U64:
-                        this->handleSearchOperation<u64>(this->m_regions, this->m_operation, std::any_cast<u64>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::S8:
-                        this->handleSearchOperation<s8>(this->m_regions, this->m_operation, std::any_cast<s8>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::S16:
-                        this->handleSearchOperation<s16>(this->m_regions, this->m_operation, std::any_cast<s16>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::S32:
-                        this->handleSearchOperation<s32>(this->m_regions, this->m_operation, std::any_cast<s32>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::S64:
-                        this->handleSearchOperation<s64>(this->m_regions, this->m_operation, std::any_cast<s64>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::FLOAT:
-                        this->handleSearchOperation<float>(this->m_regions, this->m_operation, std::any_cast<float>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::DOUBLE:
-                        this->handleSearchOperation<double>(this->m_regions, this->m_operation, std::any_cast<double>(this->m_value[0]));
-                        break;
-                    case cheat::types::DataType::ARRAY:
-                    case cheat::types::DataType::STRING:
-                        //this->handleSearchOperation<cheat::types::ByteArray>(this->m_regions, this->m_operation, std::any_cast<cheat::types::ByteArray>(this->m_value[0]));
-                        break;
-                }
+            this->handleSearchOperation(this->m_regions, this->m_operation, this->m_value[0]);
 
-                appletSetMediaPlaybackState(false);
-            }, "Searching memory. This might take a while...");
+            this->m_foundAddresses->setValue(hlp::formatString("%d", cheat::CheatEngine::getFoundAddresses().size()));
+
+            appletSetMediaPlaybackState(false);
+            //}, "Searching memory. This might take a while...");
             
         });
 
