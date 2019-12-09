@@ -225,6 +225,9 @@ namespace edz::save {
     }
 
     time_t Title::getPlayTime(std::unique_ptr<Account> &account) {
+        if (std::find(this->m_userIDs.begin(), this->m_userIDs.end(), account->getID()) == this->m_userIDs.end())
+            return 0;
+            
         return this->m_playStatistics[account->getID()].playtimeMinutes * 60;
     }
 
