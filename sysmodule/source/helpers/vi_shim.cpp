@@ -23,37 +23,9 @@
 #include "helpers/vi_shim.hpp"
 
 Result viDestroyManagedLayer(u64 layer_id) {
-    Service *serv = viGetSession_IManagerDisplayService();
-    if (!serviceIsActive(serv))
-        return MAKERESULT(Module_Libnx, LibnxError_NotInitialized);
+    const struct {
+        u64 layer_id;
+    } in = { .layer_id = layer_id };
 
-    IpcCommand c;
-    ipcInitialize(&c);
-
-    struct {
-        u64 magic;
-        u64 cmd_id;
-        u32 layer_id; // u64? Gives the same result
-    } *raw;
-
-    raw = static_cast<decltype(raw)>(ipcPrepareHeader(&c, sizeof(*raw)));
-    raw->magic = SFCI_MAGIC;
-    raw->cmd_id = 2011;
-    raw->layer_id = (u32)layer_id;
-
-    Result rc = serviceIpcDispatch(serv);
-
-    if (R_SUCCEEDED(rc)) {
-        IpcParsedCommand r;
-        ipcParse(&r);
-
-        struct {
-            u64 magic;
-            u64 result;
-        } *resp = static_cast<decltype(resp)>(r.Raw);
-
-        rc = resp->result;
-    }
-
-    return rc;
+    return serviceDispatchIn(viGetSession_IManagerDisplayService(), 2011, in);
 }
