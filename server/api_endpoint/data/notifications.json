@@ -3,7 +3,8 @@
         {
             "title" : "Test title",
             "description" : "Test description",
-            "icon" : "information"
+            "icon" : "information",
+            "date" : "2019-12-10T09:28:56.321-1:00"
         }
     ]
 }

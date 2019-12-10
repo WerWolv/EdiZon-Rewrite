@@ -9,3 +9,7 @@ companion/node_modules
 
 server/api_endpoint/config.py
 server/api_endpoint/__pycache__/
+
+server/api_endpoint/api_endpoint
+
+server/save_provider/save_provider
