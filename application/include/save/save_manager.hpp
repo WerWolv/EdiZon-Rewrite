@@ -34,6 +34,7 @@ namespace edz::save {
             titleid_t titleID;
             userid_t userID;
             time_t creationDate;
+            bool deltaFile;
         } PACKED backup_header_t;
 
         static EResult backup(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string backupName, std::string basePath = "");
