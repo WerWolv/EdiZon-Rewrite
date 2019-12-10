@@ -32,10 +32,6 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
   - **Virtual controllers**
     - Map button combos and button press sequences to any joycon button
     - Redirect controller inputs from your computer to the switch or vice versa
-  - **Computer companion app**
-    - Extensive interface tool to inspect your console's RAM and create cheats from it
-    - Save file management from your computer
-    - Connection over USB or WiFi
 
   All packed into one easy to use and easy to install Homebrew.
 
@@ -56,7 +52,7 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
   1. Download the latest release from the [GitHub release page](https://github.com/WerWolv/EdiZon/releases/latest).
   2. Unpack the downloaded zip file, put the files on your Nintendo Switch's SD card and let the folders merge.
   3. Use a free open source CFW like [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere) to launch the hbmenu and start EdiZon from there.
-     1. If you want to use the cheat manager you absolutely have to use [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere) as only their cheats are supported.
+     1. If you want to use the cheat manager you absolutely have to use [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere) as only their cheat service is supported.
      2. For the best experience, open the `/atmosphere/system_settings.ini` file and change `dmnt_cheats_enabled_by_default = u8!0x1` to `dmnt_cheats_enabled_by_default = u8!0x0`.
 
 
