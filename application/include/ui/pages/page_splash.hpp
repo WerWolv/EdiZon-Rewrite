@@ -26,7 +26,7 @@ namespace edz::ui::page {
 
     class PageSplash : public brls::View {
     public:
-        PageSplash();
+        PageSplash(bool showWarning);
         virtual ~PageSplash();
 
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
@@ -34,7 +34,8 @@ namespace edz::ui::page {
         brls::View* requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp = false) override;
 
     private:
-        brls::Image *m_logo;
+        brls::Image *m_logo = nullptr;
+        brls::Label *m_warning = nullptr;
     };
 
 }

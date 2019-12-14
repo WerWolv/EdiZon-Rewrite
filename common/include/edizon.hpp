@@ -22,6 +22,7 @@
 #include <switch.h>                 // libnx
 #include "edz_types.hpp"            // Types associated with EdiZon
 #include "helpers/macros.hpp"       // Helper macros
+#include "helpers/version.hpp"      // Version helper
 
 #include <memory>
 
@@ -41,6 +42,10 @@
 
     /* The buffer size used when searching a game's memory for values. Bigger values can increase speed but EdiZon might stop working in Applet mode */
     #define MEMORY_SEARCH_BUFFER_SIZE       0x40000
+
+    /* Version settings */
+    #define EDIZON_VERSION                  hlp::Version({ VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH })
+    #define MINIMUM_AMS_VERSION_REQUIRED    hlp::Version({0,10,0})
 
     /* Current web API version */
     #define EDIZON_API_VERSION              "v4"

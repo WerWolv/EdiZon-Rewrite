@@ -22,13 +22,21 @@
 
 namespace edz::ui::page {
 
-    PageSplash::PageSplash() {
+    PageSplash::PageSplash(bool showWarning) {
         this->m_logo = new brls::Image("romfs:/assets/icon_edz_color.jpg");
         this->m_logo->setParent(this);
+        
+        if (showWarning) {
+            this->m_warning = new brls::Label(brls::LabelStyle::CRASH ,"EdiZon depends on many of Atmosphere's latest features. Please update to a version greater than or equal to AMS 0.10.0.\nPress \uE0EF to exit", true);
+            this->m_warning->setParent(this);
+        }
     }
 
     PageSplash::~PageSplash() {
         delete this->m_logo;
+
+        if (this->m_warning != nullptr)
+            delete this->m_warning;
     }
 
     void PageSplash::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) {
@@ -47,6 +55,9 @@ namespace edz::ui::page {
         nvgFill(vg);
 
         this->m_logo->frame(ctx);
+
+        if (this->m_warning != nullptr)
+            this->m_warning->frame(ctx);
     }
 
     brls::View* PageSplash::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
@@ -55,6 +66,11 @@ namespace edz::ui::page {
 
     void PageSplash::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {
         this->m_logo->setBoundaries((1280 - 256) / 2, (720 - 256) / 2, 256, 256);
+
+        if (this->m_warning != nullptr) {
+            this->m_warning->setBoundaries((1280 - 512) / 2, 1000 / 2, 512, 256);
+            this->m_warning->setHorizontalAlign(NVG_ALIGN_CENTER);
+        }
     }
 
 }

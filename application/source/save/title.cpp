@@ -44,7 +44,7 @@ namespace edz::save {
 
         this->m_titleName = std::string(languageEntry->name);
         this->m_titleAuthor = std::string(languageEntry->author);
-        this->m_versionString = std::string(appControlData.nacp.version);
+        this->m_versionString = std::string(appControlData.nacp.display_version);
         
         std::memcpy(&this->m_nacp, &appControlData.nacp, sizeof(NacpStruct));
 
@@ -194,8 +194,13 @@ namespace edz::save {
         save.save_data_index = 0;
         save.save_data_type = saveDataType;
 
-        saveCreate.available_size = this->m_nacp.userAccountSaveDataSize;
-        saveCreate.journal_size = this->m_nacp.userAccountSaveDataJournalSize;
+        if (saveDataType == FsSaveDataType_Device) {
+            saveCreate.available_size = this->m_nacp.device_save_data_size;
+            saveCreate.journal_size = this->m_nacp.device_save_data_journal_size;
+        } else {
+            saveCreate.available_size = this->m_nacp.user_account_save_data_size;
+            saveCreate.journal_size = this->m_nacp.user_account_save_data_journal_size;
+        }
         saveCreate.save_data_size = 0;
         saveCreate.owner_id = this->getID();
         saveCreate.flags = 0;

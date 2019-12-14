@@ -24,9 +24,12 @@
 namespace edz::ui {
 
     brls::View* GuiSplash::setupUI() {
-        Gui::runLater([this] { Gui::changeTo<GuiMain>(); }, 20);
+        bool isAMSVersionSupported = hlp::getAtmosphereVersion() >= MINIMUM_AMS_VERSION_REQUIRED;
+        
+        if (isAMSVersionSupported)
+            Gui::runLater([this] { Gui::changeTo<GuiMain>(); }, 20);
 
-        return new ui::page::PageSplash();
+        return new ui::page::PageSplash(!isAMSVersionSupported);
     }
 
     void GuiSplash::update() {

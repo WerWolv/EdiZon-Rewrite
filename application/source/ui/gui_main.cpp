@@ -117,6 +117,9 @@ namespace edz::ui {
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
         restoreItem->setClickListener([&title](brls::View *view) {
             auto list = save::SaveManager::getLocalBackupList(title).second;
+            if (list.size() == 0)
+                return;
+                
             if (hlp::openPctlPrompt([]{})) {
                 brls::Dropdown::open("edz.gui.popup.management.backup.dropdown.title"_lang, list, [&title, list](int selection) {
 

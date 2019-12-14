@@ -29,7 +29,6 @@
 extern std::atomic<u64> g_keysDown, g_keysHeld;
 
 namespace edz::ovl {
-    static ViDisplay viDisplay;
 
     GuiMain::GuiMain() {
 
@@ -67,9 +66,10 @@ namespace edz::ovl {
         lv_obj_set_size(this->m_menuList, 216, 512 - 155);
         setListStyle(this->m_menuList);
 
-        lv_obj_t *cheatsBtn = lv_list_add_btn(this->m_menuList, nullptr, LV_SYMBOL_CHARGE " Cheats");
-        lv_obj_t *notesBtn = lv_list_add_btn(this->m_menuList, nullptr, LV_SYMBOL_FILE " Notes");
-        lv_obj_t *infosBtn = lv_list_add_btn(this->m_menuList, nullptr, LV_SYMBOL_SETTINGS " System Information");
+        lv_obj_t *cheatsBtn = lv_list_add_btn(this->m_menuList, nullptr, LV_SYMBOL_EDIT      " Cheats");
+        lv_obj_t *notesBtn = lv_list_add_btn(this->m_menuList, nullptr,  LV_SYMBOL_FILE      " Notes");
+        lv_obj_t *overclockBtn = lv_list_add_btn(this->m_menuList, nullptr, LV_SYMBOL_CHARGE " Overclocking");
+        lv_obj_t *infosBtn = lv_list_add_btn(this->m_menuList, nullptr,  LV_SYMBOL_SETTINGS  " System Information");
 
         lv_btn_set_fit(cheatsBtn, LV_FIT_NONE);
         lv_obj_set_height(cheatsBtn, 50);
@@ -81,7 +81,7 @@ namespace edz::ovl {
         lv_obj_set_event_cb(cheatsBtn, [](lv_obj_t * obj, lv_event_t event) {
             if (event != LV_EVENT_CLICKED)
                 return;
-            
+
             Gui::changeTo<GuiCheats>();
         });
 

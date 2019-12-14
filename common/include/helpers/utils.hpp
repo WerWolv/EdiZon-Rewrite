@@ -28,6 +28,7 @@
 #include <cstring>
 
 #include "helpers/folder.hpp"
+#include "helpers/version.hpp"
 
 namespace edz::save {
     class Title;
@@ -54,6 +55,24 @@ namespace edz::hlp {
     
     /* Opens the Player Select applet to select a user */
     bool openPlayerSelect(std::function<void(std::unique_ptr<save::Account>&)> f);
+
+    /* Returns if EdiZon was ran through Applet override */
+    bool isInAppletMode();
+
+    /* Returns if EdiZon was ran through Application override */
+    bool isInApplicationMode();
+
+    /* Starts the EdiZon sysmodule */
+    EResult startBackgroundService();
+
+    /* Terminates the EdiZon sysmodule */
+    EResult stopBackgroundService();
+
+    /* Enables autostart for the edizon background service */
+    void enableAutostartOfBackgroundService();
+
+    /* Disables autostart for the edizon background service */
+    void disableAutostartOfBackgroundService();
     
 #endif
 
@@ -81,17 +100,6 @@ namespace edz::hlp {
     
     /* Returns the /<CFW>/contents/<titleid>/cheats path based on what CFW the user is running and the title provided */
     std::string getLFSCheatsPath(titleid_t titleID);
-
-#ifndef __SYSMODULE__
-
-    /* Returns if EdiZon was ran through Applet override */
-    bool isInAppletMode();
-
-    /* Returns if EdiZon was ran through Application override */
-    bool isInApplicationMode();
-
-#endif
-
     
     /* C++ style sprintf */
     template <typename ...Args>
@@ -139,22 +147,6 @@ namespace edz::hlp {
     /* Turns the controller LED on or off*/
     void setLedState(bool state);
     
-#ifndef __SYSMODULE__
-
-    /* Starts the EdiZon sysmodule */
-    EResult startBackgroundService();
-
-    /* Terminates the EdiZon sysmodule */
-    EResult stopBackgroundService();
-
-    /* Enables autostart for the edizon background service */
-    void enableAutostartOfBackgroundService();
-
-    /* Disables autostart for the edizon background service */
-    void disableAutostartOfBackgroundService();
-
-#endif
-
     /* Creates a temporary folder in /switch/EdiZon/tmp and returns it */
     Folder createTmpFolder();
 
@@ -173,5 +165,7 @@ namespace edz::hlp {
     userid_t accountUidToUserID(AccountUid accountUID);
 
     AccountUid userIDToAccountUid(userid_t userID);
+
+    Version getAtmosphereVersion();
 
 }

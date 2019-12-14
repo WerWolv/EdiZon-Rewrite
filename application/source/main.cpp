@@ -79,6 +79,9 @@ EResult initServices() {
 
     // Play time querying
     ER_TRY(pdmqryInitialize());
+
+    // Atmosphere version querying
+    ER_TRY(splInitialize());
     
     // Atmosphere cheat service (Cheat toggling and memory editing)
     if (cheat::CheatManager::isCheatServiceAvailable()) {
@@ -105,6 +108,7 @@ void exitServices() {
     pminfoExit();
     hidsysExit();
     pdmqryExit();
+    splExit();
     dmntcht::exit();
     cheat::CheatManager::exit();
     brls::Application::quit();
@@ -165,7 +169,7 @@ int main(int argc, char* argv[]) {
     // Unpack background service
     {
         hlp::File romfsSysmoduleFile("romfs:/sysmodule/exefs.nsp");
-        romfsSysmoduleFile.copyTo(hlp::getLFSTitlesPath() + "/01000000000ED150/exefs.nsp");
+        romfsSysmoduleFile.copyTo(hlp::getLFSContentsPath() + "/01000000000ED150/exefs.nsp");
     }
 
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");

@@ -391,13 +391,13 @@ namespace edz::hlp {
 
     void enableAutostartOfBackgroundService() {
         // Create boot2.flag file to let the sysmodule get started on boot
-        File file(getLFSTitlesPath() + "/01000000000ED150/flags/boot2.flag"); 
+        File file(getLFSContentsPath() + "/01000000000ED150/flags/boot2.flag"); 
         file.createDirectories();
         file.write(nullptr, 0);
     }
 
     void disableAutostartOfBackgroundService() {
-        File(getLFSTitlesPath() + "/01000000000ED150/flags/boot2.flag").remove();
+        File(getLFSContentsPath() + "/01000000000ED150/flags/boot2.flag").remove();
     }
 
     EResult startBackgroundService() {
@@ -514,6 +514,21 @@ namespace edz::hlp {
 
         std::memcpy(ret.uid, &userID, sizeof(userid_t));
         return ret;
+    }
+
+    Version getAtmosphereVersion() {
+        u64 config = 0x00;
+
+        // Since Gateway copies the entirety of Exosphere in SXOS, check to make sure the
+        // version we get actually says something about the features the CFW supports
+        if (!isOnAMS())
+            return { 0, 0, 0 };
+
+        // 65000 is an unofficial config item from exosphere containing the current Atmosphere and exosphere version and the mkey revision
+        if (EResult(splGetConfig(static_cast<SplConfigItem>(65000), &config)).failed())
+            return { 0, 0, 0 };
+
+        return { static_cast<u8>((config >> 0x20) & 0xFF), static_cast<u8>((config >> 0x18) & 0xFF), static_cast<u8>((config >> 0x10) & 0xFF) };
     }
 
 }
