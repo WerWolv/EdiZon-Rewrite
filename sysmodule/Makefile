@@ -7,6 +7,7 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
+include $(TOPDIR)/libs/Atmosphere-libs/config/common.mk
 include $(TOPDIR)/../switch_rules
 
 #---------------------------------------------------------------------------------
@@ -40,9 +41,9 @@ include $(TOPDIR)/../switch_rules
 TARGET			:=	$(notdir $(CURDIR))
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source ../common/source libs/libstratosphere/source libs/lvgl/lvgl/src
+SOURCES_TOP		:=	../common/source libs/Atmosphere-libs/libstratosphere/source libs/lvgl/lvgl/src
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include ../common/include libs/libstratosphere/include libs/stb libs/lvgl/include
+INCLUDES		:=	include ../common/include libs/Atmosphere-libs/libstratosphere/include libs/Atmosphere-libs/libvapours/include libs/stb libs/lvgl/include
 EXCLUDES		:=  dmntcht.c
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -52,7 +53,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g0 -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -DATMOSPHERE_IS_STRATOSPHERE -DATMOSPHERE_BOARD_NINTENDO_SWITCH
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
