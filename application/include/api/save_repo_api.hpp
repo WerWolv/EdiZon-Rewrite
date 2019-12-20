@@ -35,16 +35,21 @@ namespace edz::api {
         typedef struct {
             std::string name;
             std::string date;
+            titleid_t titleID;
         } save_file_t;
 
         std::pair<EResult, std::string> getName();
         std::pair<EResult, std::string> getMOTD();
+        std::pair<EResult, std::string> getVersion();
         std::pair<EResult, std::vector<u8>> getIcon();
         std::pair<EResult, std::vector<u8>> getFile(std::string file);
         std::pair<EResult, std::vector<save_file_t>> listFiles();
 
+        void _updateVersionString();
+
     private:
         edz::hlp::Curl m_curl;
+        std::string m_version;
     };
 
 }

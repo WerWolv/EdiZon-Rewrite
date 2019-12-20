@@ -17,6 +17,7 @@
                 "${workspaceFolder}/application/libs/zipper/zipper",
                 "${workspaceFolder}/sysmodule/include/**",
                 "${workspaceFolder}/sysmodule/libs/Atmosphere-libs/libstratosphere/include",
+                "${workspaceFolder}/sysmodule/libs/Atmosphere-libs/libvapours/include",
                 "${workspaceFolder}/sysmodule/libs/stb",
                 "${workspaceFolder}/sysmodule/libs/lvgl/include"
             ],
@@ -50,6 +51,7 @@
                 "${workspaceFolder}/application/libs/zipper/zipper",
                 "${workspaceFolder}/sysmodule/include",
                 "${workspaceFolder}/sysmodule/libs/Atmosphere-libs/libstratosphere/include",
+                "${workspaceFolder}/sysmodule/libs/Atmosphere-libs/libvapours/include",
                 "${workspaceFolder}/sysmodule/libs/stb",
                 "${workspaceFolder}/sysmodule/libs/lvgl/include"
             ],

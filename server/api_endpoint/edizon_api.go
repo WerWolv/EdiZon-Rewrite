@@ -13,7 +13,7 @@ import (
 var serverName, serverMotd string
 var port string
 
-const apiVersion string = "v1"
+const apiVersion string = "v4"
 
 func main() {
 	var args []string = os.Args[1:]
@@ -32,9 +32,10 @@ func main() {
 	http.HandleFunc("/",        base)
 	http.HandleFunc("/version", version)
 
-	http.HandleFunc("/" + apiVersion + "/get",           get)
-	http.HandleFunc("/" + apiVersion + "/release",       release)
-	http.HandleFunc("/" + apiVersion + "/notifications", notifications)
+	http.HandleFunc("/" + apiVersion + "/get",           		get)
+	http.HandleFunc("/" + apiVersion + "/release",       		release)
+	http.HandleFunc("/" + apiVersion + "/notifications", 		notifications)
+	http.HandleFunc("/" + apiVersion + "/official_providers", 	officialProviders)
 
 
 	http.ListenAndServe(":" + port, nil)
@@ -93,6 +94,19 @@ func notifications(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content Type", "application/json")
 
 	data, err := ioutil.ReadFile("./data/notifications.json")
+
+	if err != nil {
+		w.Write([]byte("{ \"error\" : \"Request failed\" }"))
+		return
+	}
+
+	w.Write(data)
+}
+
+func officialProviders(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content Type", "application/json")
+
+	data, err := ioutil.ReadFile("./data/official_providers.json")
 
 	if err != nil {
 		w.Write([]byte("{ \"error\" : \"Request failed\" }"))

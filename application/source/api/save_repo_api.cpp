@@ -24,7 +24,7 @@ namespace edz::api {
 
     using json = nlohmann::json;
 
-    SaveRepoAPI::SaveRepoAPI(std::string apiBase) : m_curl(apiBase) {
+    SaveRepoAPI::SaveRepoAPI(std::string apiBase) : m_curl(apiBase), m_version("") {
 
     }
 
@@ -71,18 +71,10 @@ namespace edz::api {
         return { ResultSuccess, name };
     }
 
-    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getIcon() {
-        return this->m_curl.download("/icon");
-    }
+    std::pair<EResult, std::string> SaveRepoAPI::getVersion() {
+        std::string version;
 
-    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getFile(std::string file) {
-        return this->m_curl.download("/get?fileName=" + file);
-    }
-
-    std::pair<EResult, std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {
-        std::vector<SaveRepoAPI::save_file_t> saveFiles;
-
-        auto [result, response] = this->m_curl.get("/list");
+        auto [result, response] = this->m_curl.get("/version");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -90,13 +82,55 @@ namespace edz::api {
         try {
             json responseJson = json::parse(response);
 
-            for (auto provider : responseJson["save_files"])
-                saveFiles.push_back({ provider["name"], provider["date"] });
+            version = responseJson["version"];
+        } catch (std::exception& e) {
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
+        }
+
+        return { ResultSuccess, version };
+    }
+
+    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getIcon() {
+        SaveRepoAPI::_updateVersionString();
+
+        return this->m_curl.download("/" + this->m_version + "/icon");
+    }
+
+    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getFile(std::string file) {
+        SaveRepoAPI::_updateVersionString();
+
+        return this->m_curl.download("/" + this->m_version + "/get?fileName=" + file);
+    }
+
+    std::pair<EResult, std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {
+        std::vector<SaveRepoAPI::save_file_t> saveFiles;
+        SaveRepoAPI::_updateVersionString();
+
+        auto [result, response] = this->m_curl.get("/" + this->m_version + "/list");
+
+        if (result.failed())
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
+
+        try {
+            json responseJson = json::parse(response);
+
+            for (auto provider : responseJson["saveFiles"])
+                saveFiles.push_back({ provider["fileName"], provider["date"], strtoull(provider["titleID"].get<std::string>().c_str(), nullptr, 16) });
         } catch (std::exception& e) {
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 
         return { ResultSuccess, saveFiles };
+    }
+
+
+    void SaveRepoAPI::_updateVersionString() {
+        if (!this->m_version.empty())
+            return;
+
+        auto [result, version] = SaveRepoAPI::getVersion();
+        if (result.succeeded())
+            this->m_version = version;
     }
 
 }

@@ -24,7 +24,7 @@ namespace edz::api {
 
     using json = nlohmann::json;
 
-    EdiZonAPI::EdiZonAPI() : m_curl(EDIZON_API_URL) {
+    EdiZonAPI::EdiZonAPI() : m_curl(EDIZON_API_URL), m_version("") {
 
     }
 
@@ -33,10 +33,31 @@ namespace edz::api {
     }
 
 
+    std::pair<EResult, std::string> EdiZonAPI::getVersion() {
+        std::string version;
+        brls::Logger::debug("EdiZonAPI::getVersion()");
+        auto [result, response] = this->m_curl.get("/version");
+
+        if (result.failed())
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
+
+        try {
+            json responseJson = json::parse(response);
+
+            version = responseJson["version"];
+        } catch (std::exception& e) {
+            return { ResultEdzAPIError, EMPTY_RESPONSE };
+        }
+
+        return { ResultSuccess, version };
+    }
+
     std::pair<EResult, std::vector<EdiZonAPI::official_provider_t>> EdiZonAPI::getOfficialProviders() {
         std::vector<EdiZonAPI::official_provider_t> providers;
 
-        auto [result, response] = this->m_curl.get("/official_providers");
+        EdiZonAPI::_updateVersionString();
+
+        auto [result, response] = this->m_curl.get("/" + this->m_version + "/official_providers");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -55,8 +76,10 @@ namespace edz::api {
 
     std::pair<EResult, EdiZonAPI::release_info_t> EdiZonAPI::getReleaseInfo() {
         EdiZonAPI::release_info_t releaseInfo;
+        
+        EdiZonAPI::_updateVersionString();
 
-        auto [result, response] = this->m_curl.get("/release");
+        auto [result, response] = this->m_curl.get("/" + this->m_version + "/release");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -74,8 +97,10 @@ namespace edz::api {
 
     std::pair<EResult, std::vector<EdiZonAPI::notification_t>> EdiZonAPI::getNotifications() {
         std::vector<EdiZonAPI::notification_t> notifications;
+        
+        EdiZonAPI::_updateVersionString();
 
-        auto [result, response] = this->m_curl.get("/notifications");
+        auto [result, response] = this->m_curl.get("/" + this->m_version + "/notifications");
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -90,6 +115,15 @@ namespace edz::api {
         }
 
         return { ResultSuccess, notifications };
+    }
+
+    void EdiZonAPI::_updateVersionString() {
+        if (!this->m_version.empty())
+            return;
+
+        auto [result, version] = EdiZonAPI::getVersion();
+        if (result.succeeded())
+            this->m_version = version;
     }
 
 }
