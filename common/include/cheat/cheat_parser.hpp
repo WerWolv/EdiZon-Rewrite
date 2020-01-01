@@ -25,6 +25,11 @@
 
 namespace edz::cheat {
 
+    constexpr static size_t MaximumProgramOpcodeCount = 0x400;
+    constexpr static size_t MaximumCheatOpcodeCount   = 0x100;
+    constexpr static size_t MaxCheatCount             = 0x80;
+
+
     enum class ParseResult {
         NONE                         = 0x00,
 
@@ -39,8 +44,22 @@ namespace edz::cheat {
         ERROR_NAME_NOT_TERMINATED    = 0xC0,
     };
 
+    struct DebugInfo {
+        ParseResult parseResult;
+
+        u8 totalCheatCount;
+        u16 totalOpcodeCount;
+        u16 biggestCheatOpcodeCount;
+        std::string biggestCheatName;
+
+        u16 errorLine;
+        std::vector<u16> warningLines;
+
+        size_t fileSize;
+    };
+
     inline ParseResult operator|(ParseResult lhs, ParseResult rhs) {
-        using T = std::underlying_type_t <ParseResult>;
+        using T = std::underlying_type_t<ParseResult>;
         return static_cast<ParseResult>(static_cast<T>(lhs) | static_cast<T>(rhs));
     }
 
@@ -61,12 +80,12 @@ namespace edz::cheat {
 
         static std::pair<EResult, std::string> disassembleCheat(dmntcht::CheatDefinition cheatDef);
 
-        static ParseResult getParseResults() {
-            return CheatParser::s_parseResults;
+        static DebugInfo getDebugInfo() {
+            return CheatParser::s_debugInfo;
         }
 
     private:
-        static inline enum ParseResult s_parseResults = ParseResult::NONE;
+        static inline DebugInfo s_debugInfo;
     };
 
 }

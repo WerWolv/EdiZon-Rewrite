@@ -35,7 +35,7 @@ namespace edz::api {
 
     std::pair<EResult, std::string> EdiZonAPI::getVersion() {
         std::string version;
-        brls::Logger::debug("EdiZonAPI::getVersion()");
+
         auto [result, response] = this->m_curl.get("/version");
 
         if (result.failed())

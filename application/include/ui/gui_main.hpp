@@ -50,6 +50,9 @@ namespace edz::ui {
             std::string m_email, m_password;
             bool m_changeLanguage = false;
 
+            std::vector<edz::dmntcht::CheatDefinition> m_onlineCheats;
+
+
             brls::LayerView *m_titleList = nullptr;
             brls::List *m_saveReposList = nullptr;
             brls::List *m_runningTitleInfoList = nullptr;
@@ -80,6 +83,8 @@ namespace edz::ui {
             void createPlayTimeStatsTab(brls::LayerView *layerView);
             void createSettingsTab(brls::List *list);
             void createAboutTab(brls::List *list);
+
+            void loadOnlineCheats();
     };
 
 }

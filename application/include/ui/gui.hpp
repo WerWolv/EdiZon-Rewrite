@@ -43,7 +43,7 @@ namespace edz::ui {
         static void tick() {
             u16 taskIndex = 0;
             for (auto& [asyncTask, dialog, timeout] : Gui::s_asyncTasks) {
-                if (asyncTask.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready && timeout == -1)
+                if (asyncTask.wait_for(10us) == std::future_status::ready && timeout == -1)
                     timeout = 60;
                 else if (timeout == 0) {
                     if (dialog != nullptr)

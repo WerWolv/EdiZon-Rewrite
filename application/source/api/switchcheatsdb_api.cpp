@@ -75,11 +75,10 @@ namespace edz::api {
 
             u32 id = 0;
             for (auto cheat : responseJson["cheats"]) {
-                cheatResponse.cheats.push_back({ id++, static_cast<buildid_t>(strtol(cheat["buildid"].get<std::string>().c_str(), nullptr, 16)), cheat["content"], cheat["credits"] == nullptr ? "" : cheat["credits"].get<std::string>() });
+                cheatResponse.cheats.push_back({ id++, static_cast<buildid_t>(strtoull(cheat["buildid"].get<std::string>().c_str(), nullptr, 16)), cheat["content"], cheat["credits"] == nullptr ? "" : cheat["credits"].get<std::string>() });
             }
 
         } catch (std::exception& e) {
-            Logger::debug("%s", e.what());
             return { ResultEdzAPIError, EMPTY_RESPONSE };
         }
 

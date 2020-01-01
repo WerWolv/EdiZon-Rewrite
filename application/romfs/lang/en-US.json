@@ -41,6 +41,7 @@
     "edz.gui.main.cheats.sysmodule.desc"            : "Enabling this will allow you to toggle your cheats through a overlay menu ingame",
     "edz.gui.main.cheats.header.cheats"             : "Cheats",
     "edz.gui.main.cheats.error.no_cheats"           : "There are no cheats installed for this game.",
+    "edz.gui.main.cheats.error.no_cheats_online"    : "There are no cheats installed for this game and none were found Online",
     "edz.gui.main.cheats.error.no_title"            : "There's no title running in the background at the moment. Open any title, press the home button and launch EdiZon via the Album without closing the title to toggle cheats.",
     "edz.gui.main.cheats.error.syntax_error"        : "There are cheats for this game installed on your system but the cheat service failed to parse it. Checkout the guide for reasons why this could happen.",
     "edz.gui.main.cheats.error.outdated"            : "There are cheats for this game installed but they were made for a different game version. If this game just got updated, please be patient as the cheat needs to be redone.",

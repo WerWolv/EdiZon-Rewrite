@@ -25,10 +25,10 @@
 namespace edz::cheat {
 
     std::pair<EResult, std::vector<dmntcht::CheatDefinition>> CheatParser::parseString(std::string s) {
-        CheatParser::s_parseResults = ParseResult::NONE;
+        CheatParser::s_debugInfo.parseResult = ParseResult::NONE;
 
         if (s.size() == 0) {
-            CheatParser::s_parseResults |= ParseResult::ERROR_CHEAT_EMPTY;
+            CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_CHEAT_EMPTY;
             return { ResultEdzCheatParsingFailed, {} };
         }
 
@@ -48,7 +48,7 @@ namespace edz::cheat {
                 currCheatDef = &cheatDefs.back();
 
                 if (cheatDefs.size() >= 0x80) {
-                    CheatParser::s_parseResults |= ParseResult::ERROR_TOO_MANY_CHEATS;
+                    CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_TOO_MANY_CHEATS;
                     return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                 }
 
@@ -58,7 +58,7 @@ namespace edz::cheat {
                     j++;
 
                     if (j >= len) {
-                        CheatParser::s_parseResults |= ParseResult::ERROR_NAME_NOT_TERMINATED;
+                        CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_NAME_NOT_TERMINATED;
                         return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                     }
                 }
@@ -69,7 +69,7 @@ namespace edz::cheat {
                 currCheatDef->readable_name[cheat_name_len] = 0;
 
                 if (j - i - 1 > 0x3F)
-                    CheatParser::s_parseResults |= ParseResult::WARN_NAME_TOO_LONG;
+                    CheatParser::s_debugInfo.parseResult |= ParseResult::WARN_NAME_TOO_LONG;
 
                 /* Skip onwards. */
                 i = j + 1;
@@ -79,7 +79,7 @@ namespace edz::cheat {
 
                 /* There can only be one master cheat. */
                 if (currCheatDef->num_opcodes > 0) {
-                    CheatParser::s_parseResults |= ParseResult::ERROR_MULTIPLE_MASTER_CHEATS;
+                    CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_MULTIPLE_MASTER_CHEATS;
                     return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                 }
 
@@ -88,7 +88,7 @@ namespace edz::cheat {
                 while (s[j] != '}') {
                     j++;
                     if (j >= len) {
-                        CheatParser::s_parseResults |= ParseResult::ERROR_NAME_NOT_TERMINATED;
+                        CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_NAME_NOT_TERMINATED;
                         return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                     }
                 }
@@ -103,7 +103,7 @@ namespace edz::cheat {
             } else if (std::isxdigit(static_cast<unsigned char>(s[i]))) {
                 /* Bounds check the opcode count. */
                 if (currCheatDef->num_opcodes >= std::size(currCheatDef->opcodes)) {
-                    CheatParser::s_parseResults |= ParseResult::ERROR_TOO_MANY_OPCODES;
+                    CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_TOO_MANY_OPCODES;
                     return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                 }
 
@@ -112,7 +112,7 @@ namespace edz::cheat {
                     /* Validate 8 hex chars. */
 
                     if (i + j >= len || !std::isxdigit(static_cast<unsigned char>(s[i+j]))) {
-                        CheatParser::s_parseResults |= ParseResult::ERROR_INVALID_OPCODE;
+                        CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_INVALID_OPCODE;
                         return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
                     }
                 }
@@ -127,7 +127,7 @@ namespace edz::cheat {
             } else {
                 /* Unexpected character encountered. */
                 printf("%x\n", s[i]);
-                CheatParser::s_parseResults |= ParseResult::ERROR_SYNTAX_ERROR;
+                CheatParser::s_debugInfo.parseResult |= ParseResult::ERROR_SYNTAX_ERROR;
                 return { ResultEdzCheatParsingFailed, EMPTY_RESPONSE };
             }
         }

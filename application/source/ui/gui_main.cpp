@@ -133,6 +133,18 @@ namespace edz::ui {
             }
         });
 
+
+        brls::ListItem *swapAccountsItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
+        backupItem->setClickListener([&title](brls::View *view) {
+            hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
+                std::string backupName;
+                if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang, "", 32, hlp::getCurrentDateTimeString()))
+                    Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "Creating a save data backup...");
+             });
+
+        });
+
+
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
         deleteItem->setClickListener([&title, this](brls::View *view) {
 
@@ -162,28 +174,6 @@ namespace edz::ui {
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
 
-        if (GET_CONFIG(Online.loggedIn)) {
-            brls::List *cheatDownloadList = new brls::List();
-            
-            Gui::runAsync([=, &title]() {
-                api::SwitchCheatsDBAPI switchCheatsDBAPI;
-
-                auto [result, response] = switchCheatsDBAPI.getCheats(title->getID());
-
-                if (result.failed()) {
-                    cheatDownloadList->addView(new brls::ListItem("No cheats available for this game"));
-                    return;
-                }
-
-                for (auto &cheat : response.cheats) {
-                    size_t numberOfCheats = std::count(cheat.content.begin(), cheat.content.end(), '[');
-                    
-                    cheatDownloadList->addView(new brls::ListItem(hlp::formatString("Cheat collection containing %d cheats", numberOfCheats), "", hlp::formatString("Made by %s", cheat.credits.c_str())));
-                }
-            });
-
-            rootFrame->addTab("Cheats", cheatDownloadList);
-        }
 
         brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
@@ -542,8 +532,45 @@ namespace edz::ui {
                 else if (hlp::isInAppletMode()) {
                     auto [result, cheatFileName] = cheat::CheatManager::getCheatFile();
 
-                    if (result.failed())
-                        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
+                    if (result.failed()) {
+                        
+                        if (this->m_onlineCheats.size() == 0) {
+                            list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats_online"_lang, true));
+                        } else {
+                            list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
+                            
+                            brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("Apply online cheats");
+                            applyOnlineCheatsItem->setClickListener([=](brls::View *view) {
+                                brls::Application::blockInputs();
+                                brls::Application::removeFocus();
+
+                                list->removeView(4);
+                                list->removeView(3);
+
+                                for (auto &onlineCheatDef : this->m_onlineCheats)
+                                    cheat::CheatManager::addCheat(onlineCheatDef, false);
+
+                                for (auto cheat : cheat::CheatManager::getCheats()) {
+                                    brls::ToggleListItem *cheatItem = new brls::ToggleListItem(hlp::limitStringLength(cheat->getName(), 60), cheat->isEnabled(), "",
+                                        "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
+
+                                    cheatItem->setClickListener([=](brls::View *view){
+                                        cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
+                                    });
+
+                                    if (cheatItem != nullptr) {
+                                        list->addView(cheatItem);
+                                        GuiMain::m_cheatToggleListItems.push_back(cheatItem);
+                                    }
+                                }
+
+                                brls::Application::requestFocus(list, brls::FocusDirection::NONE);
+                                brls::Application::unblockInputs();
+                            });
+
+                            list->addView(applyOnlineCheatsItem);
+                        }
+                    }
                     else {
                         brls::ListItem *cheatFileSelectionItem = new brls::ListItem("Load Cheats", "Cheats have been found on your system but haven't been loaded yet. Click here to load them");
                         
@@ -765,6 +792,29 @@ namespace edz::ui {
         list->addView(this->m_dummyForceExitView);
     }
 
+    void GuiMain::loadOnlineCheats() {
+        if (GET_CONFIG(Online.loggedIn)) {           
+            //Gui::runAsync([=]() {
+                api::SwitchCheatsDBAPI switchCheatsDBAPI;
+
+                auto [result, response] = switchCheatsDBAPI.getCheats(save::Title::getRunningTitleID());
+
+                for (auto &cheat : response.cheats) {
+                    if (cheat.buildID != cheat::CheatManager::getBuildID())
+                        continue;
+                    
+                    auto [result, cheatDefs] = cheat::CheatParser::parseString(cheat.content);
+                    if (result.failed())
+                        continue;
+
+                    for (auto &cheatDef : cheatDefs)
+                        this->m_onlineCheats.push_back(cheatDef);
+                }
+            //});
+        }
+    }
+
+
     brls::View* GuiMain::setupUI() {
         brls::TabFrame *rootFrame = new brls::TabFrame();
         rootFrame->setTitle("edz.name"_lang);
@@ -780,6 +830,8 @@ namespace edz::ui {
         this->m_playTimeStatsList = new brls::LayerView();
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
+
+        loadOnlineCheats();
 
         createTitlesListTab(this->m_titleList, static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
         createCheatsTab(this->m_cheatsList);
