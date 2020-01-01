@@ -61,6 +61,7 @@ namespace edz::ui {
         auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
         auto valueTypeItem  = new brls::SelectListItem("Value Type", { "1 Byte (Unsigned)", "1 Byte (Signed)", "2 Bytes (Unsigned)", "2 Bytes (Signed)", "4 Bytes (Unsigned)", "4 Bytes (Signed)", "8 Bytes (Unsigned)", "8 Bytes (Signed)", "Float", "Double", "String", "Array" });
         auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN" });
+        auto valueItem      = new brls::ListItem("Search Value");
         auto fastScan       = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
 
         this->m_foundAddresses->setValue("0");
@@ -84,19 +85,30 @@ namespace edz::ui {
                 item->setSelectedValue(selection);
         });
 
-        valueTypeItem->setListener([this](s32 selection) {
-            constexpr cheat::types::DataType dataTypes[] = { cheat::types::DataType::U8, cheat::types::DataType::S8,
-                                                             cheat::types::DataType::U16, cheat::types::DataType::S16, 
-                                                             cheat::types::DataType::U32, cheat::types::DataType::S32, 
-                                                             cheat::types::DataType::U64, cheat::types::DataType::S64, 
-                                                             cheat::types::DataType::FLOAT, cheat::types::DataType::DOUBLE, 
-                                                             cheat::types::DataType::ARRAY, cheat::types::DataType::STRING };
+        valueTypeItem->setListener([=](s32 selection) {
+            using DataType = cheat::types::DataType;
+
+            const DataType dataTypes[] = { 
+                DataType::U8,       DataType::S8,
+                DataType::U16,      DataType::S16, 
+                DataType::U32,      DataType::S32, 
+                DataType::U64,      DataType::S64, 
+                DataType::FLOAT,    DataType::DOUBLE, 
+                DataType::ARRAY,    DataType::STRING
+            };
 
             if (selection < 0)
                 return;
-
             this->m_dataType = dataTypes[selection];
+            valueItem->setValue("0");
+            this->m_value[0] = cheat::types::Value(nullptr, this->m_dataType);
         });
+
+        this->m_regions.clear();
+        for (const auto& memoryInfo : cheat::CheatManager::getMemoryRegions()) {
+            if (memoryInfo.type == MemType_Heap)
+                this->m_regions.push_back(cheat::types::Region(memoryInfo.addr, memoryInfo.size));
+        }
 
         scanRegionItem->setListener([this](s32 selection) {
             this->m_regions.clear();
@@ -115,17 +127,24 @@ namespace edz::ui {
         list->addView(scanRegionItem);
 
         if (knownValue) {
-            auto valueItem = new brls::ListItem("Search Value");
             valueItem->setValue("0");
             valueItem->setClickListener([=](brls::View *view) { 
                 hlp::openSwkbdForNumber([=](std::string numString) {
                     valueItem->setValue(numString);
-                    if (this->m_dataType.isSigned())
-                        this->m_value[0] = cheat::types::Value(strtoll(numString.c_str(), nullptr, 10), this->m_dataType.getType());
-                    else if (this->m_dataType.isFloatingPoint())
-                        this->m_value[0] = cheat::types::Value(strtod(numString.c_str(), nullptr), this->m_dataType.getType());
-                    else
-                        this->m_value[0] = cheat::types::Value(strtoull(numString.c_str(), nullptr, 10), this->m_dataType.getType());
+                    if (this->m_dataType.isSigned()) {
+                        s64 val = strtoll(numString.c_str(), nullptr, 10);
+                        this->m_value[0] = cheat::types::Value(&val, this->m_dataType, true);
+                    }
+                    else if (this->m_dataType.isFloatingPoint()) {
+                        double val = strtod(numString.c_str(), nullptr);
+                        this->m_value[0] = cheat::types::Value(&val, this->m_dataType, true);
+                    }
+                    else {
+                        u64 val = strtoull(numString.c_str(), nullptr, 10);
+                        this->m_value[0] = cheat::types::Value(&val, this->m_dataType, true);
+                    }
+
+
                 }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, this->m_dataType.getSize() * 8))));
             });
             list->addView(valueItem);
@@ -137,7 +156,7 @@ namespace edz::ui {
     }
 
     brls::List* GuiCheatEngine::createPointerSearchSettings() {
-        this->m_foundAddresses = new brls::ListItem("Found Addresses");
+        //this->m_foundAddresses = new brls::ListItem("Found Addresses");
 
         //auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
         //auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN", "Everything" });
@@ -215,15 +234,15 @@ namespace edz::ui {
 
         this->m_rootFrame->setContentView(this->m_searchSettings);
         this->m_rootFrame->getSidebar()->getButton()->setClickListener([this](brls::View*) {
-            //Gui::runAsyncWithDialog([=] { 
+        Gui::runAsyncWithDialog([=] { 
             appletSetMediaPlaybackState(true);
-
+            std::this_thread::sleep_for(1s);
             this->handleSearchOperation(this->m_regions, this->m_operation, this->m_value[0]);
 
             this->m_foundAddresses->setValue(hlp::formatString("%d", cheat::CheatEngine::getFoundAddresses().size()));
 
             appletSetMediaPlaybackState(false);
-            //}, "Searching memory. This might take a while...");
+        }, "Searching memory. This might take a while...");
             
         });
 

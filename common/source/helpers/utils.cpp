@@ -383,7 +383,7 @@ namespace edz::hlp {
 
     void setLedState(bool state) {
         for(u8 i = 0; i < uniquePadCnt; i++)
-            hidsysSetNotificationLedPattern(state ? &patternOn : &patternOff, uniquePadIds[i]);
+            hidsysSetNotificationLedPatternWithTimeout(state ? &patternOn : &patternOff, uniquePadIds[i], 10E9);
     }
 
 

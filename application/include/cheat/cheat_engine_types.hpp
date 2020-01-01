@@ -47,19 +47,18 @@ namespace edz::cheat::types {
             ARRAY   = 0 | 0x10
         };
 
-        DataType() = default;
-        constexpr DataType(DataType& type) : m_type(type.getType()) { }
-        constexpr DataType(DataType::Type type) : m_type(type) { }
+        DataType(DataType& type) : m_type(type.getType()) { }
+        DataType(DataType::Type type) : m_type(type) { }
 
-        constexpr u8 getSize()           { return (this->m_type & 0x0F); }
+        u8 getSize()           { return (this->m_type & 0x0F); }
 
-        constexpr bool isUnsigned()      { return (this->m_type & 0xF0) == 0x00; }
-        constexpr bool isSigned()        { return (this->m_type & 0xF0) == 0x80; }
-        constexpr bool isFloatingPoint() { return (this->m_type & 0xF0) == 0x40; }
-        constexpr bool isArray()         { return (this->m_type & 0xF0) == 0x10 
-                                                || (this->m_type & 0xF0) == 0x20; }
+        bool isUnsigned()      { return (this->m_type & 0xF0) == 0x00; }
+        bool isSigned()        { return (this->m_type & 0xF0) == 0x80; }
+        bool isFloatingPoint() { return (this->m_type & 0xF0) == 0x40; }
+        bool isArray()         { return (this->m_type & 0xF0) == 0x10 
+                                     || (this->m_type & 0xF0) == 0x20; }
 
-        constexpr DataType::Type getType() { return this->m_type; }
+        DataType::Type getType() { return this->m_type; }
 
     private:
         DataType::Type m_type;
@@ -97,60 +96,80 @@ namespace edz::cheat::types {
         u8 *m_value;
         size_t m_size;
         DataType m_type;
+        bool m_copied;
     
     public:
-        constexpr Value() : m_value(nullptr), m_size(0), m_type(DataType::INVALID) { }
+        Value() : m_value(nullptr), m_size(0), m_type(DataType::INVALID), m_copied(false) { }
 
-        Value(Value&) = default;
-
-        template<typename T>
-        Value(T value, DataType type) {
-            this->m_value = new u8[sizeof(T)];
-            std::memcpy(this->m_value, &value, sizeof(T));
-
-            this->m_size = type.getSize();
-            this->m_type = type;
+        Value(void *value, DataType type, bool copy = false) : m_type(type), m_size(type.getSize()), m_copied(copy) {
+            if (copy) {
+                this->m_value = new u8[type.getSize()];
+                
+                if (value != nullptr)
+                    std::memcpy(this->m_value, value, type.getSize());
+            }
+            else
+                this->m_value = reinterpret_cast<u8*>(value);
         }
 
         ~Value() {
-            delete[] this->m_value;
-        }
-
-        constexpr void operator=(Value& other) {
-            if (other.m_size != this->m_size) {
+            if (this->m_value != nullptr && this->m_copied)
                 delete[] this->m_value;
-                this->m_value = new u8[other.m_size];
-                this->m_size = other.m_size;
+        }
+
+        void setValue(void *value) {
+            if (this->m_copied) {
+                this->m_copied = false;
+                
+                if (this->m_value != nullptr)
+                    delete[] this->m_value;
             }
-
-            std::memcpy(this->m_value, other.m_value, other.m_size);
-            this->m_type = other.m_type;
+            
+            this->m_value = reinterpret_cast<u8*>(value);
         }
 
-        constexpr void operator=(Value&& other) {
-            operator=(other);
+        template<typename T>
+        T get() {
+            return *reinterpret_cast<T*>(this->m_value);
         }
 
-        constexpr size_t getSize() {
+        size_t getSize() {
             return this->m_size;
         }
 
-        constexpr DataType getType() {
+        DataType& getType() {
             return this->m_type;
         }
 
-        constexpr bool operator==(Value& other) {
-            if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
-                return false;
+        Value& operator=(Value &&other) {
+            if (this->m_copied && this->m_value != nullptr)
+                delete[] this->m_value;
+            
+            this->m_size = other.m_size;
+            this->m_type = other.m_type;
 
-            return std::memcmp(this->m_value, other.m_value, this->m_size);
+            this->m_value = new u8[this->m_size];
+            this->m_copied = true;
+
+            if (other.m_value != nullptr)
+                std::memcpy(this->m_value, other.m_value, this->m_size);
+            else
+                std::memset(this->m_value, 0x00, this->m_size);
+
+            return *this;
         }
 
-        constexpr bool operator!=(Value& other) {
+        bool operator==(Value& other) {
+            if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
+                return false;
+            return std::memcmp(this->m_value, other.m_value, this->m_size) == 0;
+        }
+
+        bool operator!=(Value& other) {
             return !operator==(other);
         }
 
-        constexpr bool operator>(Value& other) {
+        bool operator>(Value& other) {
             if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
                 return false;
 
@@ -159,28 +178,28 @@ namespace edz::cheat::types {
             }
             else if (this->m_type.isUnsigned()) {
                 for (u8 i = this->m_size - 1; i > 0; i--)
-                    if (this->m_value[i] > other.m_value[i])
+                    if (reinterpret_cast<u8*>(this->m_value)[i] > reinterpret_cast<u8*>(other.m_value)[i])
                         return true;
             }
 
             return false;
         }
 
-        constexpr bool operator>=(Value& other) {
+        bool operator>=(Value& other) {
             if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
                 return false;
 
             return operator>(other) || operator==(other);
         }
 
-        constexpr bool operator<(Value& other) {
+        bool operator<(Value& other) {
             if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
                 return false;
 
             return operator<=(other) && !operator==(other);
         }
 
-        constexpr bool operator<=(Value& other) {
+        bool operator<=(Value& other) {
             if (this->m_type.getType() != other.m_type.getType() || this->m_size != other.m_size)
                 return false;
 

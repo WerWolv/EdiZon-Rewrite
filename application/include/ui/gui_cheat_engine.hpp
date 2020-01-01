@@ -59,12 +59,9 @@ namespace edz::ui {
 
         static inline cheat::types::Value NOVALUE;
         void handleSearchOperation(std::vector<cheat::types::Region>& regions, cheat::types::SearchOperation operation, cheat::types::Value &value1, cheat::types::Value &value2 = NOVALUE) {
-            printf("1\n");
             switch (operation.getOperation()) {
                 case cheat::types::SearchOperation::EQUALS:
-                    printf("2\n");
                     cheat::CheatEngine::findIn(regions, STRATEGY(==), value1, value2);
-                    printf("3\n");
                     break;
                 case cheat::types::SearchOperation::GREATER_THAN:
                     cheat::CheatEngine::findIn(regions, STRATEGY(>), value1, value2);

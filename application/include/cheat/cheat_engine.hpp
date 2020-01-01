@@ -34,28 +34,37 @@ namespace edz::cheat {
         static void findIn(types::RegionList regions, types::Operation operation, cheat::types::Value &value1, cheat::types::Value &value2) {
             u32 bufferSize = MEMORY_SEARCH_BUFFER_SIZE;
             u8 *buffer = new u8[bufferSize];
+            types::Value memValue(nullptr, value1.getType());
+
+            bool ledState = false;
+
+            hlp::overclockSystem(true);
 
             for (const auto &region : regions) {
                 offset_t offset = 0;
-
                 while (offset < offset_t(region.getSize())) {
-                    if (region.getSize() - offset < bufferSize)
+                    if (static_cast<s32>(region.getSize()) - offset < bufferSize)
                         bufferSize = region.getSize() - offset;
 
                     cheat::CheatManager::readMemory(region.getBase() + offset, buffer, bufferSize);
 
                     for (u32 i = 0; i < bufferSize; i += value1.getSize()) {
-                        if ((types::Value(*(buffer + offset + i), value1.getType()).*operation)(value1)) {
-                            //CheatEngine::s_foundAddresses.push_back(region.getBase() + offset);
-                        }
+                        memValue.setValue(buffer + i);
+                        if ((memValue.*operation)(value1))
+                            CheatEngine::s_foundAddresses.push_back(region.getBase() + offset);
                     }
 
                     offset += bufferSize;
-                    //svcSleepThread(100E3); // Wait 100us
                 }
 
-            }
+                ledState = !ledState;
+                hlp::setLedState(ledState);
 
+            }
+            
+            hlp::setLedState(false);
+            hlp::overclockSystem(false);
+            
             delete[] buffer;
         }
 
