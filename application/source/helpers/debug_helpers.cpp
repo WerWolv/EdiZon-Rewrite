@@ -40,6 +40,9 @@
     static u64 allocatedSize = 0;
 
     void* operator new(std::size_t sz) {
+        if (sz == 0)
+            sz = 1;
+
         void* ptr = std::malloc(sz);
         if (ptr) {
             allocatedSize += sz;
@@ -59,6 +62,13 @@
             throw std::bad_alloc();
     }
 
+    void* operator new[](std::size_t sz) {
+        void *ptr = operator new (sz);
+        std::__fill_n_a(ptr, sz, 0x00);
+
+        return ptr;
+    }
+
     void operator delete(void* ptr) noexcept {
         size_t size = 0;
         for (u32 i = 0; i < allocatedDataIndex; i++)
@@ -72,6 +82,10 @@
 
         Logger::debug("Deallocated %d bytes, now at %d bytes", size, allocatedSize);
         std::free(ptr);
+    }
+
+    void operator delete[](void* ptr) {
+        operator delete[] (ptr);
     }
 
 #endif

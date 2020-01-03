@@ -27,6 +27,7 @@
 namespace edz::cheat::types {
 
 #define STRATEGY(operation) &edz::cheat::types::Value::operator operation
+#define INVALID_REGION      edz::cheat::types::Region(0x00, 0);
 
     class DataType {
     public:
@@ -295,6 +296,8 @@ namespace edz::cheat::types {
         constexpr addr_t getBase() const { return this->m_base; }
         constexpr size_t getSize() const { return this->m_size; }
 
+        constexpr bool contains(addr_t address) { return address >= getBase() && address < getBase() + getSize(); }
+
     private:
         addr_t m_base;
         size_t m_size;
@@ -302,6 +305,6 @@ namespace edz::cheat::types {
 
     using Operation = bool(Value::*)(Value&);
 
-    using RegionList = std::vector<Region>&;
+    using RegionList = std::vector<Region>;
 
 }

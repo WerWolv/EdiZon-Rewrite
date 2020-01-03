@@ -30,9 +30,11 @@
 
 #include "cheat/cheat.hpp"
 
+#include "ui/fonts.hpp"
 #include "ui/gui.hpp"
 #include "ui/gui_splash.hpp"
 #include "ui/gui_main.hpp"
+
 
 using namespace edz;
 
@@ -42,6 +44,9 @@ EResult initServices() {
     // Initialize Borealis (UI library)
     if (!brls::Application::init())
         return ResultEdzBorealisInitFailed;
+
+    // Extra fonts
+    ui::Fonts::initFonts();
 
     // Curl
     if (EResult(curl_global_init(CURL_GLOBAL_ALL)).failed())

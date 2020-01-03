@@ -17,6 +17,7 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ui/fonts.hpp"
 #include "ui/elements/title_info.hpp"
 #include "cheat/cheat.hpp"
 

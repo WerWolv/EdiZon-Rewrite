@@ -25,6 +25,7 @@
 
 #include "ui/gui.hpp"
 #include "cheat/cheat_engine.hpp"
+#include "ui/elements/hex_editor.hpp"
 
 namespace edz::ui {
 
@@ -39,7 +40,7 @@ namespace edz::ui {
     private:
         brls::ThumbnailFrame *m_rootFrame;
         brls::LayerView *m_searchSettings;
-        brls::ListItem *m_foundAddresses;
+        brls::ListItem *m_foundAddresses = nullptr;
 
         cheat::types::DataType m_dataType = cheat::types::DataType::U8;
         cheat::types::SearchOperation m_operation = cheat::types::SearchOperation::EQUALS;

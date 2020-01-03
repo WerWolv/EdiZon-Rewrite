@@ -21,6 +21,7 @@
 
 #include "edizon.hpp"
 #include "cheat/dmntcht.hpp"
+#include "cheat/cheat_engine_types.hpp"
 
 #include <string>
 #include <vector>
@@ -76,6 +77,11 @@ namespace edz::cheat {
         static titleid_t getTitleID();
         static processid_t getProcessID();
         static buildid_t getBuildID();
+
+        static types::Region getBaseRegion();
+        static types::Region getHeapRegion();
+        static types::Region getMainRegion();
+        static types::Region getAliasRegion();
 
         static std::pair<EResult, std::string> getCheatFile();
 

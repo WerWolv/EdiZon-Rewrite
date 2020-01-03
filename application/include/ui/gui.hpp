@@ -33,6 +33,7 @@ namespace edz::ui {
     class Gui {
     public:
         Gui() { }
+
         virtual ~Gui() { }
 
         virtual brls::View* setupUI() = 0;
@@ -151,6 +152,8 @@ namespace edz::ui {
         static inline std::vector<Gui*> s_guiStack;
 
         static inline u64 s_frames = 0;
+
+        static inline s32 s_monoSpaceFont = 0;
     };
 
 }

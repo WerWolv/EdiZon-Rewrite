@@ -107,9 +107,7 @@ namespace edz::ui::element {
     }
 
     brls::View* PopupList::requestFocus(brls::FocusDirection direction, View* oldFocus, bool fromUp) {
-        if (direction == brls::FocusDirection::UP || direction == brls::FocusDirection::NONE)
-            return this->m_list->defaultFocus(oldFocus);
-        else if ((direction == brls::FocusDirection::DOWN && oldFocus != this->m_rButton) || (direction == brls::FocusDirection::LEFT && oldFocus != this->m_list))
+        if ((direction == brls::FocusDirection::DOWN && oldFocus != this->m_rButton) || (direction == brls::FocusDirection::LEFT && oldFocus != this->m_list) || direction == brls::FocusDirection::NONE)
             return this->m_lButton;
         else if (direction == brls::FocusDirection::RIGHT && oldFocus != this->m_list)
             return this->m_rButton;

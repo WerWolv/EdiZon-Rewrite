@@ -87,6 +87,9 @@ namespace edz::hlp {
 
             openFile();
 
+            if (this->m_file == nullptr)
+                return *this;
+
             while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
                 fwrite(buffer, 1, size, dst);
                 offset += size;

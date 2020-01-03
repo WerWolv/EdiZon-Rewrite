@@ -37,6 +37,8 @@
 #include "api/save_repo_api.hpp"
 #include "api/switchcheatsdb_api.hpp"
 
+#include "ui/elements/hex_editor.hpp"
+
 namespace edz::ui {
 
     EResult openWebpage(std::string url) {
@@ -823,7 +825,7 @@ namespace edz::ui {
             rootFrame->setIcon("romfs:/assets/icon_edz_dark.png");
         else
             rootFrame->setIcon("romfs:/assets/icon_edz_light.png");
-        
+
         this->m_titleList = new brls::LayerView();
         this->m_saveReposList = new brls::List();
         this->m_cheatsList = new brls::List();

@@ -35,33 +35,55 @@ namespace edz::cheat {
             u32 bufferSize = MEMORY_SEARCH_BUFFER_SIZE;
             u8 *buffer = new u8[bufferSize];
             types::Value memValue(nullptr, value1.getType());
+            std::vector<addr_t> previouslyFoundAddresses = CheatEngine::s_foundAddresses;
+
+            CheatEngine::clearFoundAddresses();
 
             bool ledState = false;
 
             hlp::overclockSystem(true);
 
-            for (const auto &region : regions) {
-                offset_t offset = 0;
-                while (offset < offset_t(region.getSize())) {
-                    if (static_cast<s32>(region.getSize()) - offset < bufferSize)
-                        bufferSize = region.getSize() - offset;
+            if (previouslyFoundAddresses.size() == 0) {
+                for (const auto &region : regions) {
+                    offset_t offset = 0;
+                    while (offset < offset_t(region.getSize())) {
+                        if (static_cast<s32>(region.getSize()) - offset < bufferSize)
+                            bufferSize = region.getSize() - offset;
 
-                    cheat::CheatManager::readMemory(region.getBase() + offset, buffer, bufferSize);
+                        if (EResult(cheat::CheatManager::readMemory(region.getBase() + offset, buffer, bufferSize)).failed())
+                            goto cleanup;   // Explicitly goto the end to do cleanup code (Can't use break because of nested loops)
 
-                    for (u32 i = 0; i < bufferSize; i += value1.getSize()) {
-                        memValue.setValue(buffer + i);
-                        if ((memValue.*operation)(value1))
-                            CheatEngine::s_foundAddresses.push_back(region.getBase() + offset);
+                        for (u32 i = 0; i < bufferSize; i += value1.getSize()) {
+                            memValue.setValue(buffer + i);
+                            if ((memValue.*operation)(value1))
+                                CheatEngine::s_foundAddresses.push_back(region.getBase() + offset);
+                        }
+
+                        offset += bufferSize;
                     }
 
-                    offset += bufferSize;
+                    ledState = !ledState;
+                    hlp::setLedState(ledState);
+
                 }
+            } else {
+                memValue.setValue(buffer);
 
-                ledState = !ledState;
-                hlp::setLedState(ledState);
+                for (addr_t &address : previouslyFoundAddresses) {
+                    if (EResult(cheat::CheatManager::readMemory(address, buffer, memValue.getType().getSize())).failed())
+                        goto cleanup;   // Explicitly goto the end to do cleanup code (Can't use break because of nested loops)
 
+                    if ((memValue.*operation)(value1))
+                        CheatEngine::s_foundAddresses.push_back(address);
+                }
             }
-            
+
+        cleanup:
+
+            // If the search didn't yield any result, go back to the previous results
+            if (CheatEngine::s_foundAddresses.size() == 0)
+                CheatEngine::s_foundAddresses = previouslyFoundAddresses;
+
             hlp::setLedState(false);
             hlp::overclockSystem(false);
             

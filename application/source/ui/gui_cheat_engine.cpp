@@ -18,6 +18,8 @@
  */
 
 #include "ui/gui_cheat_engine.hpp"
+#include "ui/gui_hex_editor.hpp"
+
 #include "ui/elements/popup_list.hpp"
 #include "helpers/config_manager.hpp"
 
@@ -28,8 +30,6 @@
 #include <cmath>
 
 namespace edz::ui {
-
-
 
     void GuiCheatEngine::setSearchCountText(u16 searchCount) {
         switch (searchCount) {
@@ -56,15 +56,77 @@ namespace edz::ui {
         static std::vector<brls::SelectListItem*> scanTypeItems;
         brls::List *list = new brls::List();
         
-        this->m_foundAddresses = new brls::ListItem("Found Addresses");
+        auto hexViewItem    = new brls::ListItem("Memory View");
+        auto foundAddresses = new brls::ListItem("Found Addresses");
+        auto clearSearchItem    = new brls::ListItem("Clear Search");
 
         auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
         auto valueTypeItem  = new brls::SelectListItem("Value Type", { "1 Byte (Unsigned)", "1 Byte (Signed)", "2 Bytes (Unsigned)", "2 Bytes (Signed)", "4 Bytes (Unsigned)", "4 Bytes (Signed)", "8 Bytes (Unsigned)", "8 Bytes (Signed)", "Float", "Double", "String", "Array" });
         auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN" });
         auto valueItem      = new brls::ListItem("Search Value");
-        auto fastScan       = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
+        auto fastScanItem   = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
 
-        this->m_foundAddresses->setValue("0");
+
+        hexViewItem->setClickListener([=](brls::View *view) {
+            auto regionSelection = new brls::Dialog("Look at the HEAP or MAIN section?");
+
+            regionSelection->addButton("HEAP", [=](brls::View *view) {
+                Gui::changeTo<GuiHexEditor>(cheat::CheatManager::getHeapRegion().getBase());
+            });
+
+            regionSelection->addButton("MAIN", [=](brls::View *view) {
+                Gui::changeTo<GuiHexEditor>(cheat::CheatManager::getMainRegion().getBase());
+            });
+
+            regionSelection->open();
+        });
+
+        foundAddresses->setClickListener([this](brls::View *view) {
+            if (cheat::CheatEngine::getFoundAddresses().size() > 0 && cheat::CheatEngine::getFoundAddresses().size() < 50) {
+                auto rootFrame = new brls::AppletFrame(true, true);
+                auto list = new brls::List();
+                
+
+                auto heapRegion = cheat::CheatManager::getHeapRegion();
+                auto mainRegion = cheat::CheatManager::getMainRegion();
+                auto baseRegion = cheat::CheatManager::getBaseRegion();
+
+                for (auto &address : cheat::CheatEngine::getFoundAddresses()) {
+                    brls::ListItem *item = nullptr;
+                    u64 buffer = 0;
+                    cheat::CheatManager::readMemory(address, &buffer, this->m_dataType.getSize());
+
+                    if (heapRegion.contains(address))
+                        item = new brls::ListItem(hlp::formatString("[ HEAP + %08lx ]  ( 0x%lx )", address - heapRegion.getBase(), buffer));
+                    else if (mainRegion.contains(address))
+                        item = new brls::ListItem(hlp::formatString("[ MAIN + %08lx ]  ( 0x%lx )", address - mainRegion.getBase(), buffer));
+                    else
+                        item = new brls::ListItem(hlp::formatString("[ BASE + %08lx ]  ( 0x%lx )", address - baseRegion.getBase(), buffer));
+
+                    item->setClickListener([this, address](brls::View *view) {
+                        hlp::openSwkbdForNumber([&](std::string str) {
+                            s64 valueToWrite = strtoll(str.c_str(), nullptr, 10);
+                            cheat::CheatManager::writeMemory(address, &valueToWrite, this->m_dataType.getSize());
+                        }, "Enter a new value", "", "", "", 10);
+                    });
+
+                    list->addView(item);
+
+                }
+
+                rootFrame->setContentView(list);
+                
+                brls::PopupFrame::open("Found Addresses", rootFrame);
+            }
+
+        });
+
+        clearSearchItem->setClickListener([](brls::View *view) {
+            cheat::CheatEngine::clearFoundAddresses();
+
+            hlp::File foundAddressesFile(EDIZON_BASE_DIR "/found_addrs.bin");
+            foundAddressesFile.remove();
+        });
 
         scanTypeItems.push_back(scanTypeItem);
         scanTypeItem->setListener([this](s32 selection) {
@@ -120,7 +182,11 @@ namespace edz::ui {
             }
         });
 
-        list->addView(this->m_foundAddresses);
+
+        list->addView(hexViewItem);
+        list->addView(foundAddresses);
+        list->addView(clearSearchItem);
+
         list->addView(new brls::Header("Search Settings", false));
         list->addView(scanTypeItem);
         list->addView(valueTypeItem);
@@ -150,7 +216,7 @@ namespace edz::ui {
             list->addView(valueItem);
         }
 
-        list->addView(fastScan);
+        list->addView(fastScanItem);
 
         return list;
     }
@@ -213,12 +279,14 @@ namespace edz::ui {
         dialog->open();
     }*/
 
+
     brls::View* GuiCheatEngine::setupUI() {
         this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
 
         this->m_rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
 
-        this->m_rootFrame->setCancelListener([](brls::View *view) {
+        this->m_rootFrame->setCancelListener([this](brls::View *view) {
+            this->m_rootFrame = nullptr;
             Gui::goBack();
             return true;
         });
@@ -229,20 +297,32 @@ namespace edz::ui {
             this->m_rootFrame->getSidebar()->setThumbnail(&thumbnailBuffer[0], 1280, 720);
         
 
+        hlp::File foundAddressesFile(EDIZON_BASE_DIR "/found_addrs.bin");
+
+        if (foundAddressesFile.exists()) {
+            addr_t buffer[foundAddressesFile.size() / sizeof(addr_t)];
+
+            cheat::CheatEngine::getFoundAddresses().reserve(foundAddressesFile.size() / sizeof(addr_t));
+            foundAddressesFile.read(reinterpret_cast<u8*>(buffer), foundAddressesFile.size());
+            std::copy(buffer, buffer + (foundAddressesFile.size() / sizeof(addr_t)), std::back_inserter(cheat::CheatEngine::getFoundAddresses()));
+        }
+
+
         this->m_searchSettings = new brls::LayerView();
         createSearchSettings(this->m_searchSettings);
 
         this->m_rootFrame->setContentView(this->m_searchSettings);
         this->m_rootFrame->getSidebar()->getButton()->setClickListener([this](brls::View*) {
-        Gui::runAsyncWithDialog([=] { 
-            appletSetMediaPlaybackState(true);
-            std::this_thread::sleep_for(1s);
-            this->handleSearchOperation(this->m_regions, this->m_operation, this->m_value[0]);
+            Gui::runAsyncWithDialog([this] { 
+                appletSetMediaPlaybackState(true);
 
-            this->m_foundAddresses->setValue(hlp::formatString("%d", cheat::CheatEngine::getFoundAddresses().size()));
+                this->handleSearchOperation(this->m_regions, this->m_operation, this->m_value[0]);
 
-            appletSetMediaPlaybackState(false);
-        }, "Searching memory. This might take a while...");
+                hlp::File foundAddressesFile(EDIZON_BASE_DIR "/found_addrs.bin");
+                size_t size = foundAddressesFile.write(reinterpret_cast<u8*>(&cheat::CheatEngine::getFoundAddresses()[0]), cheat::CheatEngine::getFoundAddresses().size() * sizeof(addr_t));
+
+                appletSetMediaPlaybackState(false);
+            }, "Searching memory. This might take a while...");
             
         });
 
@@ -250,7 +330,8 @@ namespace edz::ui {
     }
 
     void GuiCheatEngine::update() {
-
+        if (this->m_rootFrame != nullptr)
+            this->m_rootFrame->getSidebar()->setSubtitle(hlp::formatString("Found Addresses: %d", cheat::CheatEngine::getFoundAddresses().size()));
     }
 
 }

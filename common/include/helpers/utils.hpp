@@ -105,9 +105,10 @@ namespace edz::hlp {
     template <typename ...Args>
     std::string formatString(const std::string& format, Args && ...args) {
         auto size = std::snprintf(nullptr, 0, format.c_str(), args...);
-        std::string output(size + 1, '\0');
+        char output[size + 1];
+        std::memset(output, ' ', sizeof(output));
 
-        std::sprintf(&output[0], format.c_str(), args...);
+        std::sprintf(output, format.c_str(), args...);
 
         return output;
     }

@@ -196,6 +196,35 @@ namespace edz::cheat {
     }
 
 
+    types::Region CheatManager::getBaseRegion() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return INVALID_REGION;
+
+        return types::Region(CheatManager::s_processMetadata.address_space_extents.base, CheatManager::s_processMetadata.address_space_extents.size);
+    }
+
+    types::Region CheatManager::getHeapRegion() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return INVALID_REGION;
+
+        return types::Region(CheatManager::s_processMetadata.heap_extents.base, CheatManager::s_processMetadata.heap_extents.size);
+    }
+
+    types::Region CheatManager::getMainRegion() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return INVALID_REGION;
+
+        return types::Region(CheatManager::s_processMetadata.main_nso_extents.base, CheatManager::s_processMetadata.main_nso_extents.size);
+    }
+
+    types::Region CheatManager::getAliasRegion() {
+        if (!CheatManager::isCheatServiceAvailable())
+            return INVALID_REGION;
+
+        return types::Region(CheatManager::s_processMetadata.alias_extents.base, CheatManager::s_processMetadata.alias_extents.size);
+    }
+
+
     std::pair<EResult, std::string> CheatManager::getCheatFile() {
         if (!CheatManager::isCheatServiceAvailable())
             return { ResultEdzCheatServiceNotAvailable, "" };
