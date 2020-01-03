@@ -309,8 +309,10 @@ namespace edz::ui {
             auto &title = titlePair.second;
 
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
-                        
-            titleItem->setThumbnail(title->getIcon());            
+            
+            titleItem->setValue(Fonts::MaterialIcons::SUBMENU);
+            titleItem->setThumbnail(title->getIcon()); 
+
             titleItem->setClickListener([&](brls::View *view) {
                 createTitlePopup(title);
             });
@@ -328,7 +330,7 @@ namespace edz::ui {
             auto &title = titlePair.second;
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 35));
             
-            titleItem->setValue(title->getIDString(), true, false);
+            titleItem->setValue(Fonts::MaterialIcons::SUBMENU);
                         
             titleItem->setClickListener([&](brls::View *view) {
                 createTitlePopup(title);
@@ -420,6 +422,7 @@ namespace edz::ui {
         element::TitleInfo *titleInfo = new element::TitleInfo(runningTitle->getIcon(), runningTitle);
 
         brls::ListItem *cheatEngineItem = new brls::ListItem("edz.gui.main.running.cheatengine.title"_lang, "", "edz.gui.main.running.cheatengine.subtitle"_lang);
+        cheatEngineItem->setValue(Fonts::MaterialIcons::SUBMENU);
         cheatEngineItem->setClickListener([](brls::View *view){
             Gui::changeTo<GuiCheatEngine>();
         });
@@ -778,6 +781,10 @@ namespace edz::ui {
         scdbItem->setThumbnail("romfs:/assets/about/icon_scdb.png");
         patreonItem->setThumbnail("romfs:/assets/about/icon_patreon.png");
         guideItem->setThumbnail("romfs:/assets/about/icon_guide.png");
+
+        scdbItem->setValue(Fonts::MaterialIcons::SUBMENU);
+        patreonItem->setValue(Fonts::MaterialIcons::SUBMENU);
+        guideItem->setValue(Fonts::MaterialIcons::SUBMENU);
 
         if (hlp::isInApplicationMode()) {
             scdbItem->setClickListener([](brls::View *view)    { openWebpage("https://www.switchcheatsdb.com"); });

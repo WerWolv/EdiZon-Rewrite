@@ -24,7 +24,7 @@
     "edz.gui.main.settings.tab"                     : "Settings",
     "edz.gui.main.running.general"                  : "General Information",
     "edz.gui.main.running.cheatengine.title"        : "Cheat Engine",
-    "edz.gui.main.running.cheatengine.subtitle"     : "The cheat engine can be used to edit a titles memory on the fly or create cheats",
+    "edz.gui.main.running.cheatengine.subtitle"     : "The cheat engine can be used to inspect and edit a title's memory",
     "edz.gui.main.running.memory"                   : "Memory Sections",
     "edz.gui.main.running.section.main"             : "main",
     "edz.gui.main.running.section.heap"             : "heap",

@@ -27,6 +27,7 @@
 #include <utility>
 
 #include "helpers/utils.hpp"
+#include "ui/fonts.hpp"
 
 namespace edz::ui {
 

@@ -38,6 +38,12 @@ namespace edz::ui {
             return Fonts::s_monoSpaceFont;
         }
 
+        class MaterialIcons {
+        public:
+            static inline const char* SUBMENU           = "\uE3E0";
+            static inline const char* PARENTIAL_CONTROL = "\uE32A";
+        };
+
     private:
         static inline s32 s_monoSpaceFont = 0;
     };

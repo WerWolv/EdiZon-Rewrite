@@ -66,7 +66,7 @@ namespace edz::ui {
         auto valueItem      = new brls::ListItem("Search Value");
         auto fastScanItem   = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
 
-
+        hexViewItem->setValue(Fonts::MaterialIcons::SUBMENU);
         hexViewItem->setClickListener([=](brls::View *view) {
             auto regionSelection = new brls::Dialog("Look at the HEAP or MAIN section?");
 
@@ -81,6 +81,7 @@ namespace edz::ui {
             regionSelection->open();
         });
 
+        foundAddresses->setValue(Fonts::MaterialIcons::SUBMENU);
         foundAddresses->setClickListener([this](brls::View *view) {
             if (cheat::CheatEngine::getFoundAddresses().size() > 0 && cheat::CheatEngine::getFoundAddresses().size() < 50) {
                 auto rootFrame = new brls::AppletFrame(true, true);
