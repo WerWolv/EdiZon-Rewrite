@@ -1,16 +1,32 @@
-## Bug report
+---
+name: Bug report
+about: Create a bug report if EdiZon is crashing or behaves weirdly
+title: ''
+labels: bug
+assignees: ''
 
-### What happened?
-  `Your text here`
+---
 
-### What should have happened?
-  `Your text here`
-  
-### What version of EdiZon were you using?
-  `EdiZon vX.X.X`
-  
-### Screenshot of fatal screen, if it occured
-  `Fatal screenshot here`
-  
-### Additional context
-  `Your text here`
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem. A picture of atmosphere's fatal error screen or EdiZon's `EdiZon was closed because a error occured. ` screen for example.
+
+**Versions**
+- What Firmware version are you on?
+- What Atmosphere version are you using?
+- What EdiZon version are you using?
+
+**Additional context**
+Add any other context about the problem here.
