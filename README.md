@@ -1,14 +1,17 @@
 # EdiZon
-  <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon/master/icon.jpg"><br />
-      <a href="https://github.com/WerWolv/EdiZon/releases/latest"><img src="https://img.shields.io/github/downloads/WerWolv/EdiZon/total.svg" alt="Latest Release" /></a>
+
+  <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon-Rewrite/master/icon.jpg"><br />
+      <a href="https://github.com/WerWolv/EdiZon-Rewrite/releases/latest"><img src="https://img.shields.io/github/downloads/WerWolv/EdiZon-Rewrite/total.svg" alt="Latest Release" /></a>
     <a href="https://discord.gg/qyA38T8"><img src="https://discordapp.com/api/guilds/465980502206054400/embed.png" alt="Discord Server" /></a>
-    <a href="https://travis-ci.com/WerWolv/EdiZon"><img src="https://travis-ci.com/WerWolv/EdiZon.svg?branch=master" alt="Build Status" /></a>
+    <a href="https://travis-ci.com/WerWolv/EdiZon-Rewrite"><img src="https://travis-ci.com/WerWolv/EdiZon-Rewrite.svg?branch=master" alt="Build Status" /></a>
   </p>
 
 A Homebrew save file manager, editor, cheat engine, cheat creator and button sequence mapper for Horizon, the OS of the Nintendo Switch.
 
-# Overview
-  EdiZon consists of 6 different main functionalities.
+## Overview
+
+EdiZon consists of 6 different main functionalities.
+
   - **Save file management**
     - Extraction of game saves.
     - Injection of extracted game saves (Your own and your friends save files).
@@ -35,19 +38,20 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
 
   All packed into one easy to use and easy to install Homebrew.
 
-# Images
+## Images
+
   <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon/master/assets/main_menu.jpg"></p>
   <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon/master/assets/save_editor_1.jpg"></p>
   <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon/master/assets/save_editor_2.jpg"></p>
   <p align="center"><img src="https://raw.githubusercontent.com/WerWolv/EdiZon/master/assets/ram_editor.jpg"></p>
 
-# Save editor Config and Script files
+## Save editor Config and Script files
 
   To download working Editor Config and Editor Script files, visit [this repository](https://github.com/WerWolv/EdiZon_ConfigsAndScripts/tree/master)
 
   Check out our [Wiki page](https://github.com/WerWolv/EdiZon/wiki) for more information on how to build your own Editor Config and Editor Script files.
 
-# How to install
+## How to install
 
   1. Download the latest release from the [GitHub release page](https://github.com/WerWolv/EdiZon/releases/latest).
   2. Unpack the downloaded zip file, put the files on your Nintendo Switch's SD card and let the folders merge.
@@ -56,7 +60,7 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
      2. For the best experience, open the `/atmosphere/system_settings.ini` file and change `dmnt_cheats_enabled_by_default = u8!0x1` to `dmnt_cheats_enabled_by_default = u8!0x0`.
 
 
-# How to compile
+## How to compile
 
   1. Clone the EdiZon repo to your computer using `git clone https://github.com/WerWolv/EdiZon --recurse-submodules`.
   2. Download and install devkitA64. It comes bundled with the [devkitPro](https://devkitpro.org) toolchain.
@@ -64,11 +68,11 @@ A Homebrew save file manager, editor, cheat engine, cheat creator and button seq
   4. The rest of the compilation works using the `make` command. Type `make application` to build only EdiZon, `make sysmodule` to build only the companion sysmodule or just `make` to build everything.
   5. If you want to use the debug utilities built into the makefile, you also need `python3` and `lftp` installed on your computer and [sys-ftpd](https://github.com/jakibaki/sys-ftpd) installed on your Switch.
 
-# Discord
+## Discord
 
   For support with the usage of EdiZon or the creation of save editor configs and scripts, feel free to join the EdiZon server on Discord: https://discord.gg/qyA38T8
 
-# Credits
+## Credits
 
   Thanks to...
 
