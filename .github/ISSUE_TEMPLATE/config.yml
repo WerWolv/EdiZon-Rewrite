@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: EdiZon Discord
+    url: https://discord.gg/qyA38T8
+    about: For support questions, please ask on our Discord instead of creating a GitHub issue
