@@ -1,8 +1,21 @@
-.PHONY: clean all application sysmodule
+export VERSION_MAJOR 	:= 4
+export VERSION_MINOR 	:= 0
+export VERSION_MICRO 	:= 0
+export SNAPSHOT		 	:= 1
+
+export APP_TITLE		:=	EdiZon
+export APP_AUTHOR		:=	WerWolv
+
+.PHONY: clean all application sysmodule release
 
 all: application sysmodule
 
-application: sysmodule
+--release:
+	$(eval SNAPSHOT := 0)
+
+release: --release clean sysmodule application
+
+application:
 	@printf "\x1b[32;01m ==== Building application ==== \x1b[0m\n"
 
 	@$(MAKE) -C application --no-print-directory

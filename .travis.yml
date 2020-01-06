@@ -25,7 +25,9 @@ before_deploy:
     - git config --local user.name "WerWolv"
     - git config --local user.email "werwolv98@gmail.com"
     - export TRAVIS_TAG=snapshot
-    - git tag -f $TRAVIS_TAG
+    - git tag -d $TRAVIS_TAG
+    - git push
+    - git tag $TRAVIS_TAG
   
 deploy:
   provider: releases
@@ -35,6 +37,6 @@ deploy:
   skip_cleanup: true
   overwrite: true
   name: "Snapshot Build"
-  body: "This snapshot was compiled on the $(date +'%d. %B %Y') from commit [$(git rev-parse HEAD)](https://github.com/WerWolv/EdiZon-Rewrite/commit/$(git rev-parse HEAD)).\n\nIt may be unstable, use it at your own risk.\nTo install it, place the EdiZon.nro in your /switch/EdiZon folder replacing the file in there."
+  body: "This snapshot was compiled on the $(date +'%d. %B %Y') from commit [$(printf %.7s $(git rev-parse HEAD))](https://github.com/WerWolv/EdiZon-Rewrite/commit/$(git rev-parse HEAD)). </br> </br> It may be unstable, use it at your own risk. </br> To install it, place the EdiZon.nro in your /switch/EdiZon folder replacing the file in there."
   on:
     branch: master

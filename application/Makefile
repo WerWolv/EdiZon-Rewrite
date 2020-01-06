@@ -37,16 +37,9 @@ include $(TOPDIR)/../switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-VERSION_MAJOR := 4
-VERSION_MINOR := 0
-VERSION_MICRO := 0
-NIGHTLY		  := 1
 
-APP_TITLE	:=	EdiZon
-APP_AUTHOR	:=	WerWolv
-
-ifeq ($(NIGHTLY), 1)
-	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} - Nightly
+ifeq ($(SNAPSHOT), 1)
+	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} - Snapshot
 else
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 endif
