@@ -13,9 +13,9 @@ all: application sysmodule
 --release:
 	$(eval SNAPSHOT := 0)
 
-release: --release clean sysmodule application
+release: --release clean application
 
-application:
+application: sysmodule
 	@printf "\x1b[32;01m ==== Building application ==== \x1b[0m\n"
 
 	@$(MAKE) -C application --no-print-directory
