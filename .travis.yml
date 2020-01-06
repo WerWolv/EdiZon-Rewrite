@@ -10,7 +10,7 @@ git:
   submodules: false
 
 before_install:
-  - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules # Travis can't deal with the user 'git'...
+  - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
   - echo -e "\n\nmachine github.com\n  login $GITHUB_TOKEN\n" >~/.netrc
   - git submodule update --init --recursive
   - wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
@@ -25,8 +25,7 @@ before_deploy:
     - git config --local user.name "WerWolv"
     - git config --local user.email "werwolv98@gmail.com"
     - export TRAVIS_TAG=snapshot
-    - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-    - git tag $TRAVIS_TAG
+    - git tag -f $TRAVIS_TAG
   
 deploy:
   provider: releases
@@ -36,6 +35,6 @@ deploy:
   skip_cleanup: true
   overwrite: true
   name: "Snapshot Build"
-  body: "This build was compiled on the $(date +'%d.%m.%Y'). It may be unstable, contains more features and bug fixes too though"
+  body: "This snapshot was compiled on the $(date +'%d. %B %Y') from commit [$(git rev-parse HEAD)](https://github.com/WerWolv/EdiZon-Rewrite/commit/$(git rev-parse HEAD)).\n\nIt may be unstable, use it at your own risk.\nTo install it, place the EdiZon.nro in your /switch/EdiZon folder replacing the file in there."
   on:
     branch: master
