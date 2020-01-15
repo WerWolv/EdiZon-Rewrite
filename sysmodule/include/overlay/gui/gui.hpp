@@ -21,6 +21,8 @@
 
 #include <memory>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include "overlay/screen.hpp"
 #include "overlay/elements/element.hpp"
@@ -39,93 +41,42 @@ namespace edz::ovl::gui {
         static void init(Screen *screen);
         static void exit();
 
-        bool shouldClose();
+        virtual bool shouldClose();
 
         virtual Element* createUI() = 0;
         virtual void update() = 0;
 
+        static void tick();
+        static void hidUpdate(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPosLeft, JoystickPosition joyStickPosRight, u32 touchX, u32 touchY);
+
+        static void setGuiOpacity(float opacity);
+
+        static void playIntroAnimation();
+
+
         template<typename T>
-        static void changeTo() {
-            Gui::s_nextGui = new T();
-        }
+        static void changeTo()   {  Gui::s_nextGui = new T(); }
 
-        static Gui* getCurrGui() {
-            return Gui::s_currGui;
-        }
+        static Gui* getCurrGui() {  return Gui::s_currGui;    }
 
-        static void tick(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPosLeft, JoystickPosition joyStickPosRight, touchPosition touchPos) {
-            Gui::s_frameCount++;
+        static void requestFocus(Element *element, FocusDirection direction);
+        static void removeFocus(Element *element = nullptr);
 
-            if (Gui::s_nextGui != nullptr) {
-                if (Gui::s_currGui != nullptr)
-                    delete Gui::s_currGui;
-
-                if (Gui::s_topElement != nullptr)
-                    delete Gui::s_topElement;
-
-                Gui::s_currGui = Gui::s_nextGui;
-                Gui::s_nextGui = nullptr;
-
-                Gui::s_topElement = Gui::s_currGui->createUI();
-                Gui::s_topElement->layout();
-            }
-
-            if (Gui::s_currGui == nullptr)
-                return;
-
-            Gui::s_currGui->update();
-
-            Gui::s_screen->fillScreen({ 0x0, 0x0, 0x0, static_cast<u8>(0xD * Gui::s_guiOpacity) });
-            Gui::s_screen->drawRect(15, 720 - 73, FB_WIDTH - 30, 1, 0xFFFF);
-
-            Gui::s_screen->drawString("\uE0E1  Back     \uE0E0  OK", false, 30, 693, 0.023, 0xFFFF);
-
-            if (Gui::s_topElement != nullptr)
-                Gui::s_topElement->draw(Gui::s_screen);
-
-            Gui::s_screen->flush();
-
-            if (Gui::s_guiOpacity < 1.0 && Gui::s_introAnimationPlaying) {
-                Gui::s_guiOpacity += 0.2F;
-            }
-
-            if (Gui::s_guiOpacity > 0.0 && Gui::s_outroAnimationPlaying) {
-                Gui::s_guiOpacity -= 0.1F;
-            }
-
-            if (Gui::s_guiOpacity >= 1.0)
-                Gui::s_introAnimationPlaying = false;
-            if (Gui::s_guiOpacity <= 0.0)
-                Gui::s_outroAnimationPlaying = false;
-        }
-
-        static u64 getFrameCount() {
-            return Gui::s_frameCount;
-        }
-        
-        static void setGuiOpacity(float opacity) {
-            Gui::s_guiOpacity = opacity;
-        }
-
-        static void playIntroAnimation() {
-            Gui::s_introAnimationPlaying = true;
-            Gui::s_guiOpacity = 0.0F;
-        }
-
-    protected:
+        static bool isFocused(Element *element) { return Gui::s_focusedElement == element; }
 
     private:
         static inline Screen *s_screen = nullptr;
         static inline Gui *s_currGui = nullptr;
         static inline Gui *s_nextGui = nullptr;
         static inline Element *s_topElement = nullptr;
+        static inline Element *s_focusedElement = nullptr;
 
-        static inline bool s_initialized = false;
-        static inline u64 s_frameCount = 0;
         static inline float s_guiOpacity = 0.0;
 
         static inline bool s_introAnimationPlaying = true;
         static inline bool s_outroAnimationPlaying = true;
+
+        static inline std::chrono::duration<int, std::nano> s_lastFrameDuration = 0s;
 
     };
 

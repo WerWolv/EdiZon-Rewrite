@@ -18,6 +18,9 @@
  */
 
 #include "overlay/elements/list.hpp"
+#include "overlay/gui/gui.hpp"
+
+#include <algorithm>
 
 namespace edz::ovl::element {
 
@@ -26,20 +29,63 @@ namespace edz::ovl::element {
     }
 
     List::~List() {
+        for (auto &item : this->m_items)
+            delete item;
 
+        this->m_items.clear();
     }
 
 
-    Element* List::requestFocus(Element *oldFocus, Element::FocusDirection direction) {
+    Element* List::requestFocus(Element *oldFocus, FocusDirection direction) {
+        if (this->m_items.size() == 0)
+            return nullptr;
 
+        if (oldFocus == nullptr)
+            return this->m_items[0];
+
+        auto it = std::find(this->m_items.begin(), this->m_items.end(), oldFocus);
+
+        if (it == this->m_items.end() || direction == FocusDirection::NONE)
+            return this->m_items[0];
+
+        if (direction == FocusDirection::UP) {
+            if (it == this->m_items.begin())
+                return this->m_items[0];
+            else 
+                return *(it - 1);
+        } else if (direction == FocusDirection::DOWN) {
+            if (it == (this->m_items.end() - 1))
+                return this->m_items[this->m_items.size() - 1];
+            else
+                return *(it + 1);
+        }
+        
+        return *it;
     }
 
-    void List::draw(ovl::Screen *screen) {
-
+    void List::draw(ovl::Screen *screen, u16 x, u16 y) {
+        for (auto &item : this->m_items)
+            item->frame(screen);
     }
 
     void List::layout() {
+        this->setPosition(40, 175);
 
+        u16 y = 175;
+        for (auto &item : this->m_items) {
+            item->layout();
+
+            auto [w, h] = item->getSize();
+            item->setPosition(40, y);
+
+            y += h - 1;
+        }
+    }
+
+    void List::addItem(ListItem *listItem) {
+        listItem->setParent(this);
+        
+        this->m_items.push_back(listItem);
     }
 
 }

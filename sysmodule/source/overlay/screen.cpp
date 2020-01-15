@@ -36,6 +36,8 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "overlay/stb_truetype.h"
 
+#include "material_icons_ttf.h"
+
 
 extern "C" u64 __nx_vi_layer_id;
 
@@ -118,13 +120,20 @@ namespace edz::ovl {
     }
 
     EResult Screen::initFont() {
+        
+        // Nintendo's default font
         ER_TRY(plGetSharedFontByType(&Screen::s_fontStd, PlSharedFontType_Standard));
-        ER_TRY(plGetSharedFontByType(&Screen::s_fontExt, PlSharedFontType_NintendoExt));
-
         u8 *fontBuffer = reinterpret_cast<u8*>(Screen::s_fontStd.address);
         stbtt_InitFont(&Screen::s_stbFontStd, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+        
+        // Nintendo's extended font containing a bunch of icons
+        ER_TRY(plGetSharedFontByType(&Screen::s_fontExt, PlSharedFontType_NintendoExt));
         fontBuffer = reinterpret_cast<u8*>(Screen::s_fontExt.address);
         stbtt_InitFont(&Screen::s_stbFontExt, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+
+        // Stripped version of the Material Icons font
+        fontBuffer = const_cast<u8*>(material_icons_ttf);
+        stbtt_InitFont(&Screen::s_stbFontMaterial, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
         return ResultSuccess;
     }
@@ -217,34 +226,43 @@ namespace edz::ovl {
             i += codepointWidth;
 
             stbtt_fontinfo *currFont;
+            float currFontSize = fontSize;
 
-            if (stbtt_FindGlyphIndex(&Screen::s_stbFontStd, currCharacter))
+            if (stbtt_FindGlyphIndex(&Screen::s_stbFontStd, currCharacter)) {
                 currFont = &Screen::s_stbFontStd;
-            else if (stbtt_FindGlyphIndex(&Screen::s_stbFontExt, currCharacter))
+                currFontSize /= 1000;
+            }
+            else if (stbtt_FindGlyphIndex(&Screen::s_stbFontExt, currCharacter)) {
                 currFont = &Screen::s_stbFontExt;
+                currFontSize /= 1000;
+            }
+            else if (stbtt_FindGlyphIndex(&Screen::s_stbFontMaterial, currCharacter)) {
+                currFont = &Screen::s_stbFontMaterial;
+                currFontSize /= 500;
+            }
             else return;
 
-            currX += fontSize * stbtt_GetCodepointKernAdvance(currFont, prevCharacter, currCharacter);
+            currX += currFontSize * stbtt_GetCodepointKernAdvance(currFont, prevCharacter, currCharacter);
 
             if (currCharacter == '\n') {
                 currX = x;
 
                 int ascent = 0;
                 stbtt_GetFontVMetrics(currFont, &ascent, nullptr, nullptr);
-                currY += ascent * fontSize * 1.125F;
+                currY += ascent * currFontSize * 1.125F;
                 continue;
             }
 
             int bounds[4] = { 0 };
-            stbtt_GetCodepointBitmapBoxSubpixel(currFont, currCharacter, fontSize, fontSize,
+            stbtt_GetCodepointBitmapBoxSubpixel(currFont, currCharacter, currFontSize, currFontSize,
                                                 0, 0, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
 
             int xAdvance;
             stbtt_GetCodepointHMetrics(currFont, currCharacter, &xAdvance, nullptr);
 
-            Screen::drawGlyph(currCharacter, currX + bounds[0], currY + bounds[1], color, currFont, fontSize);
+            Screen::drawGlyph(currCharacter, currX + bounds[0], currY + bounds[1], color, currFont, currFontSize);
 
-            currX += xAdvance * fontSize;
+            currX += xAdvance * currFontSize;
             
         } while (i < stringLength);
     } 

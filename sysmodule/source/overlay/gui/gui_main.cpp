@@ -19,6 +19,7 @@
 
 #include "overlay/gui/gui_main.hpp"
 
+#include "overlay/elements/list.hpp"
 #include "overlay/elements/list_item.hpp"
 
 namespace edz::ovl::gui {
@@ -33,7 +34,13 @@ namespace edz::ovl::gui {
 
 
     Element* GuiMain::createUI() {
-        return new element::ListItem();
+        auto list = new element::List();
+        list->addItem(new element::ListItem("\uE225 Cheats"));
+        list->addItem(new element::ListItem("\uE22B Notes"));
+        list->addItem(new element::ListItem("\uE202 Stats"));
+        list->addItem(new element::ListItem("\uE227 Settings"));
+
+        return list;
     }
 
     void GuiMain::update() {

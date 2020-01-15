@@ -116,10 +116,10 @@ namespace edz::ovl {
             if (x > FB_WIDTH || y > FB_HEIGHT)
                 return 0;
 
-            u32 tmp_pos = ((y & 127) / 16) + (x / (32 * 8)) + (( y / (16 / 8))*(((FB_WIDTH / 2) / (16*8))));
+            u32 tmp_pos = ((y & 127) / 16) + (x / 32 * 8) + (( y / 16 / 8) * (((FB_WIDTH / 2) / 16 * 8)));
             tmp_pos *= 16 * 16 * 4;
 
-            tmp_pos += ((y%16)/8)*512 + ((x % 32) / 16) * 256 + ((y % 8) / 2) * 64 + ((x % 16) / 8) * 32 + (y % 2) * 16 + (x % 8) * 2;
+            tmp_pos += ((y % 16) / 8) * 512 + ((x % 32) / 16) * 256 + ((y % 8) / 2) * 64 + ((x % 16) / 8) * 32 + (y % 2) * 16 + (x % 8) * 2;
             
             return tmp_pos / 2;
         }
@@ -128,7 +128,7 @@ namespace edz::ovl {
         static inline ViDisplay s_display;
         static inline Event s_vsyncEvent;
         static inline PlFontData s_fontStd, s_fontExt;
-        static inline stbtt_fontinfo s_stbFontStd, s_stbFontExt;
+        static inline stbtt_fontinfo s_stbFontStd, s_stbFontExt, s_stbFontMaterial;
 
         ViLayer m_layer;
         NWindow m_window;

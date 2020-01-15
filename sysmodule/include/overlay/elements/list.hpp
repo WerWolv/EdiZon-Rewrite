@@ -20,6 +20,9 @@
 #pragma once
 
 #include "overlay/elements/element.hpp"
+#include "overlay/elements/list_item.hpp"
+
+#include <vector>
 
 namespace edz::ovl::element {
 
@@ -30,8 +33,13 @@ namespace edz::ovl::element {
 
         Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
 
-        void draw(ovl::Screen *screen) override;
+        void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
+
+        void addItem(ListItem *listItem);
+
+    private:
+        std::vector<ListItem*> m_items;
     };
 
 }

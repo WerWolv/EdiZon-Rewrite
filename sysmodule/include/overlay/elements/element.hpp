@@ -24,13 +24,14 @@
 #include "overlay/screen.hpp"
 #include <memory>
 #include <utility>
+#include <cmath>
+
+enum class FocusDirection { NONE, UP, DOWN, LEFT, RIGHT };
 
 namespace edz::ovl::element {
     
     class Element {
     public:
-        enum class FocusDirection { NONE, UP, DOWN, LEFT, RIGHT };
-
         Element() { }
         virtual ~Element() { }
 
@@ -40,8 +41,12 @@ namespace edz::ovl::element {
             return false;
         }
 
-        virtual void draw(ovl::Screen *screen) = 0;
+        virtual void draw(ovl::Screen *screen, u16 x, u16 y) = 0;
         virtual void layout() = 0;
+
+        void frame(ovl::Screen *screen);
+
+        virtual void drawFocus(ovl::Screen *screen);
 
         void setParent(Element *parent) { this->m_parent = parent; }
         Element* getParent() { return this->m_parent; }
@@ -52,6 +57,9 @@ namespace edz::ovl::element {
         constexpr void setSize(u16 width, u16 height) { this->m_width = width; this->m_height = height; }
         constexpr std::pair<u16, u16> getSize() { return { this->m_width, this->m_height }; }
 
+        constexpr bool isFocused()  { return this->m_focused;  }
+        constexpr void focus()      { this->m_focused = true;  }
+        constexpr void unfocus()    { this->m_focused = false; }
 
     private:
         Element *m_parent = nullptr;

@@ -49,7 +49,7 @@ extern "C" {
 
     u32 __nx_applet_type = AppletType_None;
 
-    #define INNER_HEAP_SIZE 0x300000
+    #define INNER_HEAP_SIZE 0x200000
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
@@ -66,69 +66,71 @@ extern "C" {
         fake_heap_start = (char*)addr;
         fake_heap_end   = (char*)addr + size;
     }
+    
+
+    void __appInit(void) {
+        ams::hos::SetVersionForLibnx();
+
+        // Use ams::sm::DoWithSession instead of smInitialize so we're not unnecessarily using up a sm session
+        ams::sm::DoWithSession([] {
+            EResult res;
+
+            // Overlay focus requesting and main loop
+            ER_ASSERT_RESULT(appletInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
+            ER_ASSERT_RESULT(hidsysInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+            // Filesystem
+            ER_ASSERT_RESULT(fsInitialize(),     MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+
+            // Key presses
+            ER_ASSERT_RESULT(hidInitialize(),    MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+            // Running title information
+            ER_ASSERT(pmdmntInitialize());
+
+            // Temparature display
+            ER_ASSERT(tsInitialize());
+
+            // Nintendo Font
+            ER_ASSERT(plInitialize());
+
+            // Cheat toggling
+            ER_ASSERT(dmntcht::initialize());
+            ER_ASSERT(cheat::CheatManager::initialize());
+
+            // Overlay drawing
+            ER_ASSERT_RESULT(ovl::Screen::initialize(), edz::ResultEdzScreenInitFailed);
+
+            // Clock speed display
+            if (ams::hos::GetVersion() >= ams::hos::Version_800) {
+                ER_ASSERT(clkrstInitialize());
+            } else {
+                ER_ASSERT(pcvInitialize());
+            }
+
+        });
+
+        // SD card access
+        ER_ASSERT(fsdevMountSdmc());
+    }
+
+    void __appExit(void) {
+        appletExit();
+        hidsysExit();
+        fsExit();
+        hidExit();
+        pmdmntExit();
+        tsExit();
+        plExit();
+        dmntcht::exit();
+        cheat::CheatManager::exit();
+        ovl::Screen::exit();
+        clkrstExit();
+        pcvExit();
+    }
 
 }
 
-void __appInit(void) {
-    ams::hos::SetVersionForLibnx();
-
-    // Use ams::sm::DoWithSession instead of smInitialize so we're not unnecessarily using up a sm session
-    ams::sm::DoWithSession([] {
-        EResult res;
-
-        // Overlay focus requesting and main loop
-        ER_ASSERT_RESULT(appletInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
-        ER_ASSERT_RESULT(hidsysInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        // Filesystem
-        ER_ASSERT_RESULT(fsInitialize(),     MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
-
-        // Key presses
-        ER_ASSERT_RESULT(hidInitialize(),    MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        // Running title information
-        ER_ASSERT(pmdmntInitialize());
-
-        // Temparature display
-        ER_ASSERT(tsInitialize());
-
-        // Nintendo Font
-        ER_ASSERT(plInitialize());
-
-        // Cheat toggling
-        ER_ASSERT(dmntcht::initialize());
-        ER_ASSERT(cheat::CheatManager::initialize());
-
-        // Overlay drawing
-        ER_ASSERT_RESULT(ovl::Screen::initialize(), edz::ResultEdzScreenInitFailed);
-
-        // Clock speed display
-        if (ams::hos::GetVersion() >= ams::hos::Version_800) {
-            ER_ASSERT(clkrstInitialize());
-        } else {
-            ER_ASSERT(pcvInitialize());
-        }
-
-    });
-
-    // SD card access
-    ER_ASSERT(fsdevMountSdmc());
-}
-
-void __appExit(void) {
-    appletExit();
-    hidsysExit();
-    fsExit();
-    hidExit();
-    pmdmntExit();
-    tsExit();
-    plExit();
-    dmntcht::exit();
-    cheat::CheatManager::exit();
-    ovl::Screen::exit();
-    clkrstExit();
-    pcvExit();
-}
 
 
 struct SharedThreadData {
@@ -136,15 +138,15 @@ struct SharedThreadData {
     Event overlayComboEvent;
 
     std::atomic<u64> keysDown, keysHeld;
-    std::atomic<JoystickPosition> joyStickPositionLeft;
-    std::atomic<JoystickPosition> joyStickPositionRight;
-    std::atomic<touchPosition> touchPosition;
+    std::atomic<JoystickPosition> joyStickPosLeft;
+    std::atomic<JoystickPosition> joyStickPosRight;
+    std::atomic<u32> touchX, touchY;
 
 };
 
 // Joycon and touch inputs reader loop
 static void hidLoop(void *args) {
-    SharedThreadData *sharedThreadData = static_cast<SharedThreadData*>(args);
+    SharedThreadData *shData = static_cast<SharedThreadData*>(args);
 
     JoystickPosition tmpJoyStickPosition[2];
     touchPosition tmpTouchPosition;
@@ -154,24 +156,27 @@ static void hidLoop(void *args) {
         hidScanInput();
 
         // Read in touch positions
-        hidTouchRead(&tmpTouchPosition, 0);
-        
+        if (hidTouchCount() > 0)
+            hidTouchRead(&tmpTouchPosition, 0);
+
         // Read in joystick values
         hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
         hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
 
         {
-            sharedThreadData->keysDown        = hidKeysDown(CONTROLLER_HANDHELD);
-            sharedThreadData->keysHeld        = hidKeysHeld(CONTROLLER_HANDHELD);
-            sharedThreadData->touchPosition   = tmpTouchPosition;
+            shData->keysDown         = hidKeysDown(CONTROLLER_HANDHELD);
+            shData->keysHeld         = hidKeysHeld(CONTROLLER_HANDHELD);
 
-            sharedThreadData->joyStickPositionLeft  = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT];
-            sharedThreadData->joyStickPositionRight = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT];
+            shData->touchX           = tmpTouchPosition.px;
+            shData->touchY           = tmpTouchPosition.py;
+
+            shData->joyStickPosLeft  = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT];
+            shData->joyStickPosRight = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT];
         }
 
         // Detect overlay key-combo
-        if ((sharedThreadData->keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && sharedThreadData->keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
-            eventFire(&sharedThreadData->overlayComboEvent);
+        if ((shData->keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && shData->keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
+            eventFire(&shData->overlayComboEvent);
         
         // Sleep 20ms
         svcSleepThread(20E6); 
@@ -180,15 +185,15 @@ static void hidLoop(void *args) {
 
 // Overlay drawing loop
 static void ovlLoop(void *args) {
-    SharedThreadData *sharedThreadData = static_cast<SharedThreadData*>(args);
+    SharedThreadData *shData = static_cast<SharedThreadData*>(args);
 
     ovl::Screen *screen = new ovl::Screen();
     ovl::gui::Gui::init(screen);
 
     while (appletMainLoop()) {
         // Wait for the overlay key combo event to trigger
-        eventWait(&sharedThreadData->overlayComboEvent, U64_MAX);
-        eventClear(&sharedThreadData->overlayComboEvent);
+        eventWait(&shData->overlayComboEvent, U64_MAX);
+        eventClear(&shData->overlayComboEvent);
 
         //focusOverlay(true);
 
@@ -200,10 +205,14 @@ static void ovlLoop(void *args) {
 
         // Draw the overlay till the user closes the overlay
         while (true) {
-
-            ovl::gui::Gui::tick(sharedThreadData->keysDown, sharedThreadData->keysHeld, sharedThreadData->joyStickPositionLeft, sharedThreadData->joyStickPositionRight, sharedThreadData->touchPosition);
             
-            if (gui->shouldClose())
+            // Update and draw overlay
+            ovl::gui::Gui::tick();
+
+            // Handle button, joystick and touch input data
+            ovl::gui::Gui::hidUpdate(shData->keysDown, shData->keysHeld, shData->joyStickPosLeft, shData->joyStickPosRight, shData->touchX, shData->touchY);
+            
+            if (gui != nullptr && gui->shouldClose())
                 break;
 
             ovl::Screen::waitForVsync();
@@ -216,7 +225,7 @@ static void ovlLoop(void *args) {
        //focusOverlay(false);
 
        // Clear the key-combo event again in case the combination was pressed again while the overlay was open already
-        eventClear(&sharedThreadData->overlayComboEvent);
+        eventClear(&shData->overlayComboEvent);
     }
     
     ovl::gui::Gui::exit();
@@ -246,7 +255,7 @@ int main(int argc, char* argv[]) {
     
     g_serverManager.RegisterServer<edz::serv::EdzService>(SettingsServiceName, SettingsMaxSessions);
 
-    SharedThreadData sharedThreadData;
+    static SharedThreadData sharedThreadData;
 
     // Create an event 
     eventCreate(&sharedThreadData.overlayComboEvent, true);
@@ -260,6 +269,8 @@ int main(int argc, char* argv[]) {
 
     // We're done with all our work on the main thread. Go to sleep
     g_serverManager.LoopProcess();
+    while (true)
+        svcSleepThread(1E9);
 
     return 0;
 }

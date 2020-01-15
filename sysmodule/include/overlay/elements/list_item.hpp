@@ -21,17 +21,22 @@
 
 #include "overlay/elements/element.hpp"
 
+#include <string>
+
 namespace edz::ovl::element {
 
     class ListItem : public Element {
     public:
-        ListItem();
+        ListItem(std::string text);
         ~ListItem();
 
         Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
 
-        void draw(ovl::Screen *screen) override;
+        void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
+
+    private:
+        std::string m_text;
     };
 
 }
