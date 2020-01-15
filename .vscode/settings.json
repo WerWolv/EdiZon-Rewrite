@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "functional": "cpp",
+<<<<<<< Updated upstream
         "new": "cpp",
         "any": "cpp",
         "array": "cpp",
@@ -67,6 +68,9 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp"
+=======
+        "new": "cpp"
+>>>>>>> Stashed changes
     },
     "python.pythonPath": "/bin/python3.8",
     "java.configuration.updateBuildConfiguration": "automatic",

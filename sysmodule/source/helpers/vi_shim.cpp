@@ -22,10 +22,15 @@
 
 #include "helpers/vi_shim.hpp"
 
-Result viDestroyManagedLayer(u64 layer_id) {
-    const struct {
-        u64 layer_id;
-    } in = { .layer_id = layer_id };
+namespace edz::vi {
 
-    return serviceDispatchIn(viGetSession_IManagerDisplayService(), 2011, in);
+    Result destroyManagedLayer(u64 layer_id) {
+        const struct {
+            u64 layer_id;
+        } in = { .layer_id = layer_id };
+
+        return serviceDispatchIn(viGetSession_IManagerDisplayService(), 2011, in);
+    }
+
 }
+

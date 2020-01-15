@@ -43,7 +43,7 @@ namespace edz::dmntcht {
     }
 
     EResult getCheatProcessEvent(Event *event) {
-        Handle evt_handle;
+        Handle evt_handle = INVALID_HANDLE;
         EResult rc = serviceDispatch(&g_dmntchtSrv, 65001,
             .out_handle_attrs = { SfOutHandleAttr_HipcCopy },
             .out_handles = &evt_handle,

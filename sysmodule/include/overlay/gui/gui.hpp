@@ -36,8 +36,8 @@ namespace edz::ovl::gui {
         Gui();
         virtual ~Gui();
 
-        static void initialize(Screen *screen);
-        static void deinitialize();
+        static void init(Screen *screen);
+        static void exit();
 
         bool shouldClose();
 
@@ -53,7 +53,7 @@ namespace edz::ovl::gui {
             return Gui::s_currGui;
         }
 
-        static void tick(u64 keysDown, u64 keysHeld) {
+        static void tick(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPositions[2], touchPosition touchPos) {
             Gui::s_frameCount++;
 
             if (Gui::s_nextGui != nullptr) {

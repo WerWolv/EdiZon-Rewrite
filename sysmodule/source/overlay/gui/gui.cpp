@@ -14,11 +14,11 @@ namespace edz::ovl::gui {
 
     }
 
-    void Gui::initialize(Screen *screen) {
+    void Gui::init(Screen *screen) {
         Gui::s_screen = screen;
     }
 
-    void Gui::deinitialize() {
+    void Gui::exit() {
         if (Gui::s_currGui != nullptr)
             delete Gui::s_currGui;
     }

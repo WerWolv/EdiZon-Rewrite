@@ -22,6 +22,7 @@
 
 namespace edz::serv {
 
+    using namespace ams;
     class EdzService final : public ams::sf::IServiceObject {
         private:
             enum class CommandId {

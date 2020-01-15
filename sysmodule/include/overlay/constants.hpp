@@ -35,14 +35,14 @@
 
 #define LAYER_WIDTH  (SCREEN_HEIGHT * FB_WIDTH / FB_HEIGHT)
 #define LAYER_HEIGHT SCREEN_HEIGHT
-#define LAYER_X      0.0f
-#define LAYER_Y      0.0f
+#define LAYER_X      0.0F
+#define LAYER_Y      0.0F
 
 #define TS_LAYER_WIDTH  (LAYER_WIDTH  * TS_WIDTH  / SCREEN_WIDTH)
 #define TS_LAYER_HEIGHT (LAYER_HEIGHT * TS_HEIGHT / SCREEN_HEIGHT)
 #define TS_LAYER_X      (LAYER_X      * TS_WIDTH  / SCREEN_WIDTH)
 #define TS_LAYER_Y      (LAYER_Y      * TS_HEIGHT / SCREEN_HEIGHT)
 
-#define BPP sizeof(rgb565_t)
+#define BPP sizeof(rgb4444_t)
 
 #define DEFAULT_FONT_HEIGHT 16

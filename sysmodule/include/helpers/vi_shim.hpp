@@ -22,4 +22,8 @@
 
 #include <switch.h>
 
-Result viDestroyManagedLayer(u64 layer_id);
+namespace edz::vi {
+
+    Result destroyManagedLayer(u64 layerId);
+
+}

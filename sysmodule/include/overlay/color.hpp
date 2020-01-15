@@ -20,48 +20,44 @@
 
 #pragma once
 
+#include <edizon.hpp>
+
 #include <cstdint>
 #include <utility>
 #include <type_traits>
-
-#include "overlay/utils.hpp"
 
 namespace edz::ovl {
 
     struct rgb565_t {
         union {
             struct {
-                uint16_t r: 5, g: 6, b: 5;
-            } __attribute__((packed));
-            uint16_t rgb;
+                u16 r: 5, g: 6, b: 5;
+            } PACKED;
+            u16 rgb;
         };
-        inline rgb565_t(uint16_t raw): rgb(raw) { }
-        inline rgb565_t(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) { }
+        inline rgb565_t(u16 raw): rgb(raw) { }
+        inline rgb565_t(u8 r, u8 g, u8 b): r(r), g(g), b(b) { }
     };
-    ASSERT_SIZE(rgb565_t, 2);
-    ASSERT_STANDARD_LAYOUT(rgb565_t);
 
     struct rgba4444_t {
         union {
             struct {
-                uint16_t r: 4, g: 4, b: 4, a: 4;
-            } __attribute__((packed));
-            uint16_t rgba;
+                u16 r: 4, g: 4, b: 4, a: 4;
+            } PACKED;
+            u16 rgba;
         };
-        inline rgba4444_t(uint16_t raw): rgba(raw) { }
-        inline rgba4444_t(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) { }
+        inline rgba4444_t(u16 raw): rgba(raw) { }
+        inline rgba4444_t(u8 r, u8 g, u8 b, u8 a): r(r), g(g), b(b), a(a) { }
     };
-    ASSERT_SIZE(rgba4444_t, 2);
-    ASSERT_STANDARD_LAYOUT(rgba4444_t);
 
     template<typename T, typename=void>
-    struct has_alpha : std::false_type { };
+    struct hasAlpha : std::false_type { };
 
     template<typename T>
-    struct has_alpha<T, decltype(std::declval<T>().a, void())> : std::true_type { };
+    struct hasAlpha<T, decltype(std::declval<T>().a, void())> : std::true_type { };
 
     template<typename T>
-    inline constexpr bool has_alpha_v = has_alpha<T>::value;
+    inline constexpr bool hasAlpha_v = hasAlpha<T>::value;
 
     template<typename T>
     struct col_underlying_type { using type = decltype(T::r); };
@@ -75,44 +71,22 @@ namespace edz::ovl {
     }
 
     template<typename T>
-    typename std::enable_if_t<!has_alpha_v<T>, T>
+    typename std::enable_if_t<!hasAlpha_v<T>, T>
     inline makeColor(decltype(T::r) r, decltype(T::g) g, decltype(T::b) b) {
         return T(r, g, b);
     }
 
     template<typename T>
-    typename std::enable_if_t<has_alpha_v<T>, T>
+    typename std::enable_if_t<hasAlpha_v<T>, T>
     inline makeColor(decltype(T::r) r, decltype(T::g) g, decltype(T::b) b, decltype(T::a) a=-1) {
         return T(r, g, b, a);
     }
 
-    template<typename T>
-    typename std::enable_if_t<!has_alpha_v<T>, T>
-    inline make_color_min_alpha() {
-        return makeColor<T>(0, 0, 0);
-    }
+    #define BLEND_CHANNEL(x, y, a) (((a) * (x) + ((0xFF - (a)) * (y))) / 0xFF)
 
     template<typename T>
-    typename std::enable_if_t<has_alpha_v<T>, T>
-    inline make_color_min_alpha() {
-        return makeColor<T>(0, 0, 0, 0);
-    }
-
-    template<typename T>
-    inline T make_color_max_alpha(decltype(T::r) r, decltype(T::g) g, decltype(T::b) b) {
-        return makeColor<T>(r, g, b);
-    }
-
-    template<typename T>
-    inline T make_color_max_all() {
-        return makeColor<T>(-1, -1, -1);
-    }
-
-    #define BLEND_CHANNEL(x, y, a) (((a) * (x) + ((0xff - (a)) * (y))) / 0xff)
-
-    template<typename T>
-    typename std::enable_if_t<!has_alpha_v<T>, T>
-    inline blend(T x, T y, uint8_t alpha) {
+    typename std::enable_if_t<!hasAlpha_v<T>, T>
+    inline blend(T x, T y, u8 alpha) {
         return makeColor<T>(
             BLEND_CHANNEL(x.r, y.r, alpha),
             BLEND_CHANNEL(x.g, y.g, alpha),
@@ -121,8 +95,8 @@ namespace edz::ovl {
     }
 
     template<typename T>
-    typename std::enable_if_t<has_alpha_v<T>, T>
-    inline blend(T x, T y, uint8_t alpha) {
+    typename std::enable_if_t<hasAlpha_v<T>, T>
+    inline blend(T x, T y, u8 alpha) {
         return makeColor<T>(
             BLEND_CHANNEL(x.r, y.r, alpha),
             BLEND_CHANNEL(x.g, y.g, alpha),

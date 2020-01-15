@@ -34,13 +34,11 @@
 
 #include <stdio.h>
 #include <array>
+#include <mutex>
 #include <thread>
 #include <atomic>
 
 using namespace edz;
-
-static Event s_overlayComboEvent;
-static std::atomic<u64> s_keysDown, s_keysHeld;
 
 namespace ams::result {
     bool CallFatalOnResultAssertion = false;
@@ -56,11 +54,6 @@ extern "C" {
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
     u32 __nx_nv_transfermem_size = 0x15000;
-
-
-    void __libnx_exception_handler(ThreadExceptionDump *ctx) {
-        ams::CrashHandler(ctx);
-    }
 
     void __libnx_initheap(void) {
         void*  addr = nx_inner_heap;
@@ -137,21 +130,40 @@ void __appExit(void) {
     pcvExit();
 }
 
+
+static Event s_overlayComboEvent;
+static std::mutex s_hidMutex;
+
+static u64 s_keysDown, s_keysHeld;
+static JoystickPosition s_joyStickPosition[2];
+static touchPosition s_touchPosition;
+
 // Joycon and touch inputs reader loop
 static void hidLoop(void *args) {
-    JoystickPosition joyStickPos[2] = { 0 };
-    touchPosition touchPos = { 0 };
+    JoystickPosition tmpJoyStickPosition[2];
+    touchPosition tmpTouchPosition;
 
     while (appletMainLoop()) {
         // Scan for button presses
         hidScanInput();
 
-        // Read in joystick values, touch input and key presses
-        hidJoystickRead(&joyStickPos[0], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
-        hidJoystickRead(&joyStickPos[1], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
-        hidTouchRead(&touchPos, 0);
-        ::s_keysDown = hidKeysDown(CONTROLLER_HANDHELD);
-        ::s_keysHeld = hidKeysHeld(CONTROLLER_HANDHELD);
+        // Read in touch positions
+        hidTouchRead(&tmpTouchPosition, 0);
+        
+        // Read in joystick values
+        hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
+        hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
+
+        {
+            std::scoped_lock lock(::s_hidMutex);
+
+            ::s_keysDown        = hidKeysDown(CONTROLLER_HANDHELD);
+            ::s_keysHeld        = hidKeysHeld(CONTROLLER_HANDHELD);
+            ::s_touchPosition   = tmpTouchPosition;
+
+            ::s_joyStickPosition[HidControllerJoystick::JOYSTICK_LEFT]  = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT];
+            ::s_joyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT] = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT];
+        }
 
         // Detect overlay key-combo
         if ((::s_keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && ::s_keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
@@ -165,7 +177,7 @@ static void hidLoop(void *args) {
 // Overlay drawing loop
 static void ovlLoop(void *args) {
     ovl::Screen *screen = new ovl::Screen();
-    ovl::gui::Gui::initialize(screen);
+    ovl::gui::Gui::init(screen);
 
     while (appletMainLoop()) {
         // Wait for the overlay key combo event to trigger
@@ -182,7 +194,12 @@ static void ovlLoop(void *args) {
 
         // Draw the overlay till the user closes the overlay
         while (true) {
-            ovl::gui::Gui::tick(0, 0);
+
+            {
+                std::scoped_lock lock(::s_hidMutex);
+
+                ovl::gui::Gui::tick(::s_keysDown, ::s_keysHeld, ::s_joyStickPosition, ::s_touchPosition);
+            }
             
             if (gui->shouldClose())
                 break;
@@ -199,13 +216,35 @@ static void ovlLoop(void *args) {
        // Clear the key-combo event again in case the combination was pressed again while the overlay was open already
         eventClear(&::s_overlayComboEvent);
     }
-
-    ovl::gui::Gui::deinitialize();
+    
+    ovl::gui::Gui::exit();
+    delete screen;
 }
+
+
+namespace {
+
+    using ServerOptions = ams::sf::hipc::DefaultServerManagerOptions;
+
+    constexpr ams::sm::ServiceName  SettingsServiceName = ams::sm::ServiceName::Encode("edz:set");
+    constexpr size_t                SettingsMaxSessions = 3;
+
+    constexpr size_t NumServers  = 1;
+    constexpr size_t MaxSessions = SettingsMaxSessions + 1;
+
+    ams::sf::hipc::ServerManager<NumServers, ServerOptions, MaxSessions> g_serverManager;
+
+}
+
+using namespace ams;
+
 
 int main(int argc, char* argv[]) {
     ams::os::Thread hidThread, ovlThread;
     
+    g_serverManager.RegisterServer<edz::serv::EdzService>(SettingsServiceName, SettingsMaxSessions);
+
+
     // Create an event 
     eventCreate(&::s_overlayComboEvent, true);
 

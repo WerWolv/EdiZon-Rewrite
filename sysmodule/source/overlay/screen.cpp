@@ -86,7 +86,8 @@ namespace edz::ovl {
             if (EResult(res = framebufferCreate(&this->m_frameBufferObject, &this->m_window, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_4444, 2)).failed())
                 goto closeWindow;
 
-            initFont();
+            if (initFont().failed())
+                goto closeWindow;
 
             return;
 
@@ -98,7 +99,7 @@ namespace edz::ovl {
                     viCloseLayer(&this->m_layer);
                 closeManagedLayer:
                     layerId = (layerId == 0) ? this->m_layer.layer_id : layerId;
-                    viDestroyManagedLayer(layerId);
+                    vi::destroyManagedLayer(layerId);
                 fatal:
                     Screen::exit();
                     fatalThrow(res);
@@ -113,8 +114,21 @@ namespace edz::ovl {
         framebufferClose(&this->m_frameBufferObject);
         nwindowClose(&this->m_window);
         viCloseLayer(&this->m_layer);
-        viDestroyManagedLayer(layerId);
+        vi::destroyManagedLayer(layerId);
     }
+
+    EResult Screen::initFont() {
+        ER_TRY(plGetSharedFontByType(&Screen::s_fontStd, PlSharedFontType_Standard));
+        ER_TRY(plGetSharedFontByType(&Screen::s_fontExt, PlSharedFontType_NintendoExt));
+
+        u8 *fontBuffer = reinterpret_cast<u8*>(Screen::s_fontStd.address);
+        stbtt_InitFont(&Screen::s_stbFontStd, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+        fontBuffer = reinterpret_cast<u8*>(Screen::s_fontExt.address);
+        stbtt_InitFont(&Screen::s_stbFontExt, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+
+        return ResultSuccess;
+    }
+
 
     void *Screen::getCurFramebuffer() {
         if (!this->m_frameBuffer)
@@ -130,6 +144,7 @@ namespace edz::ovl {
         this->m_frameBuffer = nullptr;
     }
 
+
     void Screen::clear() {
         Screen::fillScreen(0x0000);
     }
@@ -142,6 +157,7 @@ namespace edz::ovl {
         Screen::fillScreen(color.rgba);
     }
 
+
     void Screen::drawRect(s32 x, s32 y, s32 w, s32 h, u16 color) {
         for (s32 x1 = x; x1 < (x + w); x1++)
             for (s32 y1 = y; y1 < (y + h); y1++)
@@ -153,6 +169,7 @@ namespace edz::ovl {
             for (s32 y1 = y; y1 < (y + h); y1++)
                 Screen::setPixel(x1, y1, color.rgba);
     }
+
 
     void Screen::mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 *area) {
         for (s32 y = y1; y < y2; y++) {
@@ -167,17 +184,6 @@ namespace edz::ovl {
                 Screen::setPixel(x, y, (*(area++)).rgba);
     }
 
-    EResult Screen::initFont() {
-        ER_TRY(plGetSharedFontByType(&Screen::s_fontStd, PlSharedFontType_Standard));
-        ER_TRY(plGetSharedFontByType(&Screen::s_fontExt, PlSharedFontType_NintendoExt));
-
-        u8 *fontBuffer = reinterpret_cast<u8*>(Screen::s_fontStd.address);
-        stbtt_InitFont(&Screen::s_stbFontStd, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
-        fontBuffer = reinterpret_cast<u8*>(Screen::s_fontExt.address);
-        stbtt_InitFont(&Screen::s_stbFontExt, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
-
-        return ResultSuccess;
-    }
 
     void Screen::drawGlyph(u32 codepoint, u32 x, u32 y, rgba4444_t color, stbtt_fontinfo *font, float fontSize) {
         int width = 0, height = 0;
@@ -241,8 +247,6 @@ namespace edz::ovl {
             currX += xAdvance * fontSize;
             
         } while (i < stringLength);
-    }
-
-    
+    } 
 
 }
