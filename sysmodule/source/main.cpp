@@ -131,15 +131,21 @@ void __appExit(void) {
 }
 
 
-static Event s_overlayComboEvent;
-static std::mutex s_hidMutex;
+struct SharedThreadData {
 
-static u64 s_keysDown, s_keysHeld;
-static JoystickPosition s_joyStickPosition[2];
-static touchPosition s_touchPosition;
+    Event overlayComboEvent;
+
+    std::atomic<u64> keysDown, keysHeld;
+    std::atomic<JoystickPosition> joyStickPositionLeft;
+    std::atomic<JoystickPosition> joyStickPositionRight;
+    std::atomic<touchPosition> touchPosition;
+
+};
 
 // Joycon and touch inputs reader loop
 static void hidLoop(void *args) {
+    SharedThreadData *sharedThreadData = static_cast<SharedThreadData*>(args);
+
     JoystickPosition tmpJoyStickPosition[2];
     touchPosition tmpTouchPosition;
 
@@ -155,19 +161,17 @@ static void hidLoop(void *args) {
         hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
 
         {
-            std::scoped_lock lock(::s_hidMutex);
+            sharedThreadData->keysDown        = hidKeysDown(CONTROLLER_HANDHELD);
+            sharedThreadData->keysHeld        = hidKeysHeld(CONTROLLER_HANDHELD);
+            sharedThreadData->touchPosition   = tmpTouchPosition;
 
-            ::s_keysDown        = hidKeysDown(CONTROLLER_HANDHELD);
-            ::s_keysHeld        = hidKeysHeld(CONTROLLER_HANDHELD);
-            ::s_touchPosition   = tmpTouchPosition;
-
-            ::s_joyStickPosition[HidControllerJoystick::JOYSTICK_LEFT]  = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT];
-            ::s_joyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT] = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT];
+            sharedThreadData->joyStickPositionLeft  = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT];
+            sharedThreadData->joyStickPositionRight = tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT];
         }
 
         // Detect overlay key-combo
-        if ((::s_keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && ::s_keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
-            eventFire(&::s_overlayComboEvent);
+        if ((sharedThreadData->keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && sharedThreadData->keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
+            eventFire(&sharedThreadData->overlayComboEvent);
         
         // Sleep 20ms
         svcSleepThread(20E6); 
@@ -176,13 +180,15 @@ static void hidLoop(void *args) {
 
 // Overlay drawing loop
 static void ovlLoop(void *args) {
+    SharedThreadData *sharedThreadData = static_cast<SharedThreadData*>(args);
+
     ovl::Screen *screen = new ovl::Screen();
     ovl::gui::Gui::init(screen);
 
     while (appletMainLoop()) {
         // Wait for the overlay key combo event to trigger
-        eventWait(&::s_overlayComboEvent, U64_MAX);
-        eventClear(&::s_overlayComboEvent);
+        eventWait(&sharedThreadData->overlayComboEvent, U64_MAX);
+        eventClear(&sharedThreadData->overlayComboEvent);
 
         //focusOverlay(true);
 
@@ -195,11 +201,7 @@ static void ovlLoop(void *args) {
         // Draw the overlay till the user closes the overlay
         while (true) {
 
-            {
-                std::scoped_lock lock(::s_hidMutex);
-
-                ovl::gui::Gui::tick(::s_keysDown, ::s_keysHeld, ::s_joyStickPosition, ::s_touchPosition);
-            }
+            ovl::gui::Gui::tick(sharedThreadData->keysDown, sharedThreadData->keysHeld, sharedThreadData->joyStickPositionLeft, sharedThreadData->joyStickPositionRight, sharedThreadData->touchPosition);
             
             if (gui->shouldClose())
                 break;
@@ -214,7 +216,7 @@ static void ovlLoop(void *args) {
        //focusOverlay(false);
 
        // Clear the key-combo event again in case the combination was pressed again while the overlay was open already
-        eventClear(&::s_overlayComboEvent);
+        eventClear(&sharedThreadData->overlayComboEvent);
     }
     
     ovl::gui::Gui::exit();
@@ -244,20 +246,20 @@ int main(int argc, char* argv[]) {
     
     g_serverManager.RegisterServer<edz::serv::EdzService>(SettingsServiceName, SettingsMaxSessions);
 
+    SharedThreadData sharedThreadData;
 
     // Create an event 
-    eventCreate(&::s_overlayComboEvent, true);
+    eventCreate(&sharedThreadData.overlayComboEvent, true);
 
     // Setup and start the key-combo scanner and the overlay render thread
-    hidThread.Initialize(hidLoop, nullptr, 0x500, 0x2C);
-    ovlThread.Initialize(ovlLoop, nullptr, 0x3000, 0x2C);
+    hidThread.Initialize(hidLoop, &sharedThreadData, 0x500, 0x2C);
+    ovlThread.Initialize(ovlLoop, &sharedThreadData, 0x3000, 0x2C);
 
     hidThread.Start();
     ovlThread.Start();
 
     // We're done with all our work on the main thread. Go to sleep
-    while (true)
-        svcSleepThread(10'000'000);
+    g_serverManager.LoopProcess();
 
     return 0;
 }

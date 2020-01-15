@@ -53,7 +53,7 @@ namespace edz::ovl::gui {
             return Gui::s_currGui;
         }
 
-        static void tick(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPositions[2], touchPosition touchPos) {
+        static void tick(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPosLeft, JoystickPosition joyStickPosRight, touchPosition touchPos) {
             Gui::s_frameCount++;
 
             if (Gui::s_nextGui != nullptr) {
