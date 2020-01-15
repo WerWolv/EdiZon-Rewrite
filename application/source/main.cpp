@@ -37,8 +37,7 @@
 
 using namespace edz;
 
-EResult initServices()
-{
+EResult initServices() {
     // Already initialized by Borealis but also used in EdiZon: romfs, sockets, pl and set:sys
 
     // Initialize Borealis (UI library)
@@ -63,12 +62,9 @@ EResult initServices()
     ER_TRY(pctlInitialize());
 
     // Overclock
-    if (hosversionBefore(8, 0, 0))
-    {
+    if (hosversionBefore(8, 0, 0)) {
         ER_TRY(pcvInitialize());
-    }
-    else
-    {
+    } else {
         ER_TRY(clkrstInitialize());
     }
 
@@ -91,8 +87,7 @@ EResult initServices()
     ER_TRY(splInitialize());
 
     // Atmosphere cheat service (Cheat toggling and memory editing)
-    if (cheat::CheatManager::isCheatServiceAvailable())
-    {
+    if (cheat::CheatManager::isCheatServiceAvailable()) {
         dmntcht::initialize();
         cheat::CheatManager::initialize();
     }
@@ -100,8 +95,7 @@ EResult initServices()
     return ResultSuccess;
 }
 
-void exitServices()
-{
+void exitServices() {
     // Cleaned up by Borealis: romfs, sockets, pl and set:sys
 
     curl_global_cleanup();
@@ -123,8 +117,7 @@ void exitServices()
     brls::Application::quit();
 }
 
-EResult createFolderStructure()
-{
+EResult createFolderStructure() {
     std::string paths[] = {
         EDIZON_BACKUP_DIR,
         EDIZON_BATCH_BACKUP_DIR,
@@ -135,8 +128,7 @@ EResult createFolderStructure()
         EDIZON_CHEATS_DIR,
         EDIZON_TMP_DIR};
 
-    for (auto path : paths)
-    {
+    for (auto path : paths) {
         hlp::Folder folder(path);
         ER_TRY(folder.createDirectories());
     }
@@ -144,13 +136,11 @@ EResult createFolderStructure()
     return ResultSuccess;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     brls::Logger::setLogLevel(VERBOSE_LOG_OUTPUT ? brls::LogLevel::DEBUG : brls::LogLevel::ERROR);
 
     // Try to initialize all services
-    if (EResult res = initServices(); res.failed())
-    {
+    if (EResult res = initServices(); res.failed()) {
         ui::Gui::fatal("edz.fatal.service.init"_lang + res.getString());
 
         exitServices();
@@ -158,8 +148,7 @@ int main(int argc, char *argv[])
     }
 
     // Create folder structure
-    if (EResult res = createFolderStructure(); res.failed())
-    {
+    if (EResult res = createFolderStructure(); res.failed()) {
         ui::Gui::fatal("edz.fatal.folder_structure.init"_lang);
 
         exitServices();
@@ -197,8 +186,7 @@ int main(int argc, char *argv[])
     hlp::BackgroundTasks backgroundTasks;
 
     // Main loop for UI
-    while (brls::Application::mainLoop() && appletMainLoop())
-    {
+    while (brls::Application::mainLoop() && appletMainLoop()) {
         ui::Gui::tick();
     }
 

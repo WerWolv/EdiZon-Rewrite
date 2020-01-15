@@ -102,7 +102,7 @@ namespace edz::cheat::types {
     public:
         Value() : m_value(nullptr), m_size(0), m_type(DataType::INVALID), m_copied(false) { }
 
-        Value(void *value, DataType type, bool copy = false) : m_type(type), m_size(type.getSize()), m_copied(copy) {
+        Value(void *value, DataType type, bool copy = false) : m_size(type.getSize()), m_type(type), m_copied(copy) {
             if (copy) {
                 this->m_value = new u8[type.getSize()];
                 

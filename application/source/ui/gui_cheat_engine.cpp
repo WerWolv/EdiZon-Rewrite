@@ -320,7 +320,7 @@ namespace edz::ui {
                 this->handleSearchOperation(this->m_regions, this->m_operation, this->m_value[0]);
 
                 hlp::File foundAddressesFile(EDIZON_BASE_DIR "/found_addrs.bin");
-                size_t size = foundAddressesFile.write(reinterpret_cast<u8*>(&cheat::CheatEngine::getFoundAddresses()[0]), cheat::CheatEngine::getFoundAddresses().size() * sizeof(addr_t));
+                foundAddressesFile.write(reinterpret_cast<u8*>(&cheat::CheatEngine::getFoundAddresses()[0]), cheat::CheatEngine::getFoundAddresses().size() * sizeof(addr_t));
 
                 appletSetMediaPlaybackState(false);
             }, "Searching memory. This might take a while...");

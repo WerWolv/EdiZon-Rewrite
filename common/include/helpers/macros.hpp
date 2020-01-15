@@ -20,6 +20,11 @@
 #pragma once
 
 #define ER_TRY(x) { if (EResult res = x; ::edz::EResult(res).failed()) return res; }
+#define ER_TRY_RESULT(x, result) { if (EResult res = x; ::edz::EResult(res).failed()) return result; }
+
+#define ER_ASSERT(x) { if (EResult res = x; ::edz::EResult(res).failed()) fatalThrow(res); }
+#define ER_ASSERT_RESULT(x, result) { if (EResult res = x; ::edz::EResult(res).failed()) fatalThrow(result); }
+
 
 #define PRINT_DEBUG(x, ...) printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 
