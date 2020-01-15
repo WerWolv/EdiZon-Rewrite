@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 WerWolv
+ * Copyright (C) 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -19,25 +19,19 @@
 
 #pragma once
 
-#include "overlay/gui.hpp"
-#include <thread>
-#include <vector>
+#include "overlay/elements/element.hpp"
 
-namespace edz::ovl {
+namespace edz::ovl::element {
 
-    class GuiMain : public Gui {
+    class ListItem : public Element {
     public:
-        GuiMain();
-        ~GuiMain();
+        ListItem();
+        ~ListItem();
 
-        void createUI() override;
-        void update() override;
+        Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
 
-    private:
-        lv_obj_t *m_titleLabel = nullptr;
-        lv_obj_t *m_menuList = nullptr;
-        lv_obj_t *m_cpuInfoLabel = nullptr;
-        lv_obj_t *m_footerLine = nullptr;
+        void draw(ovl::Screen *screen) override;
+        void layout() override;
     };
 
 }

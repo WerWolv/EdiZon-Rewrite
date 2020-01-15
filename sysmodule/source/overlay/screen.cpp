@@ -23,102 +23,97 @@
 #include <cstring>
 #include <algorithm>
 
+#include <stratosphere.hpp>
+
 #include "overlay/constants.hpp"
 #include "overlay/color.hpp"
 #include "helpers/vi_shim.hpp"
 
 #include "overlay/screen.hpp"
 
+
+#define STBTT_STATIC
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "overlay/stb_truetype.h"
+
+
 extern "C" u64 __nx_vi_layer_id;
 
 namespace edz::ovl {
 
-    EResult Screen::initialize() {
-        EResult res = 0;
+    EResult Screen::initialize() {        
+        ER_ASSERT(viInitialize(ViServiceType_Manager));           
+        ER_ASSERT(viOpenDefaultDisplay(&Screen::s_display));
+        ER_ASSERT(viGetDisplayVsyncEvent(&Screen::s_display, &Screen::s_vsyncEvent));
 
-        if (EResult(res = viInitialize(ViServiceType_Manager)).failed())
-            goto end;
-
-        if (EResult(res = viOpenDefaultDisplay(&Screen::g_display)).failed())
-            goto close_serv;
-
-        if (EResult(res = viGetDisplayVsyncEvent(&Screen::g_display, &Screen::g_vsyncEvent)).failed())
-            goto close_display;
-
-        goto end;
-
-    close_display:
-        viCloseDisplay(&Screen::g_display);
-    close_serv:
-        viExit();
-    end:
-
-        return res;
+        return ResultSuccess;
     }
 
     void Screen::exit() {
-
-        eventClose(&Screen::g_vsyncEvent);
-        viCloseDisplay(&Screen::g_display);
+        eventClose(&Screen::s_vsyncEvent);
+        viCloseDisplay(&Screen::s_display);
         viExit();
     }
 
     Screen::Screen() {
+        ams::sm::DoWithSession([this] {
+            EResult res = 0;
+            u64 layerId = 0;
+            s32 layerZ = 0;
 
-        EResult res = 0;
-        u64 layer_id = 0;
+            if (EResult(res = viCreateManagedLayer(&Screen::s_display, (ViLayerFlags)0, 0, &__nx_vi_layer_id)).failed())
+                goto fatal;
 
-        if (EResult(res = viCreateManagedLayer(&Screen::g_display, (ViLayerFlags)0, 0, &__nx_vi_layer_id)).failed())
-            goto fatal;
+            if (EResult(res = viCreateLayer(&Screen::s_display, &this->m_layer)).failed())
+                goto closeManagedLayer;
 
-        if (EResult(res = viCreateLayer(&Screen::g_display, &this->m_layer)).failed())
-            goto close_managed_layer;
+            if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_PreserveAspectRatio)).failed())
+                goto closeLayer;
 
-        if (EResult(res = viSetLayerScalingMode(&this->m_layer, ViScalingMode_PreserveAspectRatio)).failed())
-            goto close_layer;
+            if (EResult(res = viGetZOrderCountMax(&Screen::s_display, &layerZ)).succeeded() && (layerZ > 0))
+                if (EResult(res = viSetLayerZ(&this->m_layer, layerZ)).failed())
+                    goto closeLayer;
 
-        s32 layer_z;
-        if (EResult(res = viGetZOrderCountMax(&Screen::g_display, &layer_z)).succeeded() && (layer_z > 0)) {
-            if (EResult(res = viSetLayerZ(&this->m_layer, layer_z)).failed())
-                goto close_layer;
-        }
+            if (EResult(res = viSetLayerSize(&this->m_layer, LAYER_WIDTH, LAYER_HEIGHT)).failed())
+                goto closeLayer;
 
-        if (EResult(res = viSetLayerSize(&this->m_layer, LAYER_WIDTH, LAYER_HEIGHT)).failed())
-            goto close_layer;
+            if (EResult(res = viSetLayerPosition(&this->m_layer, LAYER_X, LAYER_Y)).failed())
+                goto closeLayer;
 
-        if (EResult(res = viSetLayerPosition(&this->m_layer, LAYER_X, LAYER_Y)).failed())
-            goto close_layer;
+            if (EResult(res = nwindowCreateFromLayer(&this->m_window, &this->m_layer)).failed())
+                goto closeLayer;
 
-        if (EResult(res = nwindowCreateFromLayer(&this->m_window, &this->m_layer)).failed())
-            goto close_layer;
+            if (EResult(res = framebufferCreate(&this->m_frameBufferObject, &this->m_window, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_4444, 2)).failed())
+                goto closeWindow;
 
-        if (EResult(res = framebufferCreate(&this->m_frameBufferObject, &this->m_window, FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_4444, 2)).failed())
-            goto close_window;
+            initFont();
 
-        return;
+            return;
 
-    close_window:
-        nwindowClose(&this->m_window);
-    close_layer:
-        layer_id = this->m_layer.layer_id;
-        viCloseLayer(&this->m_layer);
-    close_managed_layer:
-        layer_id = (layer_id == 0) ? this->m_layer.layer_id : layer_id;
-        viDestroyManagedLayer(layer_id);
-    fatal:
-        exit();
-
-        fatalThrow(res);
+            {
+                closeWindow:
+                    nwindowClose(&this->m_window);
+                closeLayer:
+                    layerId = this->m_layer.layer_id;
+                    viCloseLayer(&this->m_layer);
+                closeManagedLayer:
+                    layerId = (layerId == 0) ? this->m_layer.layer_id : layerId;
+                    viDestroyManagedLayer(layerId);
+                fatal:
+                    Screen::exit();
+                    fatalThrow(res);
+            }
+        });
     }
 
     Screen::~Screen() {
+        Screen::flush();
+        u64 layerId = this->m_layer.layer_id;
 
-        flush();
         framebufferClose(&this->m_frameBufferObject);
         nwindowClose(&this->m_window);
-        u64 layer_id = this->m_layer.layer_id; // viCloseLayer zeroes it out
         viCloseLayer(&this->m_layer);
-        viDestroyManagedLayer(layer_id);
+        viDestroyManagedLayer(layerId);
     }
 
     void *Screen::getCurFramebuffer() {
@@ -128,109 +123,126 @@ namespace edz::ovl {
     }
 
     void Screen::flush() {
-        // Make sure a buffer is dequeued, and report modifications on the second buffer
         std::memcpy(getNextFramebuffer(), getCurFramebuffer(), getFramebufferSize());
+        Screen::waitForVsync();
+
         framebufferEnd(&this->m_frameBufferObject);
-        this->m_frameBuffer = nullptr; // Wait for vsync before dequeing a buffer
+        this->m_frameBuffer = nullptr;
     }
 
     void Screen::clear() {
-        fill((u16)0);
+        Screen::fillScreen(0x0000);
     }
 
-    void Screen::fill(u16 color) {
-        std::fill((u16 *)getCurFramebuffer(), (u16 *)((u8 *)getCurFramebuffer()+getFramebufferSize()), color);
+    void Screen::fillScreen(u16 color) {
+        std::fill(static_cast<u16*>(getCurFramebuffer()), reinterpret_cast<u16*>((static_cast<u8*>(getCurFramebuffer()) + getFramebufferSize())), color);
     }
 
-    void Screen::fill(rgba4444_t color) {
-        fill(color.rgba);
+    void Screen::fillScreen(rgba4444_t color) {
+        Screen::fillScreen(color.rgba);
     }
 
-    void Screen::fillArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 color) {
-        for (s32 y=y1; y<y2; ++y) {
-            for (s32 x=x1; x<x2; ++x)
-                setPixel(x, y, color);
-        }
+    void Screen::drawRect(s32 x, s32 y, s32 w, s32 h, u16 color) {
+        for (s32 x1 = x; x1 < (x + w); x1++)
+            for (s32 y1 = y; y1 < (y + h); y1++)
+                Screen::setPixel(x1, y1, color);
     }
 
-    void Screen::fillArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t color) {
-        for (s32 y=y1; y<y2; ++y) {
-            for (s32 x=x1; x<x2; ++x)
-                setPixel(x, y, color.rgba);
-        }
+    void Screen::drawRect(s32 x, s32 y, s32 w, s32 h, rgba4444_t color) {
+        for (s32 x1 = x; x1 < (x + w); x1++)
+            for (s32 y1 = y; y1 < (y + h); y1++)
+                Screen::setPixel(x1, y1, color.rgba);
     }
 
     void Screen::mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 *area) {
-        for (s32 y=y1; y<y2; ++y) {
-            for (s32 x=x1; x<x2; ++x)
-                setPixel(x, y, *(area++));
+        for (s32 y = y1; y < y2; y++) {
+            for (s32 x = x1; x < x2; x++)
+                Screen::setPixel(x, y, *(area++));
         }
     }
 
     void Screen::mapArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t *area) {
-        for (s32 y=y1; y<y2; ++y) {
-            for (s32 x=x1; x<x2; ++x)
-                setPixel(x, y, (*(area++)).rgba);
-        }
+        for (s32 y = y1; y < y2; y++)
+            for (s32 x = x1; x < x2; x++)
+                Screen::setPixel(x, y, (*(area++)).rgba);
     }
 
-    static inline u8 decodeByte(const char** ptr) {
-        u8 c = static_cast<u8>(**ptr);
-        (*ptr)++;
+    EResult Screen::initFont() {
+        ER_TRY(plGetSharedFontByType(&Screen::s_fontStd, PlSharedFontType_Standard));
+        ER_TRY(plGetSharedFontByType(&Screen::s_fontExt, PlSharedFontType_NintendoExt));
 
-        return c;
+        u8 *fontBuffer = reinterpret_cast<u8*>(Screen::s_fontStd.address);
+        stbtt_InitFont(&Screen::s_stbFontStd, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+        fontBuffer = reinterpret_cast<u8*>(Screen::s_fontExt.address);
+        stbtt_InitFont(&Screen::s_stbFontExt, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+
+        return ResultSuccess;
     }
 
-    // UTF-8 code adapted from http://www.json.org/JSON_checker/utf8_decode.c
+    void Screen::drawGlyph(u32 codepoint, u32 x, u32 y, rgba4444_t color, stbtt_fontinfo *font, float fontSize) {
+        int width = 0, height = 0;
 
-    static inline s8 decodeUTF8Cont(const char** ptr) {
-        s32 c = decodeByte(ptr);
-        return ((c & 0xC0) == 0x80) ? (c & 0x3F) : -1;
-    }
-
-    static inline u32 decodeUTF8(const char** ptr) {
-        u32 r;
-        u8 c;
-        s8 c1, c2, c3;
-
-        c = decodeByte(ptr);
-
-        if ((c & 0x80) == 0)
-            return c;
-
-        if ((c & 0xE0) == 0xC0) {
-            c1 = decodeUTF8Cont(ptr);
-            if (c1 >= 0) {
-                r = ((c & 0x1F) << 6) | c1;
-            if (r >= 0x80)
-                return r;
+        u8 *glyphBmp = stbtt_GetCodepointBitmap(font, fontSize, fontSize, codepoint, &width, &height, nullptr, nullptr);
+        
+        for (s16 bmpY = 0; bmpY < height; bmpY++)
+            for (s16 bmpX = 0; bmpX < width; bmpX++) {
+                color.a = glyphBmp[width * bmpY + bmpX] >> 4;
+                Screen::setPixelBlend(x + bmpX, y + bmpY, color);
             }
-        } else if ((c & 0xF0) == 0xE0) {
-            c1 = decodeUTF8Cont(ptr);
-            if (c1 >= 0) {
-                c2 = decodeUTF8Cont(ptr);
-                if (c2 >= 0) {
-                    r = ((c & 0x0F) << 12) | (c1 << 6) | c2;
-                    if (r >= 0x800 && (r < 0xD800 || r >= 0xE000))
-                        return r;
-                }
-            }
-        } else if ((c & 0xF8) == 0xF0) {
-            c1 = decodeUTF8Cont(ptr);
-            if (c1 >= 0) {
-                c2 = decodeUTF8Cont(ptr);
-                if (c2 >= 0) {
-                    c3 = decodeUTF8Cont(ptr);
-                    if (c3 >= 0) {
-                        r = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
-                        if (r >= 0x10000 && r < 0x110000)
-                            return r;
-                    }
-                }
-            }
-        }
 
-        return 0xFFFD;
+        std::free(glyphBmp);
     }
+
+    void Screen::drawString(const char *string, bool monospace, u32 x, u32 y, float fontSize, rgba4444_t color) {
+        const size_t stringLength = std::strlen(string);
+
+        u32 currX = x;
+        u32 currY = y;
+        u32 prevCharacter = 0;
+
+        u32 i = 0;
+        do {
+            u32 currCharacter;
+            ssize_t codepointWidth = decode_utf8(&currCharacter, reinterpret_cast<const u8*>(string + i));
+
+            if (codepointWidth <= 0)
+                break;
+
+            i += codepointWidth;
+
+            stbtt_fontinfo *currFont;
+
+            if (stbtt_FindGlyphIndex(&Screen::s_stbFontStd, currCharacter))
+                currFont = &Screen::s_stbFontStd;
+            else if (stbtt_FindGlyphIndex(&Screen::s_stbFontExt, currCharacter))
+                currFont = &Screen::s_stbFontExt;
+            else return;
+
+            currX += fontSize * stbtt_GetCodepointKernAdvance(currFont, prevCharacter, currCharacter);
+
+            if (currCharacter == '\n') {
+                currX = x;
+
+                int ascent = 0;
+                stbtt_GetFontVMetrics(currFont, &ascent, nullptr, nullptr);
+                currY += ascent * fontSize * 1.125F;
+                continue;
+            }
+
+            int bounds[4] = { 0 };
+            stbtt_GetCodepointBitmapBoxSubpixel(currFont, currCharacter, fontSize, fontSize,
+                                                0, 0, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+
+            int xAdvance;
+            stbtt_GetCodepointHMetrics(currFont, currCharacter, &xAdvance, nullptr);
+
+            Screen::drawGlyph(currCharacter, currX + bounds[0], currY + bounds[1], color, currFont, fontSize);
+
+            currX += xAdvance * fontSize;
+            
+        } while (i < stringLength);
+    }
+
+    
 
 }

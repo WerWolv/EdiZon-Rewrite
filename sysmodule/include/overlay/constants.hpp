@@ -30,8 +30,8 @@
 #define TS_HEIGHT 720
 
 // Aligned width * height -> page-aligned (0x1000)
-#define FB_WIDTH  256 // Aligned (*bpp) to 64
-#define FB_HEIGHT 512 // Aligned to 128
+#define FB_WIDTH  448 // Aligned (*bpp) to 64
+#define FB_HEIGHT 720 // Aligned to 128
 
 #define LAYER_WIDTH  (SCREEN_HEIGHT * FB_WIDTH / FB_HEIGHT)
 #define LAYER_HEIGHT SCREEN_HEIGHT

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 WerWolv
+ * Copyright (C) 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -17,32 +17,29 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "overlay/elements/list.hpp"
 
-#include "overlay/gui.hpp"
-#include <thread>
-#include <vector>
+namespace edz::ovl::element {
 
-namespace edz::ovl {
+    List::List() {
 
-    class GuiNotes : public Gui {
-    public:
-        GuiNotes();
-        ~GuiNotes();
+    }
 
-        void createUI() override;
-        void update() override;
+    List::~List() {
 
-    private:
-        lv_obj_t *m_titleLabel = nullptr;
+    }
 
-        lv_obj_t *m_btnLeft = nullptr;
-        lv_obj_t *m_btnRight = nullptr;
 
-        lv_obj_t *m_textPage = nullptr;
-        lv_obj_t *m_textLabel = nullptr;
+    Element* List::requestFocus(Element *oldFocus, Element::FocusDirection direction) {
 
-        lv_obj_t *m_btnBack = nullptr;
-    };
+    }
+
+    void List::draw(ovl::Screen *screen) {
+
+    }
+
+    void List::layout() {
+
+    }
 
 }

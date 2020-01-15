@@ -22,18 +22,15 @@
 
 #include <stratosphere.hpp>
 
+#include "overlay/gui/gui.hpp"
+#include "overlay/gui/gui_main.hpp"
+
 #include "overlay/screen.hpp"
-#include "overlay/gui.hpp"
-#include "overlay/gui_main.hpp"
-#include "overlay/gui_cheats.hpp"
-#include "overlay/gui_notes.hpp"
 #include "helpers/results.hpp"
 #include "helpers/hidsys_shim.hpp"
 #include "helpers/utils.hpp"
 #include "cheat/cheat.hpp"
 #include "services/edz_service.hpp"
-
-#include <lvgl.h>
 
 #include <stdio.h>
 #include <array>
@@ -42,24 +39,28 @@
 
 using namespace edz;
 
-std::atomic<u64> g_keysDown, g_keysHeld;
-constexpr ams::ncm::ProgramId EdiZonSysProgramId = { EDIZON_SYSMODULE_TITLEID };
-
-static ams::os::Event overlayComboEvent;
+static Event s_overlayComboEvent;
+static std::atomic<u64> s_keysDown, s_keysHeld;
 
 namespace ams::result {
     bool CallFatalOnResultAssertion = false;
 }
 
+// Libnx initialization
 extern "C" {
 
-    u32 __nx_applet_type = AppletType_OverlayApplet;
+    u32 __nx_applet_type = AppletType_None;
 
-    #define INNER_HEAP_SIZE 0x100000
+    #define INNER_HEAP_SIZE 0x300000
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
     u32 __nx_nv_transfermem_size = 0x15000;
+
+
+    void __libnx_exception_handler(ThreadExceptionDump *ctx) {
+        ams::CrashHandler(ctx);
+    }
 
     void __libnx_initheap(void) {
         void*  addr = nx_inner_heap;
@@ -73,239 +74,151 @@ extern "C" {
         fake_heap_end   = (char*)addr + size;
     }
 
-    void __attribute__((weak)) __appInit(void) {
+}
+
+void __appInit(void) {
+    ams::hos::SetVersionForLibnx();
+
+    // Use ams::sm::DoWithSession instead of smInitialize so we're not unnecessarily using up a sm session
+    ams::sm::DoWithSession([] {
         EResult res;
-        smInitialize();
 
-        if (hosversionGet() == 0) {
-            res = setsysInitialize();
-            if (res.succeeded()) {
-                SetSysFirmwareVersion fw;
-                res = setsysGetFirmwareVersion(&fw);
-                if (res.succeeded())
-                    hosversionSet(MAKEHOSVERSION(fw.major, fw.minor, fw.micro));
-                setsysExit();
-            }
+        // Overlay focus requesting and main loop
+        ER_ASSERT_RESULT(appletInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
+        ER_ASSERT_RESULT(hidsysInitialize(), MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+        // Filesystem
+        ER_ASSERT_RESULT(fsInitialize(),     MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+
+        // Key presses
+        ER_ASSERT_RESULT(hidInitialize(),    MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+        // Running title information
+        ER_ASSERT(pmdmntInitialize());
+
+        // Temparature display
+        ER_ASSERT(tsInitialize());
+
+        // Nintendo Font
+        ER_ASSERT(plInitialize());
+
+        // Cheat toggling
+        ER_ASSERT(dmntcht::initialize());
+        ER_ASSERT(cheat::CheatManager::initialize());
+
+        // Overlay drawing
+        ER_ASSERT_RESULT(ovl::Screen::initialize(), edz::ResultEdzScreenInitFailed);
+
+        // Clock speed display
+        if (ams::hos::GetVersion() >= ams::hos::Version_800) {
+            ER_ASSERT(clkrstInitialize());
+        } else {
+            ER_ASSERT(pcvInitialize());
         }
 
-        res = appletInitialize();
-        if (res.failed())
-            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
+    });
 
-        res = pmdmntInitialize();
-        if (res.failed())
-            fatalThrow(res);
-
-        res = hidInitialize();
-        if (res.failed())
-            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        res = hidsysInitialize();
-        if (res.failed())
-            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-        res = fsInitialize();
-        if (res.failed())
-            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
-
-        res = tsInitialize();
-        if (res.failed())
-            fatalThrow(res);
-
-        res = hiddbgInitialize();
-        if (res.failed())
-            fatalThrow(res);
-
-        if (hosversionBefore(8,0,0)) {
-            res = pcvInitialize();
-            if (res.failed())
-                fatalThrow(res);
-        }
-        else {
-            res = clkrstInitialize();
-            if (res.failed())
-                fatalThrow(res);
-        }
-
-        res = dmntcht::initialize();
-        if (res.failed())
-            fatalThrow(res);
-
-        res = cheat::CheatManager::initialize();
-        if (res.failed())
-            fatalThrow(res);
-
-        res = fsdevMountSdmc();
-        if (res.failed())
-            fatalThrow(res);
-
-        res = ovl::Screen::initialize();
-        if (res.failed())
-            fatalThrow(edz::ResultEdzScreenInitFailed);
-
-    }
-
-    void __attribute__((weak)) userAppExit(void);
-
-    void __attribute__((weak)) __appExit(void) {
-        fsdevUnmountAll();
-        fsExit();
-        timeExit();
-        hidExit();
-        smExit();
-        tsExit();
-        hiddbgExit();
-        pcvExit();
-        clkrstExit();
-        pmdmntExit();
-        dmntcht::exit();
-        ovl::Screen::exit();
-    }
-
+    // SD card access
+    ER_ASSERT(fsdevMountSdmc());
 }
 
-EResult focusOverlay(bool focus) {
-    aruid_t edzAruid = 0, applicationAruid = 0, appletAruid = 0;
-
-    for (u64 programId = (u64)ams::ncm::ProgramId::AppletStart; programId < (u64)ams::ncm::ProgramId::AppletEnd; programId++) {
-        pmdmntGetProcessId(&appletAruid, programId);
-        
-        if (appletAruid != 0)
-            hidsys::enableAppletToGetInput(!focus, appletAruid);
-    }
-
-    pmdmntGetApplicationProcessId(&applicationAruid);
-    appletGetAppletResourceUserIdOfCallerApplet(&edzAruid);
-
-    hidsys::enableAppletToGetInput(!focus, applicationAruid);
-    hidsys::enableAppletToGetInput(true,  edzAruid);
-
-    return edz::ResultSuccess;
+void __appExit(void) {
+    appletExit();
+    hidsysExit();
+    fsExit();
+    hidExit();
+    pmdmntExit();
+    tsExit();
+    plExit();
+    dmntcht::exit();
+    cheat::CheatManager::exit();
+    ovl::Screen::exit();
+    clkrstExit();
+    pcvExit();
 }
 
-
+// Joycon and touch inputs reader loop
 static void hidLoop(void *args) {
     JoystickPosition joyStickPos[2] = { 0 };
     touchPosition touchPos = { 0 };
 
     while (appletMainLoop()) {
+        // Scan for button presses
         hidScanInput();
 
+        // Read in joystick values, touch input and key presses
         hidJoystickRead(&joyStickPos[0], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
         hidJoystickRead(&joyStickPos[1], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
         hidTouchRead(&touchPos, 0);
-        g_keysDown = hidKeysDown(CONTROLLER_HANDHELD);
-        g_keysHeld = hidKeysHeld(CONTROLLER_HANDHELD);
+        ::s_keysDown = hidKeysDown(CONTROLLER_HANDHELD);
+        ::s_keysHeld = hidKeysHeld(CONTROLLER_HANDHELD);
 
-        svcSleepThread(20E6); // Sleep 20ms
-
-        if ((g_keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && g_keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
-            overlayComboEvent.Signal();
+        // Detect overlay key-combo
+        if ((::s_keysHeld & (KEY_L | KEY_DDOWN)) == (KEY_L | KEY_DDOWN) && ::s_keysDown & KEY_RSTICK)// && hlp::isTitleRunning())
+            eventFire(&::s_overlayComboEvent);
+        
+        // Sleep 20ms
+        svcSleepThread(20E6); 
     }
 } 
 
+// Overlay drawing loop
 static void ovlLoop(void *args) {
-    lv_init();
-
     ovl::Screen *screen = new ovl::Screen();
-    ovl::Gui::initialize(screen);
+    ovl::gui::Gui::initialize(screen);
 
     while (appletMainLoop()) {
-        overlayComboEvent.TimedWait(U64_MAX);
-        overlayComboEvent.Reset();
+        // Wait for the overlay key combo event to trigger
+        eventWait(&::s_overlayComboEvent, U64_MAX);
+        eventClear(&::s_overlayComboEvent);
 
-        focusOverlay(true);
+        //focusOverlay(true);
 
-        ovl::Gui::changeTo<ovl::GuiMain>();
-        ovl::Gui *gui = ovl::Gui::getCurrGui();
+        // By default, open GuiMain
+        ovl::gui::Gui::changeTo<ovl::gui::GuiMain>();
+        ovl::gui::Gui *gui = ovl::gui::Gui::getCurrGui();
 
-        ovl::Gui::playIntroAnimation();
+        ovl::gui::Gui::playIntroAnimation();
 
+        // Draw the overlay till the user closes the overlay
         while (true) {
-            lv_tick_inc(1);
-            lv_task_handler();
-
-            ovl::Gui::tick();
+            ovl::gui::Gui::tick(0, 0);
             
             if (gui->shouldClose())
                 break;
 
-            svcSleepThread(1E6);
+            ovl::Screen::waitForVsync();
         }
 
+        // Clear the screen
         screen->clear();
         screen->flush();
 
-        focusOverlay(false);
-        overlayComboEvent.Reset();
+       //focusOverlay(false);
+
+       // Clear the key-combo event again in case the combination was pressed again while the overlay was open already
+        eventClear(&::s_overlayComboEvent);
     }
 
-    ovl::Gui::deinitialize();
-}
-
-
-namespace {
-
-    using ServerOptions = ams::sf::hipc::DefaultServerManagerOptions;
-
-    constexpr ams::sm::ServiceName EdiZonServiceName = ams::sm::ServiceName::Encode("edz:-");
-    constexpr size_t               EdiZonMaxSessions = 4;
-
-    /* dmnt:-, dmnt:cht. */
-    constexpr size_t NumServers  = 1;
-    constexpr size_t NumSessions = EdiZonMaxSessions;
-
-    ams::sf::hipc::ServerManager<NumServers, ServerOptions, NumSessions> g_server_manager;
-
-    void LoopServerThread(void *arg) {
-        g_server_manager.LoopProcess();
-    }
-
-    constexpr size_t TotalThreads = EdiZonMaxSessions + 1;
-    static_assert(TotalThreads >= 1, "TotalThreads");
-    constexpr size_t NumExtraThreads = TotalThreads - 1;
-    constexpr size_t ThreadStackSize = 0x4000;
-    alignas(0x1000) u8 g_extra_thread_stacks[NumExtraThreads][ThreadStackSize];
-
-    ams::os::Thread g_extra_threads[NumExtraThreads];
-
+    ovl::gui::Gui::deinitialize();
 }
 
 int main(int argc, char* argv[]) {
     ams::os::Thread hidThread, ovlThread;
     
-    g_server_manager.RegisterServer<edz::serv::EdzService>(EdiZonServiceName, EdiZonMaxSessions);
+    // Create an event 
+    eventCreate(&::s_overlayComboEvent, true);
 
-
+    // Setup and start the key-combo scanner and the overlay render thread
     hidThread.Initialize(hidLoop, nullptr, 0x500, 0x2C);
-    ovlThread.Initialize(ovlLoop, nullptr, 0x30000, 0x2C);
-    
-    if constexpr (NumExtraThreads > 0) {
-        const u32 priority = ams::os::GetCurrentThreadPriority();
-        for (size_t i = 0; i < NumExtraThreads; i++) {
-            R_ASSERT(g_extra_threads[i].Initialize(LoopServerThread, nullptr, g_extra_thread_stacks[i], ThreadStackSize, priority));
-        }
-    }
-
+    ovlThread.Initialize(ovlLoop, nullptr, 0x3000, 0x2C);
 
     hidThread.Start();
     ovlThread.Start();
 
-    if constexpr (NumExtraThreads > 0) {
-        for (size_t i = 0; i < NumExtraThreads; i++) {
-            R_ASSERT(g_extra_threads[i].Start());
-        }
-    }
-
-
-    LoopServerThread(nullptr);
-    
-
-    if constexpr (NumExtraThreads > 0) {
-        for (size_t i = 0; i < NumExtraThreads; i++) {
-            R_ASSERT(g_extra_threads[i].Join());
-        }
-    }
+    // We're done with all our work on the main thread. Go to sleep
+    while (true)
+        svcSleepThread(10'000'000);
 
     return 0;
 }

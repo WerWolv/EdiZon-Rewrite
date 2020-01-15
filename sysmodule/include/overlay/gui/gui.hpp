@@ -19,12 +19,17 @@
 
 #pragma once
 
-#include <lvgl.h>
+#include <memory>
+#include <vector>
 
 #include "overlay/screen.hpp"
-#include "overlay/styles.hpp"
+#include "overlay/elements/element.hpp"
 
-namespace edz::ovl {
+#include "helpers/utils.hpp"
+
+namespace edz::ovl::gui {
+
+    using Element = element::Element;
 
     class Gui {
     public:
@@ -36,7 +41,7 @@ namespace edz::ovl {
 
         bool shouldClose();
 
-        virtual void createUI() = 0;
+        virtual Element* createUI() = 0;
         virtual void update() = 0;
 
         template<typename T>
@@ -48,23 +53,21 @@ namespace edz::ovl {
             return Gui::s_currGui;
         }
 
-        static void tick() {
-            static lv_area_t area = { 0, 0, 256, 512 };
+        static void tick(u64 keysDown, u64 keysHeld) {
             Gui::s_frameCount++;
 
             if (Gui::s_nextGui != nullptr) {
-                if (Gui::s_currGui != nullptr) {
-                    lv_group_del(Gui::s_currGui->m_group);
+                if (Gui::s_currGui != nullptr)
                     delete Gui::s_currGui;
-                }
+
+                if (Gui::s_topElement != nullptr)
+                    delete Gui::s_topElement;
 
                 Gui::s_currGui = Gui::s_nextGui;
                 Gui::s_nextGui = nullptr;
 
-                Gui::s_currGui->m_group = lv_group_create();
-                setGroupStyle(Gui::s_currGui->m_group);
-                lv_indev_set_group(Gui::s_inputDeviceButtons, Gui::s_currGui->m_group);
-                Gui::s_currGui->createUI();
+                Gui::s_topElement = Gui::s_currGui->createUI();
+                Gui::s_topElement->layout();
             }
 
             if (Gui::s_currGui == nullptr)
@@ -72,14 +75,22 @@ namespace edz::ovl {
 
             Gui::s_currGui->update();
 
+            Gui::s_screen->fillScreen({ 0x0, 0x0, 0x0, static_cast<u8>(0xD * Gui::s_guiOpacity) });
+            Gui::s_screen->drawRect(15, 720 - 73, FB_WIDTH - 30, 1, 0xFFFF);
+
+            Gui::s_screen->drawString("\uE0E1  Back     \uE0E0  OK", false, 30, 693, 0.023, 0xFFFF);
+
+            if (Gui::s_topElement != nullptr)
+                Gui::s_topElement->draw(Gui::s_screen);
+
+            Gui::s_screen->flush();
+
             if (Gui::s_guiOpacity < 1.0 && Gui::s_introAnimationPlaying) {
-                Gui::s_guiOpacity += 0.03F;
-                lv_inv_area(lv_disp_get_default(), &area);
+                Gui::s_guiOpacity += 0.2F;
             }
 
             if (Gui::s_guiOpacity > 0.0 && Gui::s_outroAnimationPlaying) {
-                Gui::s_guiOpacity -= 0.03F;
-                lv_inv_area(lv_disp_get_default(), &area);
+                Gui::s_guiOpacity -= 0.1F;
             }
 
             if (Gui::s_guiOpacity >= 1.0)
@@ -102,17 +113,12 @@ namespace edz::ovl {
         }
 
     protected:
-        void registerForButtonInput(lv_obj_t *obj);
+
     private:
         static inline Screen *s_screen = nullptr;
         static inline Gui *s_currGui = nullptr;
         static inline Gui *s_nextGui = nullptr;
-
-        static inline lv_disp_drv_t s_displayDriver = { 0 };
-        static inline lv_disp_buf_t s_displayBuffer = { 0 };
-        static inline lv_indev_drv_t s_inputDeviceDriverTouch = { 0 };
-        static inline lv_indev_drv_t s_inputDeviceDriverButtons = { 0 };
-        static inline lv_indev_t *s_inputDeviceTouch = nullptr, *s_inputDeviceButtons = nullptr;
+        static inline Element *s_topElement = nullptr;
 
         static inline bool s_initialized = false;
         static inline u64 s_frameCount = 0;
@@ -121,11 +127,6 @@ namespace edz::ovl {
         static inline bool s_introAnimationPlaying = true;
         static inline bool s_outroAnimationPlaying = true;
 
-        static void lvglDisplayFlush(lv_disp_drv_t *displayDriver, const lv_area_t *area, lv_color_t *color);
-        static bool lvglTouchRead(_lv_indev_drv_t *indev, lv_indev_data_t *data);
-        static bool lvglButtonRead(_lv_indev_drv_t *indev, lv_indev_data_t *data);
-
-        lv_group_t *m_group = nullptr;
     };
 
 }

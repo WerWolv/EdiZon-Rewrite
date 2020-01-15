@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 WerWolv
+ * Copyright (C) 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -19,29 +19,17 @@
 
 #pragma once
 
-#include "overlay/gui.hpp"
-#include <thread>
-#include <vector>
+#include "overlay/gui/gui.hpp"
 
-namespace edz::ovl {
+namespace edz::ovl::gui {
 
-    class GuiInfo : public Gui {
+    class GuiMain : public Gui {
     public:
-        GuiInfo();
-        ~GuiInfo();
+        GuiMain();
+        ~GuiMain();
 
-        void createUI() override;
+        Element* createUI() override;
         void update() override;
-
-    private:
-        ClkrstSession m_cpuClkSession, m_gpuClkSession, m_memClkSession;
-
-        lv_obj_t *m_titleLabel = nullptr;
-
-
-        lv_obj_t *m_infoLabels[6];
-
-        lv_obj_t *m_btnBack = nullptr;
     };
 
 }

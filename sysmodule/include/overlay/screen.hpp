@@ -22,12 +22,14 @@
 
 #include <switch.h>
 
+#include <edizon.hpp>
 #include <vector>
 #include <string>
 #include <unordered_map>
 
 #include "overlay/constants.hpp"
 #include "overlay/color.hpp"
+#include "overlay/stb_truetype.h"
 
 #include "helpers/result.hpp"
 
@@ -41,8 +43,10 @@ namespace edz::ovl {
 
     class Screen {
         private:
-            static inline ViDisplay g_display;
-            static inline Event g_vsyncEvent;
+            static inline ViDisplay s_display;
+            static inline Event s_vsyncEvent;
+            static inline PlFontData s_fontStd, s_fontExt;
+            static inline stbtt_fontinfo s_stbFontStd, s_stbFontExt;
 
             ViLayer m_layer;
             NWindow m_window;
@@ -55,7 +59,7 @@ namespace edz::ovl {
             static EResult initialize();
             static void exit();
 
-            static inline EResult waitForVsync() { return eventWait(&g_vsyncEvent, U64_MAX); }
+            static inline EResult waitForVsync() { return eventWait(&Screen::s_vsyncEvent, U64_MAX); }
 
             Screen();
             ~Screen();
@@ -95,7 +99,7 @@ namespace edz::ovl {
                 end.r = blendColor(src.r, dst.r, dst.a);
                 end.g = blendColor(src.g, dst.g, dst.a);
                 end.b = blendColor(src.b, dst.b, dst.a);
-                end.a = 0xF;
+                end.a = src.a;
 
                 ((u16 *)getCurFramebuffer())[off] = end.rgba;
             }
@@ -114,21 +118,28 @@ namespace edz::ovl {
             inline void setPixel(u32 x, u32 y, rgba4444_t color, u8 alpha) { setPixel(getPixelOffset(x, y), color, alpha); }
 
             void clear();
-            void fill(u16 color);
-            void fill(rgba4444_t color);
-            void fillArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 color);
-            void fillArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t color);
+            void fillScreen(u16 color);
+            void fillScreen(rgba4444_t color);
+            void drawRect(s32 x, s32 y, s32 w, s32 h, u16 color);
+            void drawRect(s32 x, s32 y, s32 w, s32 h, rgba4444_t color);
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 *area);
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u8 *area);
             void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t *area);
             
+            EResult initFont();
+            void drawGlyph(u32 codepoint, u32 x, u32 y, rgba4444_t color, stbtt_fontinfo *font, float fontSize);
+            void drawString(const char *string, bool monospace, u32 x, u32 y, float fontSize, rgba4444_t color);
+
             inline const u32 getPixelOffset(u32 x, u32 y) const {
-                // Swizzling pattern:
-                //    y8,y7,y6,y5,y4,y3,y2,y1,y0,x7,x6,x5,x4,x3,x2,x1,x0
-                // -> y8,y7,x7,x6,x5,y6,y5,y4,y3,x4,y2,y1,x3,y0,x2,x1,x0
-                const u32 swizzled_x = ((x & 0b11100000) * 128) + ((x & 0b00010000) * 8) + ((x & 0b00001000) * 2) + (x & 0b00000111);
-                const u32 swizzled_y = ((y & 0b110000000) * 256) + ((y & 0b001111000) * 32) + ((y & 0b000000110) * 16) + ((y & 0b000000001) * 8);
-                return swizzled_x + swizzled_y;
+                if (x > FB_WIDTH || y > FB_HEIGHT)
+                    return 0;
+
+                u32 tmp_pos = ((y & 127) / 16) + (x/32*8) + ((y/16/8)*(((FB_WIDTH/2)/16*8)));
+                tmp_pos *= 16*16 * 4;
+
+                tmp_pos += ((y%16)/8)*512 + ((x%32)/16)*256 + ((y%8)/2)*64 + ((x%16)/8)*32 + (y%2)*16 + (x%8)*2;
+                
+                return tmp_pos / 2;
             }
     };
 

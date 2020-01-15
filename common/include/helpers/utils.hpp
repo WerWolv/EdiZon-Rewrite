@@ -73,7 +73,7 @@ namespace edz::hlp {
 
     /* Disables autostart for the edizon background service */
     void disableAutostartOfBackgroundService();
-    
+
 #endif
 
     /* Returns if any application running */
@@ -161,12 +161,19 @@ namespace edz::hlp {
     /* Parses the Stack starting at the current Frame Pointer and returns a stack trace */
     void unwindStack(u64 *outStackTrace, s32 *outStackTraceSize, size_t maxStackTraceSize, u64 currFp);
 
+    /* Erases invalid file name characters from string */
     std::string removeInvalidCharacters(std::string in);
 
+    /* Converts a AccountUid to a userid_t */
     userid_t accountUidToUserID(AccountUid accountUID);
 
+    /* Converts a userid_t to a AccountUid */
     AccountUid userIDToAccountUid(userid_t userID);
 
+    /* Get the current Atmosphere version (or 0.0.0 if we're not on Atmosphere) */
     Version getAtmosphereVersion();
+
+    /* Requests focus to the Tesla overlay */
+    EResult focusOverlay(bool focus);
 
 }

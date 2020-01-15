@@ -25,11 +25,16 @@
 
 #ifndef __SYSMODULE__
 
-#include "save/title.hpp"
-#include "save/account.hpp"
-#include "save/save_data.hpp"
+    #include "save/title.hpp"
+    #include "save/account.hpp"
+    #include "save/save_data.hpp"
 
-#include "helpers/config_manager.hpp"
+    #include "helpers/config_manager.hpp"
+
+#else
+    
+    #include <stratosphere.hpp>
+    #include "helpers/hidsys_shim.hpp"
 
 #endif
 
@@ -506,7 +511,10 @@ namespace edz::hlp {
     }
 
     userid_t accountUidToUserID(AccountUid accountUID) {
-        return *reinterpret_cast<userid_t*>(accountUID.uid);
+        userid_t userID;
+
+        std::memcpy(&userID, accountUID.uid, sizeof(userid_t));
+        return userID;
     }
 
     AccountUid userIDToAccountUid(userid_t userID) {
@@ -530,5 +538,26 @@ namespace edz::hlp {
 
         return { static_cast<u8>((config >> 0x20) & 0xFF), static_cast<u8>((config >> 0x18) & 0xFF), static_cast<u8>((config >> 0x10) & 0xFF) };
     }
+
+#ifdef __SYSMODULE__
+    EResult focusOverlay(bool focus) {
+        aruid_t edzAruid = 0, applicationAruid = 0, appletAruid = 0;
+
+        for (u64 programId = (u64)ams::ncm::ProgramId::AppletStart; programId < (u64)ams::ncm::ProgramId::AppletEnd; programId++) {
+            pmdmntGetProcessId(&appletAruid, programId);
+            
+            if (appletAruid != 0)
+                hidsys::enableAppletToGetInput(!focus, appletAruid);
+        }
+
+        pmdmntGetApplicationProcessId(&applicationAruid);
+        appletGetAppletResourceUserIdOfCallerApplet(&edzAruid);
+
+        hidsys::enableAppletToGetInput(!focus, applicationAruid);
+        hidsys::enableAppletToGetInput(true,  edzAruid);
+
+        return edz::ResultSuccess;
+    }
+#endif
 
 }

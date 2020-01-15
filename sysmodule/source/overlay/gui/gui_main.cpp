@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 WerWolv
+ * Copyright (C) 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -17,31 +17,27 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "overlay/gui/gui_main.hpp"
 
-#include "overlay/gui.hpp"
-#include <thread>
-#include <vector>
+#include "overlay/elements/list_item.hpp"
 
-namespace edz::ovl {
+namespace edz::ovl::gui {
 
-    class GuiCheats : public Gui {
-    public:
-        GuiCheats();
-        ~GuiCheats();
+    GuiMain::GuiMain() {
 
-        void createUI() override;
-        void update() override;
+    }
 
-    private:
-        lv_obj_t *m_titleLabel = nullptr;
-        lv_obj_t *m_noCheatsLabel = nullptr;
-        lv_obj_t *m_titleInfoLabel = nullptr;
-        lv_obj_t *m_cheatsList = nullptr;
-        lv_obj_t *m_footerLine = nullptr;
-        lv_obj_t *m_btnBack = nullptr;
+    GuiMain::~GuiMain() {
 
-        std::vector<lv_obj_t*> m_cheatToggleButtons;
-    };
+    }
+
+
+    Element* GuiMain::createUI() {
+        return new element::ListItem();
+    }
+
+    void GuiMain::update() {
+        
+    }
 
 }
