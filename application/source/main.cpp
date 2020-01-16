@@ -188,6 +188,8 @@ int main(int argc, char *argv[]) {
     // Main loop for UI
     while (brls::Application::mainLoop() && appletMainLoop()) {
         ui::Gui::tick();
+
+        hidTouchRead()
     }
 
     // Cleanup after ourselves

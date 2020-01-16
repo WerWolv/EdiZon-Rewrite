@@ -39,8 +39,12 @@ namespace edz::ovl::element {
 
         counter += 0.2F;
 
-        screen->drawRect(this->m_x - 4, this->m_y - 4, this->m_width + 8, this->m_height + 8, highlightColor);
-        screen->drawRect(this->m_x, this->m_y, this->m_width, this->m_height, { 0x0, 0x0, 0x0, 0xF });
+        screen->drawRect(this->m_x - 4, this->m_y - 4, this->m_width + 8, 4, a(highlightColor));
+        screen->drawRect(this->m_x - 4, this->m_y + this->m_height, this->m_width + 8, 4, a(highlightColor));
+        screen->drawRect(this->m_x - 4, this->m_y, 4, this->m_height, a(highlightColor));
+        screen->drawRect(this->m_x + this->m_width, this->m_y, 4, this->m_height, a(highlightColor));
+
+        screen->drawRect(this->m_x, this->m_y, this->m_width, this->m_height, a(0xF000));
     }
 
 }

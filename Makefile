@@ -36,6 +36,9 @@ sysmodule:
 install: application
 	@$(MAKE) -C application install --no-print-directory
 
+install_sysmodule: sysmodule
+	@$(MAKE) -C sysmodule install --no-print-directory
+
 clean:
 	@$(MAKE) -C application clean --no-print-directory
 	@$(MAKE) -C sysmodule clean --no-print-directory

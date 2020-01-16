@@ -28,7 +28,10 @@
 
 enum class FocusDirection { NONE, UP, DOWN, LEFT, RIGHT };
 
+
 namespace edz::ovl::element {
+
+    static auto &a = edz::ovl::Screen::a;
     
     class Element {
     public:
@@ -38,6 +41,10 @@ namespace edz::ovl::element {
         virtual Element* requestFocus(Element *oldFocus, FocusDirection direction) = 0;
         
         virtual bool onClick(u64 key) {
+            return false;
+        }
+
+        virtual bool onTouch(u32 x, u32 y) {
             return false;
         }
 

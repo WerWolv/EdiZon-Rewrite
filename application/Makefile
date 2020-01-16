@@ -39,7 +39,7 @@ include $(TOPDIR)/../switch_rules
 #---------------------------------------------------------------------------------
 
 ifeq ($(SNAPSHOT), 1)
-	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} - Snapshot
+	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} Snapshot
 else
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 endif

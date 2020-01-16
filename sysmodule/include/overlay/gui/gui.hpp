@@ -32,6 +32,7 @@
 namespace edz::ovl::gui {
 
     using Element = element::Element;
+    static auto &a = edz::ovl::Screen::a;
 
     class Gui {
     public:
@@ -49,15 +50,13 @@ namespace edz::ovl::gui {
         static void tick();
         static void hidUpdate(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPosLeft, JoystickPosition joyStickPosRight, u32 touchX, u32 touchY);
 
-        static void setGuiOpacity(float opacity);
-
         static void playIntroAnimation();
-
+        static void playOutroAnimation();
 
         template<typename T>
-        static void changeTo()   {  Gui::s_nextGui = new T(); }
+        static Gui* changeTo()   { return Gui::s_nextGui = new T(); }
 
-        static Gui* getCurrGui() {  return Gui::s_currGui;    }
+        static Gui* getCurrGui() { return Gui::s_currGui; }
 
         static void requestFocus(Element *element, FocusDirection direction);
         static void removeFocus(Element *element = nullptr);
@@ -70,8 +69,6 @@ namespace edz::ovl::gui {
         static inline Gui *s_nextGui = nullptr;
         static inline Element *s_topElement = nullptr;
         static inline Element *s_focusedElement = nullptr;
-
-        static inline float s_guiOpacity = 0.0;
 
         static inline bool s_introAnimationPlaying = true;
         static inline bool s_outroAnimationPlaying = true;

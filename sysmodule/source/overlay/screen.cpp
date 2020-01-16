@@ -170,13 +170,13 @@ namespace edz::ovl {
     void Screen::drawRect(s32 x, s32 y, s32 w, s32 h, u16 color) {
         for (s32 x1 = x; x1 < (x + w); x1++)
             for (s32 y1 = y; y1 < (y + h); y1++)
-                Screen::setPixel(x1, y1, color);
+                Screen::setPixelBlendDst(x1, y1, color);
     }
 
     void Screen::drawRect(s32 x, s32 y, s32 w, s32 h, rgba4444_t color) {
         for (s32 x1 = x; x1 < (x + w); x1++)
             for (s32 y1 = y; y1 < (y + h); y1++)
-                Screen::setPixel(x1, y1, color.rgba);
+                Screen::setPixelBlendDst(x1, y1, color.rgba);
     }
 
 
@@ -193,6 +193,15 @@ namespace edz::ovl {
                 Screen::setPixel(x, y, (*(area++)).rgba);
     }
 
+    void Screen::drawRGBA8Image(s32 x, s32 y, s32 w, s32 h, const u8 *bmp) {
+        for (s32 y1 = 0; y1 < h; y1++)
+            for (s32 x1 = 0; x1 < w; x1++) {
+                const rgba4444_t color = { static_cast<u8>(bmp[1] >> 4), static_cast<u8>(bmp[2] >> 4), static_cast<u8>(bmp[3] >> 4), static_cast<u8>(bmp[0] >> 4) };
+                setPixelBlendSrc(x + x1, y + y1, a(color));
+                bmp += 4;
+            }
+    }
+
 
     void Screen::drawGlyph(u32 codepoint, u32 x, u32 y, rgba4444_t color, stbtt_fontinfo *font, float fontSize) {
         int width = 0, height = 0;
@@ -201,8 +210,9 @@ namespace edz::ovl {
         
         for (s16 bmpY = 0; bmpY < height; bmpY++)
             for (s16 bmpX = 0; bmpX < width; bmpX++) {
-                color.a = glyphBmp[width * bmpY + bmpX] >> 4;
-                Screen::setPixelBlend(x + bmpX, y + bmpY, color);
+                rgba4444_t tmpColor = color;
+                tmpColor.a = (glyphBmp[width * bmpY + bmpX] >> 4) * (static_cast<float>(tmpColor.a) / 0xF);
+                Screen::setPixelBlendSrc(x + bmpX, y + bmpY, tmpColor);
             }
 
         std::free(glyphBmp);

@@ -136,6 +136,7 @@ extern "C" {
 struct SharedThreadData {
 
     Event overlayComboEvent;
+    std::mutex inputMutex;
 
     std::atomic<u64> keysDown, keysHeld;
     std::atomic<JoystickPosition> joyStickPosLeft;
@@ -158,12 +159,15 @@ static void hidLoop(void *args) {
         // Read in touch positions
         if (hidTouchCount() > 0)
             hidTouchRead(&tmpTouchPosition, 0);
-
+        else 
+            tmpTouchPosition = { 0 };
         // Read in joystick values
         hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_LEFT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_LEFT);
         hidJoystickRead(&tmpJoyStickPosition[HidControllerJoystick::JOYSTICK_RIGHT], CONTROLLER_HANDHELD, HidControllerJoystick::JOYSTICK_RIGHT);
 
         {
+            std::scoped_lock lock(shData->inputMutex);
+
             shData->keysDown         = hidKeysDown(CONTROLLER_HANDHELD);
             shData->keysHeld         = hidKeysHeld(CONTROLLER_HANDHELD);
 
@@ -195,11 +199,10 @@ static void ovlLoop(void *args) {
         eventWait(&shData->overlayComboEvent, U64_MAX);
         eventClear(&shData->overlayComboEvent);
 
-        //focusOverlay(true);
+        hlp::focusOverlay(true);
 
         // By default, open GuiMain
-        ovl::gui::Gui::changeTo<ovl::gui::GuiMain>();
-        ovl::gui::Gui *gui = ovl::gui::Gui::getCurrGui();
+        ovl::gui::Gui *gui = ovl::gui::Gui::changeTo<ovl::gui::GuiMain>();
 
         ovl::gui::Gui::playIntroAnimation();
 
@@ -211,18 +214,22 @@ static void ovlLoop(void *args) {
 
             // Handle button, joystick and touch input data
             ovl::gui::Gui::hidUpdate(shData->keysDown, shData->keysHeld, shData->joyStickPosLeft, shData->joyStickPosRight, shData->touchX, shData->touchY);
-            
-            if (gui != nullptr && gui->shouldClose())
+
+            if (gui->shouldClose())
                 break;
 
+            shData->inputMutex.unlock();
             ovl::Screen::waitForVsync();
+            shData->inputMutex.lock();
         }
+
+        shData->inputMutex.unlock();
 
         // Clear the screen
         screen->clear();
         screen->flush();
 
-       //focusOverlay(false);
+       hlp::focusOverlay(false);
 
        // Clear the key-combo event again in case the combination was pressed again while the overlay was open already
         eventClear(&shData->overlayComboEvent);

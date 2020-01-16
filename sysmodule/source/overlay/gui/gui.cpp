@@ -1,5 +1,7 @@
 #include "overlay/gui/gui.hpp"
 
+#include "logo_bin.h"
+
 #include <atomic>
 
 namespace edz::ovl::gui {
@@ -24,7 +26,7 @@ namespace edz::ovl::gui {
     }
 
     bool Gui::shouldClose() {
-        return Gui::s_guiOpacity <= 0.0 && !Gui::s_introAnimationPlaying;
+        return Gui::s_screen->getOpacity() <= 0.0 && !Gui::s_introAnimationPlaying;
     }
 
     void Gui::tick() {
@@ -50,27 +52,29 @@ namespace edz::ovl::gui {
 
         Gui::s_currGui->update();
 
-        Gui::s_screen->fillScreen({ 0x0, 0x0, 0x0, static_cast<u8>(0xD * Gui::s_guiOpacity) });
-        Gui::s_screen->drawRect(15, 720 - 73, FB_WIDTH - 30, 1, 0xFFFF);
+        Gui::s_screen->fillScreen(a({ 0x0, 0x0, 0x0, 0xD }));
+        Gui::s_screen->drawRect(15, 720 - 73, FB_WIDTH - 30, 1, a(0xFFFF));
 
-        Gui::s_screen->drawString("\uE0E1  Back     \uE0E0  OK", false, 30, 693, 23, 0xFFFF);
+        Gui::s_screen->drawString("\uE0E1  Back     \uE0E0  OK", false, 30, 693, 23, a(0xFFFF));
+        Gui::s_screen->drawRGBA8Image(20, 20, 84, 31, logo_bin);
+        Gui::s_screen->drawString("v" VERSION_STRING, false, 108, 51, 15, a(0xFFFF));
 
         if (Gui::s_topElement != nullptr)
             Gui::s_topElement->frame(Gui::s_screen);
 
         Gui::s_screen->flush();
 
-        if (Gui::s_guiOpacity < 1.0 && Gui::s_introAnimationPlaying) {
-            Gui::s_guiOpacity += 0.2F;
-        }
+        const float opacity = Gui::s_screen->getOpacity();
 
-        if (Gui::s_guiOpacity > 0.0 && Gui::s_outroAnimationPlaying) {
-            Gui::s_guiOpacity -= 0.1F;
-        }
+        if (opacity < 1.0 && Gui::s_introAnimationPlaying)
+            Gui::s_screen->setOpacity(opacity + 0.2F);
 
-        if (Gui::s_guiOpacity >= 1.0)
+        if (opacity > 0.0 && Gui::s_outroAnimationPlaying)
+            Gui::s_screen->setOpacity(opacity - 0.2F);
+
+        if (opacity >= 1.0)
             Gui::s_introAnimationPlaying = false;
-        if (Gui::s_guiOpacity <= 0.0)
+        if (opacity <= 0.0)
             Gui::s_outroAnimationPlaying = false;
 
         // Make sure we run at a maximum of 60FPS
@@ -81,22 +85,36 @@ namespace edz::ovl::gui {
 
     void Gui::hidUpdate(s64 keysDown, s64 keysHeld, JoystickPosition joyStickPosLeft, JoystickPosition joyStickPosRight, u32 touchX, u32 touchY) {
         if (keysDown & KEY_UP)
-            Gui::requestFocus(Gui::s_focusedElement, FocusDirection::UP);
+            Gui::requestFocus(Gui::s_focusedElement->getParent(), FocusDirection::UP);
         else if (keysDown & KEY_DOWN)
-            Gui::requestFocus(Gui::s_focusedElement, FocusDirection::DOWN);
+            Gui::requestFocus(Gui::s_focusedElement->getParent(), FocusDirection::DOWN);
         else if (keysDown & KEY_LEFT)
-            Gui::requestFocus(Gui::s_focusedElement, FocusDirection::LEFT);
+            Gui::requestFocus(Gui::s_focusedElement->getParent(), FocusDirection::LEFT);
         else if (keysDown & KEY_RIGHT)
-            Gui::requestFocus(Gui::s_focusedElement, FocusDirection::RIGHT);
-    }
+            Gui::requestFocus(Gui::s_focusedElement->getParent(), FocusDirection::RIGHT);
+        else
+            Gui::s_focusedElement->onClick(keysDown);
 
-    void Gui::setGuiOpacity(float opacity) {
-        Gui::s_guiOpacity = opacity;
+        
+        
+        if (touchX > FB_WIDTH)
+            Gui::playOutroAnimation();
     }
 
     void Gui::playIntroAnimation() {
+        if (Gui::s_introAnimationPlaying)
+            return;
+
         Gui::s_introAnimationPlaying = true;
-        Gui::s_guiOpacity = 0.0F;
+        Gui::s_screen->setOpacity(0.0F);
+    }
+
+    void Gui::playOutroAnimation() {
+        if (Gui::s_outroAnimationPlaying)
+            return;
+
+        Gui::s_outroAnimationPlaying = true;
+        Gui::s_screen->setOpacity(1.0F);
     }
 
     

@@ -73,7 +73,7 @@ namespace edz::ovl {
             return (dst*alpha + src*one_minus_alpha) / static_cast<float>(0xF);
         }
 
-        inline void setPixelBlend(u32 off, u16 color) {
+        inline void setPixelBlendSrc(u32 off, u16 color) {
             rgba4444_t src((static_cast<u16*>(getCurFramebuffer()))[off]);
             rgba4444_t dst(color);
             rgba4444_t end(0);
@@ -86,11 +86,30 @@ namespace edz::ovl {
             static_cast<u16*>(getCurFramebuffer())[off] = end.rgba;
         }
 
-        inline void setPixelBlend(u32 x, u32 y, u16 color)                  { setPixelBlend(getPixelOffset(x, y), color); }
-        inline void setPixelBlend(u32 off, rgba4444_t color)                { setPixelBlend(off, color.rgba); }
-        inline void setPixelBlend(u32 x, u32 y, rgba4444_t color)           { setPixelBlend(getPixelOffset(x, y), color); }
-        inline void setPixelBlend(u32 off, rgba4444_t color, u8 alpha)      { setPixelBlend(off, blend(color, getPixel(off), alpha).rgba); }
-        inline void setPixelBlend(u32 x, u32 y, rgba4444_t color, u8 alpha) { setPixelBlend(getPixelOffset(x, y), color, alpha); }
+        inline void setPixelBlendDst(u32 off, u16 color) {
+            rgba4444_t src((static_cast<u16*>(getCurFramebuffer()))[off]);
+            rgba4444_t dst(color);
+            rgba4444_t end(0);
+
+            end.r = blendColor(src.r, dst.r, dst.a);
+            end.g = blendColor(src.g, dst.g, dst.a);
+            end.b = blendColor(src.b, dst.b, dst.a);
+            end.a = dst.a;
+
+            static_cast<u16*>(getCurFramebuffer())[off] = end.rgba;
+        }
+
+        inline void setPixelBlendSrc(u32 x, u32 y, u16 color)                  { setPixelBlendSrc(getPixelOffset(x, y), color); }
+        inline void setPixelBlendSrc(u32 off, rgba4444_t color)                { setPixelBlendSrc(off, color.rgba); }
+        inline void setPixelBlendSrc(u32 x, u32 y, rgba4444_t color)           { setPixelBlendSrc(getPixelOffset(x, y), color); }
+        inline void setPixelBlendSrc(u32 off, rgba4444_t color, u8 alpha)      { setPixelBlendSrc(off, blend(color, getPixel(off), alpha).rgba); }
+        inline void setPixelBlendSrc(u32 x, u32 y, rgba4444_t color, u8 alpha) { setPixelBlendSrc(getPixelOffset(x, y), color, alpha); }
+
+        inline void setPixelBlendDst(u32 x, u32 y, u16 color)                  { setPixelBlendDst(getPixelOffset(x, y), color); }
+        inline void setPixelBlendDst(u32 off, rgba4444_t color)                { setPixelBlendDst(off, color.rgba); }
+        inline void setPixelBlendDst(u32 x, u32 y, rgba4444_t color)           { setPixelBlendDst(getPixelOffset(x, y), color); }
+        inline void setPixelBlendDst(u32 off, rgba4444_t color, u8 alpha)      { setPixelBlendDst(off, blend(color, getPixel(off), alpha).rgba); }
+        inline void setPixelBlendDst(u32 x, u32 y, rgba4444_t color, u8 alpha) { setPixelBlendDst(getPixelOffset(x, y), color, alpha); }
         
         inline void setPixel(u32 off, u16 color)                       { static_cast<u16*>(getCurFramebuffer())[off] = color; }
         inline void setPixel(u32 x, u32 y, u16 color)                  { setPixel(getPixelOffset(x, y), color); }
@@ -107,6 +126,8 @@ namespace edz::ovl {
         void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u16 *area);
         void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, u8 *area);
         void mapArea(s32 x1, s32 y1, s32 x2, s32 y2, rgba4444_t *area);
+
+        void drawRGBA8Image(s32 x, s32 y, s32 w, s32 h, const u8 *bmp);
         
         EResult initFont();
         void drawGlyph(u32 codepoint, u32 x, u32 y, rgba4444_t color, stbtt_fontinfo *font, float fontSize);
@@ -124,11 +145,20 @@ namespace edz::ovl {
             return tmp_pos / 2;
         }
 
+        float getOpacity() { return this->s_opacity; }
+        void setOpacity(float opacity)  { this->s_opacity = opacity; }
+
+        static rgba4444_t a(const rgba4444_t &c) {
+            return (c.rgba & 0x0FFF) | (static_cast<u8>(c.a * Screen::s_opacity) << 12);
+        }
+
     private:
         static inline ViDisplay s_display;
         static inline Event s_vsyncEvent;
         static inline PlFontData s_fontStd, s_fontExt;
         static inline stbtt_fontinfo s_stbFontStd, s_stbFontExt, s_stbFontMaterial;
+
+        static inline float s_opacity;
 
         ViLayer m_layer;
         NWindow m_window;

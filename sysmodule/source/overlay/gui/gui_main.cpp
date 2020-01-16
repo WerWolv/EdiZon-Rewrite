@@ -35,10 +35,10 @@ namespace edz::ovl::gui {
 
     Element* GuiMain::createUI() {
         auto list = new element::List();
-        list->addItem(new element::ListItem("\uE225 Cheats"));
-        list->addItem(new element::ListItem("\uE22B Notes"));
-        list->addItem(new element::ListItem("\uE202 Stats"));
-        list->addItem(new element::ListItem("\uE227 Settings"));
+        list->addItem(new element::ListItem("\uE225   Cheats"));
+        list->addItem(new element::ListItem("\uE22B   Notes"));
+        list->addItem(new element::ListItem("\uE202   Stats"));
+        list->addItem(new element::ListItem("\uE227   Settings"));
 
         return list;
     }

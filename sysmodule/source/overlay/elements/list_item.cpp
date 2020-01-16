@@ -31,17 +31,17 @@ namespace edz::ovl::element {
 
 
     Element* ListItem::requestFocus(Element *oldFocus, FocusDirection direction) {
-        return this->getParent();
+        return this;
     }
 
     void ListItem::draw(ovl::Screen *screen, u16 x1, u16 y1) {
         const auto [x, y] = this->getPosition();
         const auto [w, h] = this->getSize();
 
-        screen->drawRect(x, y, w, 1, { 0x5, 0x5, 0x5, 0xF });
-        screen->drawRect(x, y + h - 1, w, 1, { 0x5, 0x5, 0x5, 0xF });
+        screen->drawRect(x, y, w, 1, a({ 0x5, 0x5, 0x5, 0xF }));
+        screen->drawRect(x, y + h - 1, w, 1, a({ 0x5, 0x5, 0x5, 0xF }));
 
-        screen->drawString(this->m_text.c_str(), false, x + 20, y + 45, 25, { 0xF, 0xF, 0xF, 0xF });
+        screen->drawString(this->m_text.c_str(), false, x + 20, y + 45, 25, a({ 0xF, 0xF, 0xF, 0xF }));
     }
 
     void ListItem::layout() {

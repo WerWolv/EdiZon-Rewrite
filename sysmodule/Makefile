@@ -38,6 +38,13 @@ include $(TOPDIR)/../switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
+
+ifeq ($(SNAPSHOT), 1)
+	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} Snapshot
+else
+	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+endif
+
 TARGET			:=	$(notdir $(CURDIR))
 OUTDIR			:=	out
 BUILD			:=	build
@@ -49,12 +56,21 @@ DATA			:=	data
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
+null      	:=
+SPACE     	:=  $(null) $(null)
+
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g3 -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES)
-
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__SYSMODULE__ -DFONT_ENGINE=FT -DATMOSPHERE_IS_STRATOSPHERE -DATMOSPHERE_BOARD_NINTENDO_SWITCH
+			$(ARCH) $(DEFINES) \
+			$(INCLUDE)  -D__SWITCH__ \
+			-D__SYSMODULE__ \
+			-DATMOSPHERE_IS_STRATOSPHERE \
+			-DATMOSPHERE_BOARD_NINTENDO_SWITCH \
+			-DVERSION_MAJOR=${VERSION_MAJOR} \
+			-DVERSION_MINOR=${VERSION_MINOR} \
+			-DVERSION_MICRO=${VERSION_MICRO} \
+			-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fexceptions -std=gnu++17
 
