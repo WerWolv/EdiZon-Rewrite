@@ -32,6 +32,7 @@
 #include "save/edit/editor.hpp"
 #include "ui/elements/focusable_table.hpp"
 #include "ui/elements/title_list_item.hpp"
+#include "ui/elements/credit_view.hpp"
 #include "ui/pages/page_login.hpp"
 
 #include "api/edizon_api.hpp"
@@ -96,7 +97,8 @@ namespace edz::ui {
             brls::ListItem *createSaveFSItem = new brls::ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
             createSaveFSItem->setClickListener([&title](brls::View *view) {
                 hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
-                    //title->createSaveDataFileSystem(account, );
+                    title->createSaveDataFileSystem(account, FsSaveDataType_Account);
+                    brls::Application::popView();
                 });
             });
 
@@ -782,10 +784,10 @@ namespace edz::ui {
     }
 
     void GuiMain::createAboutTab(brls::List *list) {
-        list->addView(new brls::Header("edz.name"_lang + " " VERSION_STRING + "edz.by"_lang + "edz.dev"_lang, true));
+        list->addView(new brls::Header("edz.name"_lang + " v" + EDIZON_VERSION.getString() + (SNAPSHOT ? " - Snapshot" : "") + "edz.by"_lang + "edz.dev"_lang, true));
         list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.about.label.edz"_lang, true));
 
-        list->addView(new brls::Header("edz.gui.main.about.links"_lang, false));
+        list->addView(new brls::Header("edz.gui.main.about.header.links"_lang, false));
         
         brls::ListItem *scdbItem = new brls::ListItem("edz.switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
         brls::ListItem *patreonItem = new brls::ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv");
@@ -808,6 +810,9 @@ namespace edz::ui {
         list->addView(scdbItem);
         list->addView(patreonItem);
         list->addView(guideItem);
+
+        list->addView(new brls::Header("edz.gui.main.about.header.credits"_lang, true));
+        list->addView(new element::CreditView());
 
         // TODO: Replace this with something better. For now force closes EdiZon when this Gui gets poped
         this->m_dummyForceExitView = new element::DummyForceExitView();

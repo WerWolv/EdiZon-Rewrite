@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 WerWolv
+ * Copyright (C) 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -24,17 +24,16 @@
 
 namespace edz::ui::element {
 
-    class DummyForceExitView : public brls::View {
+    class CreditView : public brls::View {
     public:
-        DummyForceExitView();
-        virtual ~DummyForceExitView();
+        CreditView();
+        virtual ~CreditView();
         View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
 
-        void disableExit();
-
-    private:
-        bool m_exitDisabled = false;
+        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        
+        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
     };
 
 }

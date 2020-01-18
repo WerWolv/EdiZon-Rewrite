@@ -23,6 +23,10 @@
             "defines": [
                 "SWITCH",
                 "WINDOW_NAME=\"EdiZon\"",
+                "VERSION_MAJOR=0",
+                "VERSION_MINOR=0",
+                "VERSION_MICRO=0",
+                "SNAPSHOT=0",
                 "VERSION_STRING=\"v0.0.0\"",
                 "__SWITCH__",
                 "__aarch64__"
@@ -56,6 +60,10 @@
             "defines": [
                 "SWITCH",
                 "WINDOW_NAME=\"EdiZon\"",
+                "VERSION_MAJOR=0",
+                "VERSION_MINOR=0",
+                "VERSION_MICRO=0",
+                "SNAPSHOT=0",
                 "VERSION_STRING=\"v0.0.0\"",
                 "__SWITCH__",
                 "__aarch64__"

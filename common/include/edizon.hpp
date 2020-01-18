@@ -44,7 +44,7 @@
     #define MEMORY_SEARCH_BUFFER_SIZE       0x40000
 
     /* Version settings */
-    #define EDIZON_VERSION                  hlp::Version({ VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH })
+    #define EDIZON_VERSION                  hlp::Version({ VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO })
     #define MINIMUM_AMS_VERSION_REQUIRED    hlp::Version({0,10,0})
 
     /* Current web API version */

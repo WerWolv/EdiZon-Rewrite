@@ -9,34 +9,10 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(TOPDIR)/../switch_rules
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# ROMFS is the directory containing data to be added to RomFS, relative to the Makefile (Optional)
-#
-# NO_ICON: if set to anything, do not use icon.
-# NO_NACP: if set to anything, no .nacp file is generated.
-# APP_TITLE is the name of the app stored in the .nacp file (Optional)
-# APP_AUTHOR is the author of the app stored in the .nacp file (Optional)
-# APP_VERSION is the version of the app stored in the .nacp file (Optional)
-# APP_TITLEID is the titleID of the app stored in the .nacp file (Optional)
-# ICON is the filename of the icon (.jpg), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.jpg
-#     - icon.jpg
-#     - <libnx folder>/default_icon.jpg
-#
-# CONFIG_JSON is the filename of the NPDM config file (.json), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.json
-#     - config.json
-#   If a JSON file is provided or autodetected, an ExeFS PFS0 (.nsp) is built instead
-#   of a homebrew executable (.nro). This is intended to be used for sysmodules.
-#   NACP building is skipped as well.
-#---------------------------------------------------------------------------------
+VERSION_MAJOR	?= 0
+VERSION_MINOR	?= 0
+VERSION_MICRO	?= 0
+SNAPSHOT		?= 0
 
 ifeq ($(SNAPSHOT), 1)
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} Snapshot
@@ -72,6 +48,7 @@ DEFINES 	+=  -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 COMMONFLAGS	:=  -g -Wall -Og -ffunction-sections \
 				$(ARCH) $(DEFINES) 				 \
 				-DWINDOW_NAME=\"EdiZon\"		 \
+				-DSNAPSHOT=${SNAPSHOT}			 \
 				-DVERSION_MAJOR=${VERSION_MAJOR} \
 				-DVERSION_MINOR=${VERSION_MINOR} \
 				-DVERSION_MICRO=${VERSION_MICRO} \

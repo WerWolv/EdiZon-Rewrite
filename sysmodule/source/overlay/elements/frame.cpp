@@ -63,7 +63,11 @@ namespace edz::ovl::element {
 
     bool Frame::onClick(s64 key) {
         if (key == KEY_B) {
-            gui::Gui::changeTo<gui::GuiMain>();
+            if (dynamic_cast<gui::GuiMain*>(gui::Gui::getCurrentGui()) == nullptr)
+                gui::Gui::changeTo<gui::GuiMain>();
+            else
+                gui::Gui::playOutroAnimation();
+                
             return true;
         }
 

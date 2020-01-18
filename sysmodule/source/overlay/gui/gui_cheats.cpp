@@ -44,6 +44,11 @@ namespace edz::ovl::gui {
 
         auto header = new element::CustomDrawer(0, 0, 100, FB_WIDTH, [](u16 x, u16 y, Screen *screen){
             screen->drawString("Cheats", false, 20, 50, 30, a(0xFFFF));
+
+            if (cheat::CheatManager::getCheats().size() == 0) {
+                screen->drawString("\uE150", false, 180, 250, 90, a(0xFFFF));
+                screen->drawString("No Cheats loaded!", false, 110, 340, 25, a(0xFFFF));
+            }
         });
 
         auto list = new element::List();
