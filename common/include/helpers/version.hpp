@@ -62,6 +62,10 @@ namespace edz::hlp {
         bool operator<=(Version other) {
             return operator<(other) || operator==(other);
         }
+
+        std::string getString() {
+            return std::to_string(this->major) + "." + std::to_string(this->minor) + "." + std::to_string(this->patch);
+        }
     };
 
 }

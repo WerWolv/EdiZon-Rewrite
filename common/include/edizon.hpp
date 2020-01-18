@@ -52,7 +52,7 @@
     #define SWITCHCHEATSDB_API_VERSION      "v1"
 
     /* Web API URLs */
-    #define EDIZON_API_URL                  "http://api.edizon.werwolv.net/" EDIZON_API_VERSION 
+    #define EDIZON_API_URL                  "http://werwolv.net:1337/" EDIZON_API_VERSION 
     #define SWITCHCHEATSDB_API_URL          "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
     #define ANONFILE_API_URL                "https://api.anonfile.com"
 

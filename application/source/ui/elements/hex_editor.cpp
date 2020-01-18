@@ -119,7 +119,7 @@ namespace edz::ui::element {
         if (type == SelectionType::BYTE)
             this->m_clickCallback(type, this->m_address + offset, this->m_buffer[offset]);
         else if (type == SelectionType::ADDRESS)
-            this->m_clickCallback(type, reinterpret_cast<u64*>(this->m_buffer)[(this->m_selectY - 1) * 2 + this->m_selectX], 0x00);
+            this->m_clickCallback(type, reinterpret_cast<u64*>(this->m_buffer)[(this->m_selectY - 1) * 2 + this->m_selectX / 8], 0x00);
 
         return true;
     }

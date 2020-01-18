@@ -96,10 +96,10 @@ namespace edz::api {
         return this->m_curl.download("/" + this->m_version + "/icon");
     }
 
-    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getFile(std::string file) {
+    EResult SaveRepoAPI::getFile(std::string file, std::string downloadPath) {
         SaveRepoAPI::_updateVersionString();
 
-        return this->m_curl.download("/" + this->m_version + "/get?fileName=" + file);
+        return this->m_curl.download("/" + this->m_version + "/get?fileName=" + file, downloadPath);
     }
 
     std::pair<EResult, std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {

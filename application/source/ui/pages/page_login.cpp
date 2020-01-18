@@ -60,9 +60,6 @@ namespace edz::ui::page {
         });
 
         this->m_loginBtn->setClickListener([=](View *view) {
-            brls::Dialog *dialog = new brls::Dialog("Error");
-            dialog->addButton("edz.dialog.okay"_lang, [=](View *view) { dialog->close(); });
-
             api::SwitchCheatsDBAPI scdbApi;
 
             auto [result, token] = scdbApi.getToken(this->m_email, this->m_password);
@@ -70,6 +67,9 @@ namespace edz::ui::page {
             this->m_password = "";
 
             if (result != ResultSuccess) {
+                brls::Dialog *dialog = new brls::Dialog("edz.page.login.error"_lang);
+                dialog->addButton("edz.dialog.okay"_lang, [=](View *view) { dialog->close(); });
+
                 dialog->open();
                 return;
             }

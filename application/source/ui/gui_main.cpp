@@ -22,6 +22,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <iomanip>
 
 #include "cheat/cheat.hpp"
 #include "cheat/cheat_parser.hpp"
@@ -85,7 +86,7 @@ namespace edz::ui {
             }
 
             if (title->hasCommonSaveFile()) {
-                brls::ListItem *userItem = new brls::ListItem("Common Save File", "", " ");
+                brls::ListItem *userItem = new brls::ListItem("edz.gui.popup.information.save.common"_lang, "", " ");
                 userItem->setThumbnail("romfs:/assets/info/icon_save_common.png");
 
                 softwareInfoList->addView(userItem);                
@@ -111,7 +112,7 @@ namespace edz::ui {
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
                 if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang, "", 32, hlp::getCurrentDateTimeString()))
-                    Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "Creating a save data backup...");
+                    Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "edz.gui.popup.management.backup.dialog"_lang);
              });
 
         });
@@ -127,25 +128,13 @@ namespace edz::ui {
 
                     if (selection != -1) {
                         hlp::openPlayerSelect([&, list, selection](std::unique_ptr<save::Account> &account) { 
-                            Gui::runAsyncWithDialog([&] { save::SaveManager::restore(title, account, list[selection]); }, "Restoring a save data backup...");
+                            Gui::runAsyncWithDialog([&] { save::SaveManager::restore(title, account, list[selection]); }, "edz.gui.popup.management.restore.dialog"_lang);
                         });
                     }
                     
                 });
             }
         });
-
-
-        brls::ListItem *swapAccountsItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
-        backupItem->setClickListener([&title](brls::View *view) {
-            hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
-                std::string backupName;
-                if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang, "", 32, hlp::getCurrentDateTimeString()))
-                    Gui::runAsyncWithDialog([&](){ save::SaveManager::backup(title, account, backupName, ""); }, "Creating a save data backup...");
-             });
-
-        });
-
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
         deleteItem->setClickListener([&title, this](brls::View *view) {
@@ -205,8 +194,24 @@ namespace edz::ui {
         brls::AppletFrame *rootFrame = new brls::AppletFrame(false, false);
         brls::List *list = new brls::List();
 
-        for (auto saveFile : saveFiles)
-            list->addView(new brls::ListItem(saveFile.name, "", saveFile.date));
+        auto &allTitles = save::SaveFileSystem::getAllTitles();
+        for (auto saveFile : saveFiles) {
+            if (allTitles.find(saveFile.titleID) == allTitles.end())
+                continue;
+
+            auto item = new brls::ListItem(hlp::formatString("%s [ %s ]", saveFile.name.c_str(), allTitles[saveFile.titleID]->getName().c_str()), "", saveFile.date);
+            item->setThumbnail(allTitles[saveFile.titleID]->getIcon());
+            item->setClickListener([saveRepoUrl, saveFile](brls::View *view) {
+                Gui::runAsyncWithDialog([=] {
+                    api::SaveRepoAPI saveRepoApi(saveRepoUrl);
+
+                    auto downloadFolder = hlp::createTmpFolder();
+                    saveRepoApi.getFile(saveFile.name, downloadFolder.path() + saveFile.name);
+                }, "edz.gui.main.repos.dialog.download"_lang);
+            });
+
+            list->addView(item);
+        }
 
         rootFrame->setContentView(list);
 
@@ -504,7 +509,8 @@ namespace edz::ui {
 
 
         list->addView(this->m_sysmoduleRunningOption);
-        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "\uE016 You can open the menu at any time by pressing \uE0E4, \uE0EC and \uE105 simultaneously\n \n", true));
+        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note.1", true));
+        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note.2", true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
         GuiMain::m_cheatToggleListItems.clear();
@@ -544,7 +550,7 @@ namespace edz::ui {
                         } else {
                             list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
                             
-                            brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("Apply online cheats");
+                            brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("Apply online cheats", "edz.gui.main.cheats.button.load.online.desc"_lang);
                             applyOnlineCheatsItem->setClickListener([=](brls::View *view) {
                                 brls::Application::blockInputs();
                                 brls::Application::removeFocus();
@@ -577,7 +583,7 @@ namespace edz::ui {
                         }
                     }
                     else {
-                        brls::ListItem *cheatFileSelectionItem = new brls::ListItem("Load Cheats", "Cheats have been found on your system but haven't been loaded yet. Click here to load them");
+                        brls::ListItem *cheatFileSelectionItem = new brls::ListItem("edz.gui.main.cheats.button.load.offline"_lang, "edz.gui.main.cheats.button.load.offline.desc"_lang);
                         
                         cheatFileSelectionItem->setClickListener([this](brls::View *view) {
                             auto [result, cheatDefs] = cheat::CheatParser::parseFile(EDIZON_CHEATS_DIR "/" + cheat::CheatManager::getCheatFile().second);
@@ -653,7 +659,7 @@ namespace edz::ui {
         brls::ToggleListItem *pctlOptionItem = nullptr;
         
         if (hlp::isPctlEnabled()) {
-            pctlOptionItem = new brls::ToggleListItem("Enable parential control checks", GET_CONFIG(Settings.pctlChecksEnabled), "Locks some destructive options like restoring or deleting save files behind the Parential Control PIN.", "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
+            pctlOptionItem = new brls::ToggleListItem("edz.gui.main.settings.pctl"_lang, GET_CONFIG(Settings.pctlChecksEnabled), "edz.gui.main.settings.pctl.desc"_lang, "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
             pctlOptionItem->setClickListener([](brls::View *view) {
                 static bool rejected = false;
 

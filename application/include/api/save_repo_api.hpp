@@ -42,7 +42,7 @@ namespace edz::api {
         std::pair<EResult, std::string> getMOTD();
         std::pair<EResult, std::string> getVersion();
         std::pair<EResult, std::vector<u8>> getIcon();
-        std::pair<EResult, std::vector<u8>> getFile(std::string file);
+        EResult getFile(std::string file, std::string downloadPath);
         std::pair<EResult, std::vector<save_file_t>> listFiles();
 
         void _updateVersionString();

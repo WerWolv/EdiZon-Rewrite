@@ -56,25 +56,25 @@ namespace edz::ui {
         static std::vector<brls::SelectListItem*> scanTypeItems;
         brls::List *list = new brls::List();
         
-        auto hexViewItem    = new brls::ListItem("Memory View");
-        auto foundAddresses = new brls::ListItem("Found Addresses");
-        auto clearSearchItem    = new brls::ListItem("Clear Search");
+        auto hexViewItem    = new brls::ListItem("edz.gui.cheatengine.memoryview"_lang);
+        auto foundAddresses = new brls::ListItem("edz.gui.cheatengine.foundaddresses"_lang);
+        auto clearSearchItem    = new brls::ListItem("edz.gui.cheatengine.clear"_lang);
 
-        auto scanTypeItem   = new brls::SelectListItem("Scan Type", { "Exact Value", "Greater than...", "Less than...", "Value between...", "Unknown initial value"});
-        auto valueTypeItem  = new brls::SelectListItem("Value Type", { "1 Byte (Unsigned)", "1 Byte (Signed)", "2 Bytes (Unsigned)", "2 Bytes (Signed)", "4 Bytes (Unsigned)", "4 Bytes (Signed)", "8 Bytes (Unsigned)", "8 Bytes (Signed)", "Float", "Double", "String", "Array" });
-        auto scanRegionItem = new brls::SelectListItem("Scan Region", { "HEAP", "MAIN", "HEAP + MAIN" });
-        auto valueItem      = new brls::ListItem("Search Value");
-        auto fastScanItem   = new brls::ToggleListItem("Fast Scanning Mode", true, "If enabled, only aligned values will be searched");
+        auto scanTypeItem   = new brls::SelectListItem("edz.gui.cheatengine.scantype"_lang, { "edz.gui.cheatengine.scantype.eq"_lang, "edz.gui.cheatengine.scantype.gt"_lang, "edz.gui.cheatengine.scantype.lt"_lang, "edz.gui.cheatengine.scantype.btwn"_lang, "edz.gui.cheatengine.scantype.unk"_lang });
+        auto valueTypeItem  = new brls::SelectListItem("edz.gui.cheatengine.valuetype"_lang, { "edz.gui.cheatengine.valuetype.u8"_lang, "edz.gui.cheatengine.valuetype.s8"_lang, "edz.gui.cheatengine.valuetype.u16"_lang, "edz.gui.cheatengine.valuetype.s16"_lang, "edz.gui.cheatengine.valuetype.u32"_lang, "edz.gui.cheatengine.valuetype.s32"_lang, "edz.gui.cheatengine.valuetype.u64"_lang, "edz.gui.cheatengine.valuetype.s64"_lang, "edz.gui.cheatengine.valuetype.float"_lang, "edz.gui.cheatengine.valuetype.double"_lang, "edz.gui.cheatengine.valuetype.string"_lang, "edz.gui.cheatengine.valuetype.array"_lang });
+        auto scanRegionItem = new brls::SelectListItem("edz.gui.cheatengine.scanregion"_lang, { "edz.gui.cheatengine.scanregion.heap"_lang, "edz.gui.cheatengine.scanregion.main"_lang, "edz.gui.cheatengine.scanregion.both"_lang });
+        auto valueItem      = new brls::ListItem("edz.gui.cheatengine.value"_lang);
+        auto fastScanItem   = new brls::ToggleListItem("edz.gui.cheatengine.fastmode"_lang, true, "edz.gui.cheatengine.fastmode.desc"_lang);
 
         hexViewItem->setValue(Fonts::MaterialIcons::SUBMENU);
         hexViewItem->setClickListener([=](brls::View *view) {
-            auto regionSelection = new brls::Dialog("Look at the HEAP or MAIN section?");
+            auto regionSelection = new brls::Dialog("edz.gui.hexeditor.dialog"_lang);
 
-            regionSelection->addButton("HEAP", [=](brls::View *view) {
+            regionSelection->addButton("edz.gui.cheatengine.scanregion.heap"_lang, [=](brls::View *view) {
                 Gui::changeTo<GuiHexEditor>(cheat::CheatManager::getHeapRegion().getBase());
             });
 
-            regionSelection->addButton("MAIN", [=](brls::View *view) {
+            regionSelection->addButton("edz.gui.cheatengine.scanregion.main"_lang, [=](brls::View *view) {
                 Gui::changeTo<GuiHexEditor>(cheat::CheatManager::getMainRegion().getBase());
             });
 
@@ -108,7 +108,7 @@ namespace edz::ui {
                         hlp::openSwkbdForNumber([&](std::string str) {
                             s64 valueToWrite = strtoll(str.c_str(), nullptr, 10);
                             cheat::CheatManager::writeMemory(address, &valueToWrite, this->m_dataType.getSize());
-                        }, "Enter a new value", "", "", "", 10);
+                        }, "edz.widget.integer.title"_lang, "", "", "", 10);
                     });
 
                     list->addView(item);
@@ -117,7 +117,7 @@ namespace edz::ui {
 
                 rootFrame->setContentView(list);
                 
-                brls::PopupFrame::open("Found Addresses", rootFrame);
+                brls::PopupFrame::open("edz.gui.cheatengine.foundaddresses"_lang, rootFrame);
             }
 
         });
@@ -188,7 +188,7 @@ namespace edz::ui {
         list->addView(foundAddresses);
         list->addView(clearSearchItem);
 
-        list->addView(new brls::Header("Search Settings", false));
+        list->addView(new brls::Header("edz.gui.cheatengine.header.settings"_lang, false));
         list->addView(scanTypeItem);
         list->addView(valueTypeItem);
         list->addView(scanRegionItem);
@@ -212,7 +212,7 @@ namespace edz::ui {
                     }
 
 
-                }, "Enter Search Value", "Enter the value you want to search for", this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, this->m_dataType.getSize() * 8))));
+                }, "edz.gui.cheatengine.value.input.title"_lang, "edz.gui.cheatengine.value.input.desc"_lang, this->m_dataType.isSigned() ? "-" : "", this->m_dataType.isFloatingPoint() ? "." : "", std::ceil(std::log10(std::pow(2, this->m_dataType.getSize() * 8))));
             });
             list->addView(valueItem);
         }
@@ -282,7 +282,7 @@ namespace edz::ui {
 
 
     brls::View* GuiCheatEngine::setupUI() {
-        this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.button.search"_lang);
+        this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.sidebar.search"_lang);
 
         this->m_rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
 
@@ -323,7 +323,7 @@ namespace edz::ui {
                 foundAddressesFile.write(reinterpret_cast<u8*>(&cheat::CheatEngine::getFoundAddresses()[0]), cheat::CheatEngine::getFoundAddresses().size() * sizeof(addr_t));
 
                 appletSetMediaPlaybackState(false);
-            }, "Searching memory. This might take a while...");
+            }, "edz.gui.cheatengine.dialog.searching"_lang);
             
         });
 
@@ -332,7 +332,7 @@ namespace edz::ui {
 
     void GuiCheatEngine::update() {
         if (this->m_rootFrame != nullptr)
-            this->m_rootFrame->getSidebar()->setSubtitle(hlp::formatString("Found Addresses: %d", cheat::CheatEngine::getFoundAddresses().size()));
+            this->m_rootFrame->getSidebar()->setSubtitle(hlp::formatString("edz.gui.cheatengine.sidebar.foundaddresses"_lang, cheat::CheatEngine::getFoundAddresses().size()));
     }
 
 }

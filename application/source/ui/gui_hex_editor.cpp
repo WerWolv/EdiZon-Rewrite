@@ -27,7 +27,7 @@ namespace edz::ui {
     brls::View* GuiHexEditor::setupUI() {
         brls::AppletFrame *rootFrame = new brls::AppletFrame(false, false);
 
-        rootFrame->setTitle("Hex Memory View");
+        rootFrame->setTitle("edz.gui.hexeditor.title"_lang);
 
         cheat::CheatManager::readMemory(this->m_address, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);
 
@@ -41,9 +41,12 @@ namespace edz::ui {
                     cheat::CheatManager::writeMemory(address, &valueToWrite, 1);
                     cheat::CheatManager::readMemory(this->m_address, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);
                     editor->reloadMemory();
-                }, "Enter a new value", "", "", "", 3);
+                }, "edz.widget.integer.title"_lang, "", "", "", 3);
             } else {
                 brls::Logger::debug("%lx %lx", address, value);
+                if (address == 0)
+                    return;
+                    
                 this->m_address = address;
                 cheat::CheatManager::readMemory(this->m_address, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);
                 editor->setDisplayAddress(this->m_address);

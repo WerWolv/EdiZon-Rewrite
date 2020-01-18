@@ -19,6 +19,7 @@
 
 #include "ui/pages/page_splash.hpp"
 
+#include "helpers/utils.hpp"
 
 namespace edz::ui::page {
 
@@ -27,7 +28,7 @@ namespace edz::ui::page {
         this->m_logo->setParent(this);
         
         if (showWarning) {
-            this->m_warning = new brls::Label(brls::LabelStyle::CRASH ,"EdiZon depends on many of Atmosphere's latest features. Please update to a version greater than or equal to AMS 0.10.0.\nPress \uE0EF to exit", true);
+            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString()), true);
             this->m_warning->setParent(this);
         }
     }

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/go-restruct/restruct"
 )
@@ -49,11 +48,12 @@ func main() {
 
 //SaveFile Struct containing save file information
 type SaveFile struct {
-	FileName string    `json:"fileName"`
-	Date     time.Time `json:"date"`
-	TitleID  string    `json:"titleID"`
+	FileName string `json:"fileName"`
+	Date     string `json:"string"`
+	TitleID  string `json:"titleID"`
 }
 
+//SaveFileList Struct containing a list of SaveFiles
 type SaveFileList struct {
 	SaveFiles []SaveFile `json:"saveFiles"`
 }
@@ -121,7 +121,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			vec.SaveFiles = append(vec.SaveFiles, SaveFile{FileName: file.Name(), Date: file.ModTime(), TitleID: fmt.Sprintf("%016x", header.TitleID)})
+			vec.SaveFiles = append(vec.SaveFiles, SaveFile{FileName: file.Name(), Date: file.ModTime().Format("15:04 - 2. January 2006"), TitleID: fmt.Sprintf("%016x", header.TitleID)})
 			i++
 		}
 
