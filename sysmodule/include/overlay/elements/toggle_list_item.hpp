@@ -20,29 +20,33 @@
 #pragma once
 
 #include "overlay/elements/element.hpp"
+#include "overlay/elements/list_item.hpp"
 
 #include <string>
 #include <functional>
 
 namespace edz::ovl::element {
 
-    class ListItem : public Element {
+    class ToggleListItem : public ListItem {
     public:
-        ListItem(std::string text);
-        ~ListItem();
+        ToggleListItem(std::string text, bool defaultState);
+        ~ToggleListItem();
 
         Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
 
         void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
 
+        bool getState() { return this->m_state; }
+        void setState(bool state) { this->m_state = state; }
+
         bool onClick(s64 key) override;
 
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
+        void setStateChangeListener(std::function<void(bool)> stateChangeListener) { this->m_stateChangeListener = stateChangeListener; }
 
     private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
+        bool m_state;
+        std::function<void(bool)> m_stateChangeListener = nullptr;
     };
 
 }

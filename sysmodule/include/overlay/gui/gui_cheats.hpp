@@ -19,30 +19,24 @@
 
 #pragma once
 
-#include "overlay/elements/element.hpp"
+#include "overlay/gui/gui.hpp"
 
-#include <string>
-#include <functional>
+#include "overlay/elements/toggle_list_item.hpp"
 
-namespace edz::ovl::element {
+#include <vector>
 
-    class ListItem : public Element {
+namespace edz::ovl::gui {
+
+    class GuiCheats : public Gui {
     public:
-        ListItem(std::string text);
-        ~ListItem();
+        GuiCheats();
+        ~GuiCheats();
 
-        Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
-
-        void draw(ovl::Screen *screen, u16 x, u16 y) override;
-        void layout() override;
-
-        bool onClick(s64 key) override;
-
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
+        Element* createUI() override;
+        void update() override;
 
     private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
+        std::vector<element::ToggleListItem*> m_cheatToggleItems;
     };
 
 }

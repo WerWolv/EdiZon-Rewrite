@@ -1,6 +1,6 @@
 application/build/
 application/out/
-application/romfs/sysmodule
+application/romfs/sysmodule/exefs.nsp
 
 sysmodule/build/
 sysmodule/out/

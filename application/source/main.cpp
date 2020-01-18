@@ -169,8 +169,8 @@ int main(int argc, char *argv[]) {
 
     // Unpack background service
     {
-        hlp::File romfsSysmoduleFile("romfs:/sysmodule/exefs.nsp");
-        romfsSysmoduleFile.copyTo(hlp::getLFSContentsPath() + "/01000000000ED150/exefs.nsp");
+        hlp::Folder romfsSysmoduleFile("romfs:/sysmodule");
+        romfsSysmoduleFile.copyTo(hlp::getLFSContentsPath() + "/010000000007E51A");
     }
 
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
@@ -188,8 +188,6 @@ int main(int argc, char *argv[]) {
     // Main loop for UI
     while (brls::Application::mainLoop() && appletMainLoop()) {
         ui::Gui::tick();
-
-        hidTouchRead()
     }
 
     // Cleanup after ourselves

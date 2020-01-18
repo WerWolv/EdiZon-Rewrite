@@ -29,8 +29,7 @@ sysmodule:
 
 	@printf "\x1b[32;01m ==== Compiled Successfully ==== \x1b[0m\n\n"
 	
-	@rm -rf ./application/romfs/sysmodule
-	@mkdir ./application/romfs/sysmodule
+	@rm -rf ./application/romfs/sysmodule/exefs.nsp
 	@cp ./sysmodule/out/exefs.nsp ./application/romfs/sysmodule/exefs.nsp
 
 install: application

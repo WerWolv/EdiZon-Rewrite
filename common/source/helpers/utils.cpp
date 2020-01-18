@@ -396,13 +396,13 @@ namespace edz::hlp {
 
     void enableAutostartOfBackgroundService() {
         // Create boot2.flag file to let the sysmodule get started on boot
-        File file(getLFSContentsPath() + "/01000000000ED150/flags/boot2.flag"); 
+        File file(getLFSContentsPath() + "/010000000007E51A/flags/boot2.flag"); 
         file.createDirectories();
         file.write(nullptr, 0);
     }
 
     void disableAutostartOfBackgroundService() {
-        File(getLFSContentsPath() + "/01000000000ED150/flags/boot2.flag").remove();
+        File(getLFSContentsPath() + "/010000000007E51A/flags/boot2.flag").remove();
     }
 
     EResult startBackgroundService() {

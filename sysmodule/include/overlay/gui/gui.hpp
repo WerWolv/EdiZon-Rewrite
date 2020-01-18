@@ -54,14 +54,29 @@ namespace edz::ovl::gui {
         static void playOutroAnimation();
 
         template<typename T>
-        static Gui* changeTo()   { return Gui::s_nextGui = new T(); }
+        static Gui* changeTo() { 
+            return Gui::s_nextGui = new T();
+        }
 
-        static Gui* getCurrGui() { return Gui::s_currGui; }
+        static Gui* getCurrentGui() { return Gui::s_currGui; }
+
+        static void closeGui() {
+            if (Gui::s_currGui == nullptr)
+                return;
+
+
+            delete Gui::s_currGui;
+            Gui::s_currGui = nullptr;
+        }
 
         static void requestFocus(Element *element, FocusDirection direction);
         static void removeFocus(Element *element = nullptr);
 
         static bool isFocused(Element *element) { return Gui::s_focusedElement == element; }
+
+        static auto getLastFrameTime() {
+            return std::chrono::duration_cast<std::chrono::duration<u64, std::milli>>(Gui::s_lastFrameDuration);
+        }
 
     private:
         static inline Screen *s_screen = nullptr;
@@ -70,10 +85,11 @@ namespace edz::ovl::gui {
         static inline Element *s_topElement = nullptr;
         static inline Element *s_focusedElement = nullptr;
 
+        static inline u8 s_animationCounter = 0;
         static inline bool s_introAnimationPlaying = true;
         static inline bool s_outroAnimationPlaying = true;
 
-        static inline std::chrono::duration<int, std::nano> s_lastFrameDuration = 0s;
+        static inline std::chrono::duration<s64, std::nano> s_lastFrameDuration = 0s;
 
     };
 

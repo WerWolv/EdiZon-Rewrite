@@ -35,11 +35,13 @@ namespace edz::ovl::element {
 
         void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
+        void applyOpacity(float opacity) override;
 
         void addItem(ListItem *listItem);
 
     private:
         std::vector<ListItem*> m_items;
+        u16 m_listOffset = 0;
     };
 
 }

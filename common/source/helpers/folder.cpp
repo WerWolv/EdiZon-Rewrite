@@ -71,11 +71,11 @@ namespace edz::hlp {
                 continue;
 
             if (entry->d_type == DT_DIR) {
-                Folder folder(hlp::formatString("%s/%s", this->m_path.c_str(), entry->d_name), entry->d_name);
-                folder.copyTo(hlp::formatString("%s/%s", newPath.c_str(), folder.name().c_str()));
+                Folder folder(hlp::formatString("%s%s", this->m_path.c_str(), entry->d_name), entry->d_name);
+                folder.copyTo(hlp::formatString("%s%s", newPath.c_str(), folder.name().c_str()));
             } else if (entry->d_type == DT_REG) {
-                File file(hlp::formatString("%s/%s", this->m_path.c_str(), entry->d_name));
-                file.copyTo(hlp::formatString("%s/%s", newPath.c_str(), entry->d_name));
+                File file(hlp::formatString("%s%s", this->m_path.c_str(), entry->d_name));
+                file.copyTo(hlp::formatString("%s%s", newPath.c_str(), entry->d_name));
             }
         }
 

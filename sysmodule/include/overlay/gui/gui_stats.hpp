@@ -19,30 +19,25 @@
 
 #pragma once
 
-#include "overlay/elements/element.hpp"
+#include "overlay/gui/gui.hpp"
 
-#include <string>
-#include <functional>
+namespace edz::ovl::gui {
 
-namespace edz::ovl::element {
-
-    class ListItem : public Element {
+    class GuiStats : public Gui {
     public:
-        ListItem(std::string text);
-        ~ListItem();
+        GuiStats();
+        ~GuiStats();
 
-        Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
-
-        void draw(ovl::Screen *screen, u16 x, u16 y) override;
-        void layout() override;
-
-        bool onClick(s64 key) override;
-
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
+        Element* createUI() override;
+        void update() override;
 
     private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
+        ClkrstSession m_clkrstSessionCpu, m_clkrstSessionGpu, m_clkrstSessionMem;
+        int m_ipAddress;
+
+        titleid_t m_runningTitleID;
+        processid_t m_runningProcessID;
+        buildid_t m_runningBuildID;
     };
 
 }

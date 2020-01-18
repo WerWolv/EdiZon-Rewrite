@@ -41,11 +41,18 @@ namespace edz::ovl::element {
         screen->drawRect(x, y, w, 1, a({ 0x5, 0x5, 0x5, 0xF }));
         screen->drawRect(x, y + h - 1, w, 1, a({ 0x5, 0x5, 0x5, 0xF }));
 
-        screen->drawString(this->m_text.c_str(), false, x + 20, y + 45, 25, a({ 0xF, 0xF, 0xF, 0xF }));
+        screen->drawString(this->m_text.c_str(), false, x + 20, y + 45, 23, a({ 0xF, 0xF, 0xF, 0xF }));
     }
 
     void ListItem::layout() {
         this->setSize(FB_WIDTH - 80, 72);
+    }
+
+    bool ListItem::onClick(s64 key) {
+        if (this->m_clickListener != nullptr)
+            return this->m_clickListener(key);
+
+        return false;
     }
 
 }

@@ -51,28 +51,54 @@ namespace edz::ovl::element {
         if (direction == FocusDirection::UP) {
             if (it == this->m_items.begin())
                 return this->m_items[0];
-            else 
+            else {
+                if (oldFocus == *(this->m_items.begin() + this->m_listOffset + 1))
+                    if (this->m_listOffset > 0) {
+                        this->m_listOffset--;
+                        this->layout();
+                    }
+
                 return *(it - 1);
+            }
         } else if (direction == FocusDirection::DOWN) {
             if (it == (this->m_items.end() - 1))
                 return this->m_items[this->m_items.size() - 1];
-            else
+            else {
+                if (oldFocus == *(this->m_items.begin() + this->m_listOffset + 4)) {
+                    if (this->m_listOffset < this->m_items.size()) {
+                        this->m_listOffset++;
+                        this->layout();
+                    }
+                }
+
                 return *(it + 1);
+            }
         }
         
         return *it;
     }
 
     void List::draw(ovl::Screen *screen, u16 x, u16 y) {
-        for (auto &item : this->m_items)
+        u16 i = 0;
+        for (auto &item : this->m_items) {
+            i++;
+            if (i < this->m_listOffset + 1 || i > (this->m_listOffset + 6))
+                continue;
+
             item->frame(screen);
+        }
     }
 
     void List::layout() {
         this->setPosition(40, 175);
 
         u16 y = 175;
+        u16 i = 0;
         for (auto &item : this->m_items) {
+            i++;
+            if (i < this->m_listOffset + 1 || i > (this->m_listOffset + 6))
+                continue;
+
             item->layout();
 
             auto [w, h] = item->getSize();
@@ -82,9 +108,17 @@ namespace edz::ovl::element {
         }
     }
 
+    void List::applyOpacity(float opacity) {
+        for (auto &item : this->m_items)
+            item->setOpacity(opacity);
+    }
+
+
     void List::addItem(ListItem *listItem) {
+        if (listItem == nullptr)
+            return;
+
         listItem->setParent(this);
-        
         this->m_items.push_back(listItem);
     }
 

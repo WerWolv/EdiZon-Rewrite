@@ -49,7 +49,7 @@ extern "C" {
 
     u32 __nx_applet_type = AppletType_None;
 
-    #define INNER_HEAP_SIZE 0x200000
+    #define INNER_HEAP_SIZE 0x290000
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
@@ -91,6 +91,9 @@ extern "C" {
             // Temparature display
             ER_ASSERT(tsInitialize());
 
+            // WiFi signal strength display
+            ER_ASSERT(wlaninfInitialize());
+
             // Nintendo Font
             ER_ASSERT(plInitialize());
 
@@ -121,6 +124,7 @@ extern "C" {
         hidExit();
         pmdmntExit();
         tsExit();
+        wlaninfExit();
         plExit();
         dmntcht::exit();
         cheat::CheatManager::exit();
@@ -202,21 +206,22 @@ static void ovlLoop(void *args) {
         hlp::focusOverlay(true);
 
         // By default, open GuiMain
-        ovl::gui::Gui *gui = ovl::gui::Gui::changeTo<ovl::gui::GuiMain>();
+        ovl::gui::Gui::changeTo<ovl::gui::GuiMain>();
 
         ovl::gui::Gui::playIntroAnimation();
 
         // Draw the overlay till the user closes the overlay
         while (true) {
-            
             // Update and draw overlay
             ovl::gui::Gui::tick();
 
             // Handle button, joystick and touch input data
             ovl::gui::Gui::hidUpdate(shData->keysDown, shData->keysHeld, shData->joyStickPosLeft, shData->joyStickPosRight, shData->touchX, shData->touchY);
 
-            if (gui->shouldClose())
+            if (ovl::gui::Gui::getCurrentGui()->shouldClose()) {
+                ovl::gui::Gui::closeGui();
                 break;
+            }
 
             shData->inputMutex.unlock();
             ovl::Screen::waitForVsync();

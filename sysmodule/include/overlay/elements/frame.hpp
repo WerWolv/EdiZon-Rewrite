@@ -21,28 +21,26 @@
 
 #include "overlay/elements/element.hpp"
 
-#include <string>
-#include <functional>
+#include <vector>
 
 namespace edz::ovl::element {
 
-    class ListItem : public Element {
+    class Frame : public Element {
     public:
-        ListItem(std::string text);
-        ~ListItem();
+        Frame();
+        ~Frame();
 
         Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
 
         void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
-
+        void applyOpacity(float opacity) override;
         bool onClick(s64 key) override;
-
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
+        
+        void addElement(Element *element);
 
     private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
+        std::vector<Element*> m_children;
     };
 
 }

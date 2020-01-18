@@ -17,32 +17,28 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "overlay/elements/element.hpp"
-
-#include <string>
-#include <functional>
+#include "overlay/elements/custom_drawer.hpp"
 
 namespace edz::ovl::element {
 
-    class ListItem : public Element {
-    public:
-        ListItem(std::string text);
-        ~ListItem();
+    CustomDrawer::CustomDrawer(u16 x, u16 y, u16 w, u16 h, std::function<void(u16 x, u16 y, ovl::Screen *screen)> drawer) : m_drawer(drawer) {
+        this->setPosition(x, y);
+        this->setSize(w, h);
+    }
 
-        Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
+    CustomDrawer::~CustomDrawer() {
 
-        void draw(ovl::Screen *screen, u16 x, u16 y) override;
-        void layout() override;
+    }
 
-        bool onClick(s64 key) override;
+    void CustomDrawer::draw(ovl::Screen *screen, u16 x1, u16 y1) {
+        const auto [x, y] = this->getPosition();
 
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
+        if (this->m_drawer != nullptr)
+            this->m_drawer(x, y, screen);
+    }
 
-    private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
-    };
+    void CustomDrawer::layout() {
+
+    }
 
 }

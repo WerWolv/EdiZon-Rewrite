@@ -21,28 +21,24 @@
 
 #include "overlay/elements/element.hpp"
 
-#include <string>
 #include <functional>
 
 namespace edz::ovl::element {
 
-    class ListItem : public Element {
+    class CustomDrawer : public Element {
     public:
-        ListItem(std::string text);
-        ~ListItem();
+        CustomDrawer(u16 x, u16 y, u16 w, u16 h, std::function<void(u16 x, u16 y, ovl::Screen *screen)> drawer);
+        ~CustomDrawer();
 
-        Element* requestFocus(Element *oldFocus, FocusDirection direction) override;
+        Element* requestFocus(Element *oldFocus, FocusDirection direction) {
+            return nullptr;
+        }
 
         void draw(ovl::Screen *screen, u16 x, u16 y) override;
         void layout() override;
 
-        bool onClick(s64 key) override;
-
-        void setClickListener(std::function<bool(s64 keysDown)> clickListener) { this->m_clickListener = clickListener; }
-
     private:
-        std::string m_text;
-        std::function<bool(s64 keysDown)> m_clickListener = nullptr;
+        std::function<void(u16 x, u16 y, ovl::Screen *screen)> m_drawer;
     };
 
 }

@@ -25,13 +25,11 @@
 #include <memory>
 #include <utility>
 #include <cmath>
+#include <chrono>
 
 enum class FocusDirection { NONE, UP, DOWN, LEFT, RIGHT };
 
-
 namespace edz::ovl::element {
-
-    static auto &a = edz::ovl::Screen::a;
     
     class Element {
     public:
@@ -40,13 +38,15 @@ namespace edz::ovl::element {
 
         virtual Element* requestFocus(Element *oldFocus, FocusDirection direction) = 0;
         
-        virtual bool onClick(u64 key) {
+        virtual bool onClick(s64 key) {
             return false;
         }
 
         virtual bool onTouch(u32 x, u32 y) {
             return false;
         }
+
+        void shakeFocus(FocusDirection direction);
 
         virtual void draw(ovl::Screen *screen, u16 x, u16 y) = 0;
         virtual void layout() = 0;
@@ -64,15 +64,27 @@ namespace edz::ovl::element {
         constexpr void setSize(u16 width, u16 height) { this->m_width = width; this->m_height = height; }
         constexpr std::pair<u16, u16> getSize() { return { this->m_width, this->m_height }; }
 
-        constexpr bool isFocused()  { return this->m_focused;  }
-        constexpr void focus()      { this->m_focused = true;  }
-        constexpr void unfocus()    { this->m_focused = false; }
+        void setOpacity(float opacity) { this->m_opacity = opacity; applyOpacity(opacity); }
+
+
+    protected:
+        virtual void applyOpacity(float opacity) { }
+
+        rgba4444_t a(const rgba4444_t &c) {
+            return ovl::Screen::a((c.rgba & 0x0FFF) | (static_cast<u8>(c.a * Element::m_opacity) << 12));
+        }
 
     private:
         Element *m_parent = nullptr;
-        bool m_focused = false;
+        float m_opacity = 1.0F;
 
         u16 m_x = 0, m_y = 0, m_width = 0, m_height = 0;
+
+        // Highlight shake animation
+        bool m_highlightShaking = false;
+        std::chrono::system_clock::time_point m_highlightShakingStartTime;
+        FocusDirection m_highlightShakingDirection;
+
     };
 
 }

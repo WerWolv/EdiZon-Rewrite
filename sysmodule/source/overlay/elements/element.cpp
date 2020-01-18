@@ -28,6 +28,15 @@ namespace edz::ovl::element {
 
         this->draw(screen, this->m_x, this->m_y);
     }
+    
+    int shakeAnimation(std::chrono::system_clock::duration t, float a) {
+        float w = 0.2F;
+        float tau = 0.05F;
+
+        int t_ = t.count() / 1'000'000;
+
+        return roundf(a * exp(-(tau * t_) * sin(w * t_)));
+    }
 
     void Element::drawFocus(ovl::Screen *screen) {
         static float counter = 0;
@@ -39,12 +48,50 @@ namespace edz::ovl::element {
 
         counter += 0.2F;
 
-        screen->drawRect(this->m_x - 4, this->m_y - 4, this->m_width + 8, 4, a(highlightColor));
-        screen->drawRect(this->m_x - 4, this->m_y + this->m_height, this->m_width + 8, 4, a(highlightColor));
-        screen->drawRect(this->m_x - 4, this->m_y, 4, this->m_height, a(highlightColor));
-        screen->drawRect(this->m_x + this->m_width, this->m_y, 4, this->m_height, a(highlightColor));
+        s32 x = 0, y = 0;
+
+        if (this->m_highlightShaking) {
+            auto t = (std::chrono::system_clock::now() - this->m_highlightShakingStartTime);
+            if (t >= 100ms)
+                this->m_highlightShaking = false;
+            else {
+                s32 amplitude = std::rand() % 5 + 5;
+
+                switch (this->m_highlightShakingDirection) {
+                    case FocusDirection::UP:
+                        y -= shakeAnimation(t, amplitude);
+                        break;
+                    case FocusDirection::DOWN:
+                        y += shakeAnimation(t, amplitude);
+                        break;
+                    case FocusDirection::LEFT:
+                        x -= shakeAnimation(t, amplitude);
+                        break;
+                    case FocusDirection::RIGHT:
+                        x += shakeAnimation(t, amplitude);
+                        break;
+                    default:
+                        break;
+                }
+
+                x = std::clamp(x, -amplitude, amplitude);
+                y = std::clamp(y, -amplitude, amplitude);
+            }
+        }
 
         screen->drawRect(this->m_x, this->m_y, this->m_width, this->m_height, a(0xF000));
+
+        screen->drawRect(this->m_x + x - 4, this->m_y + y - 4, this->m_width + 8, 4, a(highlightColor));
+        screen->drawRect(this->m_x + x - 4, this->m_y + y + this->m_height, this->m_width + 8, 4, a(highlightColor));
+        screen->drawRect(this->m_x + x - 4, this->m_y + y, 4, this->m_height, a(highlightColor));
+        screen->drawRect(this->m_x + x + this->m_width, this->m_y + y, 4, this->m_height, a(highlightColor));
+
+    }
+
+    void Element::shakeFocus(FocusDirection direction) {
+        this->m_highlightShaking = true;
+        this->m_highlightShakingDirection = direction;
+        this->m_highlightShakingStartTime = std::chrono::system_clock::now();
     }
 
 }

@@ -85,4 +85,4 @@
     using namespace std::string_literals;       // String user defined literals
 
     /* TitleID of the bundled sysmodule */
-    #define EDIZON_SYSMODULE_TITLEID        0x01000000000ED150
+    #define EDIZON_SYSMODULE_TITLEID        0x010000000007E51A
