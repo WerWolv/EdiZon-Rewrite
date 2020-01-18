@@ -202,12 +202,20 @@ namespace edz::ui {
             auto item = new brls::ListItem(hlp::formatString("%s [ %s ]", saveFile.name.c_str(), allTitles[saveFile.titleID]->getName().c_str()), "", saveFile.date);
             item->setThumbnail(allTitles[saveFile.titleID]->getIcon());
             item->setClickListener([saveRepoUrl, saveFile](brls::View *view) {
-                Gui::runAsyncWithDialog([=] {
-                    api::SaveRepoAPI saveRepoApi(saveRepoUrl);
+                hlp::openPlayerSelect([=](auto &account) {
+                    Gui::runAsyncWithDialog([=, &account] {
+                        auto &allTitles = save::SaveFileSystem::getAllTitles();
+                        api::SaveRepoAPI saveRepoApi(saveRepoUrl);
 
-                    auto downloadFolder = hlp::createTmpFolder();
-                    saveRepoApi.getFile(saveFile.name, downloadFolder.path() + saveFile.name);
-                }, "edz.gui.main.repos.dialog.download"_lang);
+                        hlp::File downloadedFile = hlp::File(hlp::createTmpFolder().path() + saveFile.name);
+                        if (saveRepoApi.getFile(saveFile.name, downloadedFile.path()).succeeded()) {
+                            std::string backupName = saveFile.name.substr(0, saveFile.name.length() - 4);
+                            save::SaveManager::restore(allTitles[saveFile.titleID], account, backupName, downloadedFile.parent());
+                        }
+                        else
+                            brls::Logger::error("Failed to download save file");
+                    }, "edz.gui.main.repos.dialog.download"_lang);
+                });
             });
 
             list->addView(item);
