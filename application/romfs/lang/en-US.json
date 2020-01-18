@@ -124,6 +124,8 @@
     "edz.gui.popup.management.backup.dropdown.title"    : "Select the backup you want to restore",
     "edz.gui.popup.management.delete.title"             : "Delete save data",
     "edz.gui.popup.management.delete.subtitle"          : "Delete the save data this game",
+    "edz.gui.popup.management.delete.confirm"           : "Are your sure you want to delete your save data? This cannot be undone without a backup.",
+    "edz.gui.popup.management.delete.deleting"          : "Deleting save data...",
     "edz.gui.popup.management.swapaccount.title"        : "Swap with different account",
     "edz.gui.popup.management.swapaccount.subtitle"     : "Swap two account's save files",
     "edz.gui.popup.management.createfs.title"           : "Create Save FS",
@@ -179,7 +181,14 @@
 
     "edz.gui.hexeditor.title"       : "Hex Memory View",
     "edz.gui.hexeditor.dialog"      : "Do you want to inspect the HEAP or MAIN region?",
- 
+    
+    "edz.element.titleinfo.name"        : "Name",
+    "edz.element.titleinfo.author"      : "Author",
+    "edz.element.titleinfo.version"     : "Version",
+    "edz.element.titleinfo.programid"   : "Program ID",
+    "edz.element.titleinfo.buildid"     : "Build ID",
+    "edz.element.titleinfo.processid"   : "Process ID",
+
     "edz.fatal.service.init"        : "An error occurred during service initialization.\nError code: ",
     "edz.fatal.exception"           : "A fatal exception occured!",
     "edz.fatal.exception.reason"    : "Reason"

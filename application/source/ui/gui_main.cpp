@@ -139,12 +139,12 @@ namespace edz::ui {
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
         deleteItem->setClickListener([&title, this](brls::View *view) {
 
-            brls::Dialog *confirmationDialog = new brls::Dialog("Are your sure you want to delete your save data? This cannot be undone without a backup.");
+            brls::Dialog *confirmationDialog = new brls::Dialog("edz.gui.popup.management.delete.confirm"_lang);
             confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
             confirmationDialog->addButton("Yes", [confirmationDialog, &title, this](brls::View *view) {
                 if (hlp::openPctlPrompt([this]{})) {
                     hlp::openPlayerSelect([&, this](std::unique_ptr<save::Account> &account) {
-                        Gui::runLater([&]() { Gui::runAsyncWithDialog([&] { save::SaveManager::remove(title, account); }, "Deleting save data..."); }, 1);
+                        Gui::runLater([&]() { Gui::runAsyncWithDialog([&] { save::SaveManager::remove(title, account); }, "edz.gui.popup.management.delete.deleting"_lang); }, 1);
                     });
                 }
                 confirmationDialog->close();
@@ -550,7 +550,7 @@ namespace edz::ui {
                         } else {
                             list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
                             
-                            brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("Apply online cheats", "edz.gui.main.cheats.button.load.online.desc"_lang);
+                            brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("edz.gui.main.cheats.button.load.online"_lang, "edz.gui.main.cheats.button.load.online.desc"_lang);
                             applyOnlineCheatsItem->setClickListener([=](brls::View *view) {
                                 brls::Application::blockInputs();
                                 brls::Application::removeFocus();
@@ -719,7 +719,7 @@ namespace edz::ui {
 
         // SwitchCheatsDB Login
         brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang, "edz.gui.main.settings.scdbinfo"_lang);
-        scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "Not logged in");
+        scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "edz.gui.main.settings.account.nologin"_lang);
         scdbLoginItem->setClickListener([=](brls::View *view) { 
             if (GET_CONFIG(Online.loggedIn)) {
                 brls::Dialog *dialog = new brls::Dialog("edz.gui.main.settings.dialog.logout"_lang);

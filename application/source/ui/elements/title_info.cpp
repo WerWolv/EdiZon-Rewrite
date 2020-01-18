@@ -32,12 +32,12 @@ namespace edz::ui::element {
 
         this->m_table = new brls::Table();
         this->m_table->setParent(this);
-        this->m_table->addRow(brls::TableRowType::HEADER, "Name",      hlp::limitStringLength(title->getName(), 32));
-        this->m_table->addRow(brls::TableRowType::BODY,   "Author",    hlp::limitStringLength(title->getAuthor(), 32));
-        this->m_table->addRow(brls::TableRowType::BODY,   "Version",   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
-        this->m_table->addRow(brls::TableRowType::BODY,   "TitleID",   title->getIDString());
-        this->m_table->addRow(brls::TableRowType::BODY,   "ProcessID", std::to_string(save::Title::getRunningProcessID()));
-        this->m_table->addRow(brls::TableRowType::BODY,   "BuildID",   hlp::toHexString(cheat::CheatManager::getBuildID()));
+        this->m_table->addRow(brls::TableRowType::HEADER, "edz.element.titleinfo.name"_lang,      hlp::limitStringLength(title->getName(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "edz.element.titleinfo.author"_lang,    hlp::limitStringLength(title->getAuthor(), 32));
+        this->m_table->addRow(brls::TableRowType::BODY,   "edz.element.titleinfo.version"_lang,   title->getVersionString() + " [ v" + std::to_string(title->getVersion()) + " ]");
+        this->m_table->addRow(brls::TableRowType::BODY,   "edz.element.titleinfo.programid"_lang, title->getIDString());
+        this->m_table->addRow(brls::TableRowType::BODY,   "edz.element.titleinfo.buildid"_lang,   hlp::toHexString(cheat::CheatManager::getBuildID()));
+        this->m_table->addRow(brls::TableRowType::BODY,   "edz.element.titleinfo.processid"_lang, std::to_string(save::Title::getRunningProcessID()));
     }
 
     TitleInfo::~TitleInfo() {
