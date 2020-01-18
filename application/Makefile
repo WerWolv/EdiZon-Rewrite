@@ -44,6 +44,9 @@ else
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 endif
 
+APP_TITLE		:=	EdiZon
+APP_AUTHOR		:=	WerWolv
+
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build

@@ -140,8 +140,8 @@ namespace edz::ui {
         deleteItem->setClickListener([&title, this](brls::View *view) {
 
             brls::Dialog *confirmationDialog = new brls::Dialog("edz.gui.popup.management.delete.confirm"_lang);
-            confirmationDialog->addButton("No", [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
-            confirmationDialog->addButton("Yes", [confirmationDialog, &title, this](brls::View *view) {
+            confirmationDialog->addButton("edz.dialog.no"_lang, [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
+            confirmationDialog->addButton("edz.dialog.yes"_lang, [confirmationDialog, &title, this](brls::View *view) {
                 if (hlp::openPctlPrompt([this]{})) {
                     hlp::openPlayerSelect([&, this](std::unique_ptr<save::Account> &account) {
                         Gui::runLater([&]() { Gui::runAsyncWithDialog([&] { save::SaveManager::remove(title, account); }, "edz.gui.popup.management.delete.deleting"_lang); }, 1);
@@ -421,7 +421,7 @@ namespace edz::ui {
         else {
             for (auto provider : providers) {
                 brls::ListItem *listItem = new brls::ListItem(provider.name + "edz.by"_lang + provider.owner, "", provider.description);
-                listItem->setClickListener([=](brls::View *view) { this->createSaveRepoPopup(provider.url); });
+                listItem->setClickListener([=](brls::View *view) { brls::Logger::error("%s", this->createSaveRepoPopup(provider.url).getString().c_str()); });
                 list->addView(listItem);
             }
         }
@@ -517,8 +517,7 @@ namespace edz::ui {
 
 
         list->addView(this->m_sysmoduleRunningOption);
-        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note.1", true));
-        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note.2", true));
+        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note"_lang, true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
         GuiMain::m_cheatToggleListItems.clear();

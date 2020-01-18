@@ -3,9 +3,6 @@ export VERSION_MINOR 	:= 0
 export VERSION_MICRO 	:= 0
 export SNAPSHOT		 	:= 1
 
-export APP_TITLE		:=	EdiZon
-export APP_AUTHOR		:=	WerWolv
-
 .PHONY: clean all application sysmodule release
 
 all: application sysmodule

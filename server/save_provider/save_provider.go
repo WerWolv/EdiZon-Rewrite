@@ -49,7 +49,7 @@ func main() {
 //SaveFile Struct containing save file information
 type SaveFile struct {
 	FileName string `json:"fileName"`
-	Date     string `json:"string"`
+	Date     string `json:"date"`
 	TitleID  string `json:"titleID"`
 }
 

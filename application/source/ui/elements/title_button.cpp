@@ -100,7 +100,6 @@ namespace edz::ui::element {
     }
 
 
-    // TODO: Fix focus not being able to exit the TitleList sideways
     brls::View* HorizontalTitleList::defaultFocus(brls::View *oldFocus) {
         TitleButton *oldTitleButton = dynamic_cast<TitleButton*>(oldFocus);
         

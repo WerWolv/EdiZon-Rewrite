@@ -84,7 +84,6 @@ namespace edz::save {
         return ResultSuccess;
     }
 
-    // TODO: Finish
     EResult SaveManager::backup(std::unique_ptr<Title> &title, std::string backupName, std::string basePath) {
         hlp::File backupFile;
 
