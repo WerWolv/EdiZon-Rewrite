@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2020 natinusala
  * Copyright (C) 2019 WerWolv
  * 
  * This file is part of EdiZon.
