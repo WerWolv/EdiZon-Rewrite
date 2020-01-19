@@ -54,8 +54,14 @@ namespace edz::hlp {
     bool isPctlEnabled() {
         bool enabled = false;
 
-        if (EResult(pctlIsRestrictionEnabled(&enabled)).failed())
-            return false;
+        // 9.1.0+ reduced the number of sessions pctl gives out. Therefor we have to release this
+        // session again as soon as we don't need it anymore, otherwise the pctlauth applet fatals.
+        pctlInitialize();
+
+        // If this call fails, enabled will stay unset
+        pctlIsRestrictionEnabled(&enabled);
+
+        pctlExit();
 
         return enabled;
     }

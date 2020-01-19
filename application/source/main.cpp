@@ -58,9 +58,6 @@ EResult initServices() {
     // Account querying
     ER_TRY(accountInitialize(AccountServiceType_Administrator));
 
-    // Parential control lockdown
-    ER_TRY(pctlInitialize());
-
     // Overclock
     if (hosversionBefore(8, 0, 0)) {
         ER_TRY(pcvInitialize());
@@ -102,7 +99,6 @@ void exitServices() {
     ncmExit();
     nsExit();
     accountExit();
-    pctlExit();
     pcvExit();
     clkrstExit();
     setExit();
