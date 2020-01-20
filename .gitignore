@@ -2,8 +2,8 @@ application/build/
 application/out/
 application/romfs/sysmodule/exefs.nsp
 
-sysmodule/build/
-sysmodule/out/
+overlay/build/
+overlay/out/
 
 companion/node_modules
 

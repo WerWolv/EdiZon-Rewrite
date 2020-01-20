@@ -10,9 +10,9 @@
 [submodule "application/libs/zipper"]
 	path = application/libs/zipper
 	url = https://github.com/sebastiandev/zipper
-[submodule "sysmodule/libs/Atmosphere-libs"]
-	path = sysmodule/libs/Atmosphere-libs
-	url = https://github.com/Atmosphere-NX/Atmosphere-libs
-[submodule "sysmodule/libs/libtesla"]
-	path = sysmodule/libs/libtesla
+[submodule "https://github.com/WerWolv/libtesla"]
+	path = https://github.com/WerWolv/libtesla
+	url = overlay/libs/libtesla
+[submodule "overlay/libs/libtesla"]
+	path = overlay/libs/libtesla
 	url = https://github.com/WerWolv/libtesla

@@ -7,7 +7,6 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
-include $(TOPDIR)/libs/Atmosphere-libs/config/common.mk
 include $(TOPDIR)/../switch_rules
 
 ifeq ($(SNAPSHOT), 1)
@@ -16,12 +15,15 @@ else
 	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 endif
 
-TARGET			:=	$(notdir $(CURDIR))
+APP_TITLE		:=	EdiZon
+APP_AUTHOR		:=	WerWolv
+
+TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	../common/source libs/Atmosphere-libs/libstratosphere/source
+SOURCES_TOP		:=	../common/source source libs/libtesla/source
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include ../common/include libs/Atmosphere-libs/libstratosphere/include libs/Atmosphere-libs/libvapours/include
+INCLUDES		:=	include ../common/include libs/libtesla/include
 EXCLUDES		:=  dmntcht.c
 DATA			:=	data
 #---------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ LIBDIRS	:= $(PORTLIBS) $(LIBNX)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/exefs
+export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/ovlEdiZon
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -134,7 +136,7 @@ ifeq ($(strip $(NO_ICON)),)
 endif
 
 ifeq ($(strip $(NO_NACP)),)
-	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/EdiZonSysmodule.nacp
+	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/ovlEdiZon.nacp
 endif
 
 ifneq ($(APP_TITLEID),)
@@ -174,25 +176,16 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-ifeq ($(strip $(APP_JSON)),)
+all	:  $(OUTPUT).ovl
 
-all	:	$(OUTPUT).nro
-
-ifeq ($(strip $(NO_NACP)),)
-$(OUTPUT).nro	:	$(OUTPUT).elf $(OUTPUT).nacp
-else
-$(OUTPUT).nro	:	$(OUTPUT).elf
-endif
-
-else
-
-all	:	$(OUTPUT).nsp
+$(OUTPUT).ovl	:	$(OUTPUT).nro
+	@cp $(OUTPUT).nro $(OUTPUT).ovl
 
 $(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
 
 $(OUTPUT).nso	:	$(OUTPUT).elf
 
-endif
+$(OUTPUT).nro	:	$(OUTPUT).nso $(OUTPUT).nacp
 
 $(OUTPUT).elf	:	$(OFILES)
 
