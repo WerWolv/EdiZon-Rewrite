@@ -37,10 +37,10 @@ namespace edz::save {
         std::memset(&appControlData, 0x00, sizeof(NsApplicationControlData));
         
         if (EResult(nsGetApplicationControlData(NsApplicationControlSource_Storage, titleID, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize)).failed())
-            throw std::runtime_error("Failed to load language data from title");
+            throw std::runtime_error("Failed to load app control data from title");
             
-        if (EResult(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry)))
-            throw std::runtime_error("Failed to load icon data from title");
+        if (EResult(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry)) || languageEntry == nullptr || languageEntry->name == nullptr || languageEntry->author == nullptr)
+            throw std::runtime_error("Failed to load language data from title");
 
         this->m_titleName = std::string(languageEntry->name);
         this->m_titleAuthor = std::string(languageEntry->author);
