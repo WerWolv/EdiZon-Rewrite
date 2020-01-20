@@ -164,8 +164,7 @@ clean:
 #---------------------------------------------------------------------------------
 install: all
 	@echo " LFTP " $@
-	@touch ./out/boot2.flag
-	@lftp -e "put -O /atmosphere/contents/010000000007E51A ./out/exefs.nsp;bye" $(IP)
+	@lftp -e "put -O /switch/.overlays ./out/ovlEdiZon.ovl;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else

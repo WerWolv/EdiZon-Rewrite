@@ -163,12 +163,6 @@ int main(int argc, char *argv[]) {
     // Load config file
     hlp::ConfigManager::load();
 
-    // Unpack background service
-    {
-        hlp::Folder romfsSysmoduleFile("romfs:/sysmodule");
-        romfsSysmoduleFile.copyTo(hlp::getLFSContentsPath() + "/010000000007E51A");
-    }
-
     printf("\033[0;33mWelcome to EdiZon\033[0m\n");
 
 // Set the startup Gui

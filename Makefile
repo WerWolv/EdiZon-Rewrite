@@ -1,41 +1,37 @@
-export VERSION_MAJOR 	:= 4
-export VERSION_MINOR 	:= 0
-export VERSION_MICRO 	:= 0
-export SNAPSHOT		 	:= 1
+.PHONY: clean all application overlay release
 
-.PHONY: clean all application sysmodule release
-
-all: application sysmodule
+all: application overlay
 
 --release:
 	$(eval SNAPSHOT := 0)
 
 release: --release clean application
 
-application: sysmodule
+application: overlay
 	@printf "\x1b[32;01m ==== Building application ==== \x1b[0m\n"
 
 	@$(MAKE) -C application --no-print-directory
 
 	@printf "\x1b[32;01m ==== Compiled Successfully ==== \x1b[0m\n\n"
 
-sysmodule:
-	@printf "\x1b[32;01m ==== Building Sysmodule ==== \x1b[0m\n"
+overlay:
+	@printf "\x1b[32;01m ==== Building Overlay ==== \x1b[0m\n"
 
-	@$(MAKE) -C sysmodule --no-print-directory
+	@$(MAKE) -C overlay --no-print-directory
 
 	@printf "\x1b[32;01m ==== Compiled Successfully ==== \x1b[0m\n\n"
 	
-	@rm -rf ./application/romfs/sysmodule/exefs.nsp
-	@cp ./sysmodule/out/exefs.nsp ./application/romfs/sysmodule/exefs.nsp
+	@rm -rf ./application/romfs/overlay
+	@mkdir -p ./application/romfs/overlay
+	@cp ./overlay/out/ovlEdiZon.ovl ./application/romfs/overlay/ovlEdiZon.ovl
 
 install: application
 	@$(MAKE) -C application install --no-print-directory
 
-install_sysmodule: sysmodule
-	@$(MAKE) -C sysmodule install --no-print-directory
+install_overlay: overlay
+	@$(MAKE) -C overlay install --no-print-directory
 
 clean:
 	@$(MAKE) -C application clean --no-print-directory
-	@$(MAKE) -C sysmodule clean --no-print-directory
+	@$(MAKE) -C overlay clean --no-print-directory
 	

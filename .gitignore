@@ -1,6 +1,6 @@
 application/build/
 application/out/
-application/romfs/sysmodule/exefs.nsp
+application/romfs/overlay/
 
 overlay/build/
 overlay/out/

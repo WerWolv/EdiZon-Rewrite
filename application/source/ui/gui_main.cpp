@@ -500,26 +500,30 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.sysmodule"_lang, hlp::isProgramRunning(EDIZON_SYSMODULE_TITLEID), "edz.gui.main.cheats.sysmodule.desc"_lang);
+        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File("sdmc:/switch/.overlays/ovlEdiZon.ovl").exists(), "edz.gui.main.cheats.overlay.desc"_lang);
         this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
-            if (listItem->getToggleState())
-                hlp::startBackgroundService();
-            else
-                hlp::stopBackgroundService();
+            if (listItem->getToggleState()) {
+                hlp::File overlayFile("romfs:/overlay/ovlEdiZon.ovl");
+                overlayFile.copyTo("sdmc:/switch/.overlays/ovlEdiZon.ovl");
+            }
+            else {
+                hlp::File overlayFile("sdmc:/switch/.overlays/ovlEdiZon.ovl");
+                overlayFile.remove();
+            }
 
             Gui::runLater([this] {
-                bool actuallyRunning = hlp::isProgramRunning(EDIZON_SYSMODULE_TITLEID);
+                bool actuallExtracted = hlp::File("sdmc:/switch/.overlays/ovlEdiZon.ovl").exists();
 
-                if (actuallyRunning != this->m_sysmoduleRunningOption->getToggleState())
-                this->m_sysmoduleRunningOption->setToggleState(actuallyRunning);
+                if (actuallExtracted != this->m_sysmoduleRunningOption->getToggleState())
+                    this->m_sysmoduleRunningOption->setToggleState(actuallExtracted);
             }, 10);
         });
 
 
         list->addView(this->m_sysmoduleRunningOption);
-        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.sysmodule.note"_lang, true));
+        list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.overlay.note"_lang, true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
         GuiMain::m_cheatToggleListItems.clear();
