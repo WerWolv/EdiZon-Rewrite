@@ -1,13 +1,32 @@
+/**
+ * Copyright (C) 2020 WerWolv
+ *
+ * This file is part of EdiZon.
+ *
+ * EdiZon is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * EdiZon is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package main
 
 import (
-	"fmt"
-	"os"
-	"net/http"
 	"encoding/json"
-	"strings"
-	"log"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 )
 
 var serverName, serverMotd string
@@ -29,25 +48,24 @@ func main() {
 		port = "1337"
 	}
 
-	http.HandleFunc("/",        base)
+	http.HandleFunc("/", base)
 	http.HandleFunc("/version", version)
 
-	http.HandleFunc("/" + apiVersion + "/get",           		get)
-	http.HandleFunc("/" + apiVersion + "/release",       		release)
-	http.HandleFunc("/" + apiVersion + "/notifications", 		notifications)
-	http.HandleFunc("/" + apiVersion + "/official_providers", 	officialProviders)
+	http.HandleFunc("/"+apiVersion+"/get", get)
+	http.HandleFunc("/"+apiVersion+"/release", release)
+	http.HandleFunc("/"+apiVersion+"/notifications", notifications)
+	http.HandleFunc("/"+apiVersion+"/official_providers", officialProviders)
 
-
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":"+port, nil)
 }
 
-//SaveFile Struct containing save file information
+//ReleaseData Struct containing reslease information
 type ReleaseData struct {
-	Name          string	`json:"name"`
-	Changelog     string    `json:"changelog"`
-	Tag           string    `json:"tag"`
-	Date          string	`json:"date"`
-	DownloadCount uint32    `json:"download_count"`
+	Name          string `json:"name"`
+	Changelog     string `json:"changelog"`
+	Tag           string `json:"tag"`
+	Date          string `json:"date"`
+	DownloadCount uint32 `json:"download_count"`
 }
 
 func base(w http.ResponseWriter, r *http.Request) {
@@ -65,13 +83,13 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func release(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get("https://api.github.com/repos/WerWolv/EdiZon/releases/latest")
-	
+
 	if err != nil {
 		w.Header().Add("Content Type", "application/json")
 		w.Write([]byte("{ \"error\" : \"Request failed\" }"))
 		return
 	}
-	
+
 	defer resp.Body.Close()
 	receivedData, err := ioutil.ReadAll(resp.Body)
 
@@ -83,9 +101,9 @@ func release(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	release := ReleaseData { Name: data["name"].(string), Changelog: strings.ReplaceAll(data["body"].(string), "\r\n", "\n"), Tag: data["tag_name"].(string), Date: data["published_at"].(string), DownloadCount: uint32(data["assets"].([]interface{})[0].(map[string]interface{})["download_count"].(float64)) }
+	release := ReleaseData{Name: data["name"].(string), Changelog: strings.ReplaceAll(data["body"].(string), "\r\n", "\n"), Tag: data["tag_name"].(string), Date: data["published_at"].(string), DownloadCount: uint32(data["assets"].([]interface{})[0].(map[string]interface{})["download_count"].(float64))}
 
-	jsonResp, _ :=json.Marshal(release)
+	jsonResp, _ := json.Marshal(release)
 
 	w.Write(jsonResp)
 }
