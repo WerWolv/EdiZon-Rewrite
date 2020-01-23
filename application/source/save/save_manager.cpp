@@ -38,9 +38,9 @@ namespace edz::save {
         hlp::File backupFile;
 
         if (basePath == "")
-            backupFile = hlp::File(hlp::formatString("%s/%s/%s.edz", EDIZON_BACKUP_DIR, hlp::removeInvalidCharacters(SaveManager::getBackupFolderName(title)).c_str(), backupName.c_str()));
+            backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, hlp::removeInvalidCharacters(SaveManager::getBackupFolderName(title)).c_str(), backupName.c_str()));
         else
-            backupFile = hlp::File(hlp::formatString("%s/%s.edz", basePath.c_str(), backupName.c_str()));
+            backupFile = hlp::File(hlp::formatString("%s/%s" BACKUP_FILE_EXTENSION, basePath.c_str(), backupName.c_str()));
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;

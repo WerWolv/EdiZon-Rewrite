@@ -60,8 +60,6 @@ namespace edz::ui {
             brls::List *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
 
-            brls::ToggleListItem *m_sysmoduleRunningOption;
-
             bool handleSorting(SortingStyle sorting, std::unique_ptr<save::Title> &l, std::unique_ptr<save::Title> &r);
             void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);
             void sortTitleGrid(brls::List *list, SortingStyle sorting);

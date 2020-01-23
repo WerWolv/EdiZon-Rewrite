@@ -62,18 +62,6 @@ namespace edz::hlp {
     /* Returns if EdiZon was ran through Application override */
     bool isInApplicationMode();
 
-    /* Starts the EdiZon sysmodule */
-    EResult startBackgroundService();
-
-    /* Terminates the EdiZon sysmodule */
-    EResult stopBackgroundService();
-
-    /* Enables autostart for the edizon background service */
-    void enableAutostartOfBackgroundService();
-
-    /* Disables autostart for the edizon background service */
-    void disableAutostartOfBackgroundService();
-
 #endif
 
     /* Returns if any application running */

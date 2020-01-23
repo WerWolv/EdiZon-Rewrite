@@ -60,7 +60,6 @@
     "edz.gui.main.settings.header.generaloptions"   : "General options",
     "edz.gui.main.settings.header.titleoptions"     : "Title options",
     "edz.gui.main.settings.header.accountoptions"   : "Account options",
-    "edz.gui.main.settings.header.sysmoduleoptions" : "Background service",
     "edz.gui.main.settings.language"                : "Language",
     "edz.gui.main.settings.language.default"        : "Operating system default",
     "edz.gui.main.settings.pctl"                    : "Enable parential control checks",

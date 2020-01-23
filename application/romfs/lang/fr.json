@@ -60,7 +60,6 @@
     "edz.gui.main.settings.header.generaloptions"   : "Options générales",
     "edz.gui.main.settings.header.titleoptions"     : "Liste des titres",
     "edz.gui.main.settings.header.accountoptions"   : "Option des comptes",
-    "edz.gui.main.settings.header.sysmoduleoptions" : "Service en arrière-plan",
     "edz.gui.main.settings.language"                : "Langue",
     "edz.gui.main.settings.language.default"        : "Langue du système",
     "edz.gui.main.settings.pctl"                    : "Activer la protection parentale",

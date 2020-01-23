@@ -68,9 +68,8 @@ EResult initServices() {
     // Language code setting querying
     ER_TRY(setInitialize());
 
-    // Companion sysmodule launching
+    // Running application information querying
     ER_TRY(pmdmntInitialize());
-    ER_TRY(pmshellInitialize());
     ER_TRY(pminfoInitialize());
 
     // Controller LED

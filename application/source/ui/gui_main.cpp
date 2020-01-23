@@ -500,8 +500,8 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
-        this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
+        auto *edizonOverlayInstalledItem = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
+        edizonOverlayInstalledItem->setClickListener([edizonOverlayInstalledItem](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
             if (!listItem->getToggleState()) {
@@ -513,16 +513,16 @@ namespace edz::ui {
                 overlayFile.remove();
             }
 
-            Gui::runLater([this] {
+            Gui::runLater([edizonOverlayInstalledItem] {
                 bool actuallExtracted = hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists();
 
-                if (actuallExtracted != this->m_sysmoduleRunningOption->getToggleState())
-                    this->m_sysmoduleRunningOption->setToggleState(actuallExtracted);
+                if (actuallExtracted != edizonOverlayInstalledItem->getToggleState())
+                    edizonOverlayInstalledItem->setToggleState(actuallExtracted);
             }, 10);
         });
 
 
-        list->addView(this->m_sysmoduleRunningOption);
+        list->addView(edizonOverlayInstalledItem);
         list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.overlay.note"_lang, true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
@@ -756,20 +756,6 @@ namespace edz::ui {
             }
         });
 
-
-        // Sysmodule Options
-        brls::ListItem *sysmoduleAutoStartOption = new brls::ToggleListItem("edz.gui.main.settings.autostart"_lang, GET_CONFIG(Settings.sysmoduleAutoStart), "edz.gui.main.settings.autostart.desc"_lang);
-        sysmoduleAutoStartOption->setClickListener([](brls::View *view) {
-            brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
-            SET_CONFIG(Settings.sysmoduleAutoStart, listItem->getToggleState());
-            
-            if (listItem->getToggleState())
-                hlp::enableAutostartOfBackgroundService();
-            else
-                hlp::disableAutostartOfBackgroundService();
-        });
-
-
         list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
         list->addView(languageOptionItem);
         list->addView(pctlOptionItem);
@@ -780,10 +766,6 @@ namespace edz::ui {
         
         list->addView(new brls::Header("edz.gui.main.settings.header.accountoptions"_lang));
         list->addView(scdbLoginItem);
-
-        list->addView(new brls::Header("edz.gui.main.settings.header.sysmoduleoptions"_lang));
-        list->addView(sysmoduleAutoStartOption);
-
     }
 
     void GuiMain::createAboutTab(brls::List *list) {

@@ -28,7 +28,7 @@ namespace edz::ui::page {
         this->m_logo->setParent(this);
         
         if (showWarning) {
-            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString()), true);
+            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString().c_str()), true);
             this->m_warning->setParent(this);
         }
     }
