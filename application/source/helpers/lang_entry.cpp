@@ -49,6 +49,12 @@ namespace edz {
 
         for (auto &[unlocalizedString, localizedString] : json.items())
             LangEntry::s_localizedStrings.insert({ unlocalizedString, localizedString });
+
+        // Insert missing localized strings from the english file since it's the most complete
+        langFile.open("romfs:/lang/en-US.json");
+        for (auto &[unlocalizedString, localizedString] : json.items())
+            LangEntry::s_localizedStrings.insert({ unlocalizedString, localizedString });
+
     }
 
     std::string LangEntry::get() const {

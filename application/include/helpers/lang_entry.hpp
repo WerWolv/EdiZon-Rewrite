@@ -44,6 +44,7 @@ namespace edz {
         std::string m_unlocalizedString;
 
         static inline std::map<std::string, std::string> s_localizedStrings;
+        static inline std::map<std::string, std::string> s_englishLocalizedStrings;
     };
 
 }
