@@ -73,7 +73,7 @@ namespace edz::save {
             return titles;  // Return empty titles map on error
         }
         
-
+        
         // Get all installed games
         for (s32 i = 0; i < actualAppRecordCnt; i++) {
             try {
@@ -87,7 +87,7 @@ namespace edz::save {
             titleid_t &titleID = saveDataInfo.application_id;
 
             // Add titles that are not installed but still have a save file on the system
-            if (titles.find(titleID) == titles.end()) {
+            if (actualAppRecordCnt < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
                 try {
                     titles.insert({ titleID, std::make_unique<Title>(titleID, false) });
                 } catch (std::runtime_error& e) {
@@ -96,6 +96,8 @@ namespace edz::save {
                 }
             }
 
+            if (titles.find(titleID) == titles.end())
+                continue;
             // Add userIDs of all accounts that have a save file for this title
             titles[titleID]->addUser(hlp::accountUidToUserID(saveDataInfo.uid));
         }
@@ -104,7 +106,7 @@ namespace edz::save {
             titleid_t &titleID = saveDataInfo.application_id;
 
             // Add titles that are not installed but still have a save file on the system
-            if (titles.find(titleID) == titles.end()) {
+            if (actualAppRecordCnt < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
                 try {
                     titles.insert({ titleID, std::make_unique<Title>(titleID, false) });
                 } catch (std::runtime_error& e) {
@@ -112,6 +114,9 @@ namespace edz::save {
                     continue;
                 }
             }
+
+            if (titles.find(titleID) == titles.end())
+                continue;
 
             // Specify that this title has a common/device save file (Save file shared between users)
             titles[titleID]->setHasCommonSaveFile();

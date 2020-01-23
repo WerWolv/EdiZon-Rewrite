@@ -59,7 +59,7 @@ EResult initServices() {
     ER_TRY(accountInitialize(AccountServiceType_Administrator));
 
     // Overclock
-    if (hosversionBefore(8, 0, 0)) {
+    if (hosversionBefore(8,0,0)) {
         ER_TRY(pcvInitialize());
     } else {
         ER_TRY(clkrstInitialize());
@@ -87,7 +87,6 @@ EResult initServices() {
     if (cheat::CheatManager::isCheatServiceAvailable()) {
         dmntcht::initialize();
         cheat::CheatManager::initialize();
-        printf("asdasd\n");
     }
 
     return ResultSuccess;

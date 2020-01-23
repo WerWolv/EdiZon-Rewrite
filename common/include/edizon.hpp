@@ -40,6 +40,9 @@
     /* Whether the splash screen should be displayed on launch */
     #define SPLASH_ENABLED                  true
 
+    /* If the user has more than this number of games installed, don't load any extra information of games that aren't installed anymore but have save files left */
+    #define MAX_TITLE_FROM_SAVE_DATA        50
+
     /* The buffer size used when searching a game's memory for values. Bigger values can increase speed but EdiZon might stop working in Applet mode */
     #define MEMORY_SEARCH_BUFFER_SIZE       0x40000
 
