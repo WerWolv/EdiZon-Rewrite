@@ -36,23 +36,11 @@ namespace edz::hlp {
         }
 
         bool operator>(Version other) {
-            if (this->major > other.major)
-                return true;
-            else if (this->minor > other.minor)
-                return true;
-            else if (this->patch > other.patch)
-                return true;
-            else return false;
+            return (major << 16 | minor << 8 | patch) > (other.major << 16 | other.minor << 8 | other.patch);
         }
 
         bool operator<(Version other) {
-            if (this->major < other.major)
-                return true;
-            else if (this->minor < other.minor)
-                return true;
-            else if (this->patch < other.patch)
-                return true;
-            else return false;
+            return (major << 16 | minor << 8 | patch) < (other.major << 16 | other.minor << 8 | other.patch);
         }
 
         bool operator>=(Version other) {
