@@ -33,7 +33,7 @@ namespace edz::ui::element {
         void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
         brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
 
-        bool onCancel() override;
+        bool onCancel();
 
         void addItem(brls::ListItem *listItem);
 

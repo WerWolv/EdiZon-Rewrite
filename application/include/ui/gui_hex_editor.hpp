@@ -38,6 +38,8 @@ namespace edz::ui {
 
         addr_t m_address;
         u8 m_buffer[GuiHexEditor::HEX_EDITOR_SIZE];
+        std::vector<addr_t> m_returnStack;
+        std::vector<addr_t> m_pointerStack;
     };
 
 }

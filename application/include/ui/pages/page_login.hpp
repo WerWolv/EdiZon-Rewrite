@@ -33,7 +33,7 @@ namespace edz::ui::page {
         void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
         brls::View* requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp = false) override;
 
-        bool onCancel() override;
+        bool onCancel();
 
     private:
         brls::Label *m_label;

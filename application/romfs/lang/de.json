@@ -41,7 +41,7 @@
     "edz.gui.main.cheats.error.syntax_error"      : "Es wurden Cheats für dieses Spiel installiert, jedoch konnte der Cheat-Service diese nicht korrekt interpretieren. Für mehr Information darüber warum dies passieren kann, schau in die Anleitung.",
     "edz.gui.main.cheats.error.outdated"          : "Es sind mehrere Cheats für dieses Spiel installiert worden, jedoch sind diese für eine andere Version des Spieles. In dem Fall, dass dieses Spiel gerade erst ein Update bekam, solltest du geduldig bleiben, da der Cheat komplett rekreiert werden muss.",
     "edz.gui.main.cheats.error.application_mode"  : "EdiZon wird im Applikationsmodus ausgeführt und kann desshalb den Speicher der laufenden Applikation nicht bearbeiten. Bitte beende EdiZon und öffne es erneut über das Album.",
-    "edz.gui.main.cheats.error.dmnt_cht_missing"  : "EdiZon benötigt Atmosphere's dmnt:cht Service, um Cheats auszuführen. Bitte stell sicher, dass deine CFW richtig installiert wurde und sie Cheats unterstützt.",
+    "edz.gui.main.cheats.error.dmnt_cht_missing"  : "EdiZon benötigt Atmosphère's dmnt:cht Service, um Cheats auszuführen. Bitte stell sicher, dass deine CFW richtig installiert wurde und sie Cheats unterstützt.",
     "edz.gui.main.settings.scdbinfo"              : "Um die meisten Onlinefunktionen nutzen zu können, wird ein SwitchCheatsDB Account benötigt. Bitte besuche switchcheatsdb.com für mehr Informationen",
     "edz.gui.main.settings.account.title"         : "SwitchCheatsDB Konto",
     "edz.gui.main.settings.account.nologin"       : "Du bist nicht angemeldet",

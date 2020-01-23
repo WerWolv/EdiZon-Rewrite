@@ -500,21 +500,21 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File("sdmc:/switch/.overlays/ovlEdiZon.ovl").exists(), "edz.gui.main.cheats.overlay.desc"_lang);
+        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
         this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
-            if (listItem->getToggleState()) {
-                hlp::File overlayFile("romfs:/overlay/ovlEdiZon.ovl");
-                overlayFile.copyTo("sdmc:/switch/.overlays/ovlEdiZon.ovl");
+            if (!listItem->getToggleState()) {
+                hlp::File overlayFile(EDIZON_ROMFS_OVERLAY_PATH "/" EDIZON_OVERLAY_FILENAME);
+                overlayFile.copyTo(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME);
             }
             else {
-                hlp::File overlayFile("sdmc:/switch/.overlays/ovlEdiZon.ovl");
+                hlp::File overlayFile(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME);
                 overlayFile.remove();
             }
 
             Gui::runLater([this] {
-                bool actuallExtracted = hlp::File("sdmc:/switch/.overlays/ovlEdiZon.ovl").exists();
+                bool actuallExtracted = hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists();
 
                 if (actuallExtracted != this->m_sysmoduleRunningOption->getToggleState())
                     this->m_sysmoduleRunningOption->setToggleState(actuallExtracted);
@@ -650,7 +650,6 @@ namespace edz::ui {
 
         languageOptionItem->setListener([=](size_t selection) {
             SET_CONFIG(Settings.langCode, langCodes[selection]);
-            this->m_dummyForceExitView->disableExit();
 
             brls::Application::blockInputs();
 
@@ -817,10 +816,6 @@ namespace edz::ui {
 
         list->addView(new brls::Header("edz.gui.main.about.header.credits"_lang, true));
         list->addView(new element::CreditView());
-
-        // TODO: Replace this with something better. For now force closes EdiZon when this Gui gets poped
-        this->m_dummyForceExitView = new element::DummyForceExitView();
-        list->addView(this->m_dummyForceExitView);
     }
 
     void GuiMain::loadOnlineCheats() {
@@ -861,6 +856,12 @@ namespace edz::ui {
         this->m_playTimeStatsList = new brls::LayerView();
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
+
+        rootFrame->setCancelListener([](brls::View *view) {
+            brls::Application::quit();
+
+            return true;
+        });
 
         loadOnlineCheats();
 

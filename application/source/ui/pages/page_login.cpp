@@ -23,6 +23,8 @@
 #include "api/switchcheatsdb_api.hpp"
 #include "helpers/config_manager.hpp"
 
+#include <borealis.hpp>
+
 #include <math.h>
 
 namespace edz::ui::page {
@@ -82,6 +84,7 @@ namespace edz::ui::page {
             brls::Application::popView();
         });
 
+        this->addHint("Back", brls::Key::B, [this] { return this->onCancel(); });
     }
 
     PageLogin::~PageLogin() {

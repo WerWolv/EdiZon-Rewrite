@@ -25,6 +25,8 @@
 #define ER_ASSERT(x) { if (EResult res = x; ::edz::EResult(res).failed()) fatalThrow(res); }
 #define ER_ASSERT_RESULT(x, result) { if (EResult res = x; ::edz::EResult(res).failed()) fatalThrow(result); }
 
+#define UNLIKELY(x) __builtin_expect(x, 0)
+#define LIKELY(x)   __builtin_expect(x, 1)
 
 #define PRINT_DEBUG(x, ...) printf("[DEBUG] %s:%d | " x "\n", __PRETTY_FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 

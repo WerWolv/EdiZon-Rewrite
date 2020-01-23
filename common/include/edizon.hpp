@@ -79,6 +79,11 @@
         #define EDIZON_LIBS_DIR                 EDIZON_BASE_DIR "/scripts/libs"
         #define EDIZON_CHEATS_DIR               EDIZON_BASE_DIR "/cheats"
         #define EDIZON_TMP_DIR                  EDIZON_BASE_DIR "/tmp"
+        #define EDIZON_DUMP_DIR                 EDIZON_BASE_DIR "/dumps"
+
+    #define EDIZON_OVERLAY_FILENAME         "ovlEdiZon.ovl"
+    #define EDIZON_ROMFS_OVERLAY_PATH       "romfs:/overlay"
+    #define OVERLAYS_PATH                   "sdmc:/switch/.overlays"
     
     #include <chrono>
     using namespace std::literals::chrono_literals;

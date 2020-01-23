@@ -66,6 +66,9 @@ namespace edz {
 
     constexpr Result ResultEdzMemoryReadFailed              = EDZHBRES(701);
     constexpr Result ResultEdzMemoryOverflow                = EDZHBRES(702);
+    constexpr Result ResultEdzOutOfRange                    = EDZHBRES(703);
+    constexpr Result ResultEdzNoValuesFound                 = EDZHBRES(704);
+    constexpr Result ResultEdzInvalidOperation              = EDZHBRES(705);
 
     /* Sysmodule error codes */
     constexpr Result ResultEdzAlreadyRegistered              = EDZSYSRES(1);

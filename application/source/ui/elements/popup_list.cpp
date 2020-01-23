@@ -34,6 +34,8 @@ namespace edz::ui::element {
         this->m_list->setParent(this);
         this->m_lButton->setParent(this);
         this->m_rButton->setParent(this);
+
+        this->addHint("Back", brls::Key::B, [this] { return this->onCancel(); });
     }
 
     PopupList::~PopupList() {

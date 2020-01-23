@@ -30,6 +30,12 @@ namespace edz::ui::element {
 
     HexEditor::HexEditor() {
         this->m_clickCallback = [](SelectionType, addr_t, u8) { };
+
+        this->m_historyLabel = new brls::Label(brls::LabelStyle::MEDIUM, "");
+        this->m_historyLabel->setHorizontalAlign(NVG_ALIGN_CENTER);
+        this->m_historyLabel->setParent(this);
+
+        this->addHint("OK",   brls::Key::A, [this] { return this->onClick(); });
     }
 
     HexEditor::~HexEditor() {
@@ -70,12 +76,15 @@ namespace edz::ui::element {
             
             nvgFillColor(vg, lineNumber % 2 == 0 ? a(ctx->theme->textColor) : a(ctx->theme->descriptionColor));
             lineNumber++;
-
         }
+
+        this->m_historyLabel->frame(ctx);
     }
 
     void HexEditor::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {
         this->setBoundaries(50, style->AppletFrame.headerHeightRegular + 20, 1280 - 90, 720 - style->AppletFrame.headerHeightRegular - style->AppletFrame.footerHeight);
+    
+        this->m_historyLabel->setBoundaries(50, 720 - style->AppletFrame.footerHeight - 50, 1280 - 100, 50);
     }
 
     brls::View* HexEditor::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {    
@@ -89,7 +98,7 @@ namespace edz::ui::element {
                 this->m_selectY = std::max(1, this->m_selectY - 1);
                 break;
             case brls::FocusDirection::DOWN:
-                this->m_selectY = std::min(19, this->m_selectY + 1);
+                this->m_selectY = std::min(17, this->m_selectY + 1);
                 break;
             case brls::FocusDirection::LEFT:
                 this->m_selectX = std::max(0, this->m_selectX - this->m_selectWidth);
@@ -119,7 +128,7 @@ namespace edz::ui::element {
         if (type == SelectionType::BYTE)
             this->m_clickCallback(type, this->m_address + offset, this->m_buffer[offset]);
         else if (type == SelectionType::ADDRESS)
-            this->m_clickCallback(type, reinterpret_cast<u64*>(this->m_buffer)[(this->m_selectY - 1) * 2 + this->m_selectX / 8], 0x00);
+            this->m_clickCallback(type, this->m_address + offset, reinterpret_cast<u64*>(this->m_buffer)[(this->m_selectY - 1) * 2 + this->m_selectX / 8]);
 
         return true;
     }
@@ -130,14 +139,15 @@ namespace edz::ui::element {
         this->m_buffer = buffer;
         this->m_size = size;
 
-        reloadMemory();
+        reloadMemory(true);
     }
 
     void HexEditor::setDisplayAddress(addr_t address) {
         // Make sure address is 16 byte aligned 
-        this->m_address = (address + (-address & (0x10 - 1)));
 
-        reloadMemory();
+        this->m_address = address & ~0x0F;
+
+        reloadMemory(true);
     }
 
     addr_t HexEditor::getDisplayAddress() {
@@ -149,16 +159,18 @@ namespace edz::ui::element {
         this->m_displayType = displayType;
     }
 
-    void HexEditor::reloadMemory() {
+    void HexEditor::reloadMemory(bool resetCursor) {
         rebuildCache(this->m_displayType);
 
-        this->m_selectX = 0;
-        this->m_selectY = 1;
+        if (resetCursor) {
+            this->m_selectX = 0;
+            this->m_selectY = 1;
 
-        if (this->m_selectionType.size() != 0)
-            this->m_selectWidth = static_cast<u8>(this->m_selectionType[0]);
-        else
-            this->m_selectWidth = 1;
+            if (this->m_selectionType.size() != 0)
+                this->m_selectWidth = static_cast<u8>(this->m_selectionType[0]);
+            else
+                this->m_selectWidth = 1;
+        }
     }
 
 
@@ -178,7 +190,7 @@ namespace edz::ui::element {
         offset_t currOffset = 0x00;
         u32 lineNumber = 0;
 
-        this->m_linesCache.push_back("      == Addresses ==          00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F   == ASCII ==");
+        this->m_linesCache.push_back("        == Offset ==           00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F    == ASCII ==");
         do {
             std::string currLine;
 
@@ -188,11 +200,11 @@ namespace edz::ui::element {
 
             // Address list
             if (heapRegion.contains(this->m_address + currOffset))
-                currLine += hlp::formatString("[ HEAP + 0x%016lX ]", this->m_address + currOffset - heapRegion.getBase());
+                currLine += hlp::formatString("[ HEAP + 0x%016lX ]", this->m_address + currOffset - heapRegion.baseAddress);
             else if (mainRegion.contains(this->m_address + currOffset))
-                currLine += hlp::formatString("[ MAIN + 0x%016lX ]", this->m_address + currOffset - mainRegion.getBase());
+                currLine += hlp::formatString("[ MAIN + 0x%016lX ]", this->m_address + currOffset - mainRegion.baseAddress);
             else
-                currLine += hlp::formatString("[ BASE + 0x%016lX ]", this->m_address + currOffset - baseRegion.getBase());
+                currLine += hlp::formatString("[ BASE + 0x%016lX ]", this->m_address + currOffset - baseRegion.baseAddress);
 
             // Padding
             currLine += "  ";
@@ -204,11 +216,11 @@ namespace edz::ui::element {
 
                 for (u8 i = 0; i < 2; i++) {
                     if (heapRegion.contains(potentialAddress[i])) {
-                        currLine += hlp::formatString("[  HEAP + 0x%08lX  ] ", potentialAddress[i] - heapRegion.getBase());
+                        currLine += hlp::formatString("[  HEAP + 0x%08lX  ] ", potentialAddress[i] - heapRegion.baseAddress);
                         this->m_selectionType.push_back(SelectionType::ADDRESS);
                     }
                     else if (mainRegion.contains(potentialAddress[i])) {
-                        currLine += hlp::formatString("[  MAIN + 0x%08lX  ] ", potentialAddress[i] - mainRegion.getBase());
+                        currLine += hlp::formatString("[  MAIN + 0x%08lX  ] ", potentialAddress[i] - mainRegion.baseAddress);
                         this->m_selectionType.push_back(SelectionType::ADDRESS);
                     }
                     else {
@@ -247,8 +259,51 @@ namespace edz::ui::element {
             currOffset += 0x10;
             lineNumber++;
 
-        } while (size_t(currOffset) < this->m_size && lineNumber < 19);
+        } while (size_t(currOffset) < this->m_size && lineNumber < 17);
     }
 
+    void HexEditor::setAddressHistory(std::vector<addr_t> &returnStack, std::vector<addr_t> &pointerStack) {
+        static cheat::types::Region baseRegion = cheat::CheatManager::getBaseRegion();
+        static cheat::types::Region heapRegion = cheat::CheatManager::getHeapRegion();
+        static cheat::types::Region mainRegion = cheat::CheatManager::getMainRegion();
 
+        std::string historyString;
+
+        cheat::types::Region currRegion;
+        if (returnStack.size() > 0 && pointerStack.size() > 0) {
+
+            for (u16 i = std::max(s32(returnStack.size()) - 6, 0); i < returnStack.size(); i++)
+                historyString += "[ ";
+            
+            if (returnStack.size() > 6) {
+                historyString += "\uE090";
+            } else {
+                if (heapRegion.contains(returnStack[0])) {
+                    currRegion = heapRegion;
+                    historyString += "HEAP";
+                }
+                else if (mainRegion.contains(returnStack[0])) {
+                    currRegion = mainRegion;
+                    historyString += "MAIN";
+                }
+                else {
+                    currRegion = baseRegion;
+                    historyString += "BASE";
+                }
+            }
+
+
+            for (u16 i = std::max(s32(returnStack.size()) - 6, 0); i < returnStack.size(); i++) {
+                if (i == 0)
+                    historyString += hlp::formatString(" + 0x%08lx ]", offset_t(returnStack[0]) - currRegion.baseAddress);
+                else if (returnStack[i] >= pointerStack[i - 1])
+                    historyString += hlp::formatString(" + 0x%08lx ]", offset_t(returnStack[i] - currRegion.baseAddress) - (pointerStack[i - 1] - currRegion.baseAddress));
+                else
+                    historyString += hlp::formatString(" - 0x%08lx ]", offset_t(pointerStack[i - 1] - currRegion.baseAddress) - (returnStack[i] - currRegion.baseAddress));
+            }
+
+        }
+
+        this->m_historyLabel->hide([this, historyString]{ this->m_historyLabel->setText(historyString); this->m_historyLabel->show([]{}); });
+    }
 }

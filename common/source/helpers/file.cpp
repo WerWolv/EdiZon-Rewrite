@@ -23,155 +23,174 @@
 #include <helpers/folder.hpp>
 
 namespace edz::hlp {
-        File::File() : m_file(nullptr), m_filePath("") {
 
-        }
+    File::File() : m_file(nullptr), m_filePath("") {
 
-        File::File(std::string filePath) : m_file(nullptr), m_filePath(filePath) {
+    }
 
-        }
+    File::File(std::string filePath) : m_file(nullptr), m_filePath(filePath) {
 
-        File::File(const File &file) : m_file(file.m_file), m_filePath(file.m_filePath) {
+    }
 
-        }
+    File::File(const File &file) : m_file(file.m_file), m_filePath(file.m_filePath) {
 
-        File::~File() {
-            closeFile();
+    }
+
+    File::~File() {
+        closeFile();
+    }
+    
+
+    std::string File::name() {
+        return std::filesystem::path(this->m_filePath).filename();
+    }
+
+    std::string File::path() {
+        return this->m_filePath;
+    }
+
+    std::string File::parent() {
+        return std::filesystem::path(this->m_filePath).parent_path();
+    }
+
+    size_t File::size() {
+        if (!exists()) return -1;
+
+        openFile();
+
+        size_t fileSize;
+        fseek(this->m_file, 0, SEEK_END);
+        fileSize = ftell(this->m_file);
+        rewind(this->m_file);
+
+        return fileSize;
+    }
+
+    void File::remove() {
+        if (!exists()) return;
+
+        ::remove(this->m_filePath.c_str());
+    }
+
+    File File::copyTo(std::string path) {
+        Folder dstFolder(File(path).parent());
+        dstFolder.createDirectories();
+
+        FILE *dst = fopen(path.c_str(), "w");
+
+        if (dst == nullptr)
+            return *this;
+
+
+        size_t size = 0;
+        u64 offset = 0;
+        u8 *buffer = new u8[0x5000];
+
+        openFile();
+
+        if (this->m_file == nullptr)
+            return *this;
+
+        while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
+            fwrite(buffer, 1, size, dst);
+            offset += size;
         }
         
+        delete[] buffer;
 
-        std::string File::name() {
-            return std::filesystem::path(this->m_filePath).filename();
+        closeFile();
+        fclose(dst);
+
+        return File(path);
+    }
+
+    void File::createDirectories() {
+        Folder folder(this->parent());
+
+        folder.createDirectories();
+    }
+
+    bool File::exists() {
+        this->m_file = fopen(this->m_filePath.c_str(), "rb");
+
+        if (this->m_file != nullptr) {
+            closeFile();
+            return true;
         }
 
-        std::string File::path() {
-            return this->m_filePath;
-        }
+        return false;
+    }
 
-        std::string File::parent() {
-            return std::filesystem::path(this->m_filePath).parent_path();
-        }
+    s32 File::read(u8 *buffer, size_t bufferSize) {
+        size_t readSize = 0;
+        
+        openFile();
+        fseek(this->m_file, this->m_position, this->m_seekOperation);
+        this->m_seekOperation = SEEK_SET;
 
-        size_t File::size() {
-            if (!exists()) return -1;
-
-            openFile();
-
-            size_t fileSize;
-            fseek(this->m_file, 0, SEEK_END);
-            fileSize = ftell(this->m_file);
+        if (buffer != nullptr && bufferSize != 0) {
             rewind(this->m_file);
-
-            return fileSize;
+            readSize = fread(buffer, 1, bufferSize, this->m_file);
         }
 
-        void File::remove() {
-            if (!exists()) return;
+        this->m_position = ftell(this->m_file);
+        closeFile();
 
-            ::remove(this->m_filePath.c_str());
-        }
+        return readSize;
+    }
+    
+    std::string File::read() {
+        size_t fileSize = this->size() + 1;
+        std::string content(fileSize, '\0');
 
-        File File::copyTo(std::string path) {
-            Folder dstFolder(File(path).parent());
-            dstFolder.createDirectories();
+        read(reinterpret_cast<u8*>(&content[0]), fileSize);
 
-            FILE *dst = fopen(path.c_str(), "w");
+        return content;
+    }
 
-            if (dst == nullptr)
-                return *this;
+    s32 File::write(const u8 *buffer, size_t bufferSize) {
+        size_t writeSize = 0;
 
+        openFile();
+        fseek(this->m_file, this->m_position, this->m_seekOperation);
+        this->m_seekOperation = SEEK_SET;
 
-            size_t size = 0;
-            u64 offset = 0;
-            u8 *buffer = new u8[0x5000];
+        if (buffer != nullptr && bufferSize != 0)
+            writeSize = fwrite(buffer, 1, bufferSize, this->m_file);
 
-            openFile();
+        this->m_position = ftell(this->m_file);
+        closeFile();
 
-            if (this->m_file == nullptr)
-                return *this;
+        return writeSize;            
+    }
 
-            while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
-                fwrite(buffer, 1, size, dst);
-                offset += size;
-            }
-            
-            delete[] buffer;
-
-            closeFile();
-            fclose(dst);
-
-            return File(path);
-        }
-
-        void File::createDirectories() {
-            Folder folder(this->parent());
-
-            folder.createDirectories();
-        }
-
-        bool File::exists() {
-            this->m_file = fopen(this->m_filePath.c_str(), "rb");
-
-            if (this->m_file != nullptr) {
-                closeFile();
-                return true;
-            }
-
-            return false;
-        }
-
-        s32 File::read(u8 *buffer, size_t bufferSize) {
-            size_t readSize = 0;
-            
-            openFile();
-            if (buffer != nullptr && bufferSize != 0) {
-                rewind(this->m_file);
-                readSize = fread(buffer, 1, bufferSize, this->m_file);
-            }
-            closeFile();
-
-            return readSize;
-        }
-        
-        std::string File::read() {
-            size_t fileSize = this->size() + 1;
-            std::string content(fileSize, '\0');
-
-            read(reinterpret_cast<u8*>(&content[0]), fileSize);
-
-            return content;
-        }
-
-        s32 File::write(const u8 *buffer, size_t bufferSize) {
-            size_t writeSize = 0;
-
-            openFile();
-            if (buffer != nullptr && bufferSize != 0)
-                writeSize = fwrite(buffer, 1, bufferSize, this->m_file);
-            closeFile();
-
-            return writeSize;            
-        }
-
-        void File::write(std::string &buffer) {
-            write(reinterpret_cast<u8*>(&buffer[0]), buffer.size());
-        }
+    void File::write(std::string &buffer) {
+        write(reinterpret_cast<u8*>(&buffer[0]), buffer.size());
+    }
 
 
-        void File::openFile() {
-            if (this->m_file != nullptr) return;
+    void File::openFile() {
+        if (this->m_file != nullptr) return;
 
-            this->m_file = fopen(this->m_filePath.c_str(), "rb");
+        this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
-            if (this->m_file == nullptr)
-                this->m_file = fopen(this->m_filePath.c_str(), "w+");
-        }
+        if (this->m_file == nullptr)
+            this->m_file = fopen(this->m_filePath.c_str(), "w+");
+    }
 
-        void File::closeFile() {
-            if (this->m_file == nullptr) return;
+    void File::closeFile() {
+        if (this->m_file == nullptr) return;
 
-            fclose(m_file);
-            this->m_file = nullptr;
+        fclose(m_file);
+        this->m_file = nullptr;
 
-        }
+    }
+
+    u32 File::seek(s32 position, s32 operation) {
+        this->m_position = position;
+        this->m_seekOperation = operation;
+
+        return this->m_position;
+    }
+
 }

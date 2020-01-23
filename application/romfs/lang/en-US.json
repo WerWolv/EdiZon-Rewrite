@@ -49,7 +49,7 @@
     "edz.gui.main.cheats.button.load.online"        : "Apply online cheats",
     "edz.gui.main.cheats.button.load.online.desc"   : "Cheats have been found online but they haven't been loaded yet. Click here to apply them",
     "edz.gui.main.cheats.error.no_title"            : "There's no title running in the background at the moment. Open any title, press the home button and launch EdiZon via the Album without closing the title to toggle cheats.",
-    "edz.gui.main.cheats.error.syntax_error"        : "There are cheats for this game installed on your system but the cheat service failed to parse it. Checkout the guide for reasons why this could happen.",
+    "edz.gui.main.cheats.error.syntax_error"        : "There are cheats for this game installed on your system but the cheat service failed to parse them. Checkout the guide for reasons why this could happen.",
     "edz.gui.main.cheats.error.outdated"            : "There are cheats for this game installed but they were made for a different game version. If this game just got updated, please be patient as the cheat needs to be redone.",
     "edz.gui.main.cheats.error.application_mode"    : "EdiZon is running in application mode and cannot modify the memory of the current title. Please restart EdiZon in Applet mode by opening it through the Album.",
     "edz.gui.main.cheats.error.dmnt_cht_missing"    : "EdiZon depends on the dmnt:cht service to run cheats. Please make sure you installed your CFW correctly and that it has support for it.",
@@ -98,7 +98,7 @@
     "edz.page.login.password.help" : "Please enter your SwitchCheatsDB password",
     "edz.page.login.error"         : "There was an error during login. Make sure you're connected to the internet and that you have generated a API key in your SwitchCheatsDB profile",
 
-    "edz.page.splash.error" : "EdiZon depends on many of Atmosphere's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
+    "edz.page.splash.error" : "EdiZon depends on many of Atmosphère's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
 
     "edz.dialog.okay"    : "Okay",
     "edz.dialog.yes"     : "Yes",

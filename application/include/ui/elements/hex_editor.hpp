@@ -38,7 +38,7 @@ namespace edz::ui::element {
         enum class SelectionType    { BYTE = 1, ADDRESS = 8 };
         enum class DisplayType      { HEX_VIEW, POINTER_VIEW };
 
-        using EditCallback = std::function<void(SelectionType, addr_t, u8)>;
+        using EditCallback = std::function<void(SelectionType, addr_t, u64)>;
 
         HexEditor();
         ~HexEditor();
@@ -47,14 +47,16 @@ namespace edz::ui::element {
         void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
         brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
         void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
-        bool onClick() override;
+        bool onClick();
 
         void setBuffer(u8* buffer, size_t size);
         void setDisplayAddress(addr_t address);
         addr_t getDisplayAddress();
         void setDisplayType(DisplayType displayType);
 
-        void reloadMemory();
+        void setAddressHistory(std::vector<addr_t> &returnStack, std::vector<addr_t> &pointerStack);
+
+        void reloadMemory(bool resetCursor);
 
         void setClickListener(EditCallback callback);
     
@@ -67,11 +69,11 @@ namespace edz::ui::element {
         std::vector<std::string> m_linesCache;
 
         s8 m_selectX = 0, m_selectY = 1, m_selectWidth = 1;
-
         DisplayType m_displayType = DisplayType::POINTER_VIEW;
 
         EditCallback m_clickCallback;
 
+        brls::Label *m_historyLabel;
 
         void rebuildCache(DisplayType displayType);
     };

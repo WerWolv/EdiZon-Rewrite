@@ -52,9 +52,14 @@ namespace edz::hlp {
         s32 write(const u8 *buffer, size_t bufferSize);
         void write(std::string &buffer);
 
+        u32 seek(s32 position, s32 operation);
+
     private:
         FILE *m_file;
         std::string m_filePath;
+
+        u32 m_position = 0;
+        s32 m_seekOperation = SEEK_SET;
 
         void openFile();
         void closeFile();

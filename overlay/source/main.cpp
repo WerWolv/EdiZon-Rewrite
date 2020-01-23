@@ -243,6 +243,7 @@ public:
         wlaninfInitialize();
         clkrstInitialize();
         pcvInitialize();
+
         smExit();
 
         return new GuiMain();

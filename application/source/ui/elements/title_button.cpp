@@ -26,6 +26,8 @@ namespace edz::ui::element {
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
+
+        this->addHint("OK", brls::Key::A, [this] { return this->onClick(); });
     }
 
     TitleButton::~TitleButton() {
@@ -119,6 +121,14 @@ namespace edz::ui::element {
         }
 
         return BoxLayout::defaultFocus(oldFocus);
+    }
+
+    brls::View* HorizontalTitleList::requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp) {
+        if (direction == brls::FocusDirection::LEFT)
+            if (oldFocus == this->getChildren()[0]->view)
+                return this->getParent()->getParent()->requestFocus(direction, oldFocus, fromUp);
+
+        return BoxLayout::requestFocus(direction, oldFocus, fromUp);
     }
 
 }

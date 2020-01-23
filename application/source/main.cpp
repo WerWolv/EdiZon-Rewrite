@@ -87,6 +87,7 @@ EResult initServices() {
     if (cheat::CheatManager::isCheatServiceAvailable()) {
         dmntcht::initialize();
         cheat::CheatManager::initialize();
+        printf("asdasd\n");
     }
 
     return ResultSuccess;

@@ -57,7 +57,7 @@ namespace edz::ui::element {
     }
 
     void CreditView::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {
-        this->height = 75;
+        this->height = 120;
     }
 
     brls::View* CreditView::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
