@@ -10,9 +10,10 @@
 [submodule "application/libs/zipper"]
 	path = application/libs/zipper
 	url = https://github.com/sebastiandev/zipper
-[submodule "https://github.com/WerWolv/libtesla"]
-	path = https://github.com/WerWolv/libtesla
-	url = overlay/libs/libtesla
+[submodule "application/libs/SimpleIniParser"]
+	path = application/libs/SimpleIniParser
+	url = https://github.com/AtlasNX/SimpleIniParser
 [submodule "overlay/libs/libtesla"]
 	path = overlay/libs/libtesla
 	url = https://github.com/WerWolv/libtesla
+
