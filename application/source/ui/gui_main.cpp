@@ -193,6 +193,8 @@ namespace edz::ui {
             saveFiles = _saveFiles;
         else return result;
 
+        Gui::runLater([=]{
+
         brls::AppletFrame *rootFrame = new brls::AppletFrame(false, false);
         brls::List *list = new brls::List();
 
@@ -225,7 +227,9 @@ namespace edz::ui {
 
         rootFrame->setContentView(list);
 
-        brls::PopupFrame::open(name, &icon[0], icon.size(), rootFrame, motd);
+        brls::PopupFrame::open(name, const_cast<u8*>(&icon[0]), icon.size(), rootFrame, motd);
+
+        }, 0);
 
         return ResultSuccess;
     }
@@ -423,7 +427,14 @@ namespace edz::ui {
         else {
             for (auto provider : providers) {
                 brls::ListItem *listItem = new brls::ListItem(provider.name + "edz.by"_lang + provider.owner, "", provider.description);
-                listItem->setClickListener([=](brls::View *view) { brls::Logger::error("%s", this->createSaveRepoPopup(provider.url).getString().c_str()); });
+                listItem->setClickListener([=](brls::View *view) { 
+                    Gui::runAsync([this, provider] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(provider.url);
+                        brls::Application::unblockInputs();
+
+                    });
+                });
                 list->addView(listItem);
             }
         }

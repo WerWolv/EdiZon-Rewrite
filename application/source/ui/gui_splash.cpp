@@ -25,7 +25,6 @@ namespace edz::ui {
 
     brls::View* GuiSplash::setupUI() {
         bool isAMSVersionSupported = hlp::getAtmosphereVersion() >= MINIMUM_AMS_VERSION_REQUIRED;
-        printf("%s >= %s = %d\n", hlp::getAtmosphereVersion().getString().c_str(), MINIMUM_AMS_VERSION_REQUIRED.getString().c_str(), isAMSVersionSupported);
 
         if (isAMSVersionSupported)
             Gui::runLater([this] { Gui::changeTo<GuiMain>(); }, 20);

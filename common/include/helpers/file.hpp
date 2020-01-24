@@ -61,7 +61,7 @@ namespace edz::hlp {
         u32 m_position = 0;
         s32 m_seekOperation = SEEK_SET;
 
-        void openFile();
+        EResult openFile();
         void closeFile();
     };
 

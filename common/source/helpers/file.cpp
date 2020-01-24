@@ -56,7 +56,8 @@ namespace edz::hlp {
     size_t File::size() {
         if (!exists()) return -1;
 
-        openFile();
+        if (openFile().failed())
+            return 0;
 
         size_t fileSize;
         fseek(this->m_file, 0, SEEK_END);
@@ -86,9 +87,7 @@ namespace edz::hlp {
         u64 offset = 0;
         u8 *buffer = new u8[0x5000];
 
-        openFile();
-
-        if (this->m_file == nullptr)
+        if (openFile().failed())
             return *this;
 
         while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
@@ -124,7 +123,9 @@ namespace edz::hlp {
     s32 File::read(u8 *buffer, size_t bufferSize) {
         size_t readSize = 0;
         
-        openFile();
+        if (openFile().failed())
+            return 0;
+
         fseek(this->m_file, this->m_position, this->m_seekOperation);
         this->m_seekOperation = SEEK_SET;
 
@@ -151,7 +152,9 @@ namespace edz::hlp {
     s32 File::write(const u8 *buffer, size_t bufferSize) {
         size_t writeSize = 0;
 
-        openFile();
+        if (openFile().failed())
+            return 0;
+
         fseek(this->m_file, this->m_position, this->m_seekOperation);
         this->m_seekOperation = SEEK_SET;
 
@@ -169,13 +172,18 @@ namespace edz::hlp {
     }
 
 
-    void File::openFile() {
-        if (this->m_file != nullptr) return;
+    EResult File::openFile() {
+        if (this->m_file != nullptr) return ResultSuccess;
 
         this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
         if (this->m_file == nullptr)
             this->m_file = fopen(this->m_filePath.c_str(), "w+");
+
+        if (this->m_file == nullptr)
+            return ResultEdzOperationFailed;
+
+        return ResultSuccess;
     }
 
     void File::closeFile() {
