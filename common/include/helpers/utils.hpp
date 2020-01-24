@@ -37,7 +37,7 @@ namespace edz::save {
 
 namespace edz::hlp {
 
-#ifndef __SYSMODULE__
+#ifndef __OVERLAY__
     /* Has Parential Control been enabled */
     bool isPctlEnabled();
 
@@ -163,5 +163,24 @@ namespace edz::hlp {
 
     /* Requests focus to the Tesla overlay */
     EResult focusOverlay(bool focus);
+
+    /* Read a system settings value */
+    template<typename T>
+    std::pair<EResult, T> readSetting(std::string section, std::string key) {
+        EResult res;
+        u64 valueSize;
+
+        T buffer;
+ 
+        res = setsysGetSettingsItemValueSize(section.c_str(), key.c_str(), &valueSize);
+
+        if (valueSize != sizeof(T))
+            return { ResultEdzInvalidOperation, 0 };
+
+        if (res.succeeded())
+            res = setsysGetSettingsItemValue(section.c_str(), key.c_str(), &buffer, valueSize, &valueSize);
+
+        return { res, buffer };
+    }
 
 }

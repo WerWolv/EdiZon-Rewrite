@@ -97,7 +97,8 @@
     "edz.page.login.password.help" : "Please enter your SwitchCheatsDB password",
     "edz.page.login.error"         : "There was an error during login. Make sure you're connected to the internet and that you have generated a API key in your SwitchCheatsDB profile",
 
-    "edz.page.splash.error" : "EdiZon depends on many of Atmosphère's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
+    "edz.page.splash.error.ams" : "EdiZon depends on many of Atmosphère's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
+    "edz.page.splash.error.mem" : "EdiZon depends on multiple different Applets in order to function properly. Make sure your system_settings.ini allocates enough memory for them.\nPress \uE0EF to exit",
 
     "edz.dialog.okay"    : "Okay",
     "edz.dialog.yes"     : "Yes",

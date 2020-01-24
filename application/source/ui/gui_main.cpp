@@ -546,20 +546,21 @@ namespace edz::ui {
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
                     cheatItem->setClickListener([=](brls::View *view){
+                            printf("%d\n", cheat->isEnabled());
                         cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
                     });
 
                     list->addView(cheatItem);
                     GuiMain::m_cheatToggleListItems.push_back(cheatItem);
                 }
-                Gui::runRepetiviely([this] {
+                /*Gui::runRepetiviely([this] {
                     u16 i = 0;
                     for (auto &cheatToggle : GuiMain::m_cheatToggleListItems) {
                         bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
                         if (cheatToggle->getToggleState() != isEnabled)
                             cheatToggle->setToggleState(isEnabled);
                     }
-                }, 20);
+                }, 20);*/
 
             } else {
                 if (!hlp::isTitleRunning())

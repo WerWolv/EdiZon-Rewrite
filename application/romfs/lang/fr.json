@@ -97,7 +97,7 @@
     "edz.page.login.password.help" : "Veuillez entrer le mot de passe de votre compte SwitchCheatsDB",
     "edz.page.login.error"         : "Une erreur est survenue lors de la connexion. Vérifiez que vous êtes connecté à Internet et que vous avez généré une clé API dans votre profil SwitchCheatsDB",
 
-    "edz.page.splash.error" : "EdiZon utilise beaucoup des dernière fonctionnalités d'Atmosphère. Veuillez mettre à jour vers la version %s ou plus récent.\nAppuyez sur \uE0EF pour quitter",
+    "edz.page.splash.error.ams" : "EdiZon utilise beaucoup des dernière fonctionnalités d'Atmosphère. Veuillez mettre à jour vers la version %s ou plus récent.\nAppuyez sur \uE0EF pour quitter",
 
     "edz.dialog.okay"    : "Ok",
     "edz.dialog.yes"     : "Oui",

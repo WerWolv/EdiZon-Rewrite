@@ -68,6 +68,9 @@ EResult initServices() {
     // Language code setting querying
     ER_TRY(setInitialize());
 
+    // Atmosphere settings querying
+    ER_TRY(setsysInitialize());
+
     // Running application information querying
     ER_TRY(pmdmntInitialize());
     ER_TRY(pminfoInitialize());
@@ -101,6 +104,7 @@ void exitServices() {
     pcvExit();
     clkrstExit();
     setExit();
+    setsysExit();
     pmdmntExit();
     pmshellExit();
     pminfoExit();

@@ -24,25 +24,18 @@
 
 namespace edz::ui::page {
 
-    class PageSplash : public brls::View {
+    class PageFullscreenImage : public brls::View {
     public:
 
-        enum class WarningType {
-            None,
-            TooLowAtmosphereVersion,
-            NotEnoughMemoryReserved
-        };
-
-        PageSplash(WarningType warningType);
-        virtual ~PageSplash();
+        PageFullscreenImage(brls::Image *image);
+        virtual ~PageFullscreenImage();
 
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
         void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
         brls::View* requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp = false) override;
 
     private:
-        brls::Image *m_logo = nullptr;
-        brls::Label *m_warning = nullptr;
+        brls::Image *m_image = nullptr;
     };
 
 }

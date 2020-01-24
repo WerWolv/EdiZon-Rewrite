@@ -33,18 +33,63 @@ namespace edz::ui {
         GuiCheatEngine() : Gui() { }
         ~GuiCheatEngine() { }
 
-        void createPrimaryKnownSearchLayer(brls::LayerView *layerView);
-        void createPrimaryUnknownSearchLayer(brls::LayerView *layerView);
-        void createSecondaryKnownSearchLayer(brls::LayerView *layerView);
-        void createSecondaryUnknownSearchLayer(brls::LayerView *layerView);
+        void createKnownPrimarySearchLayer(brls::LayerView *layerView);
+        void createKnownSecondarySearchLayer(brls::LayerView *layerView);
+        void createUnknownPrimarySearchLayer(brls::LayerView *layerView);
+        void createUnknownSecondarySearchLayer(brls::LayerView *layerView);
+
+        EResult startKnownPrimarySearch();
+        EResult startKnownSecondarySearch();
+        EResult startUnKnownPrimarySearch();
+        EResult startUnKnownSecondarySearch();
 
         brls::View* setupUI() override;
         void update() override;
 
     private:
-        brls::ThumbnailFrame *m_rootFrame;
+        brls::ThumbnailFrame    *m_rootFrame;
+        brls::LayerView         *m_contentLayers;
 
-        brls::Table *m_fixedValues;
+        brls::SelectListItem    *m_knownPrimarySearchType;
+        brls::SelectListItem    *m_knownPrimarySearchRegion;
+        brls::SelectListItem    *m_knownPrimaryDataType;
+        brls::ListItem          *m_knownPrimaryValue;
+        brls::ListItem          *m_knownPrimarySize;
+        brls::ToggleListItem    *m_knownPrimaryAligned;
+
+        brls::TableRow          *m_knownSecondaryFixedTableRowSearchType;
+        brls::TableRow          *m_knownSecondaryFixedTableRowSearchRegion;
+        brls::TableRow          *m_knownSecondaryFixedTableRowDataType;
+        brls::TableRow          *m_knownSecondaryFixedTableRowSearchSize;
+        brls::TableRow          *m_knownSecondaryFixedTableRowSearchAligned;
+        brls::ListItem          *m_knownSecondaryFoundAddresses;
+        brls::SelectListItem    *m_knownSecondarySearchType;
+        brls::ListItem          *m_knownSecondaryValue;
+
+        brls::SelectListItem    *m_unknownPrimarySearchType;
+        brls::SelectListItem    *m_unknownPrimarySearchRegion;
+        brls::SelectListItem    *m_unknownPrimaryDataType;
+        brls::ListItem          *m_unknownPrimarySize;
+        brls::ToggleListItem    *m_unknownPrimaryAligned;
+
+        brls::TableRow          *m_unknownSecondaryFixedTableRowSearchType;
+        brls::TableRow          *m_unknownSecondaryFixedTableRowSearchRegion;
+        brls::TableRow          *m_unknownSecondaryFixedTableRowDataType;
+        brls::TableRow          *m_unknownSecondaryFixedTableRowSearchSize;
+        brls::TableRow          *m_unknownSecondaryFixedTableRowSearchAligned;
+        brls::ListItem          *m_unknownSecondaryFoundAddresses;
+        brls::SelectListItem    *m_unknownSecondaryUnknownSearchType;
+
+        enum class SearchLayer : s8 {
+            None                = -1,
+            KnownPrimary        = 0,
+            KnownSecondary      = 1,
+            UnknownPrimary      = 2,
+            UnknownSecondary    = 3
+        };
+
+        SearchLayer m_selectedSearchLayer;
+        SearchLayer m_nextSearchLayer;
     };
 
 }
