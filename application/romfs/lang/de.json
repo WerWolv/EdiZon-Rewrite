@@ -32,7 +32,7 @@
     "edz.gui.main.repos.label.desc"               : "Speicherdaten Server sind ein einfacher Weg, um Speicherdaten, welche von anderen Leuten gehostet wurden, herunterzuladen. Für mehr Informationen dazu, wie du deinen eigenen Server hosten kannst, schau auf dem EdiZon GitHub vorbei",
     "edz.gui.main.repos.header.official"          : "Offizielle Server",
     "edz.gui.main.repos.header.unofficial"        : "Weitere Server",
-    "edz.gui.main.repos.button.add"               : "Neuen Server hinzufügen",
+    "edz.gui.main.repos.button.add"               : "Server hinzufügen",
     "edz.gui.main.repos.label.norepos"            : "Hier ist noch nichts zu sehen. Klick auf “Neuen Server hinzufügen”, um einen neuen Server zu deiner Liste hinzuzufügen",
     "edz.gui.main.cheats.label.desc"              : "Cheats sind kleine Programme, welche während dem Spielen im Hintergrund ausgeführt werden. Mehrere Male pro Sekunde bearbeiten diese den Speicher der momentan laufenden Applikation. Wichtig hierbei ist, dass Cheats sehr fragil sind. Wurden die Cheats nicht richtig erstellt, kann schon ein Gebietswechsel im Spiel oder ein Neustart dazu führen, dass die Cheats aufhören zu funktionieren. Auch wenn sie richtig erstellt wurden wird ein Update in den meisten Fällen den Cheat unbrauchbar machen und er muss neu erstellt werden.",
     "edz.gui.main.cheats.header.cheats"           : "Cheats",

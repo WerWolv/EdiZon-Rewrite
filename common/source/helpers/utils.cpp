@@ -95,11 +95,11 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMaxExt(&config, 1);
         swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
-        char buffer[0x100] = { 0 };
+        char buffer[maxStringLength + 1] = { 0 };
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
-            f(std::string(buffer));
+            f(buffer);
 
             return true;
         }
@@ -123,9 +123,9 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMax(&config, maxStringLength);
         swkbdConfigSetStringLenMaxExt(&config, 1);
 
-        char buffer[0x100];
+        char buffer[maxStringLength + 1];
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
             f(buffer);
 
@@ -154,9 +154,9 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMaxExt(&config, 1);
         swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
-        char buffer[0x100];
+        char buffer[maxStringLength + 1];
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
             f(buffer);
 

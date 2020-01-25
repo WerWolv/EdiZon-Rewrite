@@ -13,3 +13,5 @@ server/api_endpoint/__pycache__/
 server/api_endpoint/api_endpoint
 
 server/save_provider/save_provider
+
+server/save_provider/saves/

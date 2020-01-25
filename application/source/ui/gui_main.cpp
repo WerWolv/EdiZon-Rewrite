@@ -23,6 +23,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iomanip>
+#include <regex>
 
 #include "cheat/cheat.hpp"
 #include "cheat/cheat_parser.hpp"
@@ -415,6 +416,8 @@ namespace edz::ui {
     }
 
     void GuiMain::createSaveReposTab(brls::List *list) {
+        static bool addedUnofficialReposHeader = false;
+
         api::EdiZonAPI edizonApi;
 
         list->addView(new brls::Label(brls::LabelStyle::SMALL, "edz.gui.main.repos.label.desc"_lang, true));
@@ -438,6 +441,80 @@ namespace edz::ui {
                 list->addView(listItem);
             }
         }
+
+        auto &unofficialProviders = GET_CONFIG(Settings.saveFileRepos);
+        if (unofficialProviders.size() > 0) {
+
+            for (auto providerUrl : unofficialProviders) {
+                api::SaveRepoAPI saveRepoApi(providerUrl);
+
+                auto [result1, name] = saveRepoApi.getName();
+                if (result1.failed())
+                    continue;
+
+                auto [result2, motd] = saveRepoApi.getMOTD();
+                if (result2.failed())
+                    continue;
+
+                if (!addedUnofficialReposHeader)
+                    list->addView(new brls::Header("edz.gui.main.repos.header.unofficial"_lang));
+
+                addedUnofficialReposHeader = true;
+
+                brls::ListItem *listItem = new brls::ListItem(name, "", motd);
+                listItem->setClickListener([this, providerUrl](brls::View *view) { 
+                    Gui::runAsync([this, providerUrl] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(providerUrl);
+                        brls::Application::unblockInputs();
+                    });
+                });
+                list->addView(listItem);
+            }
+        }
+
+        list->addHint("edz.gui.main.repos.button.add"_lang, brls::Key::X, [this, list]{
+            hlp::openSwkbdForText([this, list](std::string input) {
+                if (!std::regex_match(input, std::regex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"))) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                api::SaveRepoAPI saveRepoApi(input);
+
+                auto [result1, name] = saveRepoApi.getName();
+                if (result1.failed()) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                auto [result2, motd] = saveRepoApi.getMOTD();
+                if (result2.failed()) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                if (!addedUnofficialReposHeader)
+                    list->addView(new brls::Header("edz.gui.main.repos.header.unofficial"_lang));
+
+                auto &unofficialProviders = GET_CONFIG(Settings.saveFileRepos);
+                unofficialProviders.push_back(input);
+                hlp::ConfigManager::store();
+
+                brls::ListItem *listItem = new brls::ListItem(name, "", motd);
+                listItem->setClickListener([this, input](brls::View *view) { 
+                    Gui::runAsync([this, input] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(input);
+                        brls::Application::unblockInputs();
+                    });
+                });
+                list->addView(listItem);
+                list->invalidate();
+            }, "edz.gui.main.repos.dialog.title"_lang, "edz.gui.main.repos.dialog.desc"_lang, 32, "http://");
+
+            return true;
+        });
 
         list->invalidate();
     }
@@ -553,14 +630,14 @@ namespace edz::ui {
                     list->addView(cheatItem);
                     GuiMain::m_cheatToggleListItems.push_back(cheatItem);
                 }
-                /*Gui::runRepetiviely([this] {
+                Gui::runRepetiviely([this] {
                     u16 i = 0;
                     for (auto &cheatToggle : GuiMain::m_cheatToggleListItems) {
                         bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
                         if (cheatToggle->getToggleState() != isEnabled)
                             cheatToggle->setToggleState(isEnabled);
                     }
-                }, 20);*/
+                }, 20);
 
             } else {
                 if (!hlp::isTitleRunning())
