@@ -138,6 +138,7 @@ namespace edz::ui {
 
             cheat::CheatManager::readMemory(newAddress, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);
             editor->setDisplayAddress(newAddress);
+            this->m_address = newAddress;
             return true;
         });
         editor->addHint("Up",   brls::Key::L, [this, editor] { 
@@ -154,6 +155,7 @@ namespace edz::ui {
 
             cheat::CheatManager::readMemory(newAddress, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);
             editor->setDisplayAddress(newAddress); 
+            this->m_address = newAddress;
             return true;
         });
         editor->addHint("Goto",   brls::Key::Y, [this, editor] { 

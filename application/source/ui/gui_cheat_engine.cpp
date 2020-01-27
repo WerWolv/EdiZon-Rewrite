@@ -34,6 +34,30 @@
 
 namespace edz::ui {
 
+    std::vector<cheat::types::Region> GuiCheatEngine::getHeapRegions() {
+        std::vector<cheat::types::Region> out;
+
+        auto heapRegion = cheat::CheatManager::getHeapRegion();
+        for (auto memInfo : cheat::CheatManager::getMemoryRegions()) {
+            if (heapRegion.contains(memInfo.addr))
+                out.push_back({ memInfo.addr, memInfo.size });
+        }
+        
+        return out;
+    }
+
+    std::vector<cheat::types::Region> GuiCheatEngine::getMainRegions() {
+        std::vector<cheat::types::Region> out;
+
+        auto mainRegion = cheat::CheatManager::getMainRegion();
+        for (auto memInfo : cheat::CheatManager::getMemoryRegions()) {
+            if (mainRegion.contains(memInfo.addr))
+                out.push_back({ memInfo.addr, memInfo.size });
+        }
+        
+        return out;
+    }
+
 
     void GuiCheatEngine::createKnownPrimarySearchLayer(brls::LayerView *layerView) {
         auto *list = new brls::List();
@@ -41,31 +65,97 @@ namespace edz::ui {
         this->m_knownPrimarySearchType   = new brls::SelectListItem("Search Type", { "Exactly...", "Greater than...", "Less than...", "Between...", "Unknown value..." }, 0);
         this->m_knownPrimarySearchRegion = new brls::SelectListItem("Region", { "HEAP", "MAIN", "HEAP and MAIN" }, 0);
         this->m_knownPrimaryDataType     = new brls::SelectListItem("Data Type", { "Unsigned", "Signed", "Floating Point" }, 0);
-        this->m_knownPrimaryValue        = new brls::ListItem("Value");
-        this->m_knownPrimarySize         = new brls::ListItem("Size");
+        this->m_knownPrimaryValue        = new brls::IntegerInputListItem("Value", 0, "Set pattern to search for");
+        this->m_knownPrimarySize         = new brls::IntegerInputListItem("Size", 1, "Set search Size");
         this->m_knownPrimaryAligned      = new brls::ToggleListItem("Aligned Search", true);
 
 
         this->m_knownPrimarySearchType->setListener([this](s32 selection) {
             this->m_unknownPrimarySearchType->setSelectedValue(selection);
 
-            if (selection == 4)
-                this->m_nextSearchLayer = SearchLayer::UnknownPrimary;
+            switch (selection) {
+                case 0: // Exact match
+                    this->m_knownOperation = STRATEGY(==);
+                    break;
+                case 1: // Greater than
+                    this->m_knownOperation = STRATEGY(>);
+                    break;
+                case 2: // Less than
+                    this->m_knownOperation = STRATEGY(<);
+                case 3: // Between
+                    // TODO: Add this somehow
+                    break;
+                case 4: // Unknown
+                    this->m_nextSearchLayer = SearchLayer::UnknownPrimary;
+                    break;
+                default: break;
+            }
         });
 
         this->m_knownPrimarySearchRegion->setListener([this](s32 selection) {
             this->m_unknownPrimarySearchRegion->setSelectedValue(selection);
+
+            this->m_regions.clear();
+            switch (selection) {
+                case 0: // HEAP
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+                    break;
+                case 1: // MAIN
+                    for (auto &region : this->getMainRegions())
+                        this->m_regions.push_back(region);
+                    break;
+                case 2: // HEAP and MAIN
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+                    break;
+            }
         });
 
         this->m_knownPrimaryDataType->setListener([this](s32 selection) {
             this->m_unknownPrimaryDataType->setSelectedValue(selection);
+
+            switch (selection) {
+                case 0: // Unsigned
+                    this->m_signedness = cheat::types::Signedness::Unsigned;
+                    break;
+                case 1: // Signed
+                    this->m_signedness = cheat::types::Signedness::Signed;
+                    break;
+                case 2: // Floating point
+                    this->m_signedness = cheat::types::Signedness::Signed;
+                    break;
+            }
         });
 
         this->m_knownPrimaryValue->setValue("0");
-        this->m_knownPrimarySize->setValue("0");
+        this->m_knownPrimarySize->setValue("1");
+        this->m_knownPrimarySize->setClickListener([this](brls::View *view) {
+            u32 value = std::strtoul(this->m_knownPrimarySize->getValue().c_str(), nullptr, 10);
+
+            if (value < 1) {
+                this->m_knownPrimarySize->setValue("1");
+                return;
+            }
+
+            this->m_unknownPrimarySize->setValue(this->m_knownPrimarySize->getValue());
+
+            this->m_patternSize = value;
+            
+            if (this->m_pattern != nullptr)
+                delete[] this->m_pattern;
+
+            this->m_pattern = new u8[value];
+            std::memset(this->m_pattern, 0x00, this->m_patternSize);
+        });
 
         this->m_knownPrimaryAligned->setClickListener([this](brls::View *view) {
             this->m_unknownPrimaryAligned->setToggleState(this->m_knownPrimaryAligned->getToggleState());
+
+            this->m_alignedSearch = this->m_knownPrimaryAligned->getToggleState();
         });
 
 
@@ -85,29 +175,96 @@ namespace edz::ui {
         this->m_unknownPrimarySearchType   = new brls::SelectListItem("Search Type", { "Exactly...", "Greater than...", "Less than...", "Between...", "Unknown value..." }, 0);
         this->m_unknownPrimarySearchRegion = new brls::SelectListItem("Region", { "HEAP", "MAIN", "HEAP and MAIN" }, 0);
         this->m_unknownPrimaryDataType     = new brls::SelectListItem("Data Type", { "Unsigned", "Signed", "Floating Point" }, 0);
-        this->m_unknownPrimarySize         = new brls::ListItem("Size");
+        this->m_unknownPrimarySize         = new brls::IntegerInputListItem("Size", 1, "Set search Size");
         this->m_unknownPrimaryAligned      = new brls::ToggleListItem("Aligned Search", true);
 
 
         this->m_unknownPrimarySearchType->setListener([this](s32 selection) {
-            this->m_unknownPrimarySearchType->setSelectedValue(selection);
-            printf("%d\n", selection);
-            if (selection == 4)
+            this->m_knownPrimarySearchType->setSelectedValue(selection);
+            switch (selection) {
+                case 0: // Exact match
+                    this->m_knownOperation = STRATEGY(==);
+                    break;
+                case 1: // Greater than
+                    this->m_knownOperation = STRATEGY(>);
+                    break;
+                case 2: // Less than
+                    this->m_knownOperation = STRATEGY(<);
+                case 3: // Between
+                    // TODO: Add this somehow
+                    break;
+                case 4: // Unknown
+                    break;
+                default: break;
+            }
+
+            if (selection != 4)
                 this->m_nextSearchLayer = SearchLayer::KnownPrimary;
         });
 
         this->m_unknownPrimarySearchRegion->setListener([this](s32 selection) {
             this->m_unknownPrimarySearchRegion->setSelectedValue(selection);
+
+            this->m_regions.clear();
+            switch (selection) {
+                case 0: // HEAP
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+                    break;
+                case 1: // MAIN
+                    for (auto &region : this->getMainRegions())
+                        this->m_regions.push_back(region);
+                    break;
+                case 2: // HEAP and MAIN
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+
+                    for (auto &region : this->getHeapRegions())
+                        this->m_regions.push_back(region);
+                    break;
+            }
         });
 
         this->m_unknownPrimaryDataType->setListener([this](s32 selection) {
             this->m_knownPrimaryDataType->setSelectedValue(selection);
+
+            switch (selection) {
+                case 0: // Unsigned
+                    this->m_signedness = cheat::types::Signedness::Unsigned;
+                    break;
+                case 1: // Signed
+                    this->m_signedness = cheat::types::Signedness::Signed;
+                    break;
+                case 2: // Floating point
+                    this->m_signedness = cheat::types::Signedness::Signed;
+                    break;
+            }
         });
 
-        this->m_unknownPrimarySize->setValue("0");
+        this->m_unknownPrimarySize->setValue("1");
+        this->m_unknownPrimarySize->setClickListener([this](brls::View *view) {
+            u32 value = std::strtoul(this->m_unknownPrimarySize->getValue().c_str(), nullptr, 10);
+
+            if (value < 1) {
+                this->m_unknownPrimarySize->setValue("1");
+                return;
+            }
+
+            this->m_knownPrimarySize->setValue(this->m_unknownPrimarySize->getValue());
+
+            this->m_patternSize = value;
+            
+            if (this->m_pattern != nullptr)
+                delete[] this->m_pattern;
+
+            this->m_pattern = new u8[value];
+            std::memset(this->m_pattern, 0x00, this->m_patternSize);
+        });
 
         this->m_unknownPrimaryAligned->setClickListener([this](brls::View *view) {
-            this->m_unknownPrimaryAligned->setToggleState(this->m_knownPrimaryAligned->getToggleState());
+            this->m_knownPrimaryAligned->setToggleState(this->m_unknownPrimaryAligned->getToggleState());
+
+            this->m_alignedSearch = this->m_unknownPrimaryAligned->getToggleState();
         });
 
 
@@ -133,11 +290,29 @@ namespace edz::ui {
         this->m_knownSecondaryFixedTableRowSearchSize    = table->addRow(brls::TableRowType::BODY, "Size");
         this->m_knownSecondaryFixedTableRowSearchAligned = table->addRow(brls::TableRowType::BODY, "Aligned");
 
-        this->m_knownSecondaryFoundAddresses = new brls::ListItem("Found addresses");
-        this->m_knownSecondarySearchType = new brls::SelectListItem("Search Type", { "Exactly...", "Greater than...", "Less than...", "Between..." }, 0);
-        this->m_knownSecondaryValue = new brls::ListItem("Value");
+        this->m_knownSecondaryFoundAddresses    = new brls::ListItem("Found addresses");
+        this->m_knownSecondarySearchType        = new brls::SelectListItem("Search Type", { "Exactly...", "Greater than...", "Less than...", "Between..." }, 0);
+        this->m_knownSecondaryValue             = new brls::IntegerInputListItem("Value", 1, "Set pattern to search for");
 
         this->m_knownSecondaryFoundAddresses->setValue("0");
+
+        this->m_knownSecondarySearchType->setListener([this](s32 selection) {
+            switch (selection) {
+                case 0: // Exact match
+                    this->m_knownOperation = STRATEGY(==);
+                    break;
+                case 1: // Greater than
+                    this->m_knownOperation = STRATEGY(>);
+                    break;
+                case 2: // Less than
+                    this->m_knownOperation = STRATEGY(<);
+                case 3: // Between
+                    // TODO: Add this somehow
+                    break;
+                default: break;
+            }
+        });
+
         this->m_knownSecondaryValue->setValue("0");
 
         list->addView(this->m_knownSecondaryFoundAddresses);
@@ -161,10 +336,27 @@ namespace edz::ui {
         this->m_unknownSecondaryFixedTableRowSearchSize    = table->addRow(brls::TableRowType::BODY, "Size");
         this->m_unknownSecondaryFixedTableRowSearchAligned = table->addRow(brls::TableRowType::BODY, "Aligned");
                 
-        this->m_unknownSecondaryFoundAddresses = new brls::ListItem("Found addresses");
-        this->m_unknownSecondaryUnknownSearchType = new brls::SelectListItem("Strategy", { "Value stayed the same", "Value changed", "Value Increased", "Value Decreased" }, 0);
+        this->m_unknownSecondaryFoundAddresses      = new brls::ListItem("Found addresses");
+        this->m_unknownSecondaryUnknownSearchType   = new brls::SelectListItem("Strategy", { "Value stayed the same", "Value changed", "Value Increased", "Value Decreased" }, 0);
 
         this->m_unknownSecondaryFoundAddresses->setValue("0");
+
+        this->m_unknownSecondaryUnknownSearchType->setListener([this](s32 selection) {
+            switch (selection) {
+                case 0: // Stayed the same
+                    this->m_unknownOperation = STRATEGY(==);
+                    break;
+                case 1: // Changed
+                    this->m_unknownOperation = STRATEGY(!=);
+                    break;
+                case 2: // Increased
+                    this->m_unknownOperation = STRATEGY(>);
+                    break;
+                case 3: // Decreased
+                    this->m_unknownOperation = STRATEGY(<);
+                default: break;
+            }
+        });
 
         list->addView(this->m_unknownSecondaryFoundAddresses);
         list->addView(table);
@@ -175,8 +367,13 @@ namespace edz::ui {
     
 
     EResult GuiCheatEngine::startKnownPrimarySearch() {
+        Gui::runAsyncWithDialog([this]{
+            /*for (auto region : this->m_regions)
+                cheat::CheatEngine::findPattern(this->m_pattern, this->m_patternSize, this->m_signedness, this->m_knownOperation, region, this->m_alignedSearch);
+*/
+            this->m_nextSearchLayer = SearchLayer::KnownSecondary;
+        }, "Searching title memory. This may take a while...");
 
-        this->m_nextSearchLayer = SearchLayer::KnownSecondary;
         return ResultSuccess;
     }
 
@@ -237,6 +434,37 @@ namespace edz::ui {
                 this->m_nextSearchLayer = SearchLayer::UnknownPrimary;
                 Gui::runLater([this]{ brls::Application::requestFocus(this->m_rootFrame, brls::FocusDirection::NONE); }, 10);
             }
+                if (this->m_pattern != nullptr)
+                    delete[] this->m_pattern;
+
+                this->m_pattern = new u8[1];
+                this->m_pattern[0] = 0x00;
+                this->m_patternSize = 0;
+                this->m_signedness = cheat::types::Signedness::Signed;
+                this->m_knownOperation = STRATEGY(==);
+                this->m_unknownOperation = STRATEGY(==);
+                this->m_regions.clear();
+                this->m_alignedSearch = true;
+
+                this->m_knownPrimarySearchType->setSelectedValue(0);
+                this->m_knownPrimarySearchRegion->setSelectedValue(0);
+                this->m_knownPrimaryDataType->setSelectedValue(0);
+                this->m_knownPrimaryValue->setValue("0");
+                this->m_knownPrimarySize->setValue("1");
+                this->m_knownPrimaryAligned->setToggleState(true);
+
+                this->m_knownSecondaryFoundAddresses->setValue("0");
+                this->m_knownSecondarySearchType->setSelectedValue(0);
+                this->m_knownSecondaryValue->setValue("0");
+
+                this->m_unknownPrimarySearchType->setSelectedValue(0);
+                this->m_unknownPrimarySearchRegion->setSelectedValue(0);
+                this->m_unknownPrimaryDataType->setSelectedValue(0);
+                this->m_unknownPrimarySize->setValue("0");
+                this->m_unknownPrimaryAligned->setToggleState(true);
+
+                this->m_unknownSecondaryFoundAddresses->setValue("0");
+                this->m_unknownSecondaryUnknownSearchType->setSelectedValue(0);
 
             return true;
         });
@@ -287,6 +515,9 @@ namespace edz::ui {
             }, "Searching memory. This might take a while...");
         });
 
+        this->m_pattern = new u8[1];
+        this->m_pattern[0] = 0x00;
+
         this->m_selectedSearchLayer = this->m_nextSearchLayer = SearchLayer::KnownPrimary;
 
         return this->m_rootFrame;
@@ -296,6 +527,7 @@ namespace edz::ui {
 
         if (this->m_nextSearchLayer != this->m_selectedSearchLayer) {
             this->m_contentLayers->changeLayer(u8(this->m_nextSearchLayer));
+            brls::Application::requestFocus(this->m_contentLayers, brls::FocusDirection::NONE);
 
             this->m_selectedSearchLayer = this->m_nextSearchLayer;
 

@@ -32,10 +32,10 @@ namespace edz::cheat {
 
     class CheatEngine {
     public:
-        std::pair<EResult, std::string> findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, bool alignedSearch);
-        std::pair<EResult, std::string> findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile);
-        std::pair<EResult, std::string> dumpRegion(types::Region region);
-        std::pair<EResult, std::string> compareMemoryWithDump(std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile, bool alignedSearch);
+        static std::pair<EResult, std::string> findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, bool alignedSearch);
+        static std::pair<EResult, std::string> findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile);
+        static std::pair<EResult, std::string> dumpRegion(types::Region region);
+        static std::pair<EResult, std::string> compareMemoryWithDump(std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile, bool alignedSearch);
     };
 
 }

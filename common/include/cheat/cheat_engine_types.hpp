@@ -107,6 +107,6 @@ namespace edz::cheat::types {
 
 
     using Operation = bool(Pattern::*)(Pattern&);
-    #define STRATEGY(operation) &Pattern::operator operation
+    #define STRATEGY(operation) &edz::cheat::types::Pattern::operator operation
 
 }
