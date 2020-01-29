@@ -166,7 +166,7 @@ namespace edz::hlp {
 
     /* Read a system settings value */
     template<typename T>
-    std::pair<EResult, T> readSetting(std::string section, std::string key) {
+    EResultVal<T> readSetting(std::string section, std::string key) {
         EResult res;
         u64 valueSize;
 

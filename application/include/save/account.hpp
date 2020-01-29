@@ -30,13 +30,13 @@ namespace edz::save {
     public:
         Account(userid_t userID, bool exists);
 
-        userid_t getID();
-        std::string getIDString();
+        userid_t getID() const;
+        std::string getIDString() const;
 
-        std::string getNickname();
+        std::string getNickname() const;
         std::vector<u8>& getIcon();
 
-        bool exists();
+        bool exists() const;
 
     private:
         userid_t m_userID;

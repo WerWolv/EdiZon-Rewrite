@@ -33,7 +33,7 @@ namespace edz::api {
     }
 
 
-    std::pair<EResult, std::string> EdiZonAPI::getVersion() {
+    EResultVal<std::string> EdiZonAPI::getVersion() {
         std::string version;
 
         auto [result, response] = this->m_curl.get("/version");
@@ -52,7 +52,7 @@ namespace edz::api {
         return { ResultSuccess, version };
     }
 
-    std::pair<EResult, std::vector<EdiZonAPI::official_provider_t>> EdiZonAPI::getOfficialProviders() {
+    EResultVal<std::vector<EdiZonAPI::official_provider_t>> EdiZonAPI::getOfficialProviders() {
         std::vector<EdiZonAPI::official_provider_t> providers;
 
         EdiZonAPI::_updateVersionString();
@@ -74,7 +74,7 @@ namespace edz::api {
         return { ResultSuccess, providers };
     }
 
-    std::pair<EResult, EdiZonAPI::release_info_t> EdiZonAPI::getReleaseInfo() {
+    EResultVal<EdiZonAPI::release_info_t> EdiZonAPI::getReleaseInfo() {
         EdiZonAPI::release_info_t releaseInfo;
         
         EdiZonAPI::_updateVersionString();
@@ -95,7 +95,7 @@ namespace edz::api {
         return { ResultSuccess, releaseInfo };
     }
 
-    std::pair<EResult, std::vector<EdiZonAPI::notification_t>> EdiZonAPI::getNotifications() {
+    EResultVal<std::vector<EdiZonAPI::notification_t>> EdiZonAPI::getNotifications() {
         std::vector<EdiZonAPI::notification_t> notifications;
         
         EdiZonAPI::_updateVersionString();

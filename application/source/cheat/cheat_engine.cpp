@@ -24,7 +24,7 @@
 
 namespace edz::cheat {
 
-    std::pair<EResult, std::string> CheatEngine::findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, bool alignedSearch) {
+    EResultVal<std::string> CheatEngine::findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, bool alignedSearch) {
         size_t bufferSize = MEMORY_SEARCH_BUFFER_SIZE;
         u8 *buffer = new u8[bufferSize];
 
@@ -71,7 +71,7 @@ namespace edz::cheat {
         return { ResultSuccess, dumpFilePath };
     }
 
-    std::pair<EResult, std::string> CheatEngine::findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile) {
+    EResultVal<std::string> CheatEngine::findPattern(u8* pattern, std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile) {
         std::string dumpFilePath = EDIZON_DUMP_DIR + hlp::formatString("/region_%016lx_k2.bin", region.baseAddress);
 
         types::DumpFile newDumpFile(dumpFilePath);
@@ -118,7 +118,7 @@ namespace edz::cheat {
         return { ResultSuccess, dumpFilePath };
     }
 
-    std::pair<EResult, std::string> CheatEngine::dumpRegion(types::Region region) {
+    EResultVal<std::string> CheatEngine::dumpRegion(types::Region region) {
         std::string dumpFilePath = EDIZON_DUMP_DIR + hlp::formatString("/region_%016lx_u1.bin", region.baseAddress);
 
         if (auto file = hlp::File(dumpFilePath); file.exists())
@@ -149,7 +149,7 @@ namespace edz::cheat {
         return { ResultSuccess, dumpFilePath };
     }
 
-    std::pair<EResult, std::string> CheatEngine::compareMemoryWithDump(std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile, bool alignedSearch) {
+    EResultVal<std::string> CheatEngine::compareMemoryWithDump(std::size_t patternSize, types::Signedness signedness, types::Operation operation, types::Region region, types::DumpFile &dumpFile, bool alignedSearch) {
         size_t bufferSize = MEMORY_SEARCH_BUFFER_SIZE;
         u8 *memBuffer = new u8[bufferSize];
         u8 *dumpBuffer = new u8[bufferSize];

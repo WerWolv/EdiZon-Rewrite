@@ -45,7 +45,7 @@ SPACE     	:=  $(null) $(null)
 
 DEFINES 	+=  -Dfopen64=fopen -Dftello64=ftello -Dfseeko64=fseeko
 
-COMMONFLAGS	:=  -g -Wall -Og -ffunction-sections \
+COMMONFLAGS	:=  -g -Wall -Og -ffunction-sections -flto -fuse-linker-plugin -ffat-lto-objects \
 				$(ARCH) $(DEFINES) 				 \
 				-DWINDOW_NAME=\"EdiZon\"		 \
 				-DSNAPSHOT=${SNAPSHOT}			 \

@@ -33,14 +33,14 @@ namespace edz::hlp {
         Curl(std::string baseURL);
         ~Curl();
 
-        std::pair<EResult, std::string> get(std::string path, std::map<std::string, std::string> extraHeaders = { });
-        std::pair<EResult, std::string> post(std::string path, std::string body);
+        EResultVal<std::string> get(std::string path, std::map<std::string, std::string> extraHeaders = { });
+        EResultVal<std::string> post(std::string path, std::string body);
 
-        std::pair<EResult, std::vector<u8>> download(std::string path);
+        EResultVal<std::vector<u8>> download(std::string path);
         EResult download(std::string path, std::string downloadPath);
 
-        std::pair<EResult, std::string> upload(std::string path, std::string fileName, std::vector<u8> &data);
-        std::pair<EResult, std::string> upload(std::string path, std::string uploadPath);
+        EResultVal<std::string> upload(std::string path, std::string fileName, std::vector<u8> &data);
+        EResultVal<std::string> upload(std::string path, std::string uploadPath);
 
         std::function<bool(u8)>& getProgressCallback();
         void setProgressCallback(std::function<bool(u8)> callback);

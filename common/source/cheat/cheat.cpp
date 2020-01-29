@@ -227,7 +227,7 @@ namespace edz::cheat {
     }
 
 
-    std::pair<EResult, std::string> CheatManager::getCheatFile() {
+    EResultVal<std::string> CheatManager::getCheatFile() {
         if (!CheatManager::isCheatServiceAvailable())
             return { ResultEdzCheatServiceNotAvailable, "" };
         
@@ -242,7 +242,7 @@ namespace edz::cheat {
     }
 
 
-    std::pair<EResult, u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
+    EResultVal<u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
         if (!CheatManager::isCheatServiceAvailable())
             return { ResultEdzCheatServiceNotAvailable, 0 };
 

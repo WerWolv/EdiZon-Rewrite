@@ -339,7 +339,7 @@ namespace edz::save {
     }
     
 
-    std::pair<EResult, std::vector<std::string>> SaveManager::getLocalBackupList(std::unique_ptr<Title> &title) {
+    EResultVal<std::vector<std::string>> SaveManager::getLocalBackupList(std::unique_ptr<Title> &title) {
         std::regex regex = std::regex(".+ " + title->getIDString());
 
         hlp::Folder backupFolder(hlp::formatString("%s/%s", EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str()));
@@ -353,7 +353,7 @@ namespace edz::save {
         return { ResultSuccess, backupFiles }; 
     }
     
-    std::pair<EResult, std::map<std::string, std::string>> SaveManager::getOnlineBackupList(std::unique_ptr<Title> &title) {
+    EResultVal<std::map<std::string, std::string>> SaveManager::getOnlineBackupList(std::unique_ptr<Title> &title) {
         api::SwitchCheatsDBAPI switchCheatsDBApi;
         std::map<std::string, std::string> saveFileNames;
 
@@ -368,7 +368,7 @@ namespace edz::save {
         return { ResultSuccess, saveFileNames };
     }
     
-    std::pair<EResult, bool> SaveManager::areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
+    EResultVal<bool> SaveManager::areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
         return { ResultEdzNotYetImplemented, false };
     }
 

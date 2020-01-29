@@ -33,7 +33,7 @@ namespace edz::api {
     }
 
 
-    std::pair<EResult, std::string> SaveRepoAPI::getName() {
+    EResultVal<std::string> SaveRepoAPI::getName() {
         std::string name;
 
         auto [result, response] = this->m_curl.get("/name");
@@ -52,7 +52,7 @@ namespace edz::api {
         return { ResultSuccess, name };
     }
 
-    std::pair<EResult, std::string> SaveRepoAPI::getMOTD() {
+    EResultVal<std::string> SaveRepoAPI::getMOTD() {
         std::string name;
 
         auto [result, response] = this->m_curl.get("/motd");
@@ -71,7 +71,7 @@ namespace edz::api {
         return { ResultSuccess, name };
     }
 
-    std::pair<EResult, std::string> SaveRepoAPI::getVersion() {
+    EResultVal<std::string> SaveRepoAPI::getVersion() {
         std::string version;
 
         auto [result, response] = this->m_curl.get("/version");
@@ -90,7 +90,7 @@ namespace edz::api {
         return { ResultSuccess, version };
     }
 
-    std::pair<EResult, std::vector<u8>> SaveRepoAPI::getIcon() {
+    EResultVal<std::vector<u8>> SaveRepoAPI::getIcon() {
         SaveRepoAPI::_updateVersionString();
 
         return this->m_curl.download("/" + this->m_version + "/icon");
@@ -102,7 +102,7 @@ namespace edz::api {
         return this->m_curl.download("/" + this->m_version + "/get?fileName=" + file, downloadPath);
     }
 
-    std::pair<EResult, std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {
+    EResultVal<std::vector<SaveRepoAPI::save_file_t>> SaveRepoAPI::listFiles() {
         std::vector<SaveRepoAPI::save_file_t> saveFiles;
         SaveRepoAPI::_updateVersionString();
 

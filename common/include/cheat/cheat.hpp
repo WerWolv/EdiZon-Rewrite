@@ -83,9 +83,9 @@ namespace edz::cheat {
         static types::Region getMainRegion();
         static types::Region getAliasRegion();
 
-        static std::pair<EResult, std::string> getCheatFile();
+        static EResultVal<std::string> getCheatFile();
 
-        static std::pair<EResult, u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
+        static EResultVal<u32> addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled);
         static EResult removeCheat(u32 cheatID);
 
         static std::vector<Cheat*>& getCheats();

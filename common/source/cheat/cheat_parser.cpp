@@ -24,7 +24,7 @@
 
 namespace edz::cheat {
 
-    std::pair<EResult, std::vector<dmntcht::CheatDefinition>> CheatParser::parseString(std::string s) {
+    EResultVal<std::vector<dmntcht::CheatDefinition>> CheatParser::parseString(std::string s) {
         CheatParser::s_debugInfo.parseResult = ParseResult::NONE;
 
         if (s.size() == 0) {
@@ -135,7 +135,7 @@ namespace edz::cheat {
         return { ResultSuccess, cheatDefs };
     }
 
-    std::pair<EResult, std::vector<dmntcht::CheatDefinition>> CheatParser::parseFile(std::string filePath) {
+    EResultVal<std::vector<dmntcht::CheatDefinition>> CheatParser::parseFile(std::string filePath) {
         hlp::File file(filePath);
 
         return CheatParser::parseString(file.read());

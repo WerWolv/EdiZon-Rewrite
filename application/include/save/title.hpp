@@ -34,20 +34,20 @@ namespace edz::save {
         void addUser(userid_t userID);
         void setHasCommonSaveFile();
 
-        titleid_t getID();
-        std::string getIDString();
+        titleid_t getID() const;
+        std::string getIDString() const;
 
-        std::string getName();
-        std::string getAuthor();
-        std::string getVersionString();
-        u32 getVersion();
+        std::string getName() const;
+        std::string getAuthor() const;
+        std::string getVersionString() const;
+        u32 getVersion() const;
 
-        bool isInstalled();
-        bool hasSaveFile();
-        bool hasSaveFile(std::unique_ptr<Account> &account);
-        bool hasCommonSaveFile();
+        bool isInstalled() const;
+        bool hasSaveFile() const;
+        bool hasSaveFile(std::unique_ptr<Account> &account) const;
+        bool hasCommonSaveFile() const;
 
-        bool isRunning();
+        bool isRunning() const;
         static titleid_t getRunningTitleID();
         static processid_t getRunningProcessID();
         static std::unique_ptr<Title>& getRunningTitle();
@@ -56,10 +56,10 @@ namespace edz::save {
 
         std::vector<u8>& getIcon();
 
-        std::vector<userid_t> getUserIDs();
+        std::vector<userid_t> getUserIDs() const;
 
         EResult createSaveDataFileSystem(std::unique_ptr<Account> &account, FsSaveDataType saveDataType);
-        void launch();
+        void launch() const;
 
         time_t getPlayTime(std::unique_ptr<Account> &account);
         time_t getFirstPlayTime(std::unique_ptr<Account> &account);

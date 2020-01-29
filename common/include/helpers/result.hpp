@@ -29,32 +29,73 @@ namespace edz {
 
     class EResult {
     public:
-        EResult();
+        constexpr EResult() : m_module(0), m_desc(0) {}
 
-        EResult(u32 module, u32 desc);
+        constexpr EResult(u32 module, u32 desc) : m_module(module), m_desc(desc) {}
 
-        EResult(Result result);
+        constexpr EResult(Result result) : m_module(static_cast<u32>(R_MODULE(result))), m_desc(static_cast<u32>(R_DESCRIPTION(result))) {}
 
-        u32 getModule();
-        u32 getDescription();
-        std::string getString();
+        constexpr u32 getModule() {
+            return this->m_module;
+        }
 
-        bool operator==(EResult &other);
-        bool operator==(Result &other);
-        bool operator!=(EResult &other);
-        bool operator!=(Result &other);
+        constexpr u32 getDescription() {
+            return this->m_desc;
+        }
 
-        EResult operator=(u32 &other);
-        EResult operator=(EResult &other);
-        EResult operator=(Result other);
+        std::string getString() {
+            char buffer[0x20];
+            sprintf(buffer, "2%03d-%04d (0x%x)", this->getModule(), this->getDescription(), static_cast<u32>(*this));
 
-        operator u32() const;
+            return buffer;
+        }
 
-        bool succeeded();
-        bool failed();
+
+        constexpr bool operator==(EResult &other) {
+            return this->getDescription() == other.getDescription();
+        }
+
+        constexpr bool operator!=(EResult &other) {
+            return this->getDescription() != other.getDescription();
+        }
+
+        constexpr bool operator==(Result &other) {
+            return this->getDescription() == EResult(other).getDescription() && this->getDescription() == EResult(other).getModule();
+        }
+
+        constexpr bool operator!=(Result &other) {
+            return this->getDescription() != EResult(other).getDescription() || this->getDescription() != EResult(other).getModule();
+        }
+
+        constexpr EResult operator=(u32 &other) {
+            return Result(other);
+        }
+
+        constexpr EResult operator=(EResult &other) {
+            return EResult(other.getDescription());
+        }
+
+        constexpr EResult operator=(Result other) {
+            return EResult(static_cast<u32>(other));
+        }
+
+        constexpr operator u32() const { 
+            return MAKERESULT(this->m_module, this->m_desc);
+        }
+
+        constexpr bool succeeded() {
+            return this->m_module == 0 && this->m_desc == 0;
+        }
+
+        constexpr bool failed() {
+            return !this->succeeded();
+        }
 
     private:
         const u32 m_module, m_desc;
     };
+
+    template<typename T>
+    using EResultVal = std::pair<EResult, T>;
     
 }

@@ -27,27 +27,27 @@ namespace edz::hlp {
     public:
         u8 major, minor, patch;
 
-        bool operator==(Version other) {
+        constexpr bool operator==(Version other) {
             return this->major == other.major && this->minor == other.minor && this->patch == other.patch;
         }
 
-        bool operator!=(Version other) {
+        constexpr bool operator!=(Version other) {
             return !operator==(other);
         }
 
-        bool operator>(Version other) {
+        constexpr bool operator>(Version other) {
             return (major << 16 | minor << 8 | patch) > (other.major << 16 | other.minor << 8 | other.patch);
         }
 
-        bool operator<(Version other) {
+        constexpr bool operator<(Version other) {
             return (major << 16 | minor << 8 | patch) < (other.major << 16 | other.minor << 8 | other.patch);
         }
 
-        bool operator>=(Version other) {
+        constexpr bool operator>=(Version other) {
             return operator>(other) || operator==(other);
         }
 
-        bool operator<=(Version other) {
+        constexpr bool operator<=(Version other) {
             return operator<(other) || operator==(other);
         }
 

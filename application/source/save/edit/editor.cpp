@@ -35,7 +35,7 @@ namespace edz::save::edit {
     }
 
 
-    std::pair<EResult, Config*> Editor::loadConfig(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
+    EResultVal<Config*> Editor::loadConfig(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
         if (Editor::s_config != nullptr)
             return { ResultEdzEditorAlreadyLoaded, nullptr };
 
@@ -59,7 +59,7 @@ namespace edz::save::edit {
         return { ResultSuccess, Editor::s_config };
     }
 
-    std::pair<EResult, Script*> Editor::loadScript(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string saveFilePath) {
+    EResultVal<Script*> Editor::loadScript(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string saveFilePath) {
         if (Editor::s_config == nullptr)
             return { ResultEdzEditorLoadFailed, nullptr };
 

@@ -61,47 +61,47 @@ namespace edz::save {
     }
 
 
-    titleid_t Title::getID() {
+    titleid_t Title::getID() const {
         return this->m_titleID;
     }
 
-    std::string Title::getIDString() {
+    std::string Title::getIDString() const {
         std::stringstream sstream;
         sstream << std::uppercase << std::setfill('0') << std::setw(sizeof(titleid_t) * 2) << std::hex << getID();
 
         return sstream.str();
     }
 
-    std::string Title::getName() {
+    std::string Title::getName() const {
         return this->m_titleName;
     }
 
-    std::string Title::getAuthor() {
+    std::string Title::getAuthor() const {
         return this->m_titleAuthor;
     }
 
-    std::string Title::getVersionString() {
+    std::string Title::getVersionString() const {
         return this->m_versionString;
     }
 
-    u32 Title::getVersion() {
+    u32 Title::getVersion() const {
         return this->m_version;
     }
 
 
-    bool Title::isInstalled() {
+    bool Title::isInstalled() const {
         return this->m_isInstalled;
     }
 
-    bool Title::hasSaveFile() {
+    bool Title::hasSaveFile() const {
         return this->getUserIDs().size() > 0 || this->m_hasCommonSaveFile;
     }
 
-    bool Title::hasCommonSaveFile() {
+    bool Title::hasCommonSaveFile() const {
         return this->m_hasCommonSaveFile;
     }
 
-    bool Title::hasSaveFile(std::unique_ptr<Account> &account) {
+    bool Title::hasSaveFile(std::unique_ptr<Account> &account) const {
         if (!hasSaveFile())
             return false;
 
@@ -113,7 +113,7 @@ namespace edz::save {
     }
 
 
-    bool Title::isRunning() {
+    bool Title::isRunning() const {
         static titleid_t runningTitleID = 0;
 
         // Running title needs to be loaded only once as it can't ever change without the user quiting edizon
@@ -170,7 +170,7 @@ namespace edz::save {
         return this->m_icon;
     }
 
-    std::vector<userid_t> Title::getUserIDs() {
+    std::vector<userid_t> Title::getUserIDs() const {
         return this->m_userIDs;
     }
 
@@ -214,7 +214,7 @@ namespace edz::save {
         return ResultSuccess;
     }
 
-    void Title::launch() {
+    void Title::launch() const {
         appletRequestLaunchApplication(this->getID(), nullptr);
     }
 

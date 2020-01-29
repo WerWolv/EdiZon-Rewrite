@@ -37,28 +37,28 @@ namespace edz::hlp {
         Folder(std::string path, std::string folderName);
         ~Folder();
 
-        std::string path();
-        std::string name();
-        bool exists();
+        std::string path() const;
+        std::string name() const;
+        bool exists() const;
 
-        void copyTo(std::string newPath);
-        void copyFrom(std::string oldPath);
+        void copyTo(std::string newPath) const;
+        void copyFrom(std::string oldPath) const;
 
-        EResult remove();
-        EResult createDirectories();
+        EResult remove() const;
+        EResult createDirectories() const;
 
-        std::map<std::string, File> getFiles();
-        std::map<std::string, Folder> getFolders();
+        std::map<std::string, File> getFiles() const;
+        std::map<std::string, Folder> getFolders() const;
 
-        void foreach(std::function<void(struct dirent*)> callback);
+        void foreach(std::function<void(struct dirent*)> callback) const;
 
     private:
-        DIR *m_dir;
+        mutable DIR *m_dir;
         std::string m_path;
         std::string m_folderName;
 
-        void openDirectory();
-        void closeDirectory();
-        void rewindDirectory();
+        void openDirectory() const;
+        void closeDirectory() const;
+        void rewindDirectory() const;
     };
 }

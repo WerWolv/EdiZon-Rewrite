@@ -41,19 +41,19 @@ namespace edz::hlp {
     }
     
 
-    std::string File::name() {
+    std::string File::name() const {
         return std::filesystem::path(this->m_filePath).filename();
     }
 
-    std::string File::path() {
+    std::string File::path() const {
         return this->m_filePath;
     }
 
-    std::string File::parent() {
+    std::string File::parent() const {
         return std::filesystem::path(this->m_filePath).parent_path();
     }
 
-    size_t File::size() {
+    size_t File::size() const {
         if (!exists()) return -1;
 
         if (openFile().failed())
@@ -67,13 +67,13 @@ namespace edz::hlp {
         return fileSize;
     }
 
-    void File::remove() {
+    void File::remove() const {
         if (!exists()) return;
 
         ::remove(this->m_filePath.c_str());
     }
 
-    File File::copyTo(std::string path) {
+    File File::copyTo(std::string path) const {
         Folder dstFolder(File(path).parent());
         dstFolder.createDirectories();
 
@@ -103,13 +103,13 @@ namespace edz::hlp {
         return File(path);
     }
 
-    void File::createDirectories() {
+    void File::createDirectories() const {
         Folder folder(this->parent());
 
         folder.createDirectories();
     }
 
-    bool File::exists() {
+    bool File::exists() const {
         this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
         if (this->m_file != nullptr) {
@@ -172,7 +172,7 @@ namespace edz::hlp {
     }
 
 
-    EResult File::openFile() {
+    EResult File::openFile() const {
         if (this->m_file != nullptr) return ResultSuccess;
 
         this->m_file = fopen(this->m_filePath.c_str(), "rb");
@@ -186,7 +186,7 @@ namespace edz::hlp {
         return ResultSuccess;
     }
 
-    void File::closeFile() {
+    void File::closeFile() const {
         if (this->m_file == nullptr) return;
 
         fclose(m_file);

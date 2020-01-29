@@ -54,10 +54,10 @@ namespace edz::api {
             time_t date;
         } notification_t;
 
-        std::pair<EResult, std::string> getVersion();
-        std::pair<EResult, std::vector<official_provider_t>> getOfficialProviders();
-        std::pair<EResult, release_info_t> getReleaseInfo();
-        std::pair<EResult, std::vector<notification_t>> getNotifications();
+        EResultVal<std::string> getVersion();
+        EResultVal<std::vector<official_provider_t>> getOfficialProviders();
+        EResultVal<release_info_t> getReleaseInfo();
+        EResultVal<std::vector<notification_t>> getNotifications();
 
         void _updateVersionString();
 
