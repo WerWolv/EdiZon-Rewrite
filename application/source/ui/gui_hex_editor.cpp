@@ -109,7 +109,7 @@ namespace edz::ui {
             }
         });
 
-        editor->addHint("Back",   brls::Key::B, [this, editor] { 
+        editor->registerAction("Back",   brls::Key::B, [this, editor] { 
             if (this->m_returnStack.size() > 0) {
                 addr_t lastAddress = this->m_returnStack.back();
 
@@ -124,7 +124,7 @@ namespace edz::ui {
 
             return true;
         });
-        editor->addHint("Down", brls::Key::R, [this, editor] {
+        editor->registerAction("Down", brls::Key::R, [this, editor] {
             static cheat::types::Region heapRegion = cheat::CheatManager::getHeapRegion();
             static cheat::types::Region mainRegion = cheat::CheatManager::getMainRegion();
 
@@ -141,7 +141,7 @@ namespace edz::ui {
             this->m_address = newAddress;
             return true;
         });
-        editor->addHint("Up",   brls::Key::L, [this, editor] { 
+        editor->registerAction("Up",   brls::Key::L, [this, editor] { 
             static cheat::types::Region heapRegion = cheat::CheatManager::getHeapRegion();
             static cheat::types::Region mainRegion = cheat::CheatManager::getMainRegion();
 
@@ -158,7 +158,7 @@ namespace edz::ui {
             this->m_address = newAddress;
             return true;
         });
-        editor->addHint("Goto",   brls::Key::Y, [this, editor] { 
+        editor->registerAction("Goto",   brls::Key::Y, [this, editor] { 
             hlp::openSwkbdForText([this, editor](std::string str) {
                 addr_t newAddress = parseAddressString(str) & ~0x0F;
                 cheat::CheatManager::readMemory(newAddress, this->m_buffer, GuiHexEditor::HEX_EDITOR_SIZE);

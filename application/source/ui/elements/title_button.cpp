@@ -27,7 +27,7 @@ namespace edz::ui::element {
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
 
-        this->addHint("OK", brls::Key::A, [this] { return this->onClick(); });
+        this->registerAction("OK", brls::Key::A, [this] { return this->onClick(); });
     }
 
     TitleButton::~TitleButton() {

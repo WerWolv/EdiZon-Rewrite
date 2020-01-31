@@ -33,7 +33,8 @@ namespace edz::ui::page {
         this->m_label = new brls::Label(brls::LabelStyle::MEDIUM, "edz.page.login.hint"_lang, true);
         this->m_emailItem = new brls::ListItem("edz.page.login.email"_lang);
         this->m_passwordItem = new brls::ListItem("edz.page.login.password"_lang);
-        this->m_loginBtn = new brls::Button(brls::ButtonStyle::PLAIN, "edz.page.login.login"_lang);
+        this->m_loginBtn = new brls::Button(brls::ButtonStyle::PLAIN);
+        
 
         this->m_label->setParent(this);
         this->m_emailItem->setParent(this);
@@ -61,6 +62,7 @@ namespace edz::ui::page {
             }, "edz.page.login.password"_lang, "edz.page.login.password.help"_lang);
         });
 
+        this->m_loginBtn->setLabel("edz.page.login.login"_lang);
         this->m_loginBtn->setClickListener([=](View *view) {
             api::SwitchCheatsDBAPI scdbApi;
 
@@ -84,7 +86,7 @@ namespace edz::ui::page {
             brls::Application::popView();
         });
 
-        this->addHint("Back", brls::Key::B, [this] { return this->onCancel(); });
+        this->registerAction("Back", brls::Key::B, [this] { return this->onCancel(); });
     }
 
     PageLogin::~PageLogin() {

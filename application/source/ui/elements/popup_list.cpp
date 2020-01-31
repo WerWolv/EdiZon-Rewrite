@@ -25,17 +25,19 @@ namespace edz::ui::element {
     PopupList::PopupList(std::string lButton, std::string rButton, brls::EventListener lButtonEvent, brls::EventListener rButtonEvent) {
         this->m_list = new brls::List();
 
-        this->m_lButton = new brls::Button(brls::ButtonStyle::DIALOG, lButton);
+        this->m_lButton = new brls::Button(brls::ButtonStyle::DIALOG);
+        this->m_lButton->setLabel(lButton);
         this->m_lButton->setClickListener(lButtonEvent);
 
-        this->m_rButton = new brls::Button(brls::ButtonStyle::DIALOG, rButton);
+        this->m_rButton = new brls::Button(brls::ButtonStyle::DIALOG);
+        this->m_rButton->setLabel(rButton);
         this->m_rButton->setClickListener(rButtonEvent);
 
         this->m_list->setParent(this);
         this->m_lButton->setParent(this);
         this->m_rButton->setParent(this);
 
-        this->addHint("Back", brls::Key::B, [this] { return this->onCancel(); });
+        this->registerAction("Back", brls::Key::B, [this] { return this->onCancel(); });
     }
 
     PopupList::~PopupList() {

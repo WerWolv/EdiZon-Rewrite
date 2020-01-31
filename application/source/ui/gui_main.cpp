@@ -34,7 +34,6 @@
 #include "ui/elements/focusable_table.hpp"
 #include "ui/elements/title_list_item.hpp"
 #include "ui/elements/credit_view.hpp"
-#include "ui/elements/hex_keyboard.hpp"
 #include "ui/pages/page_login.hpp"
 
 #include "api/edizon_api.hpp"
@@ -474,7 +473,7 @@ namespace edz::ui {
             }
         }
 
-        list->addHint("edz.gui.main.repos.button.add"_lang, brls::Key::X, [this, list]{
+        list->registerAction("edz.gui.main.repos.button.add"_lang, brls::Key::X, [this, list]{
             hlp::openSwkbdForText([this, list](std::string input) {
                 if (!std::regex_match(input, std::regex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"))) {
                     //TODO: ERROR
@@ -950,11 +949,6 @@ namespace edz::ui {
             createRunningTitleInfoTab(this->m_runningTitleInfoList);           
             rootFrame->addTab("edz.gui.main.running.tab"_lang, this->m_runningTitleInfoList);
         }
-
-        rootFrame->addHint("Test", brls::Key::X, [] {
-            ui::element::HexKeyboard::open("Hello", [](u8*, size_t){}, 10);
-            return true;
-        });
 
         rootFrame->addTab("edz.gui.main.cheats.tab"_lang, this->m_cheatsList);
         rootFrame->addTab("edz.gui.main.repos.tab"_lang, this->m_saveReposList);

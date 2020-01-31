@@ -35,7 +35,7 @@ namespace edz::ui::element {
         this->m_historyLabel->setHorizontalAlign(NVG_ALIGN_CENTER);
         this->m_historyLabel->setParent(this);
 
-        this->addHint("OK",   brls::Key::A, [this] { return this->onClick(); });
+        this->registerAction("OK",   brls::Key::A, [this] { return this->onClick(); });
 
         this->m_selectX = 0;
         this->m_selectY = 1;
