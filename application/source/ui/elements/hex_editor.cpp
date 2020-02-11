@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -35,7 +35,11 @@ namespace edz::ui::element {
         this->m_historyLabel->setHorizontalAlign(NVG_ALIGN_CENTER);
         this->m_historyLabel->setParent(this);
 
-        this->addHint("OK",   brls::Key::A, [this] { return this->onClick(); });
+        this->registerAction("OK",   brls::Key::A, [this] { return this->onClick(); });
+
+        this->m_selectX = 0;
+        this->m_selectY = 1;
+        this->m_selectWidth = 1;
     }
 
     HexEditor::~HexEditor() {
@@ -90,9 +94,6 @@ namespace edz::ui::element {
     brls::View* HexEditor::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {    
         switch (direction) {
             case brls::FocusDirection::NONE:
-                this->m_selectX = 0;
-                this->m_selectY = 1;
-                this->m_selectWidth = 1;
                 break;
             case brls::FocusDirection::UP:
                 this->m_selectY = std::max(1, this->m_selectY - 1);
@@ -147,7 +148,13 @@ namespace edz::ui::element {
 
         this->m_address = address & ~0x0F;
 
-        reloadMemory(true);
+        this->m_selectX = address & 0x0F;
+        this->m_selectY = 1;
+
+        reloadMemory(false);
+
+        this->m_selectWidth = static_cast<u8>(this->m_selectionType[(this->m_selectY - 1) * 2 + this->m_selectX / 8]);
+        this->m_selectX = (this->m_selectX / this->m_selectWidth) * this->m_selectWidth;
     }
 
     addr_t HexEditor::getDisplayAddress() {

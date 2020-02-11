@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -38,7 +38,7 @@ namespace edz::cheat::types {
     }
 
 
-    std::string DumpFile::getFilePath() {
+    std::string DumpFile::getFilePath() const {
         return this->m_file.path();
     }
 
@@ -112,7 +112,7 @@ namespace edz::cheat::types {
     }
 
 
-    std::pair<EResult, addr_t> DumpFile::getAddress(s32 index) {
+    EResultVal<addr_t> DumpFile::getAddress(s32 index) {
         if (!this->m_header.isKnownInitialPattern)
             return { ResultEdzInvalidOperation, 0x00 };
 
@@ -127,7 +127,7 @@ namespace edz::cheat::types {
         return { ResultSuccess, this->m_readBuffer[index - this->m_readBufferOffset] };
     }
 
-    std::pair<EResult, size_t> DumpFile::getBuffer(u8 *buffer, size_t bufferSize, offset_t offset) {
+    EResultVal<size_t> DumpFile::getBuffer(u8 *buffer, size_t bufferSize, offset_t offset) {
         if (this->m_header.isKnownInitialPattern)
             return { ResultEdzInvalidOperation, 0x00 };
 

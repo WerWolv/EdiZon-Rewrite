@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -37,7 +37,7 @@ namespace edz::save {
 
 namespace edz::hlp {
 
-#ifndef __SYSMODULE__
+#ifndef __OVERLAY__
     /* Has Parential Control been enabled */
     bool isPctlEnabled();
 
@@ -61,18 +61,6 @@ namespace edz::hlp {
 
     /* Returns if EdiZon was ran through Application override */
     bool isInApplicationMode();
-
-    /* Starts the EdiZon sysmodule */
-    EResult startBackgroundService();
-
-    /* Terminates the EdiZon sysmodule */
-    EResult stopBackgroundService();
-
-    /* Enables autostart for the edizon background service */
-    void enableAutostartOfBackgroundService();
-
-    /* Disables autostart for the edizon background service */
-    void disableAutostartOfBackgroundService();
 
 #endif
 
@@ -175,5 +163,24 @@ namespace edz::hlp {
 
     /* Requests focus to the Tesla overlay */
     EResult focusOverlay(bool focus);
+
+    /* Read a system settings value */
+    template<typename T>
+    EResultVal<T> readSetting(std::string section, std::string key) {
+        EResult res;
+        u64 valueSize;
+
+        T buffer;
+ 
+        res = setsysGetSettingsItemValueSize(section.c_str(), key.c_str(), &valueSize);
+
+        if (valueSize != sizeof(T))
+            return { ResultEdzInvalidOperation, 0 };
+
+        if (res.succeeded())
+            res = setsysGetSettingsItemValue(section.c_str(), key.c_str(), &buffer, valueSize, &valueSize);
+
+        return { res, buffer };
+    }
 
 }

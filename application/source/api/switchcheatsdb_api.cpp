@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -35,7 +35,7 @@ namespace edz::api {
     }
 
 
-    std::pair<EResult, std::string> SwitchCheatsDBAPI::getToken(std::string email, std::string password) {
+    EResultVal<std::string> SwitchCheatsDBAPI::getToken(std::string email, std::string password) {
         std::string token;
 
         json body;
@@ -58,7 +58,7 @@ namespace edz::api {
     }
 
 
-    std::pair<EResult, SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
+    EResultVal<SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
         SwitchCheatsDBAPI::cheat_response_t cheatResponse;
         auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + (buildID == 0 ? "" : "/" + hlp::toHexString(buildID)), { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
 
@@ -85,7 +85,7 @@ namespace edz::api {
         return { ResultSuccess, cheatResponse };
     }
 
-    std::pair<EResult, u32> SwitchCheatsDBAPI::getCheatCount() {
+    EResultVal<u32> SwitchCheatsDBAPI::getCheatCount() {
         u32 count;
 
         auto [result, response] = this->m_curl.get("/cheats/count", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
@@ -103,7 +103,7 @@ namespace edz::api {
         return { ResultSuccess, count };
     }
 
-    std::pair<EResult, std::vector<SwitchCheatsDBAPI::save_file_t>> SwitchCheatsDBAPI::getSaveFiles() {
+    EResultVal<std::vector<SwitchCheatsDBAPI::save_file_t>> SwitchCheatsDBAPI::getSaveFiles() {
         std::vector<SwitchCheatsDBAPI::save_file_t> saveFiles;
 
         auto [result, response] = this->m_curl.get("/saves", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });

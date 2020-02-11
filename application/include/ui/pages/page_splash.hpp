@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -26,7 +26,14 @@ namespace edz::ui::page {
 
     class PageSplash : public brls::View {
     public:
-        PageSplash(bool showWarning);
+
+        enum class WarningType {
+            None,
+            TooLowAtmosphereVersion,
+            NotEnoughMemoryReserved
+        };
+
+        PageSplash(WarningType warningType);
         virtual ~PageSplash();
 
         void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;

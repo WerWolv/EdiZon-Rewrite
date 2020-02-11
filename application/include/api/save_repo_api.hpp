@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -38,12 +38,12 @@ namespace edz::api {
             titleid_t titleID;
         } save_file_t;
 
-        std::pair<EResult, std::string> getName();
-        std::pair<EResult, std::string> getMOTD();
-        std::pair<EResult, std::string> getVersion();
-        std::pair<EResult, std::vector<u8>> getIcon();
+        EResultVal<std::string> getName();
+        EResultVal<std::string> getMOTD();
+        EResultVal<std::string> getVersion();
+        EResultVal<std::vector<u8>> getIcon();
         EResult getFile(std::string file, std::string downloadPath);
-        std::pair<EResult, std::vector<save_file_t>> listFiles();
+        EResultVal<std::vector<save_file_t>> listFiles();
 
         void _updateVersionString();
 

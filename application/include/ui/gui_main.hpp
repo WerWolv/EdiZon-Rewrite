@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -59,8 +59,6 @@ namespace edz::ui {
             brls::LayerView *m_playTimeStatsList = nullptr;
             brls::List *m_settingsList = nullptr;
             brls::List *m_aboutList = nullptr;
-
-            brls::ToggleListItem *m_sysmoduleRunningOption;
 
             bool handleSorting(SortingStyle sorting, std::unique_ptr<save::Title> &l, std::unique_ptr<save::Title> &r);
             void sortTitleList(std::vector<brls::BoxLayoutChild*>& list, SortingStyle sorting);

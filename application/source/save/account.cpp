@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -61,18 +61,18 @@ namespace edz::save {
         }
 
 
-        userid_t Account::getID() {
+        userid_t Account::getID() const {
             return this->m_userID;
         }
 
-        std::string Account::getIDString() {
+        std::string Account::getIDString() const {
             std::stringstream sstream;
             sstream << std::uppercase << std::hex << static_cast<u64>(getID() >> 64) << static_cast<u64>(getID() & 0xFFFFFFFFFFFFFFFF);
 
             return sstream.str();
         }
 
-        std::string Account::getNickname() {
+        std::string Account::getNickname() const {
             return this->m_nickname;
         }
 
@@ -80,7 +80,7 @@ namespace edz::save {
             return this->m_icon;
         }
 
-        bool Account::exists() {
+        bool Account::exists() const {
             return this->m_exists;
         }
 

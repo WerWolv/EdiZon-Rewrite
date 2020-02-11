@@ -32,7 +32,7 @@
     "edz.gui.main.repos.label.desc"               : "Gedächtnisinformationenservierbretter sind ein einfacher Weg, um Gedächtnisinformationen, welche von anderen Leuten gegastgeben wurden, herunterzuladen. Für mehr Informationen dazu, wie du deinen eigenen Diener beherbergen kannst, schau auf dem EdiZon NudelaugenZentrum vorbei",
     "edz.gui.main.repos.header.official"          : "Offizielle Kellner",
     "edz.gui.main.repos.header.unofficial"        : "Weitere Ministrantinnen",
-    "edz.gui.main.repos.button.add"               : "Neuen Aufschläger hinzufügen",
+    "edz.gui.main.repos.button.add"               : "Aufschläger hinzufügen",
     "edz.gui.main.repos.label.norepos"            : "Hier ist noch nichts zu sehen. Klick auf “Neuen Server hinzufügen”, um einen neuen Server zu deiner Liste hinzuzufügen",
     "edz.gui.main.cheats.label.desc"              : "Schummler sind kleine Programme, welche während dem Spielen im Hintergrund ausgeführt werden. Mehrere Male pro Sekunde bearbeiten diese den Reminiszenz der momentan laufenden Applikation. Wichtig hierbei ist, dass Schummler sehr fragil sind. Wurden die Schummler nicht richtig erstellt, kann schon ein Gebietswechsel im Computerspiel oder ein Neustart dazu führen, dass die Schummler aufhören zu funktionieren. Auch wenn sie richtig erstellt wurden, wird ein Nachpfleger in den meisten Fällen den Schummler unbrauchbar machen und er muss neu erstellt werden.",
     "edz.gui.main.cheats.header.cheats"           : "Schummler",

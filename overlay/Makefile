@@ -37,9 +37,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g3 -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES) \
 			$(INCLUDE)  -D__SWITCH__ \
-			-D__SYSMODULE__ \
-			-DATMOSPHERE_IS_STRATOSPHERE \
-			-DATMOSPHERE_BOARD_NINTENDO_SWITCH \
+			-D__OVERLAY__ \
 			-DVERSION_MAJOR=${VERSION_MAJOR} \
 			-DVERSION_MINOR=${VERSION_MINOR} \
 			-DVERSION_MICRO=${VERSION_MICRO} \

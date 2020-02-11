@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -39,7 +39,7 @@ namespace edz::cheat {
     }
 
     bool Cheat::toggle() {
-        dmntcht::toggleCheat(getID());
+        dmntcht::toggleCheat(getID()).getString().c_str();
 
         return isEnabled();
     }
@@ -55,8 +55,10 @@ namespace edz::cheat {
     bool Cheat::isEnabled() {
         dmntcht::CheatEntry cheatEntry;
 
-        if (dmntcht::getCheatById(&cheatEntry, getID()).failed())
+        if (EResult res = dmntcht::getCheatById(&cheatEntry, getID()); res.failed()) {
             return false;
+        }
+
 
         return cheatEntry.enabled;
     }
@@ -225,7 +227,7 @@ namespace edz::cheat {
     }
 
 
-    std::pair<EResult, std::string> CheatManager::getCheatFile() {
+    EResultVal<std::string> CheatManager::getCheatFile() {
         if (!CheatManager::isCheatServiceAvailable())
             return { ResultEdzCheatServiceNotAvailable, "" };
         
@@ -240,7 +242,7 @@ namespace edz::cheat {
     }
 
 
-    std::pair<EResult, u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
+    EResultVal<u32> CheatManager::addCheat(dmntcht::CheatDefinition cheatDefinition, bool enabled) {
         if (!CheatManager::isCheatServiceAvailable())
             return { ResultEdzCheatServiceNotAvailable, 0 };
 

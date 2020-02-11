@@ -22,18 +22,20 @@
 #include <edizon.hpp>
 #include <borealis.hpp>
 
-namespace edz::ui::element {
+namespace edz::ui::page {
 
-    class CreditView : public brls::View {
+    class PageFullscreenImage : public brls::View {
     public:
-        CreditView();
-        virtual ~CreditView();
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-        void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
 
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
-        
-        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
+        PageFullscreenImage(brls::Image *image);
+        virtual ~PageFullscreenImage();
+
+        void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
+        void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
+        brls::View* requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp = false) override;
+
+    private:
+        brls::Image *m_image = nullptr;
     };
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -23,6 +23,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iomanip>
+#include <regex>
 
 #include "cheat/cheat.hpp"
 #include "cheat/cheat_parser.hpp"
@@ -193,6 +194,8 @@ namespace edz::ui {
             saveFiles = _saveFiles;
         else return result;
 
+        Gui::runLater([=]{
+
         brls::AppletFrame *rootFrame = new brls::AppletFrame(false, false);
         brls::List *list = new brls::List();
 
@@ -225,7 +228,9 @@ namespace edz::ui {
 
         rootFrame->setContentView(list);
 
-        brls::PopupFrame::open(name, &icon[0], icon.size(), rootFrame, motd);
+        brls::PopupFrame::open(name, const_cast<u8*>(&icon[0]), icon.size(), rootFrame, motd);
+
+        }, 0);
 
         return ResultSuccess;
     }
@@ -411,6 +416,8 @@ namespace edz::ui {
     }
 
     void GuiMain::createSaveReposTab(brls::List *list) {
+        static bool addedUnofficialReposHeader = false;
+
         api::EdiZonAPI edizonApi;
 
         list->addView(new brls::Label(brls::LabelStyle::SMALL, "edz.gui.main.repos.label.desc"_lang, true));
@@ -423,10 +430,91 @@ namespace edz::ui {
         else {
             for (auto provider : providers) {
                 brls::ListItem *listItem = new brls::ListItem(provider.name + "edz.by"_lang + provider.owner, "", provider.description);
-                listItem->setClickListener([=](brls::View *view) { brls::Logger::error("%s", this->createSaveRepoPopup(provider.url).getString().c_str()); });
+                listItem->setClickListener([=](brls::View *view) { 
+                    Gui::runAsync([this, provider] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(provider.url);
+                        brls::Application::unblockInputs();
+
+                    });
+                });
                 list->addView(listItem);
             }
         }
+
+        auto &unofficialProviders = GET_CONFIG(Settings.saveFileRepos);
+        if (unofficialProviders.size() > 0) {
+
+            for (auto providerUrl : unofficialProviders) {
+                api::SaveRepoAPI saveRepoApi(providerUrl);
+
+                auto [result1, name] = saveRepoApi.getName();
+                if (result1.failed())
+                    continue;
+
+                auto [result2, motd] = saveRepoApi.getMOTD();
+                if (result2.failed())
+                    continue;
+
+                if (!addedUnofficialReposHeader)
+                    list->addView(new brls::Header("edz.gui.main.repos.header.unofficial"_lang));
+
+                addedUnofficialReposHeader = true;
+
+                brls::ListItem *listItem = new brls::ListItem(name, "", motd);
+                listItem->setClickListener([this, providerUrl](brls::View *view) { 
+                    Gui::runAsync([this, providerUrl] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(providerUrl);
+                        brls::Application::unblockInputs();
+                    });
+                });
+                list->addView(listItem);
+            }
+        }
+
+        list->registerAction("edz.gui.main.repos.button.add"_lang, brls::Key::X, [this, list]{
+            hlp::openSwkbdForText([this, list](std::string input) {
+                if (!std::regex_match(input, std::regex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"))) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                api::SaveRepoAPI saveRepoApi(input);
+
+                auto [result1, name] = saveRepoApi.getName();
+                if (result1.failed()) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                auto [result2, motd] = saveRepoApi.getMOTD();
+                if (result2.failed()) {
+                    //TODO: ERROR
+                    return;
+                }
+
+                if (!addedUnofficialReposHeader)
+                    list->addView(new brls::Header("edz.gui.main.repos.header.unofficial"_lang));
+
+                auto &unofficialProviders = GET_CONFIG(Settings.saveFileRepos);
+                unofficialProviders.push_back(input);
+                hlp::ConfigManager::store();
+
+                brls::ListItem *listItem = new brls::ListItem(name, "", motd);
+                listItem->setClickListener([this, input](brls::View *view) { 
+                    Gui::runAsync([this, input] {
+                        brls::Application::blockInputs();
+                        this->createSaveRepoPopup(input);
+                        brls::Application::unblockInputs();
+                    });
+                });
+                list->addView(listItem);
+                list->invalidate();
+            }, "edz.gui.main.repos.dialog.title"_lang, "edz.gui.main.repos.dialog.desc"_lang, 32, "http://");
+
+            return true;
+        });
 
         list->invalidate();
     }
@@ -500,8 +588,8 @@ namespace edz::ui {
     }
 
     void GuiMain::createCheatsTab(brls::List *list) {
-        this->m_sysmoduleRunningOption = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
-        this->m_sysmoduleRunningOption->setClickListener([this](brls::View *view) {
+        auto *edizonOverlayInstalledItem = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
+        edizonOverlayInstalledItem->setClickListener([edizonOverlayInstalledItem](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
             if (!listItem->getToggleState()) {
@@ -513,16 +601,16 @@ namespace edz::ui {
                 overlayFile.remove();
             }
 
-            Gui::runLater([this] {
+            Gui::runLater([edizonOverlayInstalledItem] {
                 bool actuallExtracted = hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists();
 
-                if (actuallExtracted != this->m_sysmoduleRunningOption->getToggleState())
-                    this->m_sysmoduleRunningOption->setToggleState(actuallExtracted);
+                if (actuallExtracted != edizonOverlayInstalledItem->getToggleState())
+                    edizonOverlayInstalledItem->setToggleState(actuallExtracted);
             }, 10);
         });
 
 
-        list->addView(this->m_sysmoduleRunningOption);
+        list->addView(edizonOverlayInstalledItem);
         list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.overlay.note"_lang, true));
         list->addView(new brls::Header("edz.gui.main.cheats.header.cheats"_lang, cheat::CheatManager::getCheats().size() == 0));
 
@@ -535,6 +623,7 @@ namespace edz::ui {
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
                     cheatItem->setClickListener([=](brls::View *view){
+                            printf("%d\n", cheat->isEnabled());
                         cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
                     });
 
@@ -756,20 +845,6 @@ namespace edz::ui {
             }
         });
 
-
-        // Sysmodule Options
-        brls::ListItem *sysmoduleAutoStartOption = new brls::ToggleListItem("edz.gui.main.settings.autostart"_lang, GET_CONFIG(Settings.sysmoduleAutoStart), "edz.gui.main.settings.autostart.desc"_lang);
-        sysmoduleAutoStartOption->setClickListener([](brls::View *view) {
-            brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
-            SET_CONFIG(Settings.sysmoduleAutoStart, listItem->getToggleState());
-            
-            if (listItem->getToggleState())
-                hlp::enableAutostartOfBackgroundService();
-            else
-                hlp::disableAutostartOfBackgroundService();
-        });
-
-
         list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
         list->addView(languageOptionItem);
         list->addView(pctlOptionItem);
@@ -780,10 +855,6 @@ namespace edz::ui {
         
         list->addView(new brls::Header("edz.gui.main.settings.header.accountoptions"_lang));
         list->addView(scdbLoginItem);
-
-        list->addView(new brls::Header("edz.gui.main.settings.header.sysmoduleoptions"_lang));
-        list->addView(sysmoduleAutoStartOption);
-
     }
 
     void GuiMain::createAboutTab(brls::List *list) {

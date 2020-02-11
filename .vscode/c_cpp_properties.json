@@ -15,6 +15,7 @@
                 "${workspaceFolder}/application/libs/libpython/include",
                 "${workspaceFolder}/application/libs/lua",
                 "${workspaceFolder}/application/libs/zipper/zipper",
+                "${workspaceFolder}/application/libs/SimpleIniParser/include",
                 "${workspaceFolder}/overlay/libs/libtesla/include/**"
             ],
             "defines": [

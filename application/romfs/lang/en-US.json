@@ -34,7 +34,9 @@
     "edz.gui.main.repos.label.desc"                 : "Save Repositories are a easy way to download save files hosted by other people. For more information on how to host your own repository, check out the EdiZon GitHub",
     "edz.gui.main.repos.header.official"            : "Official Repositories",
     "edz.gui.main.repos.header.unofficial"          : "Additional Repositories",
-    "edz.gui.main.repos.button.add"                 : "Add more Repositories",
+    "edz.gui.main.repos.button.add"                 : "Add Repository",
+    "edz.gui.main.repos.dialog.title"               : "Add new Repository",
+    "edz.gui.main.repos.dialog.desc"                : "Enter a save file repository URL",
     "edz.gui.main.repos.label.norepos"              : "Nothing here yet. Click on the “Add more Repositories” button to add some to your list",
     "edz.gui.main.repos.dialog.download"            : "Downloading and injecting save file. Please wait...",
     "edz.gui.main.cheats.label.desc"                : "Cheats are small programs that are executed in the background while a title is running. Multiple times per second these programs edit the memory of the currently running title. Important to note is, cheats are very fragile. If made incorrectly, changing the area in a game or even just restarting the console can make them stop working. If made properly, a game update will in most cases still break all cheats though and they have to be remade.",
@@ -60,7 +62,6 @@
     "edz.gui.main.settings.header.generaloptions"   : "General options",
     "edz.gui.main.settings.header.titleoptions"     : "Title options",
     "edz.gui.main.settings.header.accountoptions"   : "Account options",
-    "edz.gui.main.settings.header.sysmoduleoptions" : "Background service",
     "edz.gui.main.settings.language"                : "Language",
     "edz.gui.main.settings.language.default"        : "Operating system default",
     "edz.gui.main.settings.pctl"                    : "Enable parential control checks",
@@ -98,7 +99,8 @@
     "edz.page.login.password.help" : "Please enter your SwitchCheatsDB password",
     "edz.page.login.error"         : "There was an error during login. Make sure you're connected to the internet and that you have generated a API key in your SwitchCheatsDB profile",
 
-    "edz.page.splash.error" : "EdiZon depends on many of Atmosphère's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
+    "edz.page.splash.error.ams" : "EdiZon depends on many of Atmosphère's latest features. Please update to a version greater than or equal to AMS %s.\nPress \uE0EF to exit",
+    "edz.page.splash.error.mem" : "EdiZon depends on multiple different Applets in order to function properly. Make sure your system_settings.ini allocates enough memory for them.\nPress \uE0EF to exit",
 
     "edz.dialog.okay"    : "Okay",
     "edz.dialog.yes"     : "Yes",

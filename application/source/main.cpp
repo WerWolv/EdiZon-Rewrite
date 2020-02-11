@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -68,9 +68,11 @@ EResult initServices() {
     // Language code setting querying
     ER_TRY(setInitialize());
 
-    // Companion sysmodule launching
+    // Atmosphere settings querying
+    ER_TRY(setsysInitialize());
+
+    // Running application information querying
     ER_TRY(pmdmntInitialize());
-    ER_TRY(pmshellInitialize());
     ER_TRY(pminfoInitialize());
 
     // Controller LED
@@ -102,6 +104,7 @@ void exitServices() {
     pcvExit();
     clkrstExit();
     setExit();
+    setsysExit();
     pmdmntExit();
     pmshellExit();
     pminfoExit();

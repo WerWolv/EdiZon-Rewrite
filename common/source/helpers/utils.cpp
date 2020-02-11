@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -23,7 +23,7 @@
 #include <ctime>
 #include <cstring>
 
-#ifndef __SYSMODULE__
+#ifndef __OVERLAY__
 
     #include "save/title.hpp"
     #include "save/account.hpp"
@@ -46,7 +46,7 @@ namespace edz::hlp {
     static u64 uniquePadIds[0x10];
     static s32 uniquePadCnt;
 
-#ifndef __SYSMODULE__
+#ifndef __OVERLAY__
 
     bool isPctlEnabled() {
         bool enabled = false;
@@ -95,11 +95,11 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMaxExt(&config, 1);
         swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
-        char buffer[0x100] = { 0 };
+        char buffer[maxStringLength + 1] = { 0 };
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
-            f(std::string(buffer));
+            f(buffer);
 
             return true;
         }
@@ -123,9 +123,9 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMax(&config, maxStringLength);
         swkbdConfigSetStringLenMaxExt(&config, 1);
 
-        char buffer[0x100];
+        char buffer[maxStringLength + 1];
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
             f(buffer);
 
@@ -154,9 +154,9 @@ namespace edz::hlp {
         swkbdConfigSetStringLenMaxExt(&config, 1);
         swkbdConfigSetKeySetDisableBitmask(&config, SwkbdKeyDisableBitmask_At | SwkbdKeyDisableBitmask_Percent | SwkbdKeyDisableBitmask_ForwardSlash | SwkbdKeyDisableBitmask_Backslash);
 
-        char buffer[0x100];
+        char buffer[maxStringLength + 1];
 
-        if (EResult(swkbdShow(&config, buffer, 0x100)).succeeded() && std::strcmp(buffer, "") != 0) {
+        if (EResult(swkbdShow(&config, buffer, maxStringLength + 1)).succeeded() && std::strcmp(buffer, "") != 0) {
             swkbdClose(&config);
             f(buffer);
 
@@ -234,7 +234,7 @@ namespace edz::hlp {
         return runningTitlePid > 0 && runningTitlePid != edizonPid;
     }
 
-#ifndef __SYSMODULE__
+#ifndef __OVERLAY__
 
     bool isInApplicationMode() {
         u64 runningTitlePid = 0, edizonPid = 0;
@@ -394,50 +394,6 @@ namespace edz::hlp {
             hidsysSetNotificationLedPatternWithTimeout(state ? &patternOn : &patternOff, uniquePadIds[i], 10E9);
     }
 
-
-#ifndef __SYSMODULE__
-
-    void enableAutostartOfBackgroundService() {
-        // Create boot2.flag file to let the sysmodule get started on boot
-        File file(getLFSContentsPath() + "/010000000007E51A/flags/boot2.flag"); 
-        file.createDirectories();
-        file.write(nullptr, 0);
-    }
-
-    void disableAutostartOfBackgroundService() {
-        File(getLFSContentsPath() + "/010000000007E51A/flags/boot2.flag").remove();
-    }
-
-    EResult startBackgroundService() {
-        EResult res = ResultSuccess;
-        u64 pid = 0;
-
-        NcmProgramLocation edizonLocation = { EDIZON_SYSMODULE_TITLEID, NcmStorageId_None };
-
-        pmdmntGetProcessId(&pid, EDIZON_SYSMODULE_TITLEID);
-        if (pid != 0) return ResultEdzSysmoduleAlreadyRunning;
-        
-        pid = 0;
-        if (EResult(pmshellLaunchProgram(0, &edizonLocation, &pid)).failed())
-            res = ResultEdzSysmoduleLaunchFailed;
-
-        return res;
-    }
-
-    EResult stopBackgroundService() {
-        u64 pid = 0;
-
-        pmdmntGetProcessId(&pid, EDIZON_SYSMODULE_TITLEID);
-        if (pid == 0) return ResultEdzSysmoduleNotRunning;
-
-        if (EResult(pmshellTerminateProcess(pid)).failed())
-            return ResultEdzSysmoduleTerminationFailed;
-
-        return ResultSuccess;
-    }
-
-#endif
-
     Folder createTmpFolder() {
         static const char charset[] =
         "0123456789"
@@ -538,6 +494,7 @@ namespace edz::hlp {
         // 65000 is an unofficial config item from exosphere containing the current Atmosphere and exosphere version and the mkey revision
         if (EResult(splGetConfig(static_cast<SplConfigItem>(65000), &config)).failed())
             return { 0, 0, 0 };
+
 
         return { static_cast<u8>((config >> 0x20) & 0xFF), static_cast<u8>((config >> 0x18) & 0xFF), static_cast<u8>((config >> 0x10) & 0xFF) };
     }

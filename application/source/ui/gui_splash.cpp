@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -22,14 +22,48 @@
 #include "ui/gui_main.hpp"
 
 namespace edz::ui {
+    
+    bool isEnoughMemoryReserved() {
+        bool enoughMemoryReserved = false;
+
+        if (hlp::isInApplicationMode())
+            return true;
+
+        {
+            auto [result, value] = hlp::readSetting<u64>("hbloader", "applet_heap_size");
+
+            if (result.succeeded())
+                enoughMemoryReserved = (value == 0 || value > 0x1910'0000);
+            
+            else return false;
+        }
+
+        {
+            auto [result, value] = hlp::readSetting<u64>("hbloader", "applet_heap_reservation_size");
+
+            if (result.succeeded())
+                enoughMemoryReserved = enoughMemoryReserved && (value >= 0x0860'0000);
+            
+            else return false;
+        }
+
+        return enoughMemoryReserved;
+    }
 
     brls::View* GuiSplash::setupUI() {
         bool isAMSVersionSupported = hlp::getAtmosphereVersion() >= MINIMUM_AMS_VERSION_REQUIRED;
-        
-        if (isAMSVersionSupported)
+
+        bool enoughMemoryReserved = isEnoughMemoryReserved();
+
+        if (isAMSVersionSupported && enoughMemoryReserved)
             Gui::runLater([this] { Gui::changeTo<GuiMain>(); }, 20);
 
-        return new ui::page::PageSplash(!isAMSVersionSupported);
+        if (!isAMSVersionSupported)
+            return new ui::page::PageSplash(ui::page::PageSplash::WarningType::TooLowAtmosphereVersion);
+        else if (!enoughMemoryReserved)
+            return new ui::page::PageSplash(ui::page::PageSplash::WarningType::NotEnoughMemoryReserved);
+        else
+            return new ui::page::PageSplash(ui::page::PageSplash::WarningType::None);
     }
 
     void GuiSplash::update() {

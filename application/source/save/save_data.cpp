@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -83,11 +83,12 @@ namespace edz::save {
             }                 
         }
 
-        for (FsSaveDataInfo saveDataInfo : getTitleSaveFileData()) {
+        auto saveFileData = getTitleSaveFileData();
+        for (FsSaveDataInfo saveDataInfo : saveFileData) {
             titleid_t &titleID = saveDataInfo.application_id;
 
             // Add titles that are not installed but still have a save file on the system
-            if (actualAppRecordCnt < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
+            if (saveFileData.size() < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
                 try {
                     titles.insert({ titleID, std::make_unique<Title>(titleID, false) });
                 } catch (std::runtime_error& e) {
@@ -106,7 +107,7 @@ namespace edz::save {
             titleid_t &titleID = saveDataInfo.application_id;
 
             // Add titles that are not installed but still have a save file on the system
-            if (actualAppRecordCnt < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
+            if (saveFileData.size() < MAX_TITLE_FROM_SAVE_DATA && titles.find(titleID) == titles.end()) {
                 try {
                     titles.insert({ titleID, std::make_unique<Title>(titleID, false) });
                 } catch (std::runtime_error& e) {

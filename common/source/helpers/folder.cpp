@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -38,22 +38,23 @@ namespace edz::hlp {
     }
 
     Folder::Folder(std::string path, std::string folderName) : m_dir(nullptr), m_path(path), m_folderName(folderName) {
-
+        if (this->m_path.back() != '/')
+            this->m_path += "/";
     }
 
     Folder::~Folder() {
 
     }
 
-    std::string Folder::path() {
+    std::string Folder::path() const {
         return this->m_path;
     }
 
-    std::string Folder::name() {
+    std::string Folder::name() const {
         return this->m_folderName;
     }
 
-    void Folder::copyTo(std::string newPath) {
+    void Folder::copyTo(std::string newPath) const {
         struct dirent *entry;
 
         if (newPath.back() != '/')
@@ -82,14 +83,14 @@ namespace edz::hlp {
         closeDirectory();
     }
 
-    void Folder::copyFrom(std::string oldPath) {
+    void Folder::copyFrom(std::string oldPath) const {
         Folder oldFolder(oldPath);
 
         this->remove();
         oldFolder.copyTo(this->m_path);
     }
 
-    EResult Folder::remove() {
+    EResult Folder::remove() const {
         EResult res;
         struct dirent *entry;
 
@@ -127,7 +128,7 @@ namespace edz::hlp {
         return res;
     }
 
-    EResult Folder::createDirectories() {
+    EResult Folder::createDirectories() const {
         EResult res;
 
         std::vector<char> path(this->m_path.c_str(), this->m_path.c_str() + this->m_path.size() + 1);
@@ -144,7 +145,7 @@ namespace edz::hlp {
     }
 
 
-    std::map<std::string, File> Folder::getFiles() {
+    std::map<std::string, File> Folder::getFiles() const {
         struct dirent *entry;
         std::map<std::string, File> files;
 
@@ -157,8 +158,6 @@ namespace edz::hlp {
                 continue;
 
             if (entry->d_type == DT_REG) {
-                if (this->m_path.back() != '/')
-                    this->m_path += "/";
                 files.insert({ entry->d_name, File(this->m_path + std::string(entry->d_name)) });
             }
         }
@@ -168,7 +167,7 @@ namespace edz::hlp {
         return files;
     }
 
-    std::map<std::string, Folder> Folder::getFolders() {
+    std::map<std::string, Folder> Folder::getFolders() const {
         struct dirent *entry;
         std::map<std::string, Folder> folders;
 
@@ -189,7 +188,7 @@ namespace edz::hlp {
         return folders;
     }
 
-    void Folder::foreach(std::function<void(struct dirent*)> callback) {
+    void Folder::foreach(std::function<void(struct dirent*)> callback) const {
         struct dirent *ent;
 
         openDirectory();
@@ -200,7 +199,7 @@ namespace edz::hlp {
         closeDirectory();
     }
 
-    bool Folder::exists() {
+    bool Folder::exists() const {
         DIR* dir = opendir(this->m_path.c_str());
         
         if (dir) {
@@ -210,20 +209,20 @@ namespace edz::hlp {
     }
 
 
-    void Folder::openDirectory() {
+    void Folder::openDirectory() const {
         if (this->m_dir != nullptr) return;
 
         this->m_dir = opendir(m_path.c_str());
     }
 
-    void Folder::closeDirectory() {
+    void Folder::closeDirectory() const {
         if (this->m_dir == nullptr) return;
 
         closedir(this->m_dir);
         this->m_dir = nullptr;
     }
 
-    void Folder::rewindDirectory() {
+    void Folder::rewindDirectory() const {
         closeDirectory();
         openDirectory();
     }

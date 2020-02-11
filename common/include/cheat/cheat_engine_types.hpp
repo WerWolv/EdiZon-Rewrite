@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -107,6 +107,6 @@ namespace edz::cheat::types {
 
 
     using Operation = bool(Pattern::*)(Pattern&);
-    #define STRATEGY(operation) &Pattern::operator operation
+    #define STRATEGY(operation) &edz::cheat::types::Pattern::operator operation
 
 }

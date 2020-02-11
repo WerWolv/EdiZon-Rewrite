@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -58,12 +58,12 @@ namespace edz::api {
         } cheat_response_t; 
 
         // Unauthenticated
-        std::pair<EResult, std::string> getToken(std::string email, std::string password);
+        EResultVal<std::string> getToken(std::string email, std::string password);
 
         // Authenticated
-        std::pair<EResult, cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
-        std::pair<EResult, u32> getCheatCount();
-        std::pair<EResult, std::vector<save_file_t>> getSaveFiles();
+        EResultVal<cheat_response_t> getCheats(titleid_t titleID, buildid_t buildID = 0);
+        EResultVal<u32> getCheatCount();
+        EResultVal<std::vector<save_file_t>> getSaveFiles();
         EResult addSaveFile(std::string backupName, std::string link, std::unique_ptr<save::Title> &title);
 
 

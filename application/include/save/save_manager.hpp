@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -54,9 +54,9 @@ namespace edz::save {
         static EResult download(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string url);
         static EResult download(std::unique_ptr<Title> &title, std::string localName, std::string url);
  
-        static std::pair<EResult, std::vector<std::string>> getLocalBackupList(std::unique_ptr<Title> &title);
-        static std::pair<EResult, std::map<std::string, std::string>> getOnlineBackupList(std::unique_ptr<Title> &title);
-        static std::pair<EResult, bool> areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
+        static EResultVal<std::vector<std::string>> getLocalBackupList(std::unique_ptr<Title> &title);
+        static EResultVal<std::map<std::string, std::string>> getOnlineBackupList(std::unique_ptr<Title> &title);
+        static EResultVal<bool> areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
         
     private:
         static std::string getBackupFolderName(std::unique_ptr<Title> &title);

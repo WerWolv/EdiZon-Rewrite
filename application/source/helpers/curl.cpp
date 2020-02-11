@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -59,7 +59,7 @@ namespace edz::hlp {
         return curl->getProgressCallback()((static_cast<double>(ulnow) / static_cast<double>(ultotal)) * 100);
     }
 
-    std::pair<EResult, std::string> Curl::get(std::string path, std::map<std::string, std::string> extraHeaders) {
+    EResultVal<std::string> Curl::get(std::string path, std::map<std::string, std::string> extraHeaders) {
         CURLcode result;
         std::string response;
 
@@ -90,7 +90,7 @@ namespace edz::hlp {
         return { ResultSuccess, response };
     }
     
-    std::pair<EResult, std::string> Curl::post(std::string path, std::string body) {
+    EResultVal<std::string> Curl::post(std::string path, std::string body) {
         CURLcode result;
         std::string response;
 
@@ -122,7 +122,7 @@ namespace edz::hlp {
     }
 
 
-    std::pair<EResult, std::vector<u8>> Curl::download(std::string path) {
+    EResultVal<std::vector<u8>> Curl::download(std::string path) {
         CURLcode result;
         std::vector<u8> data;
 
@@ -185,7 +185,7 @@ namespace edz::hlp {
         return ResultSuccess;
     }
 
-    std::pair<EResult, std::string> Curl::upload(std::string path, std::string fileName, std::vector<u8> &data) {
+    EResultVal<std::string> Curl::upload(std::string path, std::string fileName, std::vector<u8> &data) {
         CURLcode result;
         std::string response;
 
@@ -223,7 +223,7 @@ namespace edz::hlp {
         return { ResultSuccess, response };
     }
 
-    std::pair<EResult, std::string> Curl::upload(std::string path, std::string uploadPath) {
+    EResultVal<std::string> Curl::upload(std::string path, std::string uploadPath) {
         CURLcode result;
         std::string response;
 

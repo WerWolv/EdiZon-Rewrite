@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -38,9 +38,9 @@ namespace edz::save {
         hlp::File backupFile;
 
         if (basePath == "")
-            backupFile = hlp::File(hlp::formatString("%s/%s/%s.edz", EDIZON_BACKUP_DIR, hlp::removeInvalidCharacters(SaveManager::getBackupFolderName(title)).c_str(), backupName.c_str()));
+            backupFile = hlp::File(hlp::formatString("%s/%s/%s" BACKUP_FILE_EXTENSION, EDIZON_BACKUP_DIR, hlp::removeInvalidCharacters(SaveManager::getBackupFolderName(title)).c_str(), backupName.c_str()));
         else
-            backupFile = hlp::File(hlp::formatString("%s/%s.edz", basePath.c_str(), backupName.c_str()));
+            backupFile = hlp::File(hlp::formatString("%s/%s" BACKUP_FILE_EXTENSION, basePath.c_str(), backupName.c_str()));
 
         if (!title->hasSaveFile(account))
             return ResultEdzSaveNoSaveFS;
@@ -339,7 +339,7 @@ namespace edz::save {
     }
     
 
-    std::pair<EResult, std::vector<std::string>> SaveManager::getLocalBackupList(std::unique_ptr<Title> &title) {
+    EResultVal<std::vector<std::string>> SaveManager::getLocalBackupList(std::unique_ptr<Title> &title) {
         std::regex regex = std::regex(".+ " + title->getIDString());
 
         hlp::Folder backupFolder(hlp::formatString("%s/%s", EDIZON_BACKUP_DIR, SaveManager::getBackupFolderName(title).c_str()));
@@ -353,7 +353,7 @@ namespace edz::save {
         return { ResultSuccess, backupFiles }; 
     }
     
-    std::pair<EResult, std::map<std::string, std::string>> SaveManager::getOnlineBackupList(std::unique_ptr<Title> &title) {
+    EResultVal<std::map<std::string, std::string>> SaveManager::getOnlineBackupList(std::unique_ptr<Title> &title) {
         api::SwitchCheatsDBAPI switchCheatsDBApi;
         std::map<std::string, std::string> saveFileNames;
 
@@ -368,7 +368,7 @@ namespace edz::save {
         return { ResultSuccess, saveFileNames };
     }
     
-    std::pair<EResult, bool> SaveManager::areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
+    EResultVal<bool> SaveManager::areBackupsUpToDate(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account) {
         return { ResultEdzNotYetImplemented, false };
     }
 

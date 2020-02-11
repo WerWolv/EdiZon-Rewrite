@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -41,7 +41,7 @@ namespace edz::cheat::types {
         DumpFile(std::string path);
         ~DumpFile();
 
-        std::string getFilePath();
+        std::string getFilePath() const;
 
         void setTitleId(titleid_t titleId);
         void setIsKnownInitialPattern(bool known);
@@ -57,8 +57,8 @@ namespace edz::cheat::types {
         void writeHeader();
         void flush();
 
-        std::pair<EResult, addr_t> getAddress(s32 index);
-        std::pair<EResult, size_t> getBuffer(u8 *buffer, size_t bufferSize, offset_t offset);
+        EResultVal<addr_t> getAddress(s32 index);
+        EResultVal<size_t> getBuffer(u8 *buffer, size_t bufferSize, offset_t offset);
 
     private:
         hlp::File m_file;

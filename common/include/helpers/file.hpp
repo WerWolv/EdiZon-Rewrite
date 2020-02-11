@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -34,17 +34,17 @@ namespace edz::hlp {
         File(const File &file);
         ~File();
 
-        std::string name();
-        std::string path();
-        std::string parent();
+        std::string name() const;
+        std::string path() const;
+        std::string parent() const;
 
-        size_t size();
+        size_t size() const;
 
-        void remove();
-        File copyTo(std::string path);
-        void createDirectories();
+        void remove() const;
+        File copyTo(std::string path) const;
+        void createDirectories() const;
 
-        bool exists();
+        bool exists() const;
 
         s32 read(u8 *buffer, size_t bufferSize);
         std::string read();
@@ -55,14 +55,14 @@ namespace edz::hlp {
         u32 seek(s32 position, s32 operation);
 
     private:
-        FILE *m_file;
+        mutable FILE *m_file;
         std::string m_filePath;
 
         u32 m_position = 0;
         s32 m_seekOperation = SEEK_SET;
 
-        void openFile();
-        void closeFile();
+        EResult openFile() const;
+        void closeFile() const;
     };
 
 }

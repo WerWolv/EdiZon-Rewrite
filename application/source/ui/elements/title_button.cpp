@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -27,7 +27,7 @@ namespace edz::ui::element {
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
 
-        this->addHint("OK", brls::Key::A, [this] { return this->onClick(); });
+        this->registerAction("OK", brls::Key::A, [this] { return this->onClick(); });
     }
 
     TitleButton::~TitleButton() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -75,10 +75,10 @@ namespace edz::cheat {
         CheatParser(CheatParser &) = delete;
         CheatParser& operator=(CheatParser &) = delete; 
 
-        static std::pair<EResult, std::vector<dmntcht::CheatDefinition>> parseString(std::string content);
-        static std::pair<EResult, std::vector<dmntcht::CheatDefinition>> parseFile(std::string filePath);
+        static EResultVal<std::vector<dmntcht::CheatDefinition>> parseString(std::string content);
+        static EResultVal<std::vector<dmntcht::CheatDefinition>> parseFile(std::string filePath);
 
-        static std::pair<EResult, std::string> disassembleCheat(dmntcht::CheatDefinition cheatDef);
+        static EResultVal<std::string> disassembleCheat(dmntcht::CheatDefinition cheatDef);
 
         static DebugInfo getDebugInfo() {
             return CheatParser::s_debugInfo;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -23,12 +23,15 @@
 
 namespace edz::ui::page {
 
-    PageSplash::PageSplash(bool showWarning) {
+    PageSplash::PageSplash(PageSplash::WarningType warningType) {
         this->m_logo = new brls::Image("romfs:/assets/icon_edz_color.jpg");
         this->m_logo->setParent(this);
         
-        if (showWarning) {
-            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString()), true);
+        if (warningType == WarningType::TooLowAtmosphereVersion) {
+            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error.ams"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString().c_str()), true);
+            this->m_warning->setParent(this);
+        } else if (warningType == WarningType::NotEnoughMemoryReserved) {
+            this->m_warning = new brls::Label(brls::LabelStyle::CRASH, hlp::formatString("edz.page.splash.error.mem"_lang, MINIMUM_AMS_VERSION_REQUIRED.getString().c_str()), true);
             this->m_warning->setParent(this);
         }
     }

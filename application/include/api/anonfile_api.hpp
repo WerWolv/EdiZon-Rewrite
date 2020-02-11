@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -32,13 +32,13 @@ namespace edz::api {
         AnonfileAPI();
         ~AnonfileAPI();
 
-        std::pair<EResult, std::string> upload(std::vector<u8> &buffer, std::string fileName);
-        std::pair<EResult, std::string> upload(std::string path);
+        EResultVal<std::string> upload(std::vector<u8> &buffer, std::string fileName);
+        EResultVal<std::string> upload(std::string path);
 
     private:
         edz::hlp::Curl m_curl;
 
-        std::pair<EResult, std::string> getFileURL(std::string responseData);
+        EResultVal<std::string> getFileURL(std::string responseData);
     };
 
 }

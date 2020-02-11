@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -51,7 +51,6 @@ namespace edz::hlp {
             j.at("settings").at("titlesDisplayStyle").get_to(ConfigManager::s_config.Settings.titlesDisplayStyle);
             j.at("settings").at("titlesSortingStyle").get_to(ConfigManager::s_config.Settings.titlesSortingStyle);
             j.at("settings").at("saveFileRepos").get_to(ConfigManager::s_config.Settings.saveFileRepos);
-            j.at("settings").at("sysmoduleAutoStart").get_to(ConfigManager::s_config.Settings.sysmoduleAutoStart);
             j.at("settings").at("fennecMode").get_to(ConfigManager::s_config.Settings.fennecMode);
 
             j.at("cheatEngine").at("searchCount").get_to(ConfigManager::s_config.CheatEngine.searchCount);
@@ -79,7 +78,6 @@ namespace edz::hlp {
                                        { "titlesDisplayStyle",      ConfigManager::s_config.Settings.titlesDisplayStyle     },
                                        { "titlesSortingStyle",      ConfigManager::s_config.Settings.titlesSortingStyle     },
                                        { "pctlChecksEnabled",       ConfigManager::s_config.Settings.pctlChecksEnabled      },
-                                       { "sysmoduleAutoStart",      ConfigManager::s_config.Settings.sysmoduleAutoStart     },
                                        { "fennecMode",              ConfigManager::s_config.Settings.fennecMode             } } },
                     { "cheatEngine", { { "searchCount",             ConfigManager::s_config.CheatEngine.searchCount         } } }
                 };  

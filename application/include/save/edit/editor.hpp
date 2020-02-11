@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -36,8 +36,8 @@ namespace edz::save::edit {
         Editor(Editor const&) = delete;
         void operator=(Editor const&) = delete;
 
-        static std::pair<EResult, Config*> loadConfig(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
-        static std::pair<EResult, Script*> loadScript(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string saveFilePath);
+        static EResultVal<Config*> loadConfig(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account);
+        static EResultVal<Script*> loadScript(std::unique_ptr<Title> &title, std::unique_ptr<Account> &account, std::string saveFilePath);
         static EResult store();
         static void cleanUp();
 

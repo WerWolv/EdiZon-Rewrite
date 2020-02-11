@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -33,7 +33,7 @@ namespace edz::api {
     }
 
 
-    std::pair<EResult, std::string> AnonfileAPI::upload(std::vector<u8> &buffer, std::string fileName) {
+    EResultVal<std::string> AnonfileAPI::upload(std::vector<u8> &buffer, std::string fileName) {
         auto [result, response] = this->m_curl.upload("/upload", fileName, buffer);
 
         if (result.succeeded())
@@ -42,7 +42,7 @@ namespace edz::api {
         return { ResultEdzAPIError, "" };
     }
 
-    std::pair<EResult, std::string> AnonfileAPI::upload(std::string path) {
+    EResultVal<std::string> AnonfileAPI::upload(std::string path) {
         auto [result, response] =  this->m_curl.upload("/upload", path);
 
         if (result.succeeded())
@@ -51,7 +51,7 @@ namespace edz::api {
         return { ResultEdzAPIError, "" };
     }
 
-    std::pair<EResult, std::string> AnonfileAPI::getFileURL(std::string responseData) {
+    EResultVal<std::string> AnonfileAPI::getFileURL(std::string responseData) {
         try {
             json responseJson = json::parse(responseData);
 

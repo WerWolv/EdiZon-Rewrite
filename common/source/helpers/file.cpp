@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 WerWolv
+ * Copyright (C) 2019 - 2020 WerWolv
  * 
  * This file is part of EdiZon.
  * 
@@ -41,22 +41,23 @@ namespace edz::hlp {
     }
     
 
-    std::string File::name() {
+    std::string File::name() const {
         return std::filesystem::path(this->m_filePath).filename();
     }
 
-    std::string File::path() {
+    std::string File::path() const {
         return this->m_filePath;
     }
 
-    std::string File::parent() {
+    std::string File::parent() const {
         return std::filesystem::path(this->m_filePath).parent_path();
     }
 
-    size_t File::size() {
+    size_t File::size() const {
         if (!exists()) return -1;
 
-        openFile();
+        if (openFile().failed())
+            return 0;
 
         size_t fileSize;
         fseek(this->m_file, 0, SEEK_END);
@@ -66,13 +67,13 @@ namespace edz::hlp {
         return fileSize;
     }
 
-    void File::remove() {
+    void File::remove() const {
         if (!exists()) return;
 
         ::remove(this->m_filePath.c_str());
     }
 
-    File File::copyTo(std::string path) {
+    File File::copyTo(std::string path) const {
         Folder dstFolder(File(path).parent());
         dstFolder.createDirectories();
 
@@ -86,9 +87,7 @@ namespace edz::hlp {
         u64 offset = 0;
         u8 *buffer = new u8[0x5000];
 
-        openFile();
-
-        if (this->m_file == nullptr)
+        if (openFile().failed())
             return *this;
 
         while ((size = fread(buffer, 1, 0x5000, this->m_file)) > 0) {
@@ -104,13 +103,13 @@ namespace edz::hlp {
         return File(path);
     }
 
-    void File::createDirectories() {
+    void File::createDirectories() const {
         Folder folder(this->parent());
 
         folder.createDirectories();
     }
 
-    bool File::exists() {
+    bool File::exists() const {
         this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
         if (this->m_file != nullptr) {
@@ -124,7 +123,9 @@ namespace edz::hlp {
     s32 File::read(u8 *buffer, size_t bufferSize) {
         size_t readSize = 0;
         
-        openFile();
+        if (openFile().failed())
+            return 0;
+
         fseek(this->m_file, this->m_position, this->m_seekOperation);
         this->m_seekOperation = SEEK_SET;
 
@@ -151,7 +152,9 @@ namespace edz::hlp {
     s32 File::write(const u8 *buffer, size_t bufferSize) {
         size_t writeSize = 0;
 
-        openFile();
+        if (openFile().failed())
+            return 0;
+
         fseek(this->m_file, this->m_position, this->m_seekOperation);
         this->m_seekOperation = SEEK_SET;
 
@@ -169,16 +172,21 @@ namespace edz::hlp {
     }
 
 
-    void File::openFile() {
-        if (this->m_file != nullptr) return;
+    EResult File::openFile() const {
+        if (this->m_file != nullptr) return ResultSuccess;
 
         this->m_file = fopen(this->m_filePath.c_str(), "rb");
 
         if (this->m_file == nullptr)
             this->m_file = fopen(this->m_filePath.c_str(), "w+");
+
+        if (this->m_file == nullptr)
+            return ResultEdzOperationFailed;
+
+        return ResultSuccess;
     }
 
-    void File::closeFile() {
+    void File::closeFile() const {
         if (this->m_file == nullptr) return;
 
         fclose(m_file);

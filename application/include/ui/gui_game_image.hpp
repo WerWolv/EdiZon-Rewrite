@@ -20,20 +20,20 @@
 #pragma once
 
 #include <edizon.hpp>
-#include <borealis.hpp>
 
-namespace edz::ui::element {
+#include "ui/gui.hpp"
 
-    class CreditView : public brls::View {
+namespace edz::ui {
+
+    class GuiGameImage : public Gui {
     public:
-        CreditView();
-        virtual ~CreditView();
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-        void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
+        GuiGameImage() : Gui() { }
+        ~GuiGameImage() { }
 
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
-        
-        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
+        brls::View* setupUI() override;
+        void update() override;
+
+    private:
     };
 
 }

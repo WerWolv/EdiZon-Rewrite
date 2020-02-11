@@ -17,23 +17,27 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "ui/gui_game_image.hpp"
 
-#include <edizon.hpp>
-#include <borealis.hpp>
+#include "ui/pages/page_fullscreen_image.hpp"
 
-namespace edz::ui::element {
+#include "save/title.hpp"
 
-    class CreditView : public brls::View {
-    public:
-        CreditView();
-        virtual ~CreditView();
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-        void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
-
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+namespace edz::ui {
+    
+    brls::View* GuiGameImage::setupUI() {
         
-        void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
-    };
+        std::vector<u8> thumbnailBuffer(1280 * 720 * 4);
+        if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).failed())
+            std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x80);
+
+        auto gameImage = new brls::Image(&thumbnailBuffer[0], 1280, 720);
+
+        return new page::PageFullscreenImage(gameImage);
+    }
+
+    void GuiGameImage::update() {
+
+    }
 
 }
