@@ -85,7 +85,7 @@
     "edz.gui.main.about.guide.title"                : "EdiZon Guide and Documentation",
     "edz.gui.main.about.header.credits"             : "Special Thanks",
     "edz.gui.main.about.credits.1"                  : "\uE016 Natinusala, for creating Borealis and being super helpful during development!",
-    "edz.gui.main.about.credits.2"                  : "\uE016 HE, for allowing me to use his overlay creation and drawing code!",
+    "edz.gui.main.about.credits.2"                  : "\uE016 averne, for allowing me to use his overlay creation and drawing code!",
     "edz.gui.main.about.credits.3"                  : "\uE016 All the wonderful people in AtlasNX's #developer-chat, cheers guys!",
     "edz.gui.main.about.credits.4"                  : "\uE016 Everybody else that worked on EdiZon, this wouldn't have been possible without you!",
     "edz.gui.main.about.credits.5"                  : "\uE016 You, for using my homebrew!",
@@ -119,7 +119,7 @@
     "edz.gui.popup.information.header.save"             : "Save Data",
     "edz.gui.popup.information.save.common"             : "Common Save Data",
     "edz.gui.popup.information.playtime"                : "Played for %d hours and %d minutes",
-    "edz.gui.popup.management.header.basic"             : "Basic Operations",                      
+    "edz.gui.popup.management.header.basic"             : "Basic Operations",
     "edz.gui.popup.management.header.advanced"          : "Advanced Operations",
     "edz.gui.popup.management.backup.title"             : "Create backup",
     "edz.gui.popup.management.backup.subtitle"          : "Create a backup of your save data",
@@ -143,10 +143,10 @@
     "edz.gui.cheatengine.subtitle.nosearches"       : "No search has been started yet",
     "edz.gui.cheatengine.subtitle.onesearch"        : "The titles memory has been searched once",
     "edz.gui.cheatengine.subtitle.moresearches"     : "The titles memory has been searched %d times",
-    
+
     "edz.gui.cheatengine.sidebar.search"            : "Search",
     "edz.gui.cheatengine.sidebar.foundaddresses"    : "Found Addresses: %d",
-    
+
     "edz.gui.cheatengine.memoryview"                : "Memory View",
     "edz.gui.cheatengine.foundaddresses"            : "Found Addresses",
     "edz.gui.cheatengine.clear"                     : "Clear Search",
@@ -157,7 +157,7 @@
     "edz.gui.cheatengine.value"                     : "Search Value",
     "edz.gui.cheatengine.fastmode"                  : "Fast Scanning Mode",
     "edz.gui.cheatengine.fastmode.desc"             : "If enabled, only aligned values will be searched",
-    
+
     "edz.gui.cheatengine.scantype.eq"               : "Exact Value",
     "edz.gui.cheatengine.scantype.gt"               : "Greater than...",
     "edz.gui.cheatengine.scantype.lt"               : "Less than ...",
@@ -179,7 +179,7 @@
 
     "edz.gui.cheatengine.value.input.title"         : "Enter a value to search for",
     "edz.gui.cheatengine.value.input.desc"          : "The cheat engine will search the title's memory for this value",
-    
+
     "edz.gui.cheatengine.dialog.searching"          : "Searching memory. This might take a while...",
 
     "edz.gui.cheatengine.scanregion.heap"           : "HEAP Region",
@@ -188,7 +188,7 @@
 
     "edz.gui.hexeditor.title"       : "Hex Memory View",
     "edz.gui.hexeditor.dialog"      : "Do you want to inspect the HEAP or MAIN region?",
-    
+
     "edz.element.titleinfo.name"        : "Name",
     "edz.element.titleinfo.author"      : "Author",
     "edz.element.titleinfo.version"     : "Version",

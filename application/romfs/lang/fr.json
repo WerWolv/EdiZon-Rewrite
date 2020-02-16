@@ -83,7 +83,7 @@
     "edz.gui.main.about.guide.title"                : "Guide et Documentation d'EdiZon",
     "edz.gui.main.about.header.credits"             : "Remerciements",
     "edz.gui.main.about.credits.1"                  : "\uE016 Natinusala, pour avoir créé Borealis et avoir été super aidant pendant le développement !",
-    "edz.gui.main.about.credits.2"                  : "\uE016 HE, pour m'avoir autorisé à utiliser son code de création et de dessin pour l'overlay !",
+    "edz.gui.main.about.credits.2"                  : "\uE016 averne, pour m'avoir autorisé à utiliser son code de création et de dessin pour l'overlay !",
     "edz.gui.main.about.credits.3"                  : "\uE016 Toutes les personnes merveilleuses dans le salon #developer-chat d'AtlasNX's, santé à vous !",
     "edz.gui.main.about.credits.4"                  : "\uE016 Tous les autres qui ont contribué à EdiZon, ça n'aurait pas été possible sans vous !",
     "edz.gui.main.about.credits.5"                  : "\uE016 Vous, pour utiliser mon homebrew !",
@@ -97,7 +97,7 @@
     "edz.page.login.password.help" : "Veuillez entrer le mot de passe de votre compte SwitchCheatsDB",
     "edz.page.login.error"         : "Une erreur est survenue lors de la connexion. Vérifiez que vous êtes connecté à Internet et que vous avez généré une clé API dans votre profil SwitchCheatsDB",
 
-    "edz.page.splash.error.ams" : "EdiZon utilise beaucoup des dernière fonctionnalités d'Atmosphère. Veuillez mettre à jour vers la version %s ou plus récent.\nAppuyez sur \uE0EF pour quitter",
+    "edz.page.splash.error.ams" : "EdiZon utilise beaucoup des dernières fonctionnalités d'Atmosphère. Veuillez mettre à jour vers la version %s ou plus récent.\nAppuyez sur \uE0EF pour quitter",
 
     "edz.dialog.okay"    : "Ok",
     "edz.dialog.yes"     : "Oui",
