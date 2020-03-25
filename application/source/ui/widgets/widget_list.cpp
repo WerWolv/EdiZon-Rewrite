@@ -47,7 +47,7 @@ namespace edz::ui::widget {
             for (auto &[displayString, argument] : this->m_entries)
                 displayStrings.push_back(displayString);
 
-            listItem->setClickListener([&](brls::View *view){
+            listItem->getClickEvent()->subscribe([&](brls::View *view){
                 brls::Dropdown::open(this->m_name, displayStrings, [&](s32 selectedItem){
                     if (selectedItem == -1) return;
 

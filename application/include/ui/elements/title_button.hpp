@@ -38,7 +38,9 @@ namespace edz::ui::element {
         brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
         bool onClick();
 
-        void setClickListener(brls::EventListener listener);
+        brls::GenericEvent* getClickEvent() {
+            return &this->m_clickEvent;
+        }
 
         std::unique_ptr<save::Title>& getTitle();
 
@@ -49,7 +51,7 @@ namespace edz::ui::element {
         brls::Image *m_image;
         u8 m_column;
 
-        brls::EventListener m_clickListener = nullptr;
+        brls::GenericEvent m_clickEvent;
     };
 
     class HorizontalTitleList : public brls::BoxLayout {

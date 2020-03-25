@@ -43,7 +43,7 @@ namespace edz::ui::widget {
 
             listItem->setValue(this->m_state ? "edz.widget.boolean.on"_lang : "edz.widget.boolean.off"_lang, !this->m_state);
 
-            listItem->setClickListener([&](brls::View *view){
+            listItem->getClickEvent()->subscribe([&](brls::View *view){
                 this->m_state = !this->m_state;
                 listItem->setValue(this->m_state ? "edz.widget.boolean.on"_lang : "edz.widget.boolean.off"_lang, !this->m_state);
             });

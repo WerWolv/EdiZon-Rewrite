@@ -21,7 +21,6 @@
 #include "ui/gui_hex_editor.hpp"
 #include "ui/gui_game_image.hpp"
 
-#include "ui/elements/popup_list.hpp"
 #include "helpers/config_manager.hpp"
 
 #include "save/title.hpp"
@@ -70,7 +69,7 @@ namespace edz::ui {
         this->m_knownPrimaryAligned      = new brls::ToggleListItem("Aligned Search", true);
 
 
-        this->m_knownPrimarySearchType->setListener([this](s32 selection) {
+        this->m_knownPrimarySearchType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_unknownPrimarySearchType->setSelectedValue(selection);
 
             switch (selection) {
@@ -92,7 +91,7 @@ namespace edz::ui {
             }
         });
 
-        this->m_knownPrimarySearchRegion->setListener([this](s32 selection) {
+        this->m_knownPrimarySearchRegion->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_unknownPrimarySearchRegion->setSelectedValue(selection);
 
             this->m_regions.clear();
@@ -115,7 +114,7 @@ namespace edz::ui {
             }
         });
 
-        this->m_knownPrimaryDataType->setListener([this](s32 selection) {
+        this->m_knownPrimaryDataType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_unknownPrimaryDataType->setSelectedValue(selection);
 
             switch (selection) {
@@ -133,7 +132,7 @@ namespace edz::ui {
 
         this->m_knownPrimaryValue->setValue("0");
         this->m_knownPrimarySize->setValue("1");
-        this->m_knownPrimarySize->setClickListener([this](brls::View *view) {
+        this->m_knownPrimarySize->getClickEvent()->subscribe([this](brls::View *view) {
             u32 value = std::strtoul(this->m_knownPrimarySize->getValue().c_str(), nullptr, 10);
 
             if (value < 1) {
@@ -152,7 +151,7 @@ namespace edz::ui {
             std::memset(this->m_pattern, 0x00, this->m_patternSize);
         });
 
-        this->m_knownPrimaryAligned->setClickListener([this](brls::View *view) {
+        this->m_knownPrimaryAligned->getClickEvent()->subscribe([this](brls::View *view) {
             this->m_unknownPrimaryAligned->setToggleState(this->m_knownPrimaryAligned->getToggleState());
 
             this->m_alignedSearch = this->m_knownPrimaryAligned->getToggleState();
@@ -179,7 +178,7 @@ namespace edz::ui {
         this->m_unknownPrimaryAligned      = new brls::ToggleListItem("Aligned Search", true);
 
 
-        this->m_unknownPrimarySearchType->setListener([this](s32 selection) {
+        this->m_unknownPrimarySearchType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_knownPrimarySearchType->setSelectedValue(selection);
             switch (selection) {
                 case 0: // Exact match
@@ -202,7 +201,7 @@ namespace edz::ui {
                 this->m_nextSearchLayer = SearchLayer::KnownPrimary;
         });
 
-        this->m_unknownPrimarySearchRegion->setListener([this](s32 selection) {
+        this->m_unknownPrimarySearchRegion->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_unknownPrimarySearchRegion->setSelectedValue(selection);
 
             this->m_regions.clear();
@@ -225,7 +224,7 @@ namespace edz::ui {
             }
         });
 
-        this->m_unknownPrimaryDataType->setListener([this](s32 selection) {
+        this->m_unknownPrimaryDataType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             this->m_knownPrimaryDataType->setSelectedValue(selection);
 
             switch (selection) {
@@ -242,7 +241,7 @@ namespace edz::ui {
         });
 
         this->m_unknownPrimarySize->setValue("1");
-        this->m_unknownPrimarySize->setClickListener([this](brls::View *view) {
+        this->m_unknownPrimarySize->getClickEvent()->subscribe([this](brls::View *view) {
             u32 value = std::strtoul(this->m_unknownPrimarySize->getValue().c_str(), nullptr, 10);
 
             if (value < 1) {
@@ -261,7 +260,7 @@ namespace edz::ui {
             std::memset(this->m_pattern, 0x00, this->m_patternSize);
         });
 
-        this->m_unknownPrimaryAligned->setClickListener([this](brls::View *view) {
+        this->m_unknownPrimaryAligned->getClickEvent()->subscribe([this](brls::View *view) {
             this->m_knownPrimaryAligned->setToggleState(this->m_unknownPrimaryAligned->getToggleState());
 
             this->m_alignedSearch = this->m_unknownPrimaryAligned->getToggleState();
@@ -296,7 +295,7 @@ namespace edz::ui {
 
         this->m_knownSecondaryFoundAddresses->setValue("0");
 
-        this->m_knownSecondarySearchType->setListener([this](s32 selection) {
+        this->m_knownSecondarySearchType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             switch (selection) {
                 case 0: // Exact match
                     this->m_knownOperation = STRATEGY(==);
@@ -341,7 +340,7 @@ namespace edz::ui {
 
         this->m_unknownSecondaryFoundAddresses->setValue("0");
 
-        this->m_unknownSecondaryUnknownSearchType->setListener([this](s32 selection) {
+        this->m_unknownSecondaryUnknownSearchType->getValueSelectedEvent()->subscribe([this](s32 selection) {
             switch (selection) {
                 case 0: // Stayed the same
                     this->m_unknownOperation = STRATEGY(==);
@@ -394,12 +393,6 @@ namespace edz::ui {
     brls::View* GuiCheatEngine::setupUI() {
         this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.sidebar.search"_lang);
         this->m_rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
-
-        this->m_rootFrame->setCancelListener([this](brls::View *view) {
-            Gui::goBack();
-
-            return true;
-        });
 
         this->m_rootFrame->registerAction("Memory View", brls::Key::X, [this]() {
             auto regionSelection = new brls::Dialog("edz.gui.hexeditor.dialog"_lang);
@@ -493,7 +486,7 @@ namespace edz::ui {
 
         this->m_rootFrame->setContentView(this->m_contentLayers);
 
-        this->m_rootFrame->getSidebar()->getButton()->setClickListener([this](brls::View *view) {
+        this->m_rootFrame->getSidebar()->getButton()->getClickEvent()->subscribe([this](brls::View *view) {
             Gui::runAsyncWithDialog([this] {
 
                 switch (this->m_selectedSearchLayer) {

@@ -66,7 +66,7 @@ namespace edz::ui {
         brls::List *softwareInfoList = new brls::List();
 
         brls::ListItem *launchItem = new brls::ListItem("edz.gui.popup.information.launch.title"_lang, "", "edz.gui.popup.information.launch.subtitle"_lang);
-        launchItem->setClickListener([&title](brls::View *view){
+        launchItem->getClickEvent()->subscribe([&title](brls::View *view){
             title->launch();
         });
 
@@ -96,7 +96,7 @@ namespace edz::ui {
         }
         else {
             brls::ListItem *createSaveFSItem = new brls::ListItem("edz.gui.popup.management.createfs.title"_lang, "", "edz.gui.popup.management.createfs.subtitle"_lang);
-            createSaveFSItem->setClickListener([&title](brls::View *view) {
+            createSaveFSItem->getClickEvent()->subscribe([&title](brls::View *view) {
                 hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                     title->createSaveDataFileSystem(account, FsSaveDataType_Account);
                     brls::Application::popView();
@@ -111,7 +111,7 @@ namespace edz::ui {
         brls::List *saveManagementList = new brls::List();
 
         brls::ListItem *backupItem = new brls::ListItem("edz.gui.popup.management.backup.title"_lang, "", "edz.gui.popup.management.backup.subtitle"_lang);
-        backupItem->setClickListener([&title](brls::View *view) {
+        backupItem->getClickEvent()->subscribe([&title](brls::View *view) {
             hlp::openPlayerSelect([&title](std::unique_ptr<save::Account> &account) {
                 std::string backupName;
                 if (hlp::openSwkbdForText([&title, &backupName](std::string str) { backupName = str; }, "edz.gui.popup.management.backup.keyboard.title"_lang, "", 32, hlp::getCurrentDateTimeString()))
@@ -121,7 +121,7 @@ namespace edz::ui {
         });
 
         brls::ListItem *restoreItem = new brls::ListItem("edz.gui.popup.management.restore.title"_lang, "", "edz.gui.popup.management.restore.subtitle"_lang);
-        restoreItem->setClickListener([&title](brls::View *view) {
+        restoreItem->getClickEvent()->subscribe([&title](brls::View *view) {
             auto list = save::SaveManager::getLocalBackupList(title).second;
             if (list.size() == 0)
                 return;
@@ -140,7 +140,7 @@ namespace edz::ui {
         });
 
         brls::ListItem *deleteItem = new brls::ListItem("edz.gui.popup.management.delete.title"_lang, "", "edz.gui.popup.management.delete.subtitle"_lang);
-        deleteItem->setClickListener([&title, this](brls::View *view) {
+        deleteItem->getClickEvent()->subscribe([&title, this](brls::View *view) {
 
             brls::Dialog *confirmationDialog = new brls::Dialog("edz.gui.popup.management.delete.confirm"_lang);
             confirmationDialog->addButton("edz.dialog.no"_lang, [confirmationDialog](brls::View *view) { confirmationDialog->close(); });
@@ -206,7 +206,7 @@ namespace edz::ui {
 
             auto item = new brls::ListItem(hlp::formatString("%s [ %s ]", saveFile.name.c_str(), allTitles[saveFile.titleID]->getName().c_str()), "", saveFile.date);
             item->setThumbnail(allTitles[saveFile.titleID]->getIcon());
-            item->setClickListener([saveRepoUrl, saveFile](brls::View *view) {
+            item->getClickEvent()->subscribe([saveRepoUrl, saveFile](brls::View *view) {
                 hlp::openPlayerSelect([=](auto &account) {
                     Gui::runAsyncWithDialog([=, &account] {
                         auto &allTitles = save::SaveFileSystem::getAllTitles();
@@ -333,7 +333,7 @@ namespace edz::ui {
             titleItem->setValue(Fonts::MaterialIcons::SUBMENU);
             titleItem->setThumbnail(title->getIcon()); 
 
-            titleItem->setClickListener([&](brls::View *view) {
+            titleItem->getClickEvent()->subscribe([&](brls::View *view) {
                 createTitlePopup(title);
             });
 
@@ -352,7 +352,7 @@ namespace edz::ui {
             
             titleItem->setValue(Fonts::MaterialIcons::SUBMENU);
                         
-            titleItem->setClickListener([&](brls::View *view) {
+            titleItem->getClickEvent()->subscribe([&](brls::View *view) {
                 createTitlePopup(title);
             });
 
@@ -376,7 +376,7 @@ namespace edz::ui {
             
             element::TitleButton *titleButton = new element::TitleButton(title, column % 4);
 
-            titleButton->setClickListener([&](brls::View *view) {
+            titleButton->getClickEvent()->subscribe([&](brls::View *view) {
                 createTitlePopup(title);
             });
 
@@ -430,7 +430,7 @@ namespace edz::ui {
         else {
             for (auto provider : providers) {
                 brls::ListItem *listItem = new brls::ListItem(provider.name + "edz.by"_lang + provider.owner, "", provider.description);
-                listItem->setClickListener([=](brls::View *view) { 
+                listItem->getClickEvent()->subscribe([=](brls::View *view) { 
                     Gui::runAsync([this, provider] {
                         brls::Application::blockInputs();
                         this->createSaveRepoPopup(provider.url);
@@ -462,7 +462,7 @@ namespace edz::ui {
                 addedUnofficialReposHeader = true;
 
                 brls::ListItem *listItem = new brls::ListItem(name, "", motd);
-                listItem->setClickListener([this, providerUrl](brls::View *view) { 
+                listItem->getClickEvent()->subscribe([this, providerUrl](brls::View *view) { 
                     Gui::runAsync([this, providerUrl] {
                         brls::Application::blockInputs();
                         this->createSaveRepoPopup(providerUrl);
@@ -502,7 +502,7 @@ namespace edz::ui {
                 hlp::ConfigManager::store();
 
                 brls::ListItem *listItem = new brls::ListItem(name, "", motd);
-                listItem->setClickListener([this, input](brls::View *view) { 
+                listItem->getClickEvent()->subscribe([this, input](brls::View *view) { 
                     Gui::runAsync([this, input] {
                         brls::Application::blockInputs();
                         this->createSaveRepoPopup(input);
@@ -526,7 +526,7 @@ namespace edz::ui {
 
         brls::ListItem *cheatEngineItem = new brls::ListItem("edz.gui.main.running.cheatengine.title"_lang, "", "edz.gui.main.running.cheatengine.subtitle"_lang);
         cheatEngineItem->setValue(Fonts::MaterialIcons::SUBMENU);
-        cheatEngineItem->setClickListener([](brls::View *view){
+        cheatEngineItem->getClickEvent()->subscribe([](brls::View *view){
             Gui::changeTo<GuiCheatEngine>();
         });
 
@@ -589,7 +589,7 @@ namespace edz::ui {
 
     void GuiMain::createCheatsTab(brls::List *list) {
         auto *edizonOverlayInstalledItem = new brls::ToggleListItem("edz.gui.main.cheats.overlay"_lang, hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists(), "edz.gui.main.cheats.overlay.desc"_lang);
-        edizonOverlayInstalledItem->setClickListener([edizonOverlayInstalledItem](brls::View *view) {
+        edizonOverlayInstalledItem->getClickEvent()->subscribe([edizonOverlayInstalledItem](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
             if (!listItem->getToggleState()) {
@@ -622,7 +622,7 @@ namespace edz::ui {
                     brls::ToggleListItem *cheatItem = new brls::ToggleListItem(hlp::limitStringLength(cheat->getName(), 60), cheat->isEnabled(), "",
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
-                    cheatItem->setClickListener([=](brls::View *view){
+                    cheatItem->getClickEvent()->subscribe([=](brls::View *view){
                             printf("%d\n", cheat->isEnabled());
                         cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
                     });
@@ -653,7 +653,7 @@ namespace edz::ui {
                             list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "edz.gui.main.cheats.error.no_cheats"_lang, true));
                             
                             brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("edz.gui.main.cheats.button.load.online"_lang, "edz.gui.main.cheats.button.load.online.desc"_lang);
-                            applyOnlineCheatsItem->setClickListener([=](brls::View *view) {
+                            applyOnlineCheatsItem->getClickEvent()->subscribe([=](brls::View *view) {
                                 brls::Application::blockInputs();
                                 brls::Application::removeFocus();
 
@@ -667,7 +667,7 @@ namespace edz::ui {
                                     brls::ToggleListItem *cheatItem = new brls::ToggleListItem(hlp::limitStringLength(cheat->getName(), 60), cheat->isEnabled(), "",
                                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
-                                    cheatItem->setClickListener([=](brls::View *view){
+                                    cheatItem->getClickEvent()->subscribe([=](brls::View *view){
                                         cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
                                     });
 
@@ -687,7 +687,7 @@ namespace edz::ui {
                     else {
                         brls::ListItem *cheatFileSelectionItem = new brls::ListItem("edz.gui.main.cheats.button.load.offline"_lang, "edz.gui.main.cheats.button.load.offline.desc"_lang);
                         
-                        cheatFileSelectionItem->setClickListener([this](brls::View *view) {
+                        cheatFileSelectionItem->getClickEvent()->subscribe([this](brls::View *view) {
                             auto [result, cheatDefs] = cheat::CheatParser::parseFile(EDIZON_CHEATS_DIR "/" + cheat::CheatManager::getCheatFile().second);
 
                             if (result.succeeded()) {
@@ -737,7 +737,7 @@ namespace edz::ui {
 
         brls::SelectListItem *languageOptionItem = new brls::SelectListItem("edz.gui.main.settings.language"_lang, langNames);
 
-        languageOptionItem->setListener([=](size_t selection) {
+        languageOptionItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
             SET_CONFIG(Settings.langCode, langCodes[selection]);
 
             brls::Application::blockInputs();
@@ -761,7 +761,7 @@ namespace edz::ui {
         
         if (hlp::isPctlEnabled()) {
             pctlOptionItem = new brls::ToggleListItem("edz.gui.main.settings.pctl"_lang, GET_CONFIG(Settings.pctlChecksEnabled), "edz.gui.main.settings.pctl.desc"_lang, "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
-            pctlOptionItem->setClickListener([](brls::View *view) {
+            pctlOptionItem->getClickEvent()->subscribe([](brls::View *view) {
                 static bool rejected = false;
 
                 if (rejected) {
@@ -797,13 +797,13 @@ namespace edz::ui {
         brls::SelectListItem *displayOptionsItem = new brls::SelectListItem("edz.gui.main.settings.style"_lang, displayOptions);
         brls::SelectListItem *sortingOptionsItem = new brls::SelectListItem("edz.gui.main.settings.sorting"_lang, sortingOptions);
 
-        displayOptionsItem->setListener([=](size_t selection) {
+        displayOptionsItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
             this->m_titleList->changeLayer(selection, false);
             SET_CONFIG(Settings.titlesDisplayStyle, selection);
         });
 
 
-        sortingOptionsItem->setListener([=](size_t selection) {
+        sortingOptionsItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
             SET_CONFIG(Settings.titlesSortingStyle, selection);
             Gui::runLater([this]() { 
                 GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
@@ -821,7 +821,7 @@ namespace edz::ui {
         // SwitchCheatsDB Login
         brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang, "edz.gui.main.settings.scdbinfo"_lang);
         scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "edz.gui.main.settings.account.nologin"_lang);
-        scdbLoginItem->setClickListener([=](brls::View *view) { 
+        scdbLoginItem->getClickEvent()->subscribe([=](brls::View *view) { 
             if (GET_CONFIG(Online.loggedIn)) {
                 brls::Dialog *dialog = new brls::Dialog("edz.gui.main.settings.dialog.logout"_lang);
                 dialog->addButton("edz.dialog.no"_lang, [=](brls::View *view) {
@@ -876,9 +876,9 @@ namespace edz::ui {
         guideItem->setValue(Fonts::MaterialIcons::SUBMENU);
 
         if (hlp::isInApplicationMode()) {
-            scdbItem->setClickListener([](brls::View *view)    { openWebpage("https://www.switchcheatsdb.com"); });
-            patreonItem->setClickListener([](brls::View *view) { openWebpage("https://patreon.com/werwolv");    });
-            guideItem->setClickListener([](brls::View *view)   { openWebpage("http://edizon.werwolv.net");      });
+            scdbItem->getClickEvent()->subscribe([](brls::View *view)    { openWebpage("https://www.switchcheatsdb.com"); });
+            patreonItem->getClickEvent()->subscribe([](brls::View *view) { openWebpage("https://patreon.com/werwolv");    });
+            guideItem->getClickEvent()->subscribe([](brls::View *view)   { openWebpage("http://edizon.werwolv.net");      });
         }
 
         list->addView(scdbItem);
@@ -927,12 +927,6 @@ namespace edz::ui {
         this->m_playTimeStatsList = new brls::LayerView();
         this->m_settingsList = new brls::List();
         this->m_aboutList = new brls::List();
-
-        rootFrame->setCancelListener([](brls::View *view) {
-            brls::Application::quit();
-
-            return true;
-        });
 
         loadOnlineCheats();
 

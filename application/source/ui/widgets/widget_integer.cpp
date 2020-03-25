@@ -44,7 +44,7 @@ namespace edz::ui::widget {
 
             listItem->setValue(std::to_string(this->m_currValue));
 
-            listItem->setClickListener([&](brls::View *view){
+            listItem->getClickEvent()->subscribe([&](brls::View *view){
                 edz::hlp::openSwkbdForNumber([&](std::string str){
 
                     s64 newValue = std::stoll(str);
