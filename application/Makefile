@@ -53,7 +53,8 @@ COMMONFLAGS	:=  -g -Wall -Og -ffunction-sections \
 				-DVERSION_MINOR=${VERSION_MINOR} \
 				-DVERSION_MICRO=${VERSION_MICRO} \
 				-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\" \
-				$(INCLUDE) $(EXT_INCLUDE) -D__SWITCH__
+				-DBOREALIS_RESOURCES="\"romfs:/borealis/\"" \
+				$(INCLUDE) $(EXT_INCLUDE) -D__SWITCH__ 
 
 CFLAGS		:=	$(COMMONFLAGS) -Wno-incompatible-pointer-types
 
