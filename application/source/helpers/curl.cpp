@@ -77,15 +77,14 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(this->m_curl, CURLOPT_WRITEDATA, &response);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 1L);
 
         result = curl_easy_perform(this->m_curl);
 
-        if (result != CURLE_OK) {
-            Logger::debug(curl_easy_strerror(result));
+        if (result != CURLE_OK)
             return { ResultEdzCurlError, "" };
-        }
 
         return { ResultSuccess, response };
     }
@@ -107,9 +106,11 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(this->m_curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(this->m_curl, CURLOPT_WRITEDATA, &response);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
         curl_easy_setopt(this->m_curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 1L);
+
 
         result = curl_easy_perform(this->m_curl);
 
@@ -139,8 +140,8 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFOFUNCTION, &xferinfo);
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFODATA, this);
         curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
 
         result = curl_easy_perform(this->m_curl);
 
@@ -170,8 +171,8 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFOFUNCTION, &xferinfo);
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFODATA, this);
         curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
 
         result = curl_easy_perform(this->m_curl);
 
@@ -210,8 +211,8 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFOFUNCTION, &xferinfo);
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFODATA, this);
         curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
         
         result = curl_easy_perform(this->m_curl);
 
@@ -253,8 +254,8 @@ namespace edz::hlp {
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFOFUNCTION, &xferinfo);
         curl_easy_setopt(this->m_curl, CURLOPT_XFERINFODATA, this);
         curl_easy_setopt(this->m_curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 1000L);
-        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_TIMEOUT_MS, 2000L);
+        curl_easy_setopt(this->m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
         
         result = curl_easy_perform(this->m_curl);
 

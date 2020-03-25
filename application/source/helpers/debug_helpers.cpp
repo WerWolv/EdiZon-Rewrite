@@ -151,7 +151,7 @@ extern "C" {
             printDebugInfo(ctx);
 
             // Setup FatalCpuContext to pass on crash information to fatal
-            FatalCpuContext fatalCtx = { 0 };
+            static FatalCpuContext fatalCtx = { 0 };
             for (u8 i = 0; i < 29; i++)
                 fatalCtx.aarch64_ctx.x[i] = ctxBackup.cpu_gprs[i].x;
 

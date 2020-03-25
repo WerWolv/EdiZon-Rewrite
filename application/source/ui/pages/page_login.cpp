@@ -43,14 +43,14 @@ namespace edz::ui::page {
 
         this->m_label->setHorizontalAlign(NVG_ALIGN_CENTER);
 
-        this->m_emailItem->setClickListener([&](View *view) {
+        this->m_emailItem->getClickEvent()->subscribe([&](View *view) {
             hlp::openSwkbdForText([&](std::string text) {
                 this->m_email = text;
                 static_cast<brls::ListItem*>(view)->setValue(text);
             }, "edz.page.login.email"_lang, "edz.page.login.email.help"_lang);
         });
         
-        this->m_passwordItem->setClickListener([&](View *view) {
+        this->m_passwordItem->getClickEvent()->subscribe([&](View *view) {
             hlp::openSwkbdForPassword([&](std::string text) {
                 this->m_password = text;
 
@@ -63,12 +63,10 @@ namespace edz::ui::page {
         });
 
         this->m_loginBtn->setLabel("edz.page.login.login"_lang);
-        this->m_loginBtn->setClickListener([=](View *view) {
+        this->m_loginBtn->getClickEvent()->subscribe([=](View *view) {
             api::SwitchCheatsDBAPI scdbApi;
 
             auto [result, token] = scdbApi.getToken(this->m_email, this->m_password);
-
-            this->m_password = "";
 
             if (result != ResultSuccess) {
                 brls::Dialog *dialog = new brls::Dialog("edz.page.login.error"_lang);
