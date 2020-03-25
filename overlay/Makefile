@@ -176,7 +176,6 @@ DEPENDS	:=	$(OFILES:.o=.d)
 all	:  $(OUTPUT).ovl
 
 $(OUTPUT).ovl	:	$(OUTPUT).nro
-	@cp $(OUTPUT).nro $(OUTPUT).ovl
 
 $(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
 

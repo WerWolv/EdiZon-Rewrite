@@ -17,12 +17,14 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define TESLA_INIT_IMPL
+#include <tesla.hpp>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <switch.h>
-#include <tesla.hpp>
 #include <filesystem>
 
 #include <switch/nro.h>
@@ -41,30 +43,31 @@ public:
     GuiCheats() { }
     ~GuiCheats() { }
 
-    virtual tsl::Element* createUI() {
-        auto rootFrame = new tsl::element::Frame();
+    virtual tsl::elm::Element* createUI() override {
+        auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "Cheats");
 
-        auto header = new tsl::element::CustomDrawer(0, 0, 100, FB_WIDTH, [](u16 x, u16 y, tsl::Screen *screen){
-            screen->drawString("Cheats", false, 20, 50, 30, tsl::a(0xFFFF));
+        if (edz::cheat::CheatManager::getCheats().size() == 0) {
+            auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
+                renderer->drawString("\uE150", false, 180, 250, 90, renderer->a(0xFFFF));
+                renderer->drawString("No Cheats loaded!", false, 110, 340, 25, renderer->a(0xFFFF));
+            });
 
-            if (edz::cheat::CheatManager::getCheats().size() == 0) {
-                screen->drawString("\uE150", false, 180, 250, 90, tsl::a(0xFFFF));
-                screen->drawString("No Cheats loaded!", false, 110, 340, 25, tsl::a(0xFFFF));
+            rootFrame->setContent(warning);
+
+        } else {
+            auto list = new tsl::elm::List();
+            
+            for (auto &cheat : edz::cheat::CheatManager::getCheats()) {
+                auto cheatToggleItem = new tsl::elm::ToggleListItem(edz::hlp::limitStringLength(cheat->getName(), 20), cheat->isEnabled());
+                cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
+
+                this->m_cheatToggleItems.push_back(cheatToggleItem);
+                list->addItem(cheatToggleItem);
             }
-        });
 
-        auto list = new tsl::element::List();
-        
-        for (auto &cheat : edz::cheat::CheatManager::getCheats()) {
-            auto cheatToggleItem = new tsl::element::ToggleListItem(edz::hlp::limitStringLength(cheat->getName(), 20), cheat->isEnabled());
-            cheatToggleItem->setStateChangeListener([&cheat](bool state) { cheat->setState(state); });
+            rootFrame->setContent(list);
 
-            this->m_cheatToggleItems.push_back(cheatToggleItem);
-            list->addItem(cheatToggleItem);
         }
-        
-        rootFrame->addElement(header);
-        rootFrame->addElement(list);
 
         return rootFrame;
     }
@@ -75,7 +78,7 @@ public:
     }
 
 private:
-    std::vector<tsl::element::ToggleListItem*> m_cheatToggleItems;
+    std::vector<tsl::elm::ToggleListItem*> m_cheatToggleItems;
 };
 
 class GuiStats : public tsl::Gui {
@@ -104,39 +107,37 @@ public:
         }
      }
 
-    virtual tsl::Element* createUI() {
-        auto rootFrame = new tsl::element::Frame();
+    virtual tsl::elm::Element* createUI() override {
+        auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "Stats");
 
-        auto infos = new tsl::element::CustomDrawer(0, 0, 100, FB_WIDTH, [this](u16 x, u16 y, tsl::Screen *screen){
-            screen->drawString("Stats", false, 20, 50, 30, tsl::a(0xFFFF));
+        auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
+            renderer->drawString("Local IP:", false, 35, 120, 18, renderer->a(0xFFFF));
 
-            screen->drawString("Local IP:", false, 35, 120, 18, tsl::a(0xFFFF));
+            renderer->drawString("CPU Temparature:", false, 35, 160, 18, renderer->a(0xFFFF));
+            renderer->drawString("PCB Temparature:", false, 35, 190, 18, renderer->a(0xFFFF));
 
-            screen->drawString("CPU Temparature:", false, 35, 160, 18, tsl::a(0xFFFF));
-            screen->drawString("PCB Temparature:", false, 35, 190, 18, tsl::a(0xFFFF));
+            renderer->drawString("CPU Clock:", false, 35, 230, 18, renderer->a(0xFFFF));
+            renderer->drawString("GPU Clock:", false, 35, 260, 18, renderer->a(0xFFFF));
+            renderer->drawString("MEM Clock:", false, 35, 290, 18, renderer->a(0xFFFF));
 
-            screen->drawString("CPU Clock:", false, 35, 230, 18, tsl::a(0xFFFF));
-            screen->drawString("GPU Clock:", false, 35, 260, 18, tsl::a(0xFFFF));
-            screen->drawString("MEM Clock:", false, 35, 290, 18, tsl::a(0xFFFF));
-
-            screen->drawString("WiFi Signal:", false, 35, 330, 18, tsl::a(0xFFFF));
+            renderer->drawString("WiFi Signal:", false, 35, 330, 18, renderer->a(0xFFFF));
 
             if (this->m_runningProcessID != 0) {
-                screen->drawString("Program ID:", false, 35, 370, 18, tsl::a(0xFFFF));
-                screen->drawString("Build ID:", false, 35, 400, 18, tsl::a(0xFFFF));
-                screen->drawString("Process ID:", false, 35, 430, 18, tsl::a(0xFFFF));
+                renderer->drawString("Program ID:", false, 35, 370, 18, renderer->a(0xFFFF));
+                renderer->drawString("Build ID:", false, 35, 400, 18, renderer->a(0xFFFF));
+                renderer->drawString("Process ID:", false, 35, 430, 18, renderer->a(0xFFFF));
             }
 
             if (this->m_ipAddress == INADDR_LOOPBACK)
-                screen->drawString("Offline", false, 230, 120, 18, tsl::a(0xFFFF));
+                renderer->drawString("Offline", false, 230, 120, 18, renderer->a(0xFFFF));
             else 
-                screen->drawString(edz::hlp::formatString("%d.%d.%d.%d", this->m_ipAddress & 0xFF, (this->m_ipAddress >> 8) & 0xFF, (this->m_ipAddress >> 16) & 0xFF, (this->m_ipAddress >> 24) & 0xFF).c_str(), false, 230, 120, 18, tsl::a(0xFFFF));
+                renderer->drawString(edz::hlp::formatString("%d.%d.%d.%d", this->m_ipAddress & 0xFF, (this->m_ipAddress >> 8) & 0xFF, (this->m_ipAddress >> 16) & 0xFF, (this->m_ipAddress >> 24) & 0xFF).c_str(), false, 230, 120, 18, renderer->a(0xFFFF));
 
             s32 temparature = 0;
             tsGetTemperatureMilliC(TsLocation_Internal, &temparature);
-            screen->drawString(edz::hlp::formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 230, 160, 18, tsl::a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 230, 160, 18, renderer->a(0xFFFF));
             tsGetTemperatureMilliC(TsLocation_External, &temparature);
-            screen->drawString(edz::hlp::formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 230, 190, 18, tsl::a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 230, 190, 18, renderer->a(0xFFFF));
 
             u32 cpuClock = 0, gpuClock = 0, memClock = 0;
 
@@ -150,25 +151,25 @@ public:
                 pcvGetClockRate(PcvModule_EMC, &memClock);
             }
 
-            screen->drawString(edz::hlp::formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 230, 230, 18, tsl::a(0xFFFF));
-            screen->drawString(edz::hlp::formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 230, 260, 18, tsl::a(0xFFFF));
-            screen->drawString(edz::hlp::formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 230, 290, 18, tsl::a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 230, 230, 18, renderer->a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 230, 260, 18, renderer->a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 230, 290, 18, renderer->a(0xFFFF));
 
             s32 signalStrength = 0;
             wlaninfGetRSSI(&signalStrength);
 
-            screen->drawString(edz::hlp::formatString("%d dBm", signalStrength).c_str(), false, 230, 330, 18, tsl::a(0xFFFF));
+            renderer->drawString(edz::hlp::formatString("%d dBm", signalStrength).c_str(), false, 230, 330, 18, renderer->a(0xFFFF));
 
             if (this->m_runningProcessID != 0) {
-                screen->drawString(edz::hlp::formatString("%016lX", this->m_runningTitleID).c_str(), false, 230, 370, 18, tsl::a(0xFFFF));
-                screen->drawString(edz::hlp::formatString("%016lX", this->m_runningBuildID).c_str(), false, 230, 400, 18, tsl::a(0xFFFF));
-                screen->drawString(edz::hlp::formatString("%lu", this->m_runningProcessID).c_str(), false, 230, 430, 18, tsl::a(0xFFFF));
+                renderer->drawString(edz::hlp::formatString("%016lX", this->m_runningTitleID).c_str(), false, 230, 370, 18, renderer->a(0xFFFF));
+                renderer->drawString(edz::hlp::formatString("%016lX", this->m_runningBuildID).c_str(), false, 230, 400, 18, renderer->a(0xFFFF));
+                renderer->drawString(edz::hlp::formatString("%lu", this->m_runningProcessID).c_str(), false, 230, 430, 18, renderer->a(0xFFFF));
             }
 
  
         });
 
-        rootFrame->addElement(infos);
+        rootFrame->setContent(infos);
 
         return rootFrame;
     }
@@ -189,20 +190,16 @@ public:
     GuiMain() { }
     ~GuiMain() { }
 
-    virtual tsl::Element* createUI() {
-        auto *rootFrame = new tsl::element::Frame();
+    virtual tsl::elm::Element* createUI() {
+        auto *rootFrame = new tsl::elm::OverlayFrame("EdiZon", "");
 
-        auto *header = new tsl::element::CustomDrawer(0, 0, 100, FB_WIDTH, [](u16 x, u16 y, tsl::Screen *screen) {
-            screen->drawString("EdiZon", false, 20, 50, 30, tsl::a(0xFFFF));
-        });
+        auto list = new tsl::elm::List();
 
-        auto list = new tsl::element::List();
-
-        auto cheatsItem = new tsl::element::ListItem("Cheats");
-        auto statsItem  = new tsl::element::ListItem("Stats");
+        auto cheatsItem = new tsl::elm::ListItem("Cheats");
+        auto statsItem  = new tsl::elm::ListItem("Stats");
         cheatsItem->setClickListener([](s64 keys) {
             if (keys & KEY_A) {
-                Gui::changeTo<GuiCheats>();
+                tsl::changeTo<GuiCheats>();
                 return true;
             }
 
@@ -211,7 +208,7 @@ public:
 
         statsItem->setClickListener([](s64 keys) {
             if (keys & KEY_A) {
-                Gui::changeTo<GuiStats>();
+                tsl::changeTo<GuiStats>();
                 return true;
             }
 
@@ -221,8 +218,7 @@ public:
         list->addItem(cheatsItem);
         list->addItem(statsItem);
 
-        rootFrame->addElement(header);
-        rootFrame->addElement(list);
+        rootFrame->setContent(list);
 
         return rootFrame;
     }
@@ -235,8 +231,7 @@ public:
     EdiZonOverlay() { }
     ~EdiZonOverlay() { }
 
-    tsl::Gui* onSetup() { 
-        smInitialize();
+    void initServices() override {
         edz::dmntcht::initialize();
         edz::cheat::CheatManager::initialize();
         tsInitialize();
@@ -244,12 +239,9 @@ public:
         clkrstInitialize();
         pcvInitialize();
 
-        smExit();
+    } 
 
-        return new GuiMain();
-    }
-
-    void onDestroy() { 
+    virtual void exitServices() override {
         edz::dmntcht::exit();
         edz::cheat::CheatManager::exit();
         tsExit();
@@ -258,10 +250,14 @@ public:
         pcvExit();
     }
 
+    std::unique_ptr<tsl::Gui> loadInitialGui() override {
+        return initially<GuiMain>();
+    }
+
     
 };
 
 
-tsl::Overlay *overlayLoad() {
-    return new EdiZonOverlay();
+int main(int argc, char **argv) {
+    return tsl::loop<EdiZonOverlay>(argc, argv);
 }
