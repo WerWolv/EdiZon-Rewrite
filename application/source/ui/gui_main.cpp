@@ -592,7 +592,7 @@ namespace edz::ui {
         edizonOverlayInstalledItem->getClickEvent()->subscribe([edizonOverlayInstalledItem](brls::View *view) {
             brls::ToggleListItem* listItem = static_cast<brls::ToggleListItem*>(view);
             
-            if (!listItem->getToggleState()) {
+            if (listItem->getToggleState()) {
                 hlp::File overlayFile(EDIZON_ROMFS_OVERLAY_PATH "/" EDIZON_OVERLAY_FILENAME);
                 overlayFile.copyTo(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME);
             }
@@ -953,6 +953,12 @@ namespace edz::ui {
         #if DEBUG_MODE_ENABLED
             rootFrame->setFooterText("edz.debugmode"_lang);
         #endif
+
+        rootFrame->addCancelListener([](brls::View*){
+            brls::Application::quit();
+
+            return true;
+        });
 
         return rootFrame;
     }
