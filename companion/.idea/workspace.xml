@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c796c5dc-cec5-463d-96f1-911ae391de2f" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/net/werwolv/edizon/ui/GuiMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../application/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/include/ui/elements/popup_list.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/include/ui/elements/title_button.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/include/ui/elements/title_button.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/libs/borealis" beforeDir="false" afterPath="$PROJECT_DIR$/../application/libs/borealis" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/elements/popup_list.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/elements/title_button.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/elements/title_button.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/gui_cheat_engine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/gui_cheat_engine.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/gui_main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/gui_main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/pages/page_login.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/pages/page_login.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/widgets/widget_boolean.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/widgets/widget_boolean.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/widgets/widget_integer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/widgets/widget_integer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/widgets/widget_list.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/widgets/widget_list.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../application/source/ui/widgets/widget_string.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../application/source/ui/widgets/widget_string.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/assets/edizon_logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/css/material.brown-orange.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/css/material.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/css/material.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/css/material.min.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/css/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/html/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/edizon.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/main.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/material.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/material.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/material.min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/js/usb.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/.jscsrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/.jshintrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/bower.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/gulpfile.babel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.min.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/material.min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/INTRODUCTION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/_color-definitions.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/_functions.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/_mixins.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/_variables.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/animation/_animation.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/animation/demo.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/animation/demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/animation/demo.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/_badge.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-icon-icon-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-icon-icon.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-icon-text-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-icon-text.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-text-icon-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-text-icon.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-text-text-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/badge/snippets/badge-on-text-text.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/_button.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/button.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-colored-ripple.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-colored.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-disabled.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-mini-colored.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-mini.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab-ripple.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/fab.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/flat-accent.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/flat-disabled.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/flat-primary.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/flat-ripple.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/flat.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/icon-colored.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/icon.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised-accent.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised-colored.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised-disabled.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised-ripple-accent.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised-ripple.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/button/snippets/raised.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/_card.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/snippets/event.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/snippets/image.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/snippets/square.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/card/snippets/wide.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/checkbox/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/checkbox/_checkbox.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/checkbox/checkbox.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/checkbox/snippets/check-off.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/checkbox/snippets/check-on.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/_chip.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/snippets/basic.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/snippets/button.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/snippets/contact.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/snippets/deletable-contact.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/chip/snippets/deletable.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/data-table/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/data-table/_data-table.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/data-table/data-table.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/data-table/snippets/data-table.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/demos.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/dialog/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/dialog/_dialog.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/footer/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/footer/_mega_footer.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/footer/_mini_footer.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/footer/snippets/mega-footer.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/footer/snippets/mini-footer.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/grid/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/grid/_grid.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/grid/snippets/codepen-grid.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/grid/snippets/grid-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/grid/snippets/grid.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/icon-toggle/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/icon-toggle/_icon-toggle.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/icon-toggle/icon-toggle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/icon-toggle/snippets/icon-off.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/icon-toggle/snippets/icon-on.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/images/buffer.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/images/tick-mask.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/images/tick.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/_layout.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/layout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-drawer-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-drawer.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-header-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-header-drawer-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-header-drawer.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-header.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-tabs-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/fixed-tabs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/scrollable-tabs-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/scrollable-tabs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/scrolling-header-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/scrolling-header.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/transparent-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/transparent.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/waterfall-header-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/layout/snippets/waterfall-header.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/_list.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/action.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/icon.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/list-control.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/list-item.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/three-line.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/list/snippets/two-line.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/material-design-lite-grid.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/material-design-lite.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/mdlComponentHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/_menu.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/menu.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/codepen-lower-buttons.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/codepen-top-buttons.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/lower-left-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/lower-left.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/lower-right-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/lower-right.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/top-left-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/top-left.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/top-right-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/menu/snippets/top-right.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/palette/_palette.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/palette/demo.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/palette/demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/_progress.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/progress.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-buffering-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-buffering.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-default-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-default.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-indeterminate-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/progress/snippets/progress-indeterminate.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/radio/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/radio/_radio.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/radio/radio.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/radio/snippets/radio-off.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/radio/snippets/radio-on.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/resets/_h5bp.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/resets/_mobile.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/resets/_resets.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/ripple/_ripple.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/ripple/ripple.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/shadow/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/shadow/_shadow.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/shadow/demo.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/shadow/demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/_slider.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/slider.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/snippets/demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/snippets/slider-default-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/snippets/slider-default.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/snippets/slider-starting-value-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/slider/snippets/slider-starting-value.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/snackbar/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/snackbar/_snackbar.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/snackbar/snackbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/snackbar/snippets/snackbar.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/snackbar/snippets/toast.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/spinner/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/spinner/_spinner.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/spinner/snippets/spinner-default.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/spinner/snippets/spinner-single-color.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/spinner/spinner.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/styleguide.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/switch/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/switch/_switch.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/switch/snippets/switch-off.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/switch/snippets/switch-on.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/switch/switch.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tabs/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tabs/_tabs.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tabs/snippets/tabs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tabs/tabs.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/template.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/_textfield.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-expanding-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-expanding.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-floating-numeric-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-floating-numeric.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-floating-text-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-floating-text.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-multi-line-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-multi-line.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-numeric-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-numeric.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-text-demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/snippets/textfield-text.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/textfield/textfield.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/third_party/rAF.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/_tooltip.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/snippets/tooltip-large.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/snippets/tooltip-multiline.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/snippets/tooltip-rich.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/snippets/tooltip-simple.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/tooltip/tooltip.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/typography/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/typography/_typography.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/typography/demo.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/src/typography/demo.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/mdl/utils/uniffe.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.classpath" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.project" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.settings/org.eclipse.core.resources.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.settings/org.eclipse.jdt.apt.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.settings/org.eclipse.jdt.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/.settings/org.eclipse.m2e.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/src/main/java/net/werwolv/edizon/Bridge.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/src/main/java/net/werwolv/edizon/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/src/test/java/net/werwolv/edizon/AppTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/target/classes/net/werwolv/edizon/Bridge.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/target/classes/net/werwolv/edizon/Main.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usb_bridge/target/test-classes/net/werwolv/edizon/AppTest.class" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaFXApplication" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1YH0jh1b0sMiE5g0RBiYlSKkupV" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="project.structure.last.edited" value="Global Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.45057473" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+  </component>
+  <component name="RunManager">
+    <configuration name="GuiMain" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="net.werwolv.edizon.ui.GuiMain" />
+      <module name="companion" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.werwolv.edizon.ui.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.GuiMain" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\werwo\AppData\Roaming\Subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c796c5dc-cec5-463d-96f1-911ae391de2f" name="Default Changelist" comment="" />
+      <created>1582584348465</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1582584348465</updated>
+      <workItem from="1582584350172" duration="1270000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="440" y="94" key="SettingsEditor" timestamp="1582584894412">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="440" y="94" key="SettingsEditor/-1920.0.1920.1040/0.0.1920.1040/1920.0.1680.1050@0.0.1920.1040" timestamp="1582584894412" />
+  </component>
+</project>
