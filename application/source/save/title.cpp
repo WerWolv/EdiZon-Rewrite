@@ -55,7 +55,7 @@ namespace edz::save {
         for (auto &[userid, account] : save::SaveFileSystem::getAllAccounts()) {
             PdmPlayStatistics playStatistics = { 0 };
 
-            pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), hlp::userIDToAccountUid(account->getID()), &playStatistics);
+            pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(this->getID(), hlp::userIDToAccountUid(account->getID()), false, &playStatistics);
             this->m_playStatistics.insert({ userid, playStatistics });
         }
     }

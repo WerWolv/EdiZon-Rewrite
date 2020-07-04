@@ -74,6 +74,8 @@ namespace edz::hlp {
         static inline config_t s_config;
 
         static inline std::mutex s_mutex;
+        
+        static void storeUnsafe();
     };
 
 }
