@@ -56,17 +56,21 @@ namespace edz::hlp {
             j.at("cheatEngine").at("searchCount").get_to(ConfigManager::s_config.CheatEngine.searchCount);
         } catch (std::exception &e) {
             Logger::info("Config file not found. Creating...");
-            store();
+            ConfigManager::storeUnsafe();
         }
 
         // If the used edizon build has changed, the config might not be complete anymore so initialize the new values if there are any
         if (ConfigManager::s_config.Common.buildTime != __DATE__ " " __TIME__)
-            store();
+            ConfigManager::storeUnsafe();
     }
 
     void ConfigManager::store() {
         std::lock_guard<std::mutex> lock(ConfigManager::s_mutex);
 
+        ConfigManager::storeUnsafe();
+    }
+
+    void ConfigManager::storeUnsafe() {
         json j = {  { "common",      { { "buildTime",               __DATE__ " " __TIME__                                   } } },
                     { "online",      { { "localCommitSha",          ConfigManager::s_config.Online.localCommitSha           },
                                        { "notificationDates",       ConfigManager::s_config.Online.notificationDates        },
