@@ -28,6 +28,8 @@
 #include "helpers/utils.hpp"
 #include "helpers/debug_helpers.hpp"
 
+#define U64_MAX 0xFFFFFFFFFFFFFFFF
+
 #if LOG_ALLOCATION
 
     typedef struct {
@@ -171,6 +173,7 @@ extern "C" {
             
             fatalThrowWithContext(edz::ResultEdzErrorDuringErrorHandling, FatalPolicy_ErrorScreen, &fatalCtx);
             while (true)
+                // 20ms svcSleepThread(20E6);
                 svcSleepThread(U64_MAX);
         }
 
