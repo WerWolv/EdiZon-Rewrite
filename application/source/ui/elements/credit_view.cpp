@@ -60,12 +60,4 @@ namespace edz::ui::element {
         this->height = 120;
     }
 
-    brls::View* CreditView::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
-        return nullptr;
-    }
-
-    void CreditView::drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) {
-
-    }
-
 }

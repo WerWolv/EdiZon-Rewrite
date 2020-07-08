@@ -31,12 +31,8 @@ namespace edz::ui::element {
     FocusableTable::~FocusableTable() {
     }
 
-    brls::View* FocusableTable::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
+    brls::View* FocusableTable::getDefaultFocus() {        
         return this;
-    }
-
-    void FocusableTable::drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) {
-        // The view has to be focusable for scrolling to work but we don't want the highlight to be drawn
     }
 
 }

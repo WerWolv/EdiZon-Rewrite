@@ -207,7 +207,7 @@ extern "C" {
                 break;
         }
 
-        brls::Application::removeFocus();
+        brls::Application::giveFocus(nullptr);
         edz::ui::Gui::fatal("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
             "A fatal exception occured!",
             "Reason",

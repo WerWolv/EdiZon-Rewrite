@@ -37,10 +37,6 @@ namespace edz::ui::page {
         this->m_image->frame(ctx);
     }
 
-    brls::View* PageFullscreenImage::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
-        return nullptr;
-    }
-
     void PageFullscreenImage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {
         this->m_image->setBoundaries(0, 0, 1280, 720);
     }

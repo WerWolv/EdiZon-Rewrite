@@ -64,10 +64,6 @@ namespace edz::ui::page {
             this->m_warning->frame(ctx);
     }
 
-    brls::View* PageSplash::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
-        return nullptr;
-    }
-
     void PageSplash::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {
         this->m_logo->setBoundaries((1280 - 256) / 2, (720 - 256) / 2, 256, 256);
 

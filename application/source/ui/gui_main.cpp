@@ -81,7 +81,7 @@ namespace edz::ui {
 
                 if (title->hasSaveFile(account)) {
                     brls::ListItem *userItem = new brls::ListItem(account->getNickname(), "", hlp::formatString("edz.gui.popup.information.playtime"_lang, title->getPlayTime(account) / 3600, (title->getPlayTime(account) % 3600) / 60));
-                    userItem->setThumbnail(account->getIcon());
+                    userItem->setThumbnail(account->getIcon().data(), account->getIcon().size());
 
                     softwareInfoList->addView(userItem);
                 }
@@ -169,7 +169,7 @@ namespace edz::ui {
         rootFrame->addTab("edz.gui.popup.management.tab"_lang, saveManagementList);
 
 
-        brls::PopupFrame::open(title->getName(), title->getIcon(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
+        brls::PopupFrame::open(title->getName(), title->getIcon().data(), title->getIcon().size(), rootFrame, "edz.gui.popup.version"_lang + " " + title->getVersionString(), title->getAuthor());
     }
 
     EResult GuiMain::createSaveRepoPopup(std::string saveRepoUrl) {
@@ -205,7 +205,8 @@ namespace edz::ui {
                 continue;
 
             auto item = new brls::ListItem(hlp::formatString("%s [ %s ]", saveFile.name.c_str(), allTitles[saveFile.titleID]->getName().c_str()), "", saveFile.date);
-            item->setThumbnail(allTitles[saveFile.titleID]->getIcon());
+            auto thisIcon = allTitles[saveFile.titleID]->getIcon();
+            item->setThumbnail(thisIcon.data(), thisIcon.size());
             item->getClickEvent()->subscribe([saveRepoUrl, saveFile](brls::View *view) {
                 hlp::openPlayerSelect([=](auto &account) {
                     Gui::runAsyncWithDialog([=, &account] {
@@ -288,8 +289,8 @@ namespace edz::ui {
     void GuiMain::sortTitleGrid(brls::List *list, SortingStyle sorting) {
         std::vector<ui::element::TitleButton*> titleButtons;
 
-        for (brls::BoxLayoutChild *child : list->getChildren()) {
-            ui::element::HorizontalTitleList *hTitleList = static_cast<ui::element::HorizontalTitleList*>(child->view);
+        for (size_t i = 0; i < list->getViewsCount(); i++) {
+            ui::element::HorizontalTitleList *hTitleList = static_cast<ui::element::HorizontalTitleList*>(list->getChild(i));
 
             for (const auto& titleButton : hTitleList->getChildren())
                 titleButtons.push_back(static_cast<ui::element::TitleButton*>(titleButton->view));
@@ -331,7 +332,7 @@ namespace edz::ui {
             brls::ListItem *titleItem = new ui::element::TitleListItem(title, hlp::limitStringLength(title->getName(), 45), "", title->getIDString());
             
             titleItem->setValue(Fonts::MaterialIcons::SUBMENU);
-            titleItem->setThumbnail(title->getIcon()); 
+            titleItem->setThumbnail(title->getIcon().data(), title->getIcon().size()); 
 
             titleItem->getClickEvent()->subscribe([&](brls::View *view) {
                 createTitlePopup(title);
@@ -341,7 +342,7 @@ namespace edz::ui {
             list->addView(titleItem);
         }
 
-        sortTitleList(list->getChildren(), sorting);
+        // sortTitleList(list->getChildren(), sorting);
         list->setSpacing(30);
     }
 
@@ -360,7 +361,7 @@ namespace edz::ui {
             list->addView(titleItem);
         }
         
-        sortTitleList(list->getChildren(), sorting);
+        // sortTitleList(list->getChildren(), sorting);
         list->setSpacing(30);
     }
 
@@ -605,7 +606,7 @@ namespace edz::ui {
                 bool actuallExtracted = hlp::File(OVERLAYS_PATH "/" EDIZON_OVERLAY_FILENAME).exists();
 
                 if (actuallExtracted != edizonOverlayInstalledItem->getToggleState())
-                    edizonOverlayInstalledItem->setToggleState(actuallExtracted);
+                    edizonOverlayInstalledItem->onClick();  // TODO: This probably won't work
             }, 10);
         });
 
@@ -623,7 +624,7 @@ namespace edz::ui {
                         "edz.widget.boolean.on"_lang, "edz.widget.boolean.off"_lang);
 
                     cheatItem->getClickEvent()->subscribe([=](brls::View *view){
-                            printf("%d\n", cheat->isEnabled());
+                        printf("%d\n", cheat->isEnabled());
                         cheat->setState(static_cast<brls::ToggleListItem*>(view)->getToggleState());
                     });
 
@@ -635,7 +636,7 @@ namespace edz::ui {
                     for (auto &cheatToggle : GuiMain::m_cheatToggleListItems) {
                         bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
                         if (cheatToggle->getToggleState() != isEnabled)
-                            cheatToggle->setToggleState(isEnabled);
+                            cheatToggle->onClick(); // TODO: This should work properly without setToggle, but need to verify
                     }
                 }, 20);
 
@@ -655,7 +656,7 @@ namespace edz::ui {
                             brls::ListItem *applyOnlineCheatsItem = new brls::ListItem("edz.gui.main.cheats.button.load.online"_lang, "edz.gui.main.cheats.button.load.online.desc"_lang);
                             applyOnlineCheatsItem->getClickEvent()->subscribe([=](brls::View *view) {
                                 brls::Application::blockInputs();
-                                brls::Application::removeFocus();
+                                brls::Application::giveFocus(nullptr);
 
                                 list->removeView(4);
                                 list->removeView(3);
@@ -677,7 +678,7 @@ namespace edz::ui {
                                     }
                                 }
 
-                                brls::Application::requestFocus(list, brls::FocusDirection::NONE);
+                                brls::Application::giveFocus(list);
                                 brls::Application::unblockInputs();
                             });
 
@@ -696,12 +697,13 @@ namespace edz::ui {
 
                                 Gui::runLater([this] {
                                     brls::Application::blockInputs();
-                                    brls::Application::removeFocus(this->m_cheatsList);
+                                    if (brls::Application::getCurrentFocus() == this->m_cheatsList)
+                                        brls::Application::giveFocus(nullptr);
 
                                     this->m_cheatsList->clear();
                                     createCheatsTab(this->m_cheatsList);
 
-                                    brls::Application::requestFocus(this->m_cheatsList, brls::FocusDirection::NONE);
+                                    brls::Application::giveFocus(this->m_cheatsList);
                                     brls::Application::unblockInputs();
                                 }, 20);
                             }                                
@@ -744,7 +746,7 @@ namespace edz::ui {
 
             Gui::runLater([]() {
                 LangEntry::clearCache();
-                brls::Application::removeFocus();
+                brls::Application::giveFocus(nullptr);
                 brls::Application::popView();
             }, 10);
 
@@ -803,16 +805,16 @@ namespace edz::ui {
         });
 
 
-        sortingOptionsItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
-            SET_CONFIG(Settings.titlesSortingStyle, selection);
-            Gui::runLater([this]() { 
-                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
-                GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+        // sortingOptionsItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
+        //     SET_CONFIG(Settings.titlesSortingStyle, selection);
+        //     Gui::runLater([this]() { 
+        //         GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(0))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+        //         GuiMain::sortTitleList(static_cast<brls::List*>(this->m_titleList->getLayer(1))->getChildren(), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
                 
-                if (!GET_CONFIG(Settings.fennecMode))
-                    GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
-            }, 1);
-        });
+        //         if (!GET_CONFIG(Settings.fennecMode))
+        //              GuiMain::sortTitleGrid(static_cast<brls::List*>(this->m_titleList->getLayer(2)), static_cast<SortingStyle>(GET_CONFIG(Settings.titlesSortingStyle)));
+        //     }, 1);
+        // });
 
         displayOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Settings.titlesDisplayStyle)));
         sortingOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Settings.titlesSortingStyle)));
@@ -847,7 +849,8 @@ namespace edz::ui {
 
         list->addView(new brls::Header("edz.gui.main.settings.header.generaloptions"_lang));
         list->addView(languageOptionItem);
-        list->addView(pctlOptionItem);
+        if (pctlOptionItem != nullptr)
+            list->addView(pctlOptionItem);
 
         list->addView(new brls::Header("edz.gui.main.settings.header.titleoptions"_lang));
         list->addView(displayOptionsItem);
@@ -953,12 +956,6 @@ namespace edz::ui {
         #if DEBUG_MODE_ENABLED
             rootFrame->setFooterText("edz.debugmode"_lang);
         #endif
-
-        rootFrame->addCancelListener([](brls::View*){
-            brls::Application::quit();
-
-            return true;
-        });
 
         return rootFrame;
     }

@@ -40,7 +40,7 @@
 #define BACKUP_FILE_EXTENSION           ".edz"
 
 /* Whether the splash screen should be displayed on launch */
-#define SPLASH_ENABLED                  true
+#define SPLASH_ENABLED                  false
 
 /* If the user has more than this number of games installed, don't load any extra information of games that aren't installed anymore but have save files left */
 #define MAX_TITLE_FROM_SAVE_DATA        20

@@ -31,7 +31,7 @@ namespace edz::ui {
         if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).failed())
             std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x80);
 
-        auto gameImage = new brls::Image(&thumbnailBuffer[0], 1280, 720);
+        auto gameImage = new brls::Image(thumbnailBuffer.data(), thumbnailBuffer.size());
 
         return new page::PageFullscreenImage(gameImage);
     }

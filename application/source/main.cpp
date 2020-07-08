@@ -41,7 +41,7 @@ EResult initServices() {
     // Already initialized by Borealis but also used in EdiZon: romfs, sockets, pl and set:sys
 
     // Initialize Borealis (UI library)
-    if (!brls::Application::init())
+    if (!brls::Application::init("Edizon"))
         return ResultEdzBorealisInitFailed;
 
     // Extra fonts
