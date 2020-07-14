@@ -125,7 +125,8 @@ EResult createFolderStructure() {
         EDIZON_SCRIPTS_DIR,
         EDIZON_LIBS_DIR,
         EDIZON_CHEATS_DIR,
-        EDIZON_TMP_DIR};
+        EDIZON_TMP_DIR
+    };
 
     for (auto path : paths) {
         hlp::Folder folder(path);

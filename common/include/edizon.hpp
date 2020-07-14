@@ -39,8 +39,8 @@
 
 #define BACKUP_FILE_EXTENSION           ".edz"
 
-/* Whether the splash screen should be displayed on launch */
-#define SPLASH_ENABLED                  false
+/* Whether the splash screen should be displayed on launch. This does not actually make EdiZon start faster, instead it will display a black screen during loading */
+#define SPLASH_ENABLED                  true
 
 /* If the user has more than this number of games installed, don't load any extra information of games that aren't installed anymore but have save files left */
 #define MAX_TITLE_FROM_SAVE_DATA        20
