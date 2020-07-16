@@ -636,7 +636,7 @@ namespace edz::ui {
                     for (auto &cheatToggle : GuiMain::m_cheatToggleListItems) {
                         bool isEnabled = cheat::CheatManager::getCheats()[i++]->isEnabled();
                         if (cheatToggle->getToggleState() != isEnabled)
-                            cheatToggle->onClick(); // TODO: This should work properly without setToggle, but need to verify
+                            cheatToggle->setToggleState(isEnabled);
                     }
                 }, 20);
 
@@ -952,6 +952,8 @@ namespace edz::ui {
         rootFrame->addSeparator();
         rootFrame->addTab("edz.gui.main.settings.tab"_lang, this->m_settingsList);
         rootFrame->addTab("edz.gui.main.about.tab"_lang, this->m_aboutList);
+
+        rootFrame->registerAction("Back", brls::Key::B, [](){ brls::Application::quit(); return true; });
 
         #if DEBUG_MODE_ENABLED
             rootFrame->setFooterText("edz.debugmode"_lang);

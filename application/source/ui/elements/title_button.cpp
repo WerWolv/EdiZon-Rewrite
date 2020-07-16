@@ -22,7 +22,8 @@
 namespace edz::ui::element {
 
     TitleButton::TitleButton(std::unique_ptr<save::Title> &title, u8 column) : m_title(title), m_column(column) {
-        this->m_image = new brls::Image(title->getIcon().data(), title->getIcon().size());
+        this->m_image = new brls::Image();
+        this->m_image->setImage(title->getIcon().data(), title->getIcon().size());
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
@@ -36,12 +37,7 @@ namespace edz::ui::element {
 
 
     void TitleButton::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-        View *baseView = this->getParent()->getParent();
-
-        nvgSave(vg);
-        nvgScissor(vg, baseView->getX(), baseView->getY(), baseView->getWidth(), baseView->getHeight());
         this->m_image->frame(ctx);
-        nvgRestore(vg);
     }
 
     void TitleButton::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {

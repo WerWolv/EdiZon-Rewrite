@@ -4,7 +4,7 @@
             "name": "DKP Aarch64 Windows",
             "includePath": [
                 "C:/devkitPro/devkitA64/aarch64-none-elf/include/**",
-                "C:/devkitPro/devkitA64/lib/gcc/aarch64-none-elf/9.2.0/include/**",
+                "C:/devkitPro/devkitA64/lib/gcc/aarch64-none-elf/10.1.0/include/**",
                 "C:/devkitPro/libnx/include/**",
                 "C:/devkitPro/portlibs/switch/include/**",
                 "C:/devkitPro/portlibs/switch/include/freetype2/**",
@@ -26,7 +26,7 @@
                 "VERSION_MICRO=0",
                 "SNAPSHOT=0",
                 "VERSION_STRING=\"v0.0.0\"",
-                "BOREALIS_RESOURCES=\"romfs:/borealis/\"",
+                "BOREALIS_RESOURCES",
                 "__SWITCH__",
                 "__aarch64__"
             ],
@@ -39,7 +39,7 @@
             "name": "DKP Aarch64 Linux",
             "includePath": [
                 "/opt/devkitpro/devkitA64/aarch64-none-elf/include/**",
-                "/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/9.2.0/include/**",
+                "/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/10.1.0/include/**",
                 "/opt/devkitpro/libnx/include/**",
                 "/opt/devkitpro/portlibs/switch/include/**",
                 "/opt/devkitpro/portlibs/switch/include/**",
@@ -61,7 +61,7 @@
                 "VERSION_MICRO=0",
                 "SNAPSHOT=0",
                 "VERSION_STRING=\"v0.0.0\"",
-                "BOREALIS_RESOURCES=\"romfs:/borealis/\"",
+                "BOREALIS_RESOURCES",
                 "__SWITCH__",
                 "__aarch64__"
             ],

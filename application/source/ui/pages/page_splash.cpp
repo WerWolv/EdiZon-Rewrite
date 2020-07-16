@@ -24,7 +24,8 @@
 namespace edz::ui::page {
 
     PageSplash::PageSplash(PageSplash::WarningType warningType) {
-        this->m_logo = new brls::Image("romfs:/assets/icon_edz_color.jpg");
+        this->m_logo = new brls::Image();
+        this->m_logo->setImage("romfs:/assets/icon_edz_color.jpg");
         this->m_logo->setParent(this);
         
         if (warningType == WarningType::TooLowAtmosphereVersion) {

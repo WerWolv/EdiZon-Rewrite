@@ -473,12 +473,9 @@ namespace edz::ui {
         });
 
         // Sidebar 
-        std::vector<u8> thumbnailBuffer(1280 * 720 * 4);
+        auto titleIcon = save::Title::getRunningTitle()->getIcon();
 
-        if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).failed())
-            std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x80);
-
-        this->m_rootFrame->getSidebar()->setThumbnail(thumbnailBuffer.data(), thumbnailBuffer.size());
+        this->m_rootFrame->getSidebar()->setThumbnail(titleIcon.data(), titleIcon.size());
         
 
         this->m_contentLayers = new brls::LayerView();
@@ -490,6 +487,7 @@ namespace edz::ui {
 
         this->m_rootFrame->setContentView(this->m_contentLayers);
 
+        this->m_rootFrame->getSidebar()->getButton()->setLabel("Search");
         this->m_rootFrame->getSidebar()->getButton()->getClickEvent()->subscribe([this](brls::View *view) {
             Gui::runAsyncWithDialog([this] {
 
