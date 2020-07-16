@@ -29,9 +29,10 @@ namespace edz::ui {
         
         std::vector<u8> thumbnailBuffer(1280 * 720 * 4);
         if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).failed())
-            std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x80);
+            std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x00);
 
-        auto gameImage = new brls::Image(&thumbnailBuffer[0], 1280, 720);
+        auto gameImage = new brls::Image();
+        gameImage->setImageRGBA(thumbnailBuffer.data(), 1280, 720);
 
         return new page::PageFullscreenImage(gameImage);
     }

@@ -41,7 +41,7 @@ EResult initServices() {
     // Already initialized by Borealis but also used in EdiZon: romfs, sockets, pl and set:sys
 
     // Initialize Borealis (UI library)
-    if (!brls::Application::init())
+    if (!brls::Application::init("Edizon"))
         return ResultEdzBorealisInitFailed;
 
     // Extra fonts
@@ -125,7 +125,8 @@ EResult createFolderStructure() {
         EDIZON_SCRIPTS_DIR,
         EDIZON_LIBS_DIR,
         EDIZON_CHEATS_DIR,
-        EDIZON_TMP_DIR};
+        EDIZON_TMP_DIR
+    };
 
     for (auto path : paths) {
         hlp::Folder folder(path);

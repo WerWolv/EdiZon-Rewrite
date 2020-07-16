@@ -27,6 +27,8 @@ namespace edz::ui::page {
         this->m_image = image;
         this->m_image->setScaleType(brls::ImageScaleType::FIT);
         this->m_image->setParent(this);
+
+        this->registerAction("Back", brls::Key::B, [](){ brls::Application::popView(); return true; });
     }
 
     PageFullscreenImage::~PageFullscreenImage() {
@@ -37,12 +39,9 @@ namespace edz::ui::page {
         this->m_image->frame(ctx);
     }
 
-    brls::View* PageFullscreenImage::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
-        return nullptr;
-    }
-
     void PageFullscreenImage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {
         this->m_image->setBoundaries(0, 0, 1280, 720);
+        this->m_image->invalidate();
     }
 
 }

@@ -26,7 +26,8 @@
 namespace edz::ui::element {
 
     TitleInfo::TitleInfo(std::vector<u8> &buffer, std::unique_ptr<save::Title> &title) {
-        this->m_image = new brls::Image(buffer);
+        this->m_image = new brls::Image();
+        this->m_image->setImage(buffer.data(), buffer.size());
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::FIT);      
 
@@ -59,12 +60,8 @@ namespace edz::ui::element {
         this->m_table->invalidate();
     }
 
-    brls::View* TitleInfo::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {        
+    brls::View* TitleInfo::getNextFocus(brls::FocusDirection direction, void* parentUserdata) {        
         return this;
-    }
-
-    void TitleInfo::drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) {
-        // The view has to be focusable for scrolling to work but we don't want the highlight to be drawn
     }
 
 }

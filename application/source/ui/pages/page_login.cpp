@@ -101,10 +101,7 @@ namespace edz::ui::page {
         this->m_loginBtn->frame(ctx);
     }
 
-    brls::View* PageLogin::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
-        if (direction == brls::FocusDirection::NONE)
-            return this->m_emailItem;
-
+    brls::View* PageLogin::getNextFocus(brls::FocusDirection direction, void* oldFocus) {
         if (direction == brls::FocusDirection::DOWN) {
             if (oldFocus == this->m_emailItem)
                 return this->m_passwordItem;
@@ -118,6 +115,10 @@ namespace edz::ui::page {
         }
 
         return nullptr;
+    }
+
+    brls::View* PageLogin::getDefaultFocus() {
+        return this->m_emailItem;
     }
 
     void PageLogin::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {

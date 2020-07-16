@@ -152,7 +152,8 @@ namespace edz::ui {
         });
 
         this->m_knownPrimaryAligned->getClickEvent()->subscribe([this](brls::View *view) {
-            this->m_unknownPrimaryAligned->setToggleState(this->m_knownPrimaryAligned->getToggleState());
+            if (this->m_unknownPrimaryAligned->getToggleState() != this->m_knownPrimaryAligned->getToggleState())
+                this->m_unknownPrimaryAligned->onClick();   // TODO: This probably won't work. Check later
 
             this->m_alignedSearch = this->m_knownPrimaryAligned->getToggleState();
         });
@@ -261,7 +262,8 @@ namespace edz::ui {
         });
 
         this->m_unknownPrimaryAligned->getClickEvent()->subscribe([this](brls::View *view) {
-            this->m_knownPrimaryAligned->setToggleState(this->m_unknownPrimaryAligned->getToggleState());
+            if (this->m_knownPrimaryAligned->getToggleState() != this->m_unknownPrimaryAligned->getToggleState())
+                this->m_knownPrimaryAligned->onClick(); // TODO: This probably won't work, check later
 
             this->m_alignedSearch = this->m_unknownPrimaryAligned->getToggleState();
         });
@@ -391,7 +393,7 @@ namespace edz::ui {
 
 
     brls::View* GuiCheatEngine::setupUI() {
-        this->m_rootFrame = new brls::ThumbnailFrame("edz.gui.cheatengine.sidebar.search"_lang);
+        this->m_rootFrame = new brls::ThumbnailFrame();
         this->m_rootFrame->setTitle("edz.gui.cheatengine.title"_lang);
 
         this->m_rootFrame->registerAction("Memory View", brls::Key::X, [this]() {
@@ -421,11 +423,11 @@ namespace edz::ui {
         this->m_rootFrame->registerAction("Reset Search", brls::Key::MINUS, [this]() {
             if (this->m_selectedSearchLayer == SearchLayer::KnownSecondary) {
                 this->m_nextSearchLayer = SearchLayer::KnownPrimary;
-                Gui::runLater([this]{ brls::Application::requestFocus(this->m_rootFrame, brls::FocusDirection::NONE); }, 10);
+                Gui::runLater([this]{ brls::Application::giveFocus(this->m_rootFrame); }, 10);
             }
             else if (this->m_selectedSearchLayer == SearchLayer::UnknownSecondary) {
                 this->m_nextSearchLayer = SearchLayer::UnknownPrimary;
-                Gui::runLater([this]{ brls::Application::requestFocus(this->m_rootFrame, brls::FocusDirection::NONE); }, 10);
+                Gui::runLater([this]{ brls::Application::giveFocus(this->m_rootFrame); }, 10);
             }
                 if (this->m_pattern != nullptr)
                     delete[] this->m_pattern;
@@ -444,7 +446,8 @@ namespace edz::ui {
                 this->m_knownPrimaryDataType->setSelectedValue(0);
                 this->m_knownPrimaryValue->setValue("0");
                 this->m_knownPrimarySize->setValue("1");
-                this->m_knownPrimaryAligned->setToggleState(true);
+                if (!this->m_knownPrimaryAligned->getToggleState())
+                    this->m_knownPrimaryAligned->onClick();
 
                 this->m_knownSecondaryFoundAddresses->setValue("0");
                 this->m_knownSecondarySearchType->setSelectedValue(0);
@@ -454,7 +457,8 @@ namespace edz::ui {
                 this->m_unknownPrimarySearchRegion->setSelectedValue(0);
                 this->m_unknownPrimaryDataType->setSelectedValue(0);
                 this->m_unknownPrimarySize->setValue("0");
-                this->m_unknownPrimaryAligned->setToggleState(true);
+                if (!this->m_unknownPrimaryAligned->getToggleState())
+                    this->m_unknownPrimaryAligned->onClick();
 
                 this->m_unknownSecondaryFoundAddresses->setValue("0");
                 this->m_unknownSecondaryUnknownSearchType->setSelectedValue(0);
@@ -469,12 +473,9 @@ namespace edz::ui {
         });
 
         // Sidebar 
-        std::vector<u8> thumbnailBuffer(1280 * 720 * 4);
+        auto titleIcon = save::Title::getRunningTitle()->getIcon();
 
-        if (save::Title::getLastTitleForgroundImage(&thumbnailBuffer[0]).failed())
-            std::fill(thumbnailBuffer.begin(), thumbnailBuffer.end(), 0x80);
-
-        this->m_rootFrame->getSidebar()->setThumbnail(&thumbnailBuffer[0], 1280, 720);
+        this->m_rootFrame->getSidebar()->setThumbnail(titleIcon.data(), titleIcon.size());
         
 
         this->m_contentLayers = new brls::LayerView();
@@ -486,6 +487,7 @@ namespace edz::ui {
 
         this->m_rootFrame->setContentView(this->m_contentLayers);
 
+        this->m_rootFrame->getSidebar()->getButton()->setLabel("Search");
         this->m_rootFrame->getSidebar()->getButton()->getClickEvent()->subscribe([this](brls::View *view) {
             Gui::runAsyncWithDialog([this] {
 
@@ -520,7 +522,7 @@ namespace edz::ui {
 
         if (this->m_nextSearchLayer != this->m_selectedSearchLayer) {
             this->m_contentLayers->changeLayer(u8(this->m_nextSearchLayer));
-            brls::Application::requestFocus(this->m_contentLayers, brls::FocusDirection::NONE);
+            brls::Application::giveFocus(this->m_contentLayers);
 
             this->m_selectedSearchLayer = this->m_nextSearchLayer;
 

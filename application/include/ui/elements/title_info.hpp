@@ -38,9 +38,7 @@ namespace edz::ui::element {
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
         void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-    
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        View* getNextFocus(brls::FocusDirection direction, void* parentUserdata) override;
 
     private:
     

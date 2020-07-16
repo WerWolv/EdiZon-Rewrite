@@ -45,8 +45,8 @@ namespace edz::ui::element {
         
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
         void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
-        brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        brls::View* getNextFocus(brls::FocusDirection direction, void* oldFocus) override;
+        brls::View* getDefaultFocus() override;
         bool onClick();
 
         void setBuffer(u8* buffer, size_t size);

@@ -38,9 +38,7 @@ namespace edz::ui::element {
     public:
         FocusableTable();
         virtual ~FocusableTable();
-        View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
-
-        void drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) override;
+        View* getDefaultFocus() override;
     };
 
 }

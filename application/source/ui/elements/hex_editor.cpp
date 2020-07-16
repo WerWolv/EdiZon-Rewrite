@@ -91,10 +91,8 @@ namespace edz::ui::element {
         this->m_historyLabel->setBoundaries(50, 720 - style->AppletFrame.footerHeight - 50, 1280 - 100, 50);
     }
 
-    brls::View* HexEditor::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {    
+    brls::View* HexEditor::getNextFocus(brls::FocusDirection direction, void* oldFocus) {    
         switch (direction) {
-            case brls::FocusDirection::NONE:
-                break;
             case brls::FocusDirection::UP:
                 this->m_selectY = std::max(1, this->m_selectY - 1);
                 break;
@@ -109,14 +107,14 @@ namespace edz::ui::element {
                 break;
         }   
         
+        return this->getDefaultFocus();
+    }
+
+    brls::View* HexEditor::getDefaultFocus() {
         this->m_selectWidth = static_cast<u8>(this->m_selectionType[(this->m_selectY - 1) * 2 + this->m_selectX / 8]);
         this->m_selectX = (this->m_selectX / this->m_selectWidth) * this->m_selectWidth;
 
         return this;
-    }
-
-    void HexEditor::drawHighlight(NVGcontext* vg, brls::ThemeValues* theme, float alpha, brls::Style* style, bool background) {
-
     }
 
     bool HexEditor::onClick() {

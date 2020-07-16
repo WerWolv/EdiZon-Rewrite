@@ -35,7 +35,7 @@ namespace edz::ui::element {
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
         void layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) override;
-        brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+        brls::View* getDefaultFocus() override;
         bool onClick();
 
         brls::GenericEvent* getClickEvent() {
@@ -62,7 +62,7 @@ namespace edz::ui::element {
             std::vector<brls::BoxLayoutChild*> getChildren();
             void addTitle(std::unique_ptr<save::Title> &title);
             brls::View* defaultFocus(brls::View *oldFocus);
-            brls::View* requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp = false) override;
+            brls::View* getNextFocus(brls::FocusDirection direction, void* oldFocus) override;
             
     };
 

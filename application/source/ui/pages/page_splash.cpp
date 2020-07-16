@@ -24,7 +24,8 @@
 namespace edz::ui::page {
 
     PageSplash::PageSplash(PageSplash::WarningType warningType) {
-        this->m_logo = new brls::Image("romfs:/assets/icon_edz_color.jpg");
+        this->m_logo = new brls::Image();
+        this->m_logo->setImage("romfs:/assets/icon_edz_color.jpg");
         this->m_logo->setParent(this);
         
         if (warningType == WarningType::TooLowAtmosphereVersion) {
@@ -62,10 +63,6 @@ namespace edz::ui::page {
 
         if (this->m_warning != nullptr)
             this->m_warning->frame(ctx);
-    }
-
-    brls::View* PageSplash::requestFocus(brls::FocusDirection direction, brls::View* oldFocus, bool fromUp) {
-        return nullptr;
     }
 
     void PageSplash::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) {

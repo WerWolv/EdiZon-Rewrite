@@ -22,7 +22,8 @@
 namespace edz::ui::element {
 
     TitleButton::TitleButton(std::unique_ptr<save::Title> &title, u8 column) : m_title(title), m_column(column) {
-        this->m_image = new brls::Image(title->getIcon());
+        this->m_image = new brls::Image();
+        this->m_image->setImage(title->getIcon().data(), title->getIcon().size());
         this->m_image->setParent(this);
         this->m_image->setScaleType(brls::ImageScaleType::SCALE);
         this->m_image->invalidate();
@@ -36,12 +37,7 @@ namespace edz::ui::element {
 
 
     void TitleButton::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-        View *baseView = this->getParent()->getParent();
-
-        nvgSave(vg);
-        nvgScissor(vg, baseView->getX(), baseView->getY(), baseView->getWidth(), baseView->getHeight());
         this->m_image->frame(ctx);
-        nvgRestore(vg);
     }
 
     void TitleButton::layout(NVGcontext* vg, brls::Style *style, brls::FontStash *stash) {
@@ -52,7 +48,7 @@ namespace edz::ui::element {
         this->m_image->invalidate();
     }
 
-    brls::View* TitleButton::requestFocus(brls::FocusDirection direction, brls::View *oldFocus, bool fromUp) {   
+    brls::View* TitleButton::getDefaultFocus() {   
         return this;
     }
 
@@ -106,22 +102,22 @@ namespace edz::ui::element {
             
                 if (newTitleButton != nullptr) {
                     if (oldTitleButton->getParent() != newTitleButton->getParent()) {
-                        this->focusedIndex = oldTitleButton->getColumn();
+                        this->defaultFocusedIndex = oldTitleButton->getColumn();
                         return newTitleButton;
                     } else return oldFocus;
                 } else return oldFocus;
             } else return oldFocus;
         }
 
-        return BoxLayout::defaultFocus(oldFocus);
+        return BoxLayout::getDefaultFocus();
     }
 
-    brls::View* HorizontalTitleList::requestFocus(brls::FocusDirection direction, View *oldFocus, bool fromUp) {
+    brls::View* HorizontalTitleList::getNextFocus(brls::FocusDirection direction, void* oldFocus) {
         if (direction == brls::FocusDirection::LEFT)
             if (oldFocus == this->getChildren()[0]->view)
-                return this->getParent()->getParent()->requestFocus(direction, oldFocus, fromUp);
+                return this->getParent()->getParent()->getNextFocus(direction, oldFocus);
 
-        return BoxLayout::requestFocus(direction, oldFocus, fromUp);
+        return BoxLayout::getNextFocus(direction, oldFocus);
     }
 
 }
