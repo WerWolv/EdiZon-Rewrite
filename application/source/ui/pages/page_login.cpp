@@ -20,7 +20,7 @@
 #include "ui/pages/page_login.hpp"
 
 #include "helpers/utils.hpp"
-#include "api/switchcheatsdb_api.hpp"
+#include "api/cheatslips_api.hpp"
 #include "helpers/config_manager.hpp"
 
 #include <borealis.hpp>
@@ -64,7 +64,7 @@ namespace edz::ui::page {
 
         this->m_loginBtn->setLabel("edz.page.login.login"_lang);
         this->m_loginBtn->getClickEvent()->subscribe([=](View *view) {
-            api::SwitchCheatsDBAPI scdbApi;
+            api::CheatSlipsAPI scdbApi;
 
             auto [result, token] = scdbApi.getToken(this->m_email, this->m_password);
 
@@ -77,8 +77,8 @@ namespace edz::ui::page {
             }
 
             SET_CONFIG(Online.loggedIn, true);
-            SET_CONFIG(Online.switchcheatsdbEmail, this->m_email);
-            SET_CONFIG(Online.switchcheatsdbApiToken, token);
+            SET_CONFIG(Online.cheatslipsEmail, this->m_email);
+            SET_CONFIG(Online.cheatslipsApiToken, token);
 
             loginItem->setValue(this->m_email);
             brls::Application::popView();
