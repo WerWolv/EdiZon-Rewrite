@@ -56,9 +56,11 @@ public:
 
         } else {
             auto list = new tsl::elm::List();
+
+            list->addItem(new tsl::elm::CategoryHeader("Available cheats"));
             
             for (auto &cheat : edz::cheat::CheatManager::getCheats()) {
-                auto cheatToggleItem = new tsl::elm::ToggleListItem(edz::hlp::limitStringLength(cheat->getName(), 20), cheat->isEnabled());
+                auto cheatToggleItem = new tsl::elm::ToggleListItem(cheat->getName(), cheat->isEnabled());
                 cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
                 this->m_cheatToggleItems.push_back(cheatToggleItem);
