@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace edz::save {
     class Title {

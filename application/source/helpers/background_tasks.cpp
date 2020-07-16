@@ -23,6 +23,9 @@
 
 #include <borealis.hpp>
 
+#include <chrono>
+using namespace std::literals::chrono_literals;
+
 namespace edz::hlp {
 
     BackgroundTasks::BackgroundTasks() {

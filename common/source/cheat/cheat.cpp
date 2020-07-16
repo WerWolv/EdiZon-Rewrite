@@ -354,14 +354,14 @@ namespace edz::cheat {
         if ((res = dmntcht::getCheatCount(&cheatCnt)).failed())
             return res;
 
-        dmntcht::CheatEntry cheatEntries[cheatCnt];
+        dmntcht::CheatEntry *cheatEntries = new dmntcht::CheatEntry[cheatCnt];
 
         if ((res = dmntcht::getCheats(cheatEntries, cheatCnt, 0, &cheatCnt)).failed())
             return res;
         
         CheatManager::s_cheats.reserve(cheatCnt);
-        for (auto &cheatEntry : cheatEntries)
-            CheatManager::s_cheats.push_back(new Cheat(cheatEntry));
+        for (u32 i = 0; i < cheatCnt; i++)
+            CheatManager::s_cheats.push_back(new Cheat(cheatEntries[i]));
 
 
         // Get all frozen addresses

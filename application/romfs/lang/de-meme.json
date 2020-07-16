@@ -4,7 +4,7 @@
     "edz.by"            : " vong 1 nice ",
     "edz.translator"    : "1Jung vong dem City, tomGER",
 
-    "edz.switchcheatsdb.name" : "WechselSchummlerInformationensammlung",
+    "edz.cheatslips.name" : "Schummlerlippen",
     "edz.patreon.name"        : "Schutzheiliger",
 
     "edz.widget.integer.title"      : "Gib einen Wert ein",
@@ -42,10 +42,10 @@
     "edz.gui.main.cheats.error.outdated"          : "Es sind mehrere Schummler für dieses Spiel installiert worden, jedoch sind diese für eine andere Ausgabe des Spieles. In dem Fall, dass dieses Spiel gerade erst eine Modernisierung bekam, solltest du geduldig bleiben, da der Schummler komplett rekreiert werden muss.",
     "edz.gui.main.cheats.error.application_mode"  : "EdiZon wird im Applikationsmodus ausgeführt und kann desshalb den Speicher der laufenden Applikation nicht bearbeiten. Bitte beende EdiZon und öffne es erneut über das Album.",
     "edz.gui.main.cheats.error.dmnt_cht_missing"  : "EdiZon benötigt Luftkreis' dmnt:cht Einsatz, um Schummler auszuführen. Bitte stell sicher, dass deine CFW richtig installiert wurde und sie Schummler unterstützt.",
-    "edz.gui.main.settings.scdbinfo"              : "Um die meisten Onlinefunktionen nutzen zu können, wird ein WechselSchummlerInformationensammlung Konto benötigt. Bitte besuche switchcheatsdb.com für mehr Informationen",
+    "edz.gui.main.settings.cheatslipsinfo"        : "Um die meisten Onlinefunktionen nutzen zu können, wird ein WechselSchummlerInformationensammlung Konto benötigt. Bitte besuche cheatslips.com für mehr Informationen",
     "edz.gui.main.settings.account.title"         : "WechselSchummler Konto",
     "edz.gui.main.settings.account.nologin"       : "Du bist nicht angemeldet",
-    "edz.gui.main.settings.dialog.logout"         : "Willst du deinen SwitchCheatsDB Konto trennen?",
+    "edz.gui.main.settings.dialog.logout"         : "Willst du deinen Cheatslips Konto trennen?",
     "edz.gui.main.settings.header.generaloptions" : "Allgemeine Optionen",
     "edz.gui.main.settings.header.titleoptions"   : "Titeloptionen",
     "edz.gui.main.settings.header.accountoptions" : "Kontoeinstellungen",
@@ -68,7 +68,7 @@
     "edz.gui.main.about.guide.title"              : "EdiZon Anleitung und Dokumentation",
 
     "edz.page.login.title"         : "WechselSchummlerInformationensammlung",
-    "edz.page.login.hint"          : "Gib deine WechselSchummlerInformationensammlung Logindaten ein, um Zugriff auf automatische Ausgaben, Schummlerherunterlader und Gedächtnishochlader zu erhalten. Bitte besuch https://switchcheatsdb.com, um einen Account zu erstellen",
+    "edz.page.login.hint"          : "Gib deine WechselSchummlerInformationensammlung Logindaten ein, um Zugriff auf automatische Ausgaben, Schummlerherunterlader und Gedächtnishochlader zu erhalten. Bitte besuch https://cheatslips.com, um einen Account zu erstellen",
     "edz.page.login.login"         : "Anmelden",
     "edz.page.login.email"         : "Elektronische Post",
     "edz.page.login.email.help"    : "Bitte gib deine WechselSchummlerInformationensammlung E-Post-Addresse ein",

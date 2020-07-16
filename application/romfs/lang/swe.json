@@ -4,7 +4,7 @@
     "edz.by":" by ",
     "edz.translator":"alexandraos9",
 
-    "edz.switchcheatsdb.name":"SwitchCheatsDB",
+    "edz.cheatslips.name":"Cheat Slips",
     "edz.patreon.name":"Patreon",
 
     "edz.widget.integer.title":"Ange ett värde",
@@ -66,14 +66,14 @@
     "edz.gui.main.running.section.subsdk":"subsdk",
     
     "edz.gui.main.settings.account.nologin":"Ej inloggad",
-    "edz.gui.main.settings.account.title":"SwitchCheatsDB Konto",
-    "edz.gui.main.settings.dialog.logout":"Vill du logga ut från ditt SwitchCheatsDB konto?",
+    "edz.gui.main.settings.account.title":"Cheat Slips Konto",
+    "edz.gui.main.settings.dialog.logout":"Vill du logga ut från ditt Cheat Slips konto?",
     "edz.gui.main.settings.header.accountoptions":"Konto alternativ",
     "edz.gui.main.settings.header.generaloptions":"Allmänna alternativ",
     "edz.gui.main.settings.header.titleoptions":"Titel alternativ",
     "edz.gui.main.settings.language":"Språk",
     "edz.gui.main.settings.language.default":"Operativsystemet standard",
-    "edz.gui.main.settings.scdbinfo":"För att kunna använda de flesta onlinefunktionerna i EdiZon krävs ett SwitchCheatsDB-konto.  Besök switchcheatsdb.com för mer information.",
+    "edz.gui.main.settings.cheatslipsinfo":"För att kunna använda de flesta onlinefunktionerna i EdiZon krävs ett Cheat Slips-konto.  Besök cheatslips.com för mer information.",
     "edz.gui.main.settings.sorting":"Sortera efter",
     "edz.gui.main.settings.sorting.alphaauthor":"Utgivare",
     "edz.gui.main.settings.sorting.alphaname":"Namn",
@@ -113,10 +113,10 @@
     "edz.gui.popup.version":"Ver.",
     
     "edz.page.login.email":"Email",
-    "edz.page.login.email.help":"Ange din SwitchCheatsDB-e-postadress",
-    "edz.page.login.hint":"Ange dina SwitchCheatsDB-referenser för att få åtkomst till automatiska uppdateringar, nedladdning av fuskfiler och spara filuppladdning.  För att skapa ett konto, besök https://switchcheatsdb.com",
+    "edz.page.login.email.help":"Ange din Cheat Slips-e-postadress",
+    "edz.page.login.hint":"Ange dina Cheat Slips-referenser för att få åtkomst till automatiska uppdateringar, nedladdning av fuskfiler och spara filuppladdning.  För att skapa ett konto, besök https://cheatslips.com",
     "edz.page.login.login":"Logga in",
     "edz.page.login.password":"Lösenord",
-    "edz.page.login.password.help":"Ange ditt SwitchCheatsDB lösenord",
-    "edz.page.login.title":"SwitchCheatsDB"
+    "edz.page.login.password.help":"Ange ditt Cheat Slips lösenord",
+    "edz.page.login.title":"Cheat Slips"
  }

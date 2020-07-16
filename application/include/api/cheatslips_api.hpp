@@ -26,13 +26,14 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace edz::api {
 
-    class SwitchCheatsDBAPI {
+    class CheatSlipsAPI {
     public:
-        SwitchCheatsDBAPI();
-        ~SwitchCheatsDBAPI();
+        CheatSlipsAPI();
+        ~CheatSlipsAPI();
 
         typedef struct {
             u32 id;

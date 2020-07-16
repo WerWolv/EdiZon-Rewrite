@@ -29,6 +29,9 @@
 #include "helpers/utils.hpp"
 #include "ui/fonts.hpp"
 
+#include <chrono>
+using namespace std::literals::chrono_literals;
+
 namespace edz::ui {
 
     class Gui {

@@ -4,7 +4,7 @@
     "edz.by"            : " par ",
     "edz.translator"    : "natinusala",
 
-    "edz.switchcheatsdb.name" : "SwitchCheatsDB",
+    "edz.cheatslips.name" : "Cheat Slips",
     "edz.patreon.name"        : "Patreon",
     "edz.debugmode"           : "Mode Debug",
 
@@ -53,10 +53,10 @@
     "edz.gui.main.cheats.error.outdated"            : "Il y a des codes pour ce jeu installés mais ils ont été prévus pour une version du jeu différente. Si le jeu vient d'être mis à jour, veuillez être patient car les codes doivent être refaits.",
     "edz.gui.main.cheats.error.application_mode"    : "EdiZon est actuellement en mode application et ne peut pas altérer la mémoire du titre en cours d'exécution. Veuillez redémarrer EdiZon en mode applet en l'ouvrant depuis l'album photo.",
     "edz.gui.main.cheats.error.dmnt_cht_missing"    : "EdiZon utilise le service dmnt:cht pour exécuter les codes de triche. Veuillez vérifier que votre CFW est correctement installé et qu'il supporte ce service.",
-    "edz.gui.main.settings.scdbinfo"                : "Pour utiliser la plupart des fonctions en ligne d'EdiZon, un compte SwitchCheatsDB est nécessaire. Veuillez visiter switchcheatsdb.com pour plus d'informations.",
-    "edz.gui.main.settings.account.title"           : "Compte SwitchCheatsDB",
+    "edz.gui.main.settings.cheatslipsinfo"          : "Pour utiliser la plupart des fonctions en ligne d'EdiZon, un compte Cheat Slips est nécessaire. Veuillez visiter cheatslips.com pour plus d'informations.",
+    "edz.gui.main.settings.account.title"           : "Compte Cheat Slips",
     "edz.gui.main.settings.account.nologin"         : "Pas connecté",
-    "edz.gui.main.settings.dialog.logout"           : "Voulez-vous vous déconnecter de votre compte SwitchCheatsDB ?",
+    "edz.gui.main.settings.dialog.logout"           : "Voulez-vous vous déconnecter de votre compte Cheat Slips ?",
     "edz.gui.main.settings.header.generaloptions"   : "Options générales",
     "edz.gui.main.settings.header.titleoptions"     : "Liste des titres",
     "edz.gui.main.settings.header.accountoptions"   : "Option des comptes",
@@ -88,14 +88,14 @@
     "edz.gui.main.about.credits.4"                  : "\uE016 Tous les autres qui ont contribué à EdiZon, ça n'aurait pas été possible sans vous !",
     "edz.gui.main.about.credits.5"                  : "\uE016 Vous, pour utiliser mon homebrew !",
 
-    "edz.page.login.title"         : "SwitchCheatsDB",
-    "edz.page.login.hint"          : "Renseignez vos identifiants SwitchCheatsDB pour accéder aux mises à jour automatiques, aux téléchargements des codes de triche et à l'envoi des sauvegardes. Pour créer un compte, veuillez consulter https://switchcheatsdb.com",
+    "edz.page.login.title"         : "Cheat Slips",
+    "edz.page.login.hint"          : "Renseignez vos identifiants Cheat Slips pour accéder aux mises à jour automatiques, aux téléchargements des codes de triche et à l'envoi des sauvegardes. Pour créer un compte, veuillez consulter https://cheatslips.com",
     "edz.page.login.login"         : "Se connecter",
     "edz.page.login.email"         : "Adresse email",
-    "edz.page.login.email.help"    : "Veuillez entrer l'adresse email de votre compte SwitchCheatsDB",
+    "edz.page.login.email.help"    : "Veuillez entrer l'adresse email de votre compte Cheat Slips",
     "edz.page.login.password"      : "Mot de passe",
-    "edz.page.login.password.help" : "Veuillez entrer le mot de passe de votre compte SwitchCheatsDB",
-    "edz.page.login.error"         : "Une erreur est survenue lors de la connexion. Vérifiez que vous êtes connecté à Internet et que vous avez généré une clé API dans votre profil SwitchCheatsDB",
+    "edz.page.login.password.help" : "Veuillez entrer le mot de passe de votre compte Cheat Slips",
+    "edz.page.login.error"         : "Une erreur est survenue lors de la connexion. Vérifiez que vous êtes connecté à Internet et que vous avez généré une clé API dans votre profil Cheat Slips",
 
     "edz.page.splash.error.ams" : "EdiZon utilise beaucoup des dernières fonctionnalités d'Atmosphère. Veuillez mettre à jour vers la version %s ou plus récent.\nAppuyez sur \uE0EF pour quitter",
 

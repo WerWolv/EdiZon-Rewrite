@@ -24,8 +24,6 @@
 #include "helpers/macros.hpp"       // Helper macros
 #include "helpers/version.hpp"      // Version helper
 
-#include <memory>
-
 #ifndef __OVERLAY__
 
     #include <borealis/logger.hpp>              // Borealis Logger
@@ -54,11 +52,11 @@
 
 /* Current web API version */
 #define EDIZON_API_VERSION              "v4"
-#define SWITCHCHEATSDB_API_VERSION      "v1"
+#define CHEATSLIPS_API_VERSION          "v1"
 
 /* Web API URLs */
 #define EDIZON_API_URL                  "http://werwolv.net:1337/" EDIZON_API_VERSION 
-#define SWITCHCHEATSDB_API_URL          "https://www.switchcheatsdb.com/api/" SWITCHCHEATSDB_API_VERSION
+#define CHEATSLIPS_API_URL              "https://www.cheatslips.com/api/" CHEATSLIPS_API_VERSION
 #define ANONFILE_API_URL                "https://api.anonfile.com"
 
 /* Debugging */
@@ -86,6 +84,4 @@
 #define EDIZON_ROMFS_OVERLAY_PATH       "romfs:/overlay"
 #define OVERLAYS_PATH                   "sdmc:/switch/.overlays"
 
-#include <chrono>
-using namespace std::literals::chrono_literals;
 using namespace std::string_literals;       // String user defined literals

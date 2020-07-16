@@ -38,7 +38,7 @@
 
 #include "api/edizon_api.hpp"
 #include "api/save_repo_api.hpp"
-#include "api/switchcheatsdb_api.hpp"
+#include "api/cheatslips_api.hpp"
 
 #include "ui/elements/hex_editor.hpp"
 
@@ -820,10 +820,10 @@ namespace edz::ui {
         sortingOptionsItem->setSelectedValue(static_cast<int>(GET_CONFIG(Settings.titlesSortingStyle)));
 
 
-        // SwitchCheatsDB Login
-        brls::ListItem *scdbLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang, "edz.gui.main.settings.scdbinfo"_lang);
-        scdbLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.switchcheatsdbEmail) : "edz.gui.main.settings.account.nologin"_lang);
-        scdbLoginItem->getClickEvent()->subscribe([=](brls::View *view) { 
+        // CheatSlips Login
+        brls::ListItem *cheatSlipsLoginItem = new brls::ListItem("edz.gui.main.settings.account.title"_lang, "edz.gui.main.settings.cheatslipsinfo"_lang);
+        cheatSlipsLoginItem->setValue(GET_CONFIG(Online.loggedIn) ? GET_CONFIG(Online.cheatslipsEmail) : "edz.gui.main.settings.account.nologin"_lang);
+        cheatSlipsLoginItem->getClickEvent()->subscribe([=](brls::View *view) { 
             if (GET_CONFIG(Online.loggedIn)) {
                 brls::Dialog *dialog = new brls::Dialog("edz.gui.main.settings.dialog.logout"_lang);
                 dialog->addButton("edz.dialog.no"_lang, [=](brls::View *view) {
@@ -831,16 +831,16 @@ namespace edz::ui {
                 });
                 dialog->addButton("edz.dialog.yes"_lang, [=](brls::View *view) {
                     SET_CONFIG(Online.loggedIn, false);
-                    SET_CONFIG(Online.switchcheatsdbEmail, "");
-                    SET_CONFIG(Online.switchcheatsdbApiToken, "");
-                    scdbLoginItem->setValue("edz.gui.main.settings.account.nologin"_lang);
+                    SET_CONFIG(Online.cheatslipsEmail, "");
+                    SET_CONFIG(Online.cheatslipsApiToken, "");
+                    cheatSlipsLoginItem->setValue("edz.gui.main.settings.account.nologin"_lang);
                     dialog->close();
                 });
 
                 dialog->open();
             } else {
                 brls::AppletFrame *frame = new brls::AppletFrame(false, false);
-                frame->setContentView(new ui::page::PageLogin(scdbLoginItem));
+                frame->setContentView(new ui::page::PageLogin(cheatSlipsLoginItem));
                 frame->setTitle("edz.page.login.title"_lang);
 
                 brls::Application::pushView(frame);
@@ -857,7 +857,7 @@ namespace edz::ui {
         list->addView(sortingOptionsItem);
         
         list->addView(new brls::Header("edz.gui.main.settings.header.accountoptions"_lang));
-        list->addView(scdbLoginItem);
+        list->addView(cheatSlipsLoginItem);
     }
 
     void GuiMain::createAboutTab(brls::List *list) {
@@ -866,25 +866,25 @@ namespace edz::ui {
 
         list->addView(new brls::Header("edz.gui.main.about.header.links"_lang, false));
         
-        brls::ListItem *scdbItem = new brls::ListItem("edz.switchcheatsdb.name"_lang, "", "https://switchcheatsdb.com");
+        brls::ListItem *cheatSlipsItem = new brls::ListItem("edz.cheatslips.name"_lang, "", "https://cheatslips.com");
         brls::ListItem *patreonItem = new brls::ListItem("edz.patreon.name"_lang, "", "https://patreon.com/werwolv");
         brls::ListItem *guideItem = new brls::ListItem("edz.gui.main.about.guide.title"_lang, "", "https://edizon.werwolv.net");
 
-        scdbItem->setThumbnail("romfs:/assets/about/icon_scdb.png");
+        cheatSlipsItem->setThumbnail("romfs:/assets/about/icon_cheatslips.png");
         patreonItem->setThumbnail("romfs:/assets/about/icon_patreon.png");
         guideItem->setThumbnail("romfs:/assets/about/icon_guide.png");
 
-        scdbItem->setValue(Fonts::MaterialIcons::SUBMENU);
+        cheatSlipsItem->setValue(Fonts::MaterialIcons::SUBMENU);
         patreonItem->setValue(Fonts::MaterialIcons::SUBMENU);
         guideItem->setValue(Fonts::MaterialIcons::SUBMENU);
 
         if (hlp::isInApplicationMode()) {
-            scdbItem->getClickEvent()->subscribe([](brls::View *view)    { openWebpage("https://www.switchcheatsdb.com"); });
+            cheatSlipsItem->getClickEvent()->subscribe([](brls::View *view)    { openWebpage("https://www.cheatslips.com"); });
             patreonItem->getClickEvent()->subscribe([](brls::View *view) { openWebpage("https://patreon.com/werwolv");    });
             guideItem->getClickEvent()->subscribe([](brls::View *view)   { openWebpage("http://edizon.werwolv.net");      });
         }
 
-        list->addView(scdbItem);
+        list->addView(cheatSlipsItem);
         list->addView(patreonItem);
         list->addView(guideItem);
 
@@ -895,9 +895,9 @@ namespace edz::ui {
     void GuiMain::loadOnlineCheats() {
         if (GET_CONFIG(Online.loggedIn)) {           
             //Gui::runAsync([=]() {
-                api::SwitchCheatsDBAPI switchCheatsDBAPI;
+                api::CheatSlipsAPI cheatslipsAPI;
 
-                auto [result, response] = switchCheatsDBAPI.getCheats(save::Title::getRunningTitleID());
+                auto [result, response] = cheatslipsAPI.getCheats(save::Title::getRunningTitleID());
 
                 for (auto &cheat : response.cheats) {
                     if (cheat.buildID != cheat::CheatManager::getBuildID())

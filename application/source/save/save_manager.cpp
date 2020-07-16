@@ -21,7 +21,7 @@
 #include "save/save_data.hpp"
 #include "helpers/utils.hpp"
 #include "api/anonfile_api.hpp"
-#include "api/switchcheatsdb_api.hpp"
+#include "api/cheatslips_api.hpp"
 
 #include <errno.h>
 #include <string.h>
@@ -296,7 +296,7 @@ namespace edz::save {
 
         auto [result, link] = anonfileApi.upload(tmpFile.path());
         if (result.succeeded()) {
-            api::SwitchCheatsDBAPI switchCheatDBApi;
+            api::CheatSlipsAPI switchCheatDBApi;
             switchCheatDBApi.addSaveFile(backupName, link, title);
         }
 
@@ -309,7 +309,7 @@ namespace edz::save {
 
         auto [result, link] = anonfileApi.upload(backupFile.path());
         if (result.succeeded()) {
-            api::SwitchCheatsDBAPI switchCheatDBApi;
+            api::CheatSlipsAPI switchCheatDBApi;
             switchCheatDBApi.addSaveFile(backupName, link, title);
         }
 
@@ -354,10 +354,10 @@ namespace edz::save {
     }
     
     EResultVal<std::map<std::string, std::string>> SaveManager::getOnlineBackupList(std::unique_ptr<Title> &title) {
-        api::SwitchCheatsDBAPI switchCheatsDBApi;
+        api::CheatSlipsAPI cheatSlipsApi;
         std::map<std::string, std::string> saveFileNames;
 
-        auto [result, saveFiles] = switchCheatsDBApi.getSaveFiles();
+        auto [result, saveFiles] = cheatSlipsApi.getSaveFiles();
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };

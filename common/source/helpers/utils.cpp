@@ -338,15 +338,10 @@ namespace edz::hlp {
         if (string.length() <= maxLength)
             return string;
 
-        char modString[string.length() + 1];
-        std::strcpy(modString, string.c_str());
+        std::string modString = string.substr(0, maxLength - 1);
+        modString += "…";
 
-        modString[maxLength - 3] = '.'; 
-        modString[maxLength - 2] = '.';
-        modString[maxLength - 1] = '.';
-        modString[maxLength - 0] = '\0';
-
-        return std::string(modString);
+        return modString;
     }
 
     std::string removeIllegalPathCharacters(std::string path) {

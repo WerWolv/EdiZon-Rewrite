@@ -17,7 +17,7 @@
  * along with EdiZon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "api/switchcheatsdb_api.hpp"
+#include "api/cheatslips_api.hpp"
 #include <nlohmann/json.hpp>
 #include "helpers/utils.hpp"
 #include "helpers/config_manager.hpp"
@@ -26,16 +26,16 @@ namespace edz::api {
 
     using json = nlohmann::json;
 
-    SwitchCheatsDBAPI::SwitchCheatsDBAPI() : m_curl(SWITCHCHEATSDB_API_URL) {
+    CheatSlipsAPI::CheatSlipsAPI() : m_curl(CHEATSLIPS_API_URL) {
 
     }
 
-    SwitchCheatsDBAPI::~SwitchCheatsDBAPI() {
+    CheatSlipsAPI::~CheatSlipsAPI() {
 
     }
 
 
-    EResultVal<std::string> SwitchCheatsDBAPI::getToken(std::string email, std::string password) {
+    EResultVal<std::string> CheatSlipsAPI::getToken(std::string email, std::string password) {
         std::string token;
 
         json body;
@@ -58,9 +58,9 @@ namespace edz::api {
     }
 
 
-    EResultVal<SwitchCheatsDBAPI::cheat_response_t> SwitchCheatsDBAPI::getCheats(titleid_t titleID, buildid_t buildID) {
-        SwitchCheatsDBAPI::cheat_response_t cheatResponse;
-        auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + (buildID == 0 ? "" : "/" + hlp::toHexString(buildID)), { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
+    EResultVal<CheatSlipsAPI::cheat_response_t> CheatSlipsAPI::getCheats(titleid_t titleID, buildid_t buildID) {
+        CheatSlipsAPI::cheat_response_t cheatResponse;
+        auto [result, response] = this->m_curl.get("/cheats/" + hlp::toHexString(titleID) + (buildID == 0 ? "" : "/" + hlp::toHexString(buildID)), { {"X-API-TOKEN", GET_CONFIG(Online.cheatslipsApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -85,10 +85,10 @@ namespace edz::api {
         return { ResultSuccess, cheatResponse };
     }
 
-    EResultVal<u32> SwitchCheatsDBAPI::getCheatCount() {
+    EResultVal<u32> CheatSlipsAPI::getCheatCount() {
         u32 count;
 
-        auto [result, response] = this->m_curl.get("/cheats/count", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
+        auto [result, response] = this->m_curl.get("/cheats/count", { {"X-API-TOKEN", GET_CONFIG(Online.cheatslipsApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, 0 };
@@ -103,10 +103,10 @@ namespace edz::api {
         return { ResultSuccess, count };
     }
 
-    EResultVal<std::vector<SwitchCheatsDBAPI::save_file_t>> SwitchCheatsDBAPI::getSaveFiles() {
-        std::vector<SwitchCheatsDBAPI::save_file_t> saveFiles;
+    EResultVal<std::vector<CheatSlipsAPI::save_file_t>> CheatSlipsAPI::getSaveFiles() {
+        std::vector<CheatSlipsAPI::save_file_t> saveFiles;
 
-        auto [result, response] = this->m_curl.get("/saves", { {"X-API-TOKEN", GET_CONFIG(Online.switchcheatsdbApiToken)} });
+        auto [result, response] = this->m_curl.get("/saves", { {"X-API-TOKEN", GET_CONFIG(Online.cheatslipsApiToken)} });
 
         if (result.failed())
             return { ResultEdzAPIError, EMPTY_RESPONSE };
@@ -123,7 +123,7 @@ namespace edz::api {
         return { ResultSuccess, saveFiles };
     }
 
-    EResult SwitchCheatsDBAPI::addSaveFile(std::string backupName, std::string link, std::unique_ptr<save::Title> &title) {
+    EResult CheatSlipsAPI::addSaveFile(std::string backupName, std::string link, std::unique_ptr<save::Title> &title) {
         json body;
         body["name"] = backupName;
         body["path"] = link;

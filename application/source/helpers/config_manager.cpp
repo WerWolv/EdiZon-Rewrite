@@ -43,8 +43,8 @@ namespace edz::hlp {
             j.at("online").at("localCommitSha").get_to(ConfigManager::s_config.Online.localCommitSha);
             j.at("online").at("notificationDates").get_to(ConfigManager::s_config.Online.notificationDates);
             j.at("online").at("loggedIn").get_to(ConfigManager::s_config.Online.loggedIn);
-            j.at("online").at("switchcheatsdbEmail").get_to(ConfigManager::s_config.Online.switchcheatsdbEmail);
-            j.at("online").at("switchcheatsdbApiToken").get_to(ConfigManager::s_config.Online.switchcheatsdbApiToken);
+            j.at("online").at("cheatslipsEmail").get_to(ConfigManager::s_config.Online.cheatslipsEmail);
+            j.at("online").at("scheatslipsApiToken").get_to(ConfigManager::s_config.Online.cheatslipsApiToken);
 
             j.at("settings").at("langCode").get_to(ConfigManager::s_config.Settings.langCode);
             j.at("settings").at("pctlChecksEnabled").get_to(ConfigManager::s_config.Settings.pctlChecksEnabled);
@@ -75,8 +75,8 @@ namespace edz::hlp {
                     { "online",      { { "localCommitSha",          ConfigManager::s_config.Online.localCommitSha           },
                                        { "notificationDates",       ConfigManager::s_config.Online.notificationDates        },
                                        { "loggedIn",                ConfigManager::s_config.Online.loggedIn                 },
-                                       { "switchcheatsdbEmail" ,    ConfigManager::s_config.Online.switchcheatsdbEmail      },
-                                       { "switchcheatsdbApiToken",  ConfigManager::s_config.Online.switchcheatsdbApiToken   } } },
+                                       { "cheatslipsEmail" ,        ConfigManager::s_config.Online.cheatslipsEmail          },
+                                       { "cheatslipsApiToken",      ConfigManager::s_config.Online.cheatslipsApiToken       } } },
                     { "settings",    { { "langCode",                ConfigManager::s_config.Settings.langCode               },
                                        { "saveFileRepos",           ConfigManager::s_config.Settings.saveFileRepos          },
                                        { "titlesDisplayStyle",      ConfigManager::s_config.Settings.titlesDisplayStyle     },

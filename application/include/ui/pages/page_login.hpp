@@ -40,6 +40,7 @@ namespace edz::ui::page {
         brls::Label *m_label;
         brls::ListItem *m_emailItem, *m_passwordItem;
         brls::Button *m_loginBtn;
+        brls::BoxLayout *m_boxLayout;
 
         std::string m_email, m_password;
     };

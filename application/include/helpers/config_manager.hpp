@@ -42,8 +42,8 @@ namespace edz::hlp {
             std::vector<time_t> notificationDates;
 
             bool loggedIn;
-            std::string switchcheatsdbEmail;
-            std::string switchcheatsdbApiToken;
+            std::string cheatslipsEmail;
+            std::string cheatslipsApiToken;
         } Online;
 
         struct {
